@@ -108,9 +108,9 @@ TEST_F(cpu, main_test) {
 
     for (int level = startLevel; level < finishLevel; ++level) {
         std::cout << "level = " << level << std::endl;
-        double *data = GetCpuToLevel(level);
         ComputeParameters *p = new ComputeParameters(level, true, false);
         std::cout << *p << std::endl;
+        double *data = GetCpuToLevel(level);
         print_matrix(p->get_real_x_size(), p->get_real_y_size(), data);
 
         delete p;
