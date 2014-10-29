@@ -38,7 +38,6 @@ bool bul;
 initCompOfGlVar();
 
 
-cout << "\nHello world! I miss you." << endl;
 
 
 /*
@@ -89,7 +88,7 @@ bul = RichExtrPlusPrint(
               C_tau,                                  //   -  Time step.
               C_numOfTimeSteps,                       //   -  A number of time steps.
               //
-              2 );                                    //   -  "numOfSolOrd"  -  Порядок решения, который мы хотим получить.
+              2 );                                    //   -  "numOfSolOrd"  -  пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 */
 
 

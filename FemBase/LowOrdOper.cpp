@@ -119,11 +119,11 @@ for( iCurrTL = 1; iCurrTL< numOfTSt +1; iCurrTL++ )
 
    //   I want to see what is computing :)
 
-   cout<<"\r \t \t \t \t \t \t \t \t \r";
+   //cout<<"\r \t \t \t \t \t \t \t \t \r";
 
-   cout << "SchOrd = " << numOfSolOrd << ", Nx = " << numOfOXSt;
+   //cout << "SchOrd = " << numOfSolOrd << ", Nx = " << numOfOXSt;
 
-   cout << ", indexOfCurrTL = " << iCurrTL << " ( " << numOfTSt << " ) " << flush;
+   //cout << ", indexOfCurrTL = " << iCurrTL << " ( " << numOfTSt << " ) " << flush;
 
 
 
@@ -254,10 +254,10 @@ for( iCurrTL = 1; iCurrTL< numOfTSt +1; iCurrTL++ )
          //   rhoInCurrTL[ iOfOXN ][ iOfOYN ] +=  tau * RPInCurrTL;
 
          rhoInCurrTL_asV[ (numOfOXSt +1)*iOfOYN + iOfOXN ] +=  tau * RPInCurrTL;
-          if ((numOfOXSt +1)*iOfOYN + iOfOXN == 12)
-                {
-                    printf("spVolInPrevTL = %f\n", rhoInCurrTL_asV[ (numOfOXSt +1)*iOfOYN + iOfOXN ]);
-                }
+          //if ((numOfOXSt +1)*iOfOYN + iOfOXN == 12)
+            //    {
+              //      printf("spVolInPrevTL = %f\n", rhoInCurrTL_asV[ (numOfOXSt +1)*iOfOYN + iOfOXN ]);
+                //}
       }
    }
 
@@ -546,11 +546,7 @@ for( indByNumOfGridSteps = 0; indByNumOfGridSteps < numOfGrStepLayer; indByNumOf
 
       rhoInCurrTL_asV = new double [ (varNumOfOXSt +1) * (varNumOfOYSt +1) ];
    }
-
-
-
-
-
+   
    //   Computation of solution.
 
    bul = solByEqualVolumes(
@@ -569,11 +565,10 @@ for( indByNumOfGridSteps = 0; indByNumOfGridSteps < numOfGrStepLayer; indByNumOf
               varMasOY,                               //   -  Massive of ordinate grid points. Dimension = varNumOfOyGrSt +1.
               varNumOfOYSt,                           //   -  Variable number of ordinate grid steps.
               //
-              1,                                      //   -  For print only. Solution order which we want to get.
+              0,                                      //   -  For print only. Solution order which we want to get.
               //
               rhoInCurrTL_asV );                      //   -  Rho (solution) in Current (Last) Time Level.
-printf("\n");
-print_matrix(11,11,rhoInCurrTL_asV);
+
 
    //   :) Now we know solution! It's great. What we need more?
 
@@ -657,10 +652,10 @@ if( numOfGrStepLayer  >  1)
    bul = printVectorBy3D(
               "ordOfRhoErr",                          //   -  char *fileName,
               //
-              numOfOXSt,                              //   -  характеристика сетки.
-              numOfGrStepLayer,                       //   -  в название файла.
-              1./3.,                                  //   -  Отношение шага по времени к шагу по пространству.
-              numOfGrStepLayer,                       //   -  Общее число слоев по шагу.
+              numOfOXSt,                              //   -  пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
+              numOfGrStepLayer,                       //   -  пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
+              1./3.,                                  //   -  пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+              numOfGrStepLayer,                       //   -  пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ.
               //
               masOfGrStepItem,                        //   -  double *masOx,
               ordOfErr,                               //   -  double *VectorOfData,

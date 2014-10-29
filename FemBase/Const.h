@@ -132,15 +132,15 @@ if( fabs(C_numOfTSt*C_tau - C_timeEnd) >= (C_tau* 1.e-7) )
 {
    //   We need to change number of time steps and time step.
 
-   cout<<"\nA number of time steps and time step itself have changed."<< flush;
+   //cout<<"\nA number of time steps and time step itself have changed."<< flush;
 
    C_numOfTSt++;
 
    C_tau = C_timeEnd / C_numOfTSt;
 
-   cout<<"\nNow time step = "<< C_tau << " and a number of such time steps = " << C_numOfTSt << flush;
+  // cout<<"\nNow time step = "<< C_tau << " and a number of such time steps = " << C_numOfTSt << flush;
 
-   cout<<"\nSo finish time is "<< C_tau*C_numOfTSt <<flush;
+  // cout<<"\nSo finish time is "<< C_tau*C_numOfTSt <<flush;
 
    return;
 }
