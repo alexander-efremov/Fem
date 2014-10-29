@@ -589,18 +589,23 @@ for( indByNumOfGridSteps = 0; indByNumOfGridSteps < numOfGrStepLayer; indByNumOf
          rhoInCurrTL_asV[ (varNumOfOXSt +1)*k + j ]  =  anSol  -  rhoInCurrTL_asV[  (varNumOfOXSt +1)*k + j ];
       }
    }
-
+   printf("\nError\n");
+   print_matrix(varNumOfOXSt+1, varNumOfOYSt+1, rhoInCurrTL_asV);
    //   maxModAbsErr[ indByNumOfGridSteps ]  =  MaxModItemOfMatr( rhoInCurrTL, varNumOfOXSt +1, varNumOfOYSt +1);
-
-   maxModAbsErr[ indByNumOfGridSteps ]  =  normOfMatrAtL1_asV(
+   
+   
+   
+    maxModAbsErr[ indByNumOfGridSteps ] =  normOfMatrAtL1_asV(
               //
-              varMasOX, varNumOfOXSt +1,              //   -  Massive of OX grid nodes. Dimension = dimOX.
+              varMasOX, varNumOfOXSt + 1,              //   -  Massive of OX grid nodes. Dimension = dimOX.
               //
-              varMasOY, varNumOfOYSt +1,              //   -  Massive of OY grid nodes. Dimension = dimOY.
+              varMasOY, varNumOfOYSt + 1,              //   -  Massive of OY grid nodes. Dimension = dimOY.
               //
               //   rhoInCurrTL );
               rhoInCurrTL_asV );
-
+    
+    printf("\nindByNumOfGridSteps = %d\n Norm %f\n", indByNumOfGridSteps, maxModAbsErr[ indByNumOfGridSteps ]);
+   //  printf("\n", maxModAbsErr[ indByNumOfGridSteps ]);
 
 
    //   Let's compute order of numerical solution.
