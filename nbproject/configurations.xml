@@ -4,10 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-    </logicalFolder>
-    <logicalFolder name="ResourceFiles"
-                   displayName="Resource Files"
-                   projectFiles="true">
+      <itemPath>include/common.h</itemPath>
+      <itemPath>include/const.h</itemPath>
+      <itemPath>include/timer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -77,6 +76,12 @@
           </linkerLibItems>
         </linkerTool>
       </folder>
+      <item path="include/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/const.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
@@ -119,6 +124,12 @@
           <output>${TESTDIR}/TestFiles/f1</output>
         </linkerTool>
       </folder>
+      <item path="include/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/const.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
