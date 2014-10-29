@@ -1,15 +1,9 @@
-
-#include "timer.h"
-#include <gtest/gtest.h>
-#include "gtest/gtest-spi.h"
 #include <iostream>
 #include <fstream>
-
-#ifndef COMMON_H_INCLUDED
+#include <gtest/gtest.h>
+#include <gtest/gtest-spi.h>
+#include "timer.h"
 #include "common.h"
-#endif
-
-using namespace std;
 
 class TestBase : public testing::Test {
 protected:
@@ -111,30 +105,6 @@ protected:
                 C_numOfOYSt, level, false);
     }
 
-};
-
-class gputest : public TestBase {
-protected:
-
-    gputest() {
-
-    }
-
-    virtual ~gputest() {
-    }
-
-    double *GetCpuToLevel(int level, bool isComputeDiff = false) {
-
-        return solve_cpu_test(C_par_a, C_par_b, C_lbDom, C_rbDom, C_bbDom,
-                C_ubDom, C_tau, C_numOfTSt, masOX, C_numOfOXSt, masOY,
-                C_numOfOYSt, level, isComputeDiff);
-    }
-
-    double *GetCpuToLevel1TL(int level, bool isComputeDiff) {
-        return solve_cpu_test(C_par_a, C_par_b, C_lbDom, C_rbDom, C_bbDom,
-                C_ubDom, C_tau, 1, masOX, C_numOfOXSt, masOY,
-                C_numOfOYSt, level, isComputeDiff);
-    }
 };
 
 //TEST_F(gputest, main_test)
