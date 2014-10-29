@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <iostream>
-#include "Const.h" //   -  Helpful used consts.
+#include "Const.h"
 
 using namespace std;
 
