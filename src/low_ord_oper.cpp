@@ -2576,15 +2576,14 @@ double solByEqualVolumes(
         cout << "SchOrd = " << numOfSolOrd << ", Nx = " << numOfOXSt;
         cout << ", count of time levels " << numOfTSt;
     }
-    //    numOfTSt = 1;
-    //printf("[cpu] time count = %d\n", numOfTSt);
+      //  numOfTSt = 1;
+   // printf("[cpu] time count = %d\n", numOfTSt);
     for (iCurrTL = 1; iCurrTL < numOfTSt + 1; iCurrTL++) {
         if (canPrint) {
             cout << "\r \t \t \t \t \t \t \t \t \r";
             cout << "SchOrd = " << numOfSolOrd << ", Nx = " << numOfOXSt;
             cout << ", indexOfCurrTL = " << iCurrTL << " ( " << numOfTSt << " ) " << flush;
         }
-
 
         //   If we know solution on the boundary we can use it.
         for (iOfOXN = 0; iOfOXN < numOfOXSt + 1; iOfOXN++) {
@@ -2599,13 +2598,7 @@ double solByEqualVolumes(
             rhoInCurrTL_asV[ (numOfOXSt + 1) * iOfOYN ] = leftBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOY[ iOfOYN ]);
             rhoInCurrTL_asV[ (numOfOXSt + 1) * iOfOYN + numOfOXSt ] = rightBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOY[ iOfOYN ]);
         }
-#ifdef _OPENMP
-        omp_set_num_threads(24);
-#endif	
-
-#ifdef _OPENMP        	
-#pragma omp parallel for collapse(2) private(buf_D, spVolInPrevTL, RPInCurrTL)	
-#endif	
+        
         //   Enumeration from first unknown element to last one.
         for (iOfOYN = 1; iOfOYN < numOfOYSt; iOfOYN++) {
             for (iOfOXN = 1; iOfOXN < numOfOXSt; iOfOXN++) {
@@ -2625,15 +2618,33 @@ double solByEqualVolumes(
                         //
                         iOfOYN, masOY, numOfOYSt, //   -  OY data.
                         rhoInPrevTL_asV);
-                /* if (opt == 22)
-                   {
-                   printf("[cpu] result = %le\n", spVolInPrevTL);
-                   }*/
+                
+//                if (opt == 12)
+//                {
+//                    printf("a = %f\n", par_a);
+//                    printf("b = %f\n", par_b);
+//                    printf("lbDom = %f\n", lbDom);
+//                    printf("rbDom = %f\n", rbDom);
+//                    printf("bbDom = %f\n", bbDom);
+//                    printf("ubDom = %f\n", ubDom);
+//                    printf("tau = %f\n", tau);
+//                    printf("iCurTl = %d\n", iCurrTL);
+//                     printf("iOfOXN = %d\n", iOfOXN);
+//                      printf("iOfOYN = %d\n", iOfOYN);
+//                       printf("numOfOXSt = %d\n", numOfOXSt);
+//                       printf("numOfOYSt = %d\n", numOfOYSt);
+//                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
+//                }
 
                 buf_D = (masOX[iOfOXN + 1] - masOX[iOfOXN - 1]) / 2.;
                 spVolInPrevTL = spVolInPrevTL / buf_D;
                 buf_D = (masOY[iOfOYN + 1] - masOY[iOfOYN - 1]) / 2.;
                 spVolInPrevTL = spVolInPrevTL / buf_D;
+                
+//                if (opt == 12)
+//                {
+//                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
+//                }
 
                 RPInCurrTL = f_function(par_a, par_b, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL, iOfOXN,
                         masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
@@ -2642,9 +2653,20 @@ double solByEqualVolumes(
                         iOfOYN, //   -  Index of current OY node.
                         masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
                         numOfOYSt); //   -  Number of OY steps.
-
+//                if (opt == 12)
+//                {
+//                    printf("RPInCurrTL = %f\n", RPInCurrTL);
+//                    printf("tau * RPInCurrTL = %f\n", tau * RPInCurrTL);
+//                }
+//                 
+                
                 rhoInCurrTL_asV[ opt ] = spVolInPrevTL;
                 rhoInCurrTL_asV[ opt ] += tau * RPInCurrTL;
+//                if (opt == 12)
+//                {
+//                    printf("rhoInCurrTL_asV[ opt ]  = %f\n", rhoInCurrTL_asV[ opt ]);
+//                    
+//                }
 
             }
         }
