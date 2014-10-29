@@ -92,7 +92,7 @@ ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/tests.o ${OBJECTFILES:%.o=%_nomain.o}
 ${TESTDIR}/tests/tests.o: tests/tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Iinclude -I. -Igtest-1.7.0/include -Igtest-1.7.0 -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
+	$(COMPILE.cc) -g -Iinclude -I. -Igtest-1.7.0/include -Igtest-1.7.0 -Iinclude -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
 
 
 ${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp 
