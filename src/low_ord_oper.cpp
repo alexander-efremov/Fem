@@ -5,10 +5,6 @@
 #include <iomanip>
 #include <stdlib.h>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #define C_pi_device 3.14159265358979323846264338327
 
 using namespace std;

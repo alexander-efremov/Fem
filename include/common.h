@@ -3,11 +3,17 @@
 #define COMMON_H_INCLUDED
 #include <iostream>
 #include <assert.h>
-#include "const.h"
 #include <iostream>
 #include <math.h>
 #include <float.h>
 
+static const double C_pi = 3.14159265358979323846264338327;
+static const double C_par_a = 2.; //   -  Solution parameter.
+static const int C_numOfOXSt = 10; //   -  Number of OX steps (segments).
+static const double C_par_b = 100.; //   -  Item of second parameter from "u_funcion" or "v_funcion".
+static const int C_numOfOYSt = 10; //   -  Number of OY steps (segments).
+static const double C_StepsRel = 1./5.; //   -  A relation of the time step "C_tau" to the max grid step "maxOfGrSt";
+static const double C_timeEnd = 1.; //   -  Finish time.
 static double C_lbDom = 0., C_rbDom = 1.; //   -  Left and right boundaries of rectangular domain.
 static double *masOX; //   -  Massive of OX points. Dimension = C_numOfOXSt +1.
 static double C_bbDom = 0., C_ubDom = 1.; //   -  Botton and upper boundaries of rectangular domain.
