@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/src/file_reader.o \
 	${OBJECTDIR}/src/low_ord_oper.o \
 	${OBJECTDIR}/src/main.o
 
@@ -70,11 +69,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/src/file_reader.o: src/file_reader.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Iinclude -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/file_reader.o src/file_reader.cpp
-
 ${OBJECTDIR}/src/low_ord_oper.o: src/low_ord_oper.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
@@ -100,19 +94,6 @@ ${TESTDIR}/tests/tests.o: tests/tests.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Iinclude -I. -Igtest-1.7.0/include -Igtest-1.7.0 -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
 
-
-${OBJECTDIR}/src/file_reader_nomain.o: ${OBJECTDIR}/src/file_reader.o src/file_reader.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/file_reader.o`; \
-	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
-	then  \
-	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -g -Iinclude -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/file_reader_nomain.o src/file_reader.cpp;\
-	else  \
-	    ${CP} ${OBJECTDIR}/src/file_reader.o ${OBJECTDIR}/src/file_reader_nomain.o;\
-	fi
 
 ${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
