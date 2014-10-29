@@ -4,6 +4,10 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>include/common.h</itemPath>
+      <itemPath>include/const.h</itemPath>
+      <itemPath>include/file_reader.h</itemPath>
+      <itemPath>include/timer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -12,14 +16,16 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>main.cpp</itemPath>
+      <itemPath>src/file_reader.cpp</itemPath>
+      <itemPath>src/low_ord_oper.cpp</itemPath>
+      <itemPath>src/main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
       <logicalFolder name="f1" displayName="Tests" projectFiles="true" kind="TEST">
-        <itemPath>Tests.cpp</itemPath>
+        <itemPath>src/tests.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -38,9 +44,12 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <incDir>
+            <pElem>include</pElem>
+          </incDir>
+        </ccTool>
       </compileType>
-      <item path="Tests.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <folder path="TestFiles/f1">
         <cTool>
           <incDir>
@@ -72,7 +81,21 @@
           </linkerLibItems>
         </linkerTool>
       </folder>
-      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="include/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/const.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/file_reader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/file_reader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -95,8 +118,6 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="Tests.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <folder path="TestFiles/f1">
         <cTool>
           <incDir>
@@ -112,7 +133,21 @@
           <output>${TESTDIR}/TestFiles/f1</output>
         </linkerTool>
       </folder>
-      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="include/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/const.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/file_reader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/file_reader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>
