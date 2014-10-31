@@ -546,6 +546,7 @@ bool solByEqualVolWithVarStepPlusPrint(
                 //
                 rhoInCurrTL_asV); //   -  Rho (solution) in Current (Last) Time Level.
 
+        //print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
 
         //   :) Now we know solution! It's great. What we need more?
 

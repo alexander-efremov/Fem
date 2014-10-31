@@ -382,11 +382,9 @@ extern double* solve_cpu_test(
         //
         double tau, //   -  Time step.
         int numOfTSt, //   -  A number of time steps.
-        //
-        double * masOX, //   -  Massive of OX nodes. Dimension = numOfOXSt +1.
+       
         int numOfOXSt, //   -  Number of OX steps.
-        //
-        double * masOY, //   -  Massive of OY nodes. Dimension = numOfOYSt +1.
+       
         int numOfOYSt, //   -  Number of OY steps.
         int gridStep,
         bool isComputeDiff);

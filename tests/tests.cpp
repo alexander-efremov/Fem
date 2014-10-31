@@ -96,7 +96,7 @@ protected:
 
     double *GetCpuToLevel(int level) {
         return solve_cpu_test(C_par_a, C_par_b, C_lbDom, C_rbDom, C_bbDom,
-                C_ubDom, C_tau, C_numOfTSt, masOX, C_numOfOXSt, masOY,
+                C_ubDom, C_tau, C_numOfTSt,  C_numOfOXSt,
                 C_numOfOYSt, level, false);
     }
 

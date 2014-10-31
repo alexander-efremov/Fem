@@ -2460,68 +2460,34 @@ double spaceVolumeInPrevTL(
             iOfOXN, iOfOYN);
 }
 
-void print_matrix_to_file(int n, int m, double *data, std::string file_name) {
+void print_matrix_to_file(int n, int m, double *data, std::string filename) {
 
-    FILE * pFile;
-
-
-    pFile = fopen(file_name.c_str(), "w");
+    FILE *f = fopen(filename.c_str(), "w");
 
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
             int k = i * n + j;
-
-            fprintf(pFile, "%20.14le ", data[k]);
-
-
+            fprintf(f, "%20.14le ", data[k]);
         }
-        fprintf(pFile, "\n ");
+        fprintf(f, "\n ");
     }
-    fclose(pFile);
+    fclose(f);
 }
 
 void compute_diff_write_to_file(double *result, int tl, int n, int m, double tau) {
     double c_h = 1. / n;
-    /*printf("[cpu] c_h = %le\n", c_h);
-    printf("[cpu] matrix \n");
-
-    for (int i = 0; i < 11; i++)
-    {
-       for(int j = 0; j < 11 ; j++)
-    {
-       printf("%le ", result[i*11 + j]);
-    }
-       printf("\n");
-    }*/
-
-    // let's find the diff and then write a result into file diff.bin
     double *diff = new double[(n + 1) * (m + 1)]();
 
-
     std::ostringstream oss;
-
-    char *s = "diff_cpu_";
-    oss << s << tl << ".bin";
+    oss << "diff_cpu_" << tl << ".bin";
 
     std::string name(oss.str());
 
     for (int j = 0; j <= m; j++) {
         for (int i = 0; i <= n; i++) {
-
             int opt = (n + 1) * j + i;
-
             double f = analytSolut(tl*tau, i*c_h, j * c_h);
             diff [opt] = fabs(result[opt] - f);
-            /* if (i == 1 && j == 1)
-
-    {       
-            printf("[cpu] result[opt] - f = %le\n", result[opt] - f);
-            printf("[cpu] abs(result[opt] - f) = %le\n", fabs(result[opt] - f));
-            printf("[cpu] tl = %d\n", tl);
-            printf("[cpu] f = %le result[opt] = %le diff[opt] = %le opt = %d\n", f, result[opt], diff[opt], opt);
-    } */
-
-
         }
     }
     print_matrix_to_file(n + 1, m + 1, diff, name);
@@ -2560,7 +2526,6 @@ double solByEqualVolumes(
     int iOfThr; //   -  Through OXY plane index.
     double buf_D; //   -  Buffer. Only.
     int j, k;
-
 
     //   New memory.
     rhoInPrevTL_asV = new double [ (numOfOXSt + 1) * (numOfOYSt + 1) ];
@@ -2676,15 +2641,8 @@ double solByEqualVolumes(
             rhoInPrevTL_asV[ iOfThr ] = rhoInCurrTL_asV[ iOfThr ];
     }
 
-
     //ex:
     delete[] rhoInPrevTL_asV;
-
-
-
-
-
-
     return 0;
 }
 
@@ -2700,44 +2658,38 @@ double *solve_cpu_test(
         //
         double tau,
         int numOfTSt,
-        //
-        double *masOX,
         int numOfOXSt,
-        //
-        double *masOY,
         int numOfOYSt,
         int gridStep, bool isComputeDiff) {
-    double varTau = tau;
+    
     int varNumOfTSt = numOfTSt;
     double *varMasOX = NULL;
     int varNumOfOXSt = numOfOXSt;
     double *varMasOY = NULL;
     int varNumOfOYSt = numOfOYSt;
     double *rhoInCurrTL_asV = NULL;
-    double anSol;
 
-    double buf_D;
+    double tmp;
     int j, k;
-    bool bul;
 
     //   New time step.
-    varTau = tau / pow(2., gridStep);
+    tau = tau / pow(2., gridStep);
     varNumOfTSt = numOfTSt * pow(2., gridStep);
     //   New absciss grid steps.
     varNumOfOXSt = numOfOXSt * pow(2., gridStep);
     //   New absciss grid.
     varMasOX = new double [ varNumOfOXSt + 1 ];
-    buf_D = (rbDom - lbDom) / varNumOfOXSt;
+    tmp = (rbDom - lbDom) / varNumOfOXSt;
     for (j = 0; j < varNumOfOXSt + 1; j++) {
-        varMasOX[j] = lbDom + ((double) j) * buf_D;
+        varMasOX[j] = lbDom + ((double) j) * tmp;
     }
     //   New ordinate grid steps.
     varNumOfOYSt = numOfOYSt * pow(2., gridStep);
     //   New absciss grid.
     varMasOY = new double [ varNumOfOYSt + 1 ];
-    buf_D = (ubDom - bbDom) / varNumOfOYSt;
+    tmp = (ubDom - bbDom) / varNumOfOYSt;
     for (k = 0; k < varNumOfOYSt + 1; k++) {
-        varMasOY[k] = bbDom + ((double) k) * buf_D;
+        varMasOY[k] = bbDom + ((double) k) * tmp;
     }
     rhoInCurrTL_asV = new double [ (varNumOfOXSt + 1) * (varNumOfOYSt + 1) ];
 
@@ -2749,7 +2701,7 @@ double *solve_cpu_test(
             //
             bbDom, ubDom,
             //
-            varTau, //   -  Time step.
+            tau, //   -  Time step.
             varNumOfTSt, //   -  A number of time steps.
             //
             varMasOX, //   -  Massive of abscissa grid points. Dimension = varNumOfOxGrSt +1.
@@ -2763,10 +2715,9 @@ double *solve_cpu_test(
             rhoInCurrTL_asV); //   -  Rho (solution) in Current (Last) Time Level.
 
     if (isComputeDiff)
-        compute_diff_write_to_file(rhoInCurrTL_asV, varNumOfTSt, varNumOfOXSt, varNumOfOYSt, varTau);
+        compute_diff_write_to_file(rhoInCurrTL_asV, varNumOfTSt, varNumOfOXSt, varNumOfOYSt, tau);
 
     delete[] varMasOX;
     delete[] varMasOY;
-    cout << std::endl;
     return rhoInCurrTL_asV;
 }
