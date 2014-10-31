@@ -1,0 +1,9 @@
+TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'
+VARIABLES = 'X' 'Y' 'E' 
+ZONE T='SubZone'
+I=1 J=3 K=1 ZONETYPE=Ordered
+DATAPACKING=POINT
+DT=(SINGLE SINGLE SINGLE )
+0.5                             100                            0.89138909889551409815        
+1.5                             100                            0.85519288887155386902        
+2.5                             100                            0.85115377189927710067        

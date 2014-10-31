@@ -208,7 +208,7 @@ extern double normOfMatrAtL1(
 
 
 
-extern double normOfMatrAtL1_asV(
+extern double norm_at_L_1(
               double *masOX,                          //   -  Massive of OX grid nodes. Dimension = dimOX.
               int dimOX,
               //

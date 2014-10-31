@@ -135,6 +135,8 @@ double integUnderLeftTr_OneCell(
             rho[1][1] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[1] + indCurSqOx[1] ];
         }
     }
+    
+    // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
     if ((indCurSqOx[0] < 0) || (indCurSqOx[1] > numOfOXSt) || (indCurSqOy[0] < 0) || (indCurSqOy[1] > numOfOYSt)) {
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
@@ -147,9 +149,7 @@ double integUnderLeftTr_OneCell(
         rho[1][0] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
         x = indCurSqOx[1] * hx;
         y = indCurSqOy[1] * hy;
-
         rho[1][1] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
-
     }
 
     //   1.
@@ -298,6 +298,7 @@ double integUnderRectAng_OneCell(
         rho[1][0] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[0] + indCurSqOx[1] ];
         rho[1][1] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[1] + indCurSqOx[1] ];
     } else {
+         // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
         rho[0][0] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);

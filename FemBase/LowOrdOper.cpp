@@ -564,25 +564,18 @@ bool solByEqualVolWithVarStepPlusPrint(
                 rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ] = anSol - rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ];
             }
         }
-        printf("\nError\n");
-        print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
+       // printf("\nError\n");
+       // print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
         //   maxModAbsErr[ indByNumOfGridSteps ]  =  MaxModItemOfMatr( rhoInCurrTL, varNumOfOXSt +1, varNumOfOYSt +1);
 
 
 
-        maxModAbsErr[ indByNumOfGridSteps ] = normOfMatrAtL1_asV(
-                //
-                varMasOX, varNumOfOXSt + 1, //   -  Massive of OX grid nodes. Dimension = dimOX.
-                //
-                varMasOY, varNumOfOYSt + 1, //   -  Massive of OY grid nodes. Dimension = dimOY.
-                //
-                //   rhoInCurrTL );
-                rhoInCurrTL_asV);
+        maxModAbsErr[ indByNumOfGridSteps ] = norm_at_L_1(
+                varMasOX, varNumOfOXSt + 1, 
+                varMasOY, varNumOfOYSt + 1, rhoInCurrTL_asV);
 
         printf("\nindByNumOfGridSteps = %d\n Norm %f\n", indByNumOfGridSteps, maxModAbsErr[ indByNumOfGridSteps ]);
-        //  printf("\n", maxModAbsErr[ indByNumOfGridSteps ]);
-
-
+       
         //   Let's compute order of numerical solution.
 
         if (indByNumOfGridSteps > 0) {
@@ -593,36 +586,16 @@ bool solByEqualVolWithVarStepPlusPrint(
 
             ordOfErr[ indByNumOfGridSteps - 1] = log(buf_D) / log(2.);
         }
-
-
-
-
-
+        
         //   Memory clearing.
 
         if (isGridStShBeChan == true) {
             delete varMasOX;
-
             delete varMasOY;
-
-            /*
-            for( j=0; j< varNumOfOXSt +1; j++ )
-            {
-               delete rhoInCurrTL[j];
-            }
-
-            delete rhoInCurrTL;
-             */
-
             delete rhoInCurrTL_asV;
-
         }
-    } //   end of "for( indByNumOfGridSteps = 0; indByNumOfGridSteps < numOfGrStepLayer; indByNumOfGridSteps++ )".
-
-
-
-
-
+    } 
+    
     if (numOfGrStepLayer > 1) {
         //   Let's write data to file.
 
@@ -639,44 +612,15 @@ bool solByEqualVolWithVarStepPlusPrint(
                 //
                 numOfGrStepLayer - 1); //   -  dimOfVect.
     }
-
-
-
-
-
-    //   Memory clearing.
-
-    //   If we didn't do it yet.
-
+    
     if (isGridStShBeChan == false) {
         delete varMasOX;
-
         delete varMasOY;
-
-        /*
-        for( j=0; j< varNumOfOXSt +1; j++ )
-        {
-           delete rhoInCurrTL[j];
-        }
-
-        delete rhoInCurrTL;
-         */
-
         delete rhoInCurrTL_asV;
     }
-
-
-
     delete maxModAbsErr;
-
     delete masOfGrStepItem;
-
     delete ordOfErr;
-
-
-
-
-
     return true;
 }
 
