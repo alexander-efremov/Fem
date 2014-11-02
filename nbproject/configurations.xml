@@ -42,6 +42,7 @@
           <incDir>
             <pElem>include</pElem>
           </incDir>
+          <commandLine>-std=c++11</commandLine>
         </ccTool>
       </compileType>
       <folder path="TestFiles/f1">

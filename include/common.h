@@ -16,8 +16,18 @@ static double C_bbDom = 0., C_ubDom = 1.; //   -  Bottom and upper boundaries of
 
 struct ComputeParameters {
 private:
-    int time_i;
-    bool _initresult;
+     ComputeParameters() {
+        t_count = 0;
+        level = 0;
+        tau = 0.02;
+        t_count = 50;
+        a = C_par_a;
+        b = C_par_b;
+        lb = C_lbDom;
+        rb = C_rbDom;
+        bb = C_bbDom;
+        ub = C_ubDom;
+    }
 public:
     int level;
     double a;
@@ -27,73 +37,25 @@ public:
     double bb;
     double ub;
     double tau;
-
     int size;
     int t_count;
     int x_size;
     int y_size;
-    int i;
-    int j;
-    double *result;
-    double currentTimeLevel;
-    double *diff;
-    bool _initdiff;
 
-    ComputeParameters(int level_input, bool initresult, bool initdiff = false) : currentTimeLevel(1), t_count(0), level(0) {
-        tau = 0.02;
-        t_count = 50;
-        level = level_input;
-        
-        _initresult = initresult;
-        _initdiff = initdiff;
-
-        a = C_par_a;
-        b = C_par_b;
-        lb = C_lbDom;
-        rb = C_rbDom;
-        bb = C_bbDom;
-        ub = C_ubDom;
-
+    ComputeParameters(int lvl) : ComputeParameters() {
+        level = lvl;
         double value = pow(2., level);
         int n = C_numOfOXSt * value;
         tau /= value;
         t_count *= value;
-
         x_size = n;
-
-        int m = C_numOfOYSt * value;
-
-        y_size = m;
-        size = (n + 1) * (m + 1);
-        result = NULL;
-        if (initresult) {
-            result = new double[size];
-        }
-        if (_initdiff) {
-            diff = new double[size];
-        }
-
+        y_size = C_numOfOYSt * value;
+        size = (x_size + 1) * (y_size + 1);
     }
 
     ~ComputeParameters() {
-        if (_initresult)
-            delete[] result;
-        if (_initdiff)
-            delete[] diff;
     }
-
-    void reset_time_counter() {
-        time_i = 1;
-    }
-
-    bool can_iterate_over_time_level() {
-        return time_i <= t_count;
-    }
-
-    void inc_time_level() {
-        time_i++;
-    }
-
+    
     int get_real_x_size() {
         return x_size + 1;
     }
@@ -116,10 +78,6 @@ public:
 
     int get_inner_x_size() {
         return get_real_x_size() - 2;
-    }
-
-    void print_info() {
-        std::cout << "current time level " << currentTimeLevel << std::endl;
     }
 
     friend std::ostream &operator<<(std::ostream &output,
