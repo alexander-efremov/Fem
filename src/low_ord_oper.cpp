@@ -7,20 +7,6 @@
 #include "utils.h"
 #include "common.h"
 
-double u_function(double b, double t, double x,
-                    double y)
-{
-    return b * y * (1. - y) * (C_pi / 2. + atan(-x));
-}
-
-double v_function(double lb, double rb,
-                    double bb, double ub, double t, double x, double y)
-{
-    return atan(
-                (x - lb) * (x - rb) * (1. + t) / 10. * (y - ub)
-                * (y - bb));
-}
-
 double itemOfInteg_1SpecType(
                              double Py,
                              double Qy,
@@ -31,48 +17,20 @@ double itemOfInteg_1SpecType(
                              double a,
                              double b)
 {
-    double integ;
-    integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
+    double integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
     integ = integ * ((Qy - b) * (Qy - b) - (Py - b) * (Py - b));
     return integ / 4.;
 }
 
-double analytSolut(
+double analytical_solution(
                    double t, double x, double y)
 {
     return 1.1 + sin(t * x * y);
 }
 
-double analytSolut(
-                   double par_a,
-                   //
-                   double lbDom, //   -  Left and right boundaries of rectangular domain.
-                   double rbDom,
-                   //
-                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                   double ubDom,
-                   //
-                   double t, double x, double y)
+double init_solution(double ox_value, double oy_value)  
 {
-    return 1.1 + sin(t * x * y);
-}
-
-double init_solution(
-                     double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                     //
-                     double lbDom, //   -  Left and right boundaries of rectangular domain.
-                     double rbDom,
-                     //
-                     double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                     double ubDom,
-                     //
-                     int iOfOXN, //   -  Index of current OX node.
-                     const double *masOX, //   -  Massive of abscissa grid steps. Dimension = numOfOxSt +1.
-                     //
-                     int iOfOYN, //   -  Index of current OY node.
-                     const double *masOY) //   -  Massive of ordinate grid steps. Dimension = numOfOYSt +1.
-{
-    return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, 0., masOX[ iOfOXN ], masOY[ iOfOYN ]);
+    return analytical_solution(0., ox_value, oy_value);
 }
 
 double itemOfInteg_2SpecType(
@@ -85,25 +43,17 @@ double itemOfInteg_2SpecType(
                              double b,
                              double betta)
 {
-    double buf_D, integ;
+    double tmp, integ;
     //   Computing...
-    buf_D = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
-    buf_D = buf_D - (Py - alpha) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
-    integ = buf_D / (3. * a);
-    buf_D = (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
-    buf_D = buf_D - (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
-    return integ - buf_D / (12. * a * a);
+    tmp = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
+    tmp = tmp - (Py - alpha) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
+    integ = tmp / (3. * a);
+    tmp = (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
+    tmp = tmp - (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
+    return integ - tmp / (12. * a * a);
 }
 
 double integUnderLeftTr_OneCell(
-                                double par_a, //   -  Solution parameter.
-                                //
-                                double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                double rbDom,
-                                //
-                                double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                                double ubDom,
-                                //
                                 double Py,
                                 double Qy,
                                 //
@@ -149,16 +99,16 @@ double integUnderLeftTr_OneCell(
     {
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
-        rho[0][0] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[0][0] = analytical_solution(t, x, y);
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[1] * hy;
-        rho[0][1] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[0][1] = analytical_solution(t, x, y);
         x = indCurSqOx[1] * hx;
         y = indCurSqOy[0] * hy;
-        rho[1][0] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[1][0] = analytical_solution(t, x, y);
         x = indCurSqOx[1] * hx;
         y = indCurSqOy[1] * hy;
-        rho[1][1] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[1][1] = analytical_solution(t, x, y);
     }
 
     //   1.
@@ -224,16 +174,7 @@ double integUnderLeftTr_OneCell(
     return integ;
 }
 
-double integUnderRightTr_OneCell(
-                                 double par_a, //   -  Solution parameter.
-                                 //
-                                 double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                 double rbDom,
-                                 //
-                                 double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                                 double ubDom,
-                                 //
-                                 double Py,
+double integUnderRightTr_OneCell(double Py,
                                  double Qy,
                                  //
                                  double a_SL,
@@ -255,12 +196,6 @@ double integUnderRightTr_OneCell(
                                  double *rhoInPrevTL_asV)
 {
     return -1. * integUnderLeftTr_OneCell(
-                                          par_a, //   -  Solution parameter.
-                                          //
-                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                          //
-                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                                          //
                                           Py, Qy,
                                           //
                                           a_SL, b_SL,
@@ -327,16 +262,16 @@ double integUnderRectAng_OneCell(
         // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
-        rho[0][0] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[0][0] = analytical_solution(t, x, y);
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[1] * hy;
-        rho[0][1] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[0][1] = analytical_solution(t, x, y);
         x = indCurSqOx[1] * hx;
         y = indCurSqOy[0] * hy;
-        rho[1][0] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[1][0] = analytical_solution(t, x, y);
         x = indCurSqOx[1] * hx;
         y = indCurSqOy[1] * hy;
-        rho[1][1] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+        rho[1][1] = analytical_solution(t, x, y);
     }
 
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0))
@@ -575,12 +510,6 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
         if (fabs(a_SL) > 1.e-12)
         {
             buf_D = integUnderRightTr_OneCell(
-                                              par_a, //   -  Solution parameter.
-                                              //
-                                              lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                              //
-                                              bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                                              //
                                               bv[1], //   -  double Py,
                                               uv[1], //   -  double Qy,
                                               //
@@ -608,49 +537,32 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
     return integ;
 }
 
-double upper_bound(
-                   double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                   //
-                   double lbDom, //   -  Left and right boundaries of rectangular domain.
-                   double rbDom,
-                   //
-                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                   double ubDom,
-                   //
+double bottom_bound(double y, 
+                    double t,
+                    double x)
+{
+    return analytical_solution(t, x, y);
+}
+
+double upper_bound(double y,
                    double t,
                    double x)
 {
-    return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, ubDom);
+    return analytical_solution(t, x, y);
 }
 
-double right_bound(
-                   double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                   //
-                   double lbDom, //   -  Left and right boundaries of rectangular domain.
-                   double rbDom,
-                   //
-                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                   double ubDom,
-                   //
+double right_bound(double x,
                    double t,
                    double y)
 {
-    return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, rbDom, y);
+    return analytical_solution(t, x, y);
 }
 
-double left_bound(
-                  double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                  //
-                  double lbDom, //   -  Left and right boundaries of rectangular domain.
-                  double rbDom,
-                  //
-                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                  double ubDom,
-                  //
+double left_bound(double x,
                   double t,
                   double y)
 {
-    return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, lbDom, y);
+    return analytical_solution(t, x, y);
 }
 
 double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the left side.
@@ -659,7 +571,7 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
                             double lbDom, //   -  Left and right boundaries of rectangular domain.
                             double rbDom,
                             //
-                            double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                            double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                             double ubDom,
                             //
                             double tau,
@@ -733,12 +645,6 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
         if (fabs(a_SL) > 1.e-12)
         {
             buf_D = integUnderLeftTr_OneCell(
-                                             par_a, //   -  Solution parameter.
-                                             //
-                                             lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                             //
-                                             bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                                             //
                                              bv[1], //   -  double Py,
                                              uv[1], //   -  double Qy,
                                              //
@@ -2022,20 +1928,7 @@ double integUnderUnunifTr(
     return integ;
 }
 
-double bottom_bound(
-                    double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                    //
-                    double lbDom, //   -  Left and right boundaries of rectangular domain.
-                    double rbDom,
-                    //
-                    double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                    double ubDom,
-                    //
-                    double t,
-                    double x)
-{
-    return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, bbDom);
-}
+
 
 double u_function(double par_b, double t, double x, double y)
 {
@@ -2085,7 +1978,7 @@ double f_function(//   -  It's item of right part of differential equation.
     double rho, dRhoDT, dRhoDX, dRhoDY;
     double u, duDX;
     double v, dvDY;
-    rho = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
+    rho = analytical_solution(t, x, y);
     //  printf("cpu rho = %f\n", rho);
     dRhoDT = x * y * cos(t * x * y);
     //  printf("cpu dRhoDT = %f\n", dRhoDT);
@@ -2689,7 +2582,7 @@ void compute_diff_write_to_file(double *result, int tl, int n, int m, double tau
         for (int i = 0; i <= n; i++)
         {
             int opt = (n + 1) * j + i;
-            double f = analytSolut(tl*tau, i*c_h, j * c_h);
+            double f = analytical_solution(tl*tau, i*c_h, j * c_h);
             diff [opt] = fabs(result[opt] - f);
         }
     }
@@ -2750,11 +2643,11 @@ double solve(
 {
     double *prev_density = new double [ (ox_length + 1) * (oy_length + 1) ];
 
-    for (int k = 0; k < oy_length + 1; k++)
+    for (int i_oy = 0; i_oy < oy_length + 1; i_oy++)
     {
-        for (int j = 0; j < ox_length + 1; j++)
+        for (int i_ox = 0; i_ox < ox_length + 1; i_ox++)
         {
-            prev_density[ (ox_length + 1) * k + j ] = init_solution(a, lb, rb, bb, ub, j, ox, k, oy);
+            prev_density[ (ox_length + 1) * i_oy + i_ox ] = init_solution(ox[i_ox], oy[i_oy]);
         }
     }
 
@@ -2763,14 +2656,14 @@ double solve(
 
         for (int i = 0; i < ox_length + 1; i++)
         {
-            density[ i ] = bottom_bound(a, lb, rb, bb, ub, tau * i_tl, ox[ i ]);
-            density[ (ox_length + 1) * oy_length + i ] = upper_bound(a, lb, rb, bb, ub, tau * i_tl, ox[ i ]);
+            density[ i ] = bottom_bound(bb, tau * i_tl, ox[ i ]);
+            density[ (ox_length + 1) * oy_length + i ] = upper_bound(ub, tau * i_tl, ox[ i ]);
         }
 
         for (int i = 0; i < oy_length + 1; i++)
         {
-            density[ (ox_length + 1) * i ] = left_bound(a, lb, rb, bb, ub, tau * i_tl, oy[ i ]);
-            density[ (ox_length + 1) * i + ox_length ] = right_bound(a, lb, rb, bb, ub, tau * i_tl, oy[ i ]);
+            density[ (ox_length + 1) * i ] = left_bound(lb, tau * i_tl, oy[ i ]);
+            density[ (ox_length + 1) * i + ox_length ] = right_bound(rb, tau * i_tl, oy[ i ]);
         }
 
         for (int i_oy = 1; i_oy < oy_length; i_oy++)
@@ -2819,7 +2712,9 @@ double solve(
         }
 
         for (int i = 0; i < (ox_length + 1) * (oy_length + 1); i++)
-            prev_density[ i ] = density[ i ];
+        { 
+            prev_density[ i ] = density[ i ]; 
+        }
     }
 
     delete[] prev_density;

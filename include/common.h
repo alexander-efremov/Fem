@@ -545,15 +545,7 @@ double itemOfInteg_2SpecType_optimized(
         double b,
         double betta);
 
-extern double analytSolut(
-        double par_a,
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  bottom and upper boundaries of rectangular domain.
-        double ubDom,
-        //
+extern double analytical_solution(
         double t, double x, double y);
 extern float solve_at_gpu(ComputeParameters* p, bool tl1, bool compute_diff = false);
 
