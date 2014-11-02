@@ -20,20 +20,30 @@ static int C_numOfTSt; //   -  A number of time steps.
 
 inline void initCompOfGlVar() {
     double max = 0.;
+
     masOX = new double[ C_numOfOXSt + 1];
     masOY = new double[ C_numOfOYSt + 1];
     
     for (int j = 0; j < C_numOfOXSt + 1; j++) { 
         masOX[j] = C_lbDom + (C_rbDom - C_lbDom) * ((double) j / C_numOfOXSt);
-        if (max < (masOX[j + 1] - masOX[j]) && j < C_numOfOXSt) {
+    }
+
+    //   Let's find out maximum of OX step.
+    for (int j = 0; j < C_numOfOXSt; j++) {
+        if (max < (masOX[j + 1] - masOX[j])) {
             max = (masOX[j + 1] - masOX[j]);
         }
     }
-    
+
     //   Massive of OY steps. Dimension = C_numOfOYSt +1.
+    
     for (int j = 0; j < C_numOfOYSt + 1; j++) { 
         masOY[j] = C_bbDom + (C_ubDom - C_bbDom) * ((double) j / C_numOfOYSt);
-        if (max < (masOY[j + 1] - masOY[j]) && j < C_numOfOXSt) {
+    }
+
+    //   Let's find out maximum of OY step.
+    for (int j = 0; j < C_numOfOYSt; j++) {
+        if (max < (masOY[j + 1] - masOY[j])) {
             max = (masOY[j + 1] - masOY[j]);
         }
     }
