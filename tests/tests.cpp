@@ -6,21 +6,13 @@
 
 class cpu : public testing::Test {
 protected:
-
-    cpu() {
-        initCompOfGlVar();
-    }
-
-    virtual ~cpu() {
-        memClean();
-    }
-
     double *GetCpuToLevel(int level) {
+        C_tau = 0.02;
+        C_numOfTSt = 50;
         return solve_cpu_test(C_par_a, C_par_b, C_lbDom, C_rbDom, C_bbDom,
                 C_ubDom, C_tau, C_numOfTSt,  C_numOfOXSt,
                 C_numOfOYSt, level);
     }
-
 };
 
 TEST_F(cpu, main_test) {
