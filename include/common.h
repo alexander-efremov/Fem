@@ -208,16 +208,6 @@ public:
     }
 };
 
-struct VertexData {
-    int* types;
-    int length;
-    int x_length;
-    int y_length;
-    int currentTimeLevel;
-    int part_number;
-    int offset;
-    int chunk;
-};
 
 template<typename CharT>
 class DecimalSeparator : public std::numpunct<CharT> {
@@ -235,15 +225,6 @@ protected:
 
 private:
     CharT m_Separator;
-};
-
-struct ComputeResults {
-    int timeStepCount;
-    int xSize;
-    int ySize;
-    double cpuTime;
-    double openmpTime;
-    double gpuTime;
 };
 
 
@@ -370,24 +351,18 @@ extern double solByEqualVolumes(
         //
         double *rhoInCurrTL_asV); //   -  Rho (solution) in Last Time Level which we will compute.
 
-extern double* solve_cpu_test(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau, //   -  Time step.
-        int numOfTSt, //   -  A number of time steps.
-       
-        int numOfOXSt, //   -  Number of OX steps.
-       
-        int numOfOYSt, //   -  Number of OY steps.
-        int gridStep,
-        bool isComputeDiff);
+extern double *solve_cpu_test(
+                       double a,
+                       double b,
+                       double lb,
+                       double rb,
+                       double bb,
+                       double ub,
+                       double time_step,
+                       int time_step_count,
+                       int ox_length,
+                       int oy_length,
+                       const int step, const bool is_compute_diff);
 
 extern double spaceVolumeInPrevTL(
         double par_a, //   -  Item of left and right setback (parameter "a" in test).

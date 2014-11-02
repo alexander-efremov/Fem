@@ -10,26 +10,26 @@
 using namespace std;
 
 double h_u_function(double par_b, double t, double x,
-        double y) {
+                    double y) {
     return par_b * y * (1. - y) * (C_pi_device / 2. + atan(-x));
 }
 
 double h_v_function(double lbDom, double rbDom,
-        double bbDom, double ubDom, double t, double x, double y) {
+                    double bbDom, double ubDom, double t, double x, double y) {
     return atan(
-            (x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom)
-            * (y - bbDom));
+                (x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom)
+                * (y - bbDom));
 }
 
 double itemOfInteg_1SpecType(
-        double Py,
-        double Qy,
-        //
-        double Gx,
-        double Hx,
-        //
-        double a,
-        double b) {
+                             double Py,
+                             double Qy,
+                             //
+                             double Gx,
+                             double Hx,
+                             //
+                             double a,
+                             double b) {
     double integ;
     integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
     integ = integ * ((Qy - b) * (Qy - b) - (Py - b) * (Py - b));
@@ -37,50 +37,50 @@ double itemOfInteg_1SpecType(
 }
 
 double analytSolut(
-        double t, double x, double y) {
+                   double t, double x, double y) {
     return 1.1 + sin(t * x * y);
 }
 
 double analytSolut(
-        double par_a,
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t, double x, double y) {
+                   double par_a,
+                   //
+                   double lbDom, //   -  Left and right boundaries of rectangular domain.
+                   double rbDom,
+                   //
+                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                   double ubDom,
+                   //
+                   double t, double x, double y) {
     return 1.1 + sin(t * x * y);
 }
 
 double initDataOfSol(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        int iOfOXN, //   -  Index of current OX node.
-        const double *masOX, //   -  Massive of abscissa grid steps. Dimension = numOfOxSt +1.
-        //
-        int iOfOYN, //   -  Index of current OY node.
-        const double *masOY) //   -  Massive of ordinate grid steps. Dimension = numOfOYSt +1.
+                     double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                     //
+                     double lbDom, //   -  Left and right boundaries of rectangular domain.
+                     double rbDom,
+                     //
+                     double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                     double ubDom,
+                     //
+                     int iOfOXN, //   -  Index of current OX node.
+                     const double *masOX, //   -  Massive of abscissa grid steps. Dimension = numOfOxSt +1.
+                     //
+                     int iOfOYN, //   -  Index of current OY node.
+                     const double *masOY) //   -  Massive of ordinate grid steps. Dimension = numOfOYSt +1.
 {
     return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, 0., masOX[ iOfOXN ], masOY[ iOfOYN ]);
 }
 
 double itemOfInteg_2SpecType(
-        double Py,
-        double Qy,
-        //
-        double alpha,
-        //
-        double a,
-        double b,
-        double betta) {
+                             double Py,
+                             double Qy,
+                             //
+                             double alpha,
+                             //
+                             double a,
+                             double b,
+                             double betta) {
     double buf_D, integ;
     //   Computing...
     buf_D = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
@@ -92,34 +92,34 @@ double itemOfInteg_2SpecType(
 }
 
 double integUnderLeftTr_OneCell(
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double Py,
-        double Qy,
-        //
-        double a_SL,
-        double b_SL,
-        double Hx,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        int *indCurSqOx, //   -  Index of current square by Ox axis.
-        int *indCurSqOy, //   -  Index of current square by Oy axis.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                                double par_a, //   -  Solution parameter.
+                                //
+                                double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                double rbDom,
+                                //
+                                double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                double ubDom,
+                                //
+                                double Py,
+                                double Qy,
+                                //
+                                double a_SL,
+                                double b_SL,
+                                double Hx,
+                                //
+                                double tau,
+                                int iCurrTL, //   -  Index of current time layer.
+                                //
+                                int *indCurSqOx, //   -  Index of current square by Ox axis.
+                                int *indCurSqOy, //   -  Index of current square by Oy axis.
+                                //
+                                const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                int numOfOXSt, //   -  Number of OX steps.
+                                //
+                                const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                int numOfOYSt, //   -  Number of OY steps.
+                                //
+                                double *rhoInPrevTL_asV) {
     double hx = masOX[1] - masOX[0];
     double hy = masOY[1] - masOY[0];
     double integ = 0;
@@ -135,8 +135,9 @@ double integUnderLeftTr_OneCell(
             rho[1][1] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[1] + indCurSqOx[1] ];
         }
     }
-    
+
     // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
+    // норма должна уменьшиться
     if ((indCurSqOx[0] < 0) || (indCurSqOx[1] > numOfOXSt) || (indCurSqOy[0] < 0) || (indCurSqOy[1] > numOfOYSt)) {
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
@@ -204,86 +205,86 @@ double integUnderLeftTr_OneCell(
 }
 
 double integUnderRightTr_OneCell(
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double Py,
-        double Qy,
-        //
-        double a_SL,
-        double b_SL,
-        double Gx,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        int *indCurSqOx, //   -  Index of current square by Ox axis.
-        int *indCurSqOy, //   -  Index of current square by Oy axis.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                                 double par_a, //   -  Solution parameter.
+                                 //
+                                 double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                 double rbDom,
+                                 //
+                                 double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                 double ubDom,
+                                 //
+                                 double Py,
+                                 double Qy,
+                                 //
+                                 double a_SL,
+                                 double b_SL,
+                                 double Gx,
+                                 //
+                                 double tau,
+                                 int iCurrTL, //   -  Index of current time layer.
+                                 //
+                                 int *indCurSqOx, //   -  Index of current square by Ox axis.
+                                 int *indCurSqOy, //   -  Index of current square by Oy axis.
+                                 //
+                                 const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                 int numOfOXSt, //   -  Number of OX steps.
+                                 //
+                                 const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                 int numOfOYSt, //   -  Number of OY steps.
+                                 //
+                                 double *rhoInPrevTL_asV) {
     return -1. * integUnderLeftTr_OneCell(
-            par_a, //   -  Solution parameter.
-            //
-            lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-            //
-            bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-            //
-            Py, Qy,
-            //
-            a_SL, b_SL,
-            Gx, //   -  double Hx,
-            //
-            tau, iCurrTL, //   -  Index of current time layer.
-            //
-            indCurSqOx, //   -  Index of current square by Ox axis.
-            indCurSqOy, //   -  Index of current square by Oy axis.
-            //
-            masOX, numOfOXSt, //   -  Massive of OX steps. Dimension = numOfOXSt +1. Number of OX steps.
-            //
-            masOY, numOfOYSt, //   -  Massive of OY steps. Dimension = numOfOYSt +1. Number of OY steps.
-            //
-            rhoInPrevTL_asV);
+                                          par_a, //   -  Solution parameter.
+                                          //
+                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                          //
+                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                          //
+                                          Py, Qy,
+                                          //
+                                          a_SL, b_SL,
+                                          Gx, //   -  double Hx,
+                                          //
+                                          tau, iCurrTL, //   -  Index of current time layer.
+                                          //
+                                          indCurSqOx, //   -  Index of current square by Ox axis.
+                                          indCurSqOy, //   -  Index of current square by Oy axis.
+                                          //
+                                          masOX, numOfOXSt, //   -  Massive of OX steps. Dimension = numOfOXSt +1. Number of OX steps.
+                                          //
+                                          masOY, numOfOYSt, //   -  Massive of OY steps. Dimension = numOfOYSt +1. Number of OY steps.
+                                          //
+                                          rhoInPrevTL_asV);
 }
 
 double integUnderRectAng_OneCell(
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double Py,
-        double Qy,
-        //
-        double Gx,
-        double Hx,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        int *indCurSqOx, //   -  Index of current square by Ox axis.
-        int *indCurSqOy, //   -  Index of current square by Oy axis.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                                 double par_a, //   -  Solution parameter.
+                                 //
+                                 double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                 double rbDom,
+                                 //
+                                 double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                 double ubDom,
+                                 //
+                                 double Py,
+                                 double Qy,
+                                 //
+                                 double Gx,
+                                 double Hx,
+                                 //
+                                 double tau,
+                                 int iCurrTL, //   -  Index of current time layer.
+                                 //
+                                 int *indCurSqOx, //   -  Index of current square by Ox axis.
+                                 int *indCurSqOy, //   -  Index of current square by Oy axis.
+                                 //
+                                 const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                 int numOfOXSt, //   -  Number of OX steps.
+                                 //
+                                 const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                 int numOfOYSt, //   -  Number of OY steps.
+                                 //
+                                 double *rhoInPrevTL_asV) {
     //   return ( fabs( (Qy - Py) * (Hx - Gx) ) );
     double hx = masOX[1] - masOX[0];
     double hy = masOY[1] - masOY[0];
@@ -298,7 +299,7 @@ double integUnderRectAng_OneCell(
         rho[1][0] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[0] + indCurSqOx[1] ];
         rho[1][1] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[1] + indCurSqOx[1] ];
     } else {
-         // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
+        // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
         rho[0][0] = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, y);
@@ -344,33 +345,33 @@ double integUnderRectAng_OneCell(
 }
 
 double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on the right side.
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
-        double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
-        //
-        int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
-        //
-        double lb, int *indLB, //   -  Left boundary by Ox. Index by OX axis where lb is.
-        //
-        int *indCurSqOy, //   -  Index of current square by Oy axis.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                             double par_a, //   -  Solution parameter.
+                             //
+                             double lbDom, //   -  Left and right boundaries of rectangular domain.
+                             double rbDom,
+                             //
+                             double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                             double ubDom,
+                             //
+                             double tau,
+                             int iCurrTL, //   -  Index of current time layer.
+                             //
+                             double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
+                             double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
+                             //
+                             int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
+                             //
+                             double lb, int *indLB, //   -  Left boundary by Ox. Index by OX axis where lb is.
+                             //
+                             int *indCurSqOy, //   -  Index of current square by Oy axis.
+                             //
+                             const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                             int numOfOXSt, //   -  Number of OX steps.
+                             //
+                             const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                             int numOfOYSt, //   -  Number of OY steps.
+                             //
+                             double *rhoInPrevTL_asV) {
     double mv[2], rv[2]; //   -  Middle and right vertices.
     int wMvI; //   -  Where middle vertex is.
     int indCurSqOxToCh[2]; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
@@ -430,30 +431,30 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
         }
 
         buf_D = integUnderRectAng_OneCell(
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,
-                //
-                Gx, //   -  double Gx,
-                Hx, //   -  double Hx,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                indCurSqOxToCh, //   -  Index of current square by Ox axis.
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                          par_a, //   -  Solution parameter.
+                                          //
+                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                          //
+                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                          //
+                                          bv[1], //   -  double Py,
+                                          uv[1], //   -  double Qy,
+                                          //
+                                          Gx, //   -  double Gx,
+                                          Hx, //   -  double Hx,
+                                          //
+                                          tau, iCurrTL, //   -  Index of current time layer.
+                                          //
+                                          indCurSqOxToCh, //   -  Index of current square by Ox axis.
+                                          indCurSqOy, //   -  Index of current square by Oy axis.
+                                          //
+                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                          numOfOXSt, //   -  Number of OX steps.
+                                          //
+                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                          numOfOYSt, //   -  Number of OY steps.
+                                          //
+                                          rhoInPrevTL_asV);
 
         integ += buf_D;
 
@@ -480,30 +481,30 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
         }
 
         buf_D = integUnderRectAng_OneCell(
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,
-                //
-                Gx, //   -  double Gx,
-                mv[0], //   -  double Hx,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                indCurSqOx, //   -  Index of current square by Ox axis.
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                          par_a, //   -  Solution parameter.
+                                          //
+                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                          //
+                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                          //
+                                          bv[1], //   -  double Py,
+                                          uv[1], //   -  double Qy,
+                                          //
+                                          Gx, //   -  double Gx,
+                                          mv[0], //   -  double Hx,
+                                          //
+                                          tau, iCurrTL, //   -  Index of current time layer.
+                                          //
+                                          indCurSqOx, //   -  Index of current square by Ox axis.
+                                          indCurSqOy, //   -  Index of current square by Oy axis.
+                                          //
+                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                          numOfOXSt, //   -  Number of OX steps.
+                                          //
+                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                          numOfOYSt, //   -  Number of OY steps.
+                                          //
+                                          rhoInPrevTL_asV);
 
         integ += buf_D;
 
@@ -522,31 +523,31 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
 
         if (fabs(a_SL) > 1.e-12) {
             buf_D = integUnderRightTr_OneCell(
-                    par_a, //   -  Solution parameter.
-                    //
-                    lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                    //
-                    bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                    //
-                    bv[1], //   -  double Py,
-                    uv[1], //   -  double Qy,
-                    //
-                    a_SL,
-                    b_SL,
-                    mv[0], //   -  double Gx,
-                    //
-                    tau, iCurrTL, //   -  Index of current time layer.
-                    //
-                    indCurSqOx, //   -  Index of current square by Ox axis.
-                    indCurSqOy, //   -  Index of current square by Oy axis.
-                    //
-                    masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                    numOfOXSt, //   -  Number of OX steps.
-                    //
-                    masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                    numOfOYSt, //   -  Number of OY steps.
-                    //
-                    rhoInPrevTL_asV);
+                                              par_a, //   -  Solution parameter.
+                                              //
+                                              lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                              //
+                                              bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                              //
+                                              bv[1], //   -  double Py,
+                                              uv[1], //   -  double Qy,
+                                              //
+                                              a_SL,
+                                              b_SL,
+                                              mv[0], //   -  double Gx,
+                                              //
+                                              tau, iCurrTL, //   -  Index of current time layer.
+                                              //
+                                              indCurSqOx, //   -  Index of current square by Ox axis.
+                                              indCurSqOy, //   -  Index of current square by Oy axis.
+                                              //
+                                              masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                              numOfOXSt, //   -  Number of OX steps.
+                                              //
+                                              masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                              numOfOYSt, //   -  Number of OY steps.
+                                              //
+                                              rhoInPrevTL_asV);
 
             integ += buf_D;
         }
@@ -556,75 +557,75 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
 }
 
 double upperBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double x) {
+                  double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                  //
+                  double lbDom, //   -  Left and right boundaries of rectangular domain.
+                  double rbDom,
+                  //
+                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                  double ubDom,
+                  //
+                  double t,
+                  double x) {
     return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, ubDom);
 }
 
 double rightBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double y) {
+                  double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                  //
+                  double lbDom, //   -  Left and right boundaries of rectangular domain.
+                  double rbDom,
+                  //
+                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                  double ubDom,
+                  //
+                  double t,
+                  double y) {
     return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, rbDom, y);
 }
 
 double leftBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double y) {
+                 double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                 //
+                 double lbDom, //   -  Left and right boundaries of rectangular domain.
+                 double rbDom,
+                 //
+                 double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                 double ubDom,
+                 //
+                 double t,
+                 double y) {
     return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, lbDom, y);
 }
 
 double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the left side.
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
-        double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
-        //
-        int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
-        //
-        double rb, int *indRB, //   -  Right boundary by Ox. Index by OX axis where rb is.
-        //
-        int *indCurSqOy, //   -  Index of current square by Oy axis.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                            double par_a, //   -  Solution parameter.
+                            //
+                            double lbDom, //   -  Left and right boundaries of rectangular domain.
+                            double rbDom,
+                            //
+                            double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                            double ubDom,
+                            //
+                            double tau,
+                            int iCurrTL, //   -  Index of current time layer.
+                            //
+                            double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
+                            double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
+                            //
+                            int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
+                            //
+                            double rb, int *indRB, //   -  Right boundary by Ox. Index by OX axis where rb is.
+                            //
+                            int *indCurSqOy, //   -  Index of current square by Oy axis.
+                            //
+                            const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                            int numOfOXSt, //   -  Number of OX steps.
+                            //
+                            const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                            int numOfOYSt, //   -  Number of OY steps.
+                            //
+                            double *rhoInPrevTL_asV) {
     double lv[2], mv[2]; //   -  Left and middle vertices.
     int wMvI; //   -  Where middle vertex is.
     int indCurSqOxToCh[2]; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
@@ -671,31 +672,31 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
         //   Integration under one cell triangle.
         if (fabs(a_SL) > 1.e-12) {
             buf_D = integUnderLeftTr_OneCell(
-                    par_a, //   -  Solution parameter.
-                    //
-                    lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                    //
-                    bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                    //
-                    bv[1], //   -  double Py,
-                    uv[1], //   -  double Qy,
-                    //
-                    a_SL,
-                    b_SL,
-                    mv[0], //   -  double Hx,
-                    //
-                    tau, iCurrTL, //   -  Index of current time layer.
-                    //
-                    indCurSqOx, //   -  Index of current square by Ox axis.
-                    indCurSqOy, //   -  Index of current square by Oy axis.
-                    //
-                    masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                    numOfOXSt, //   -  Number of OX steps.
-                    //
-                    masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                    numOfOYSt, //   -  Number of OY steps.
-                    //
-                    rhoInPrevTL_asV);
+                                             par_a, //   -  Solution parameter.
+                                             //
+                                             lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                             //
+                                             bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                             //
+                                             bv[1], //   -  double Py,
+                                             uv[1], //   -  double Qy,
+                                             //
+                                             a_SL,
+                                             b_SL,
+                                             mv[0], //   -  double Hx,
+                                             //
+                                             tau, iCurrTL, //   -  Index of current time layer.
+                                             //
+                                             indCurSqOx, //   -  Index of current square by Ox axis.
+                                             indCurSqOy, //   -  Index of current square by Oy axis.
+                                             //
+                                             masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                             numOfOXSt, //   -  Number of OX steps.
+                                             //
+                                             masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                             numOfOYSt, //   -  Number of OY steps.
+                                             //
+                                             rhoInPrevTL_asV);
 
 
             integ += buf_D;
@@ -721,30 +722,30 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
         }
 
         buf_D = integUnderRectAng_OneCell(
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,
-                //
-                mv[0], //   -  double Gx,
-                Hx, //   -  double Hx,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                indCurSqOx, //   -  Index of current square by Ox axis.
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                          par_a, //   -  Solution parameter.
+                                          //
+                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                          //
+                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                          //
+                                          bv[1], //   -  double Py,
+                                          uv[1], //   -  double Qy,
+                                          //
+                                          mv[0], //   -  double Gx,
+                                          Hx, //   -  double Hx,
+                                          //
+                                          tau, iCurrTL, //   -  Index of current time layer.
+                                          //
+                                          indCurSqOx, //   -  Index of current square by Ox axis.
+                                          indCurSqOy, //   -  Index of current square by Oy axis.
+                                          //
+                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                          numOfOXSt, //   -  Number of OX steps.
+                                          //
+                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                          numOfOYSt, //   -  Number of OY steps.
+                                          //
+                                          rhoInPrevTL_asV);
 
         integ += buf_D;
     }
@@ -776,30 +777,30 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
 
 
         buf_D = integUnderRectAng_OneCell(
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,
-                //
-                Gx, //   -  double Gx,
-                Hx, //   -  double Hx,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                indCurSqOxToCh, //   -  Index of current square by Ox axis.
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                          par_a, //   -  Solution parameter.
+                                          //
+                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                          //
+                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                          //
+                                          bv[1], //   -  double Py,
+                                          uv[1], //   -  double Qy,
+                                          //
+                                          Gx, //   -  double Gx,
+                                          Hx, //   -  double Hx,
+                                          //
+                                          tau, iCurrTL, //   -  Index of current time layer.
+                                          //
+                                          indCurSqOxToCh, //   -  Index of current square by Ox axis.
+                                          indCurSqOy, //   -  Index of current square by Oy axis.
+                                          //
+                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                          numOfOXSt, //   -  Number of OX steps.
+                                          //
+                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                          numOfOYSt, //   -  Number of OY steps.
+                                          //
+                                          rhoInPrevTL_asV);
 
         integ += buf_D;
 
@@ -812,27 +813,27 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
 }
 
 double integUnderRigAngTr_BottLeft(
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *bv,
-        double *uv,
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                                   double par_a, //   -  Solution parameter.
+                                   //
+                                   double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                   double rbDom,
+                                   //
+                                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                   double ubDom,
+                                   //
+                                   double tau,
+                                   int iCurrTL, //   -  Index of current time layer.
+                                   //
+                                   double *bv,
+                                   double *uv,
+                                   //
+                                   const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                   int numOfOXSt, //   -  Number of OX steps.
+                                   //
+                                   const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                   int numOfOYSt, //   -  Number of OY steps.
+                                   //
+                                   double *rhoInPrevTL_asV) {
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
     double trPN[2]; //   -  Travel point next;
@@ -916,30 +917,30 @@ double integUnderRigAngTr_BottLeft(
         }
         //   d. Integration.
         buf_D = integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the left side.
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom,
-                //
-                bbDom, ubDom,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                trPC, wTrPCI, //   -  double *bv,
-                trPN, wTrPNI, //   -  double *uv,
-                //
-                indCurSqOx, //   -  Indices where trPC and trPN are.
-                //
-                bv[0], indRB, //   -  double rb  =  Right boundary by Ox.
-                //
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                     par_a, //   -  Solution parameter.
+                                     //
+                                     lbDom, rbDom,
+                                     //
+                                     bbDom, ubDom,
+                                     //
+                                     tau, iCurrTL, //   -  Index of current time layer.
+                                     //
+                                     trPC, wTrPCI, //   -  double *bv,
+                                     trPN, wTrPNI, //   -  double *uv,
+                                     //
+                                     indCurSqOx, //   -  Indices where trPC and trPN are.
+                                     //
+                                     bv[0], indRB, //   -  double rb  =  Right boundary by Ox.
+                                     //
+                                     indCurSqOy, //   -  Index of current square by Oy axis.
+                                     //
+                                     masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                     numOfOXSt, //   -  Number of OX steps.
+                                     //
+                                     masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                     numOfOYSt, //   -  Number of OY steps.
+                                     //
+                                     rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr + buf_D;
         //   e. Updating.
         if (isTrDone == false) {
@@ -973,27 +974,27 @@ double integUnderRigAngTr_BottLeft(
 }
 
 double integUnderRigAngTr_BottRight(
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *bv,
-        double *uv,
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                                    double par_a, //   -  Solution parameter.
+                                    //
+                                    double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                    double rbDom,
+                                    //
+                                    double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                    double ubDom,
+                                    //
+                                    double tau,
+                                    int iCurrTL, //   -  Index of current time layer.
+                                    //
+                                    double *bv,
+                                    double *uv,
+                                    //
+                                    const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                    int numOfOXSt, //   -  Number of OX steps.
+                                    //
+                                    const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                    int numOfOYSt, //   -  Number of OY steps.
+                                    //
+                                    double *rhoInPrevTL_asV) {
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
     double trPN[2]; //   -  Travel point next;
@@ -1076,30 +1077,30 @@ double integUnderRigAngTr_BottRight(
         }
         //   d. Integration.
         buf_D = integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on the Right side.
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom,
-                //
-                bbDom, ubDom,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                trPC, wTrPCI, //   -  double *bv,
-                trPN, wTrPNI, //   -  double *uv,
-                //
-                indCurSqOx, //   -  Indices where trPC and trPN are.
-                //
-                bv[0], indLB, //   -  double lb  =  Left boundary by Ox.
-                //
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                      par_a, //   -  Solution parameter.
+                                      //
+                                      lbDom, rbDom,
+                                      //
+                                      bbDom, ubDom,
+                                      //
+                                      tau, iCurrTL, //   -  Index of current time layer.
+                                      //
+                                      trPC, wTrPCI, //   -  double *bv,
+                                      trPN, wTrPNI, //   -  double *uv,
+                                      //
+                                      indCurSqOx, //   -  Indices where trPC and trPN are.
+                                      //
+                                      bv[0], indLB, //   -  double lb  =  Left boundary by Ox.
+                                      //
+                                      indCurSqOy, //   -  Index of current square by Oy axis.
+                                      //
+                                      masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                      numOfOXSt, //   -  Number of OX steps.
+                                      //
+                                      masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                      numOfOYSt, //   -  Number of OY steps.
+                                      //
+                                      rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr + buf_D;
         //   e. Updating.
         if (isTrDone == false) {
@@ -1133,30 +1134,30 @@ double integUnderRigAngTr_BottRight(
 }
 
 double integUnderBottTr(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *LvBt, //   -  Left, Right and Botton vertices of Botton triangle.
-        double *RvBt, //   -  Left, Right and Botton vertices of Botton triangle.
-        double *BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV,
-        int ii, int jj) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                        double par_b, //   -  Item of second parameter from "u_funcion".
+                        //
+                        double lbDom, //   -  Left and right boundaries of rectangular domain.
+                        double rbDom,
+                        //
+                        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                        double ubDom,
+                        //
+                        double tau,
+                        int iCurrTL, //   -  Index of current time layer.
+                        //
+                        double *LvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                        double *RvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                        double *BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                        //
+                        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                        int numOfOXSt, //   -  Number of OX steps.
+                        //
+                        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                        int numOfOYSt, //   -  Number of OY steps.
+                        //
+                        double *rhoInPrevTL_asV,
+                        int ii, int jj) // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 {
     double integOfBottTr;
     double buf_D;
@@ -1164,14 +1165,14 @@ double integUnderBottTr(
     //   1.
     if (BvBt[0] <= LvBt[0]) {
         buf_D = integUnderRigAngTr_BottRight(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                             par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                             //
+                                             BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = buf_D;
         buf_D = integUnderRigAngTr_BottRight(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                             par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                             //
+                                             BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr - buf_D;
 
         //      printf("Bv<Lv: i= %d, j= %d      res= %le",ii,jj,integOfBottTr);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1181,15 +1182,15 @@ double integUnderBottTr(
     //   2.
     if ((BvBt[0] > LvBt[0]) && (BvBt[0] < RvBt[0])) {
         buf_D = integUnderRigAngTr_BottLeft(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            //
+                                            BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = buf_D;
 
         buf_D = integUnderRigAngTr_BottRight(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                             par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                             //
+                                             BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr + buf_D;
 
         //      printf("Bv>Lv & Bv<Rv: i= %d, j= %d      res= %le",ii,jj,integOfBottTr);   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1199,14 +1200,14 @@ double integUnderBottTr(
     //   3.
     if (BvBt[0] >= RvBt[0]) {
         buf_D = integUnderRigAngTr_BottLeft(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            //
+                                            BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = buf_D;
         buf_D = integUnderRigAngTr_BottLeft(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            //
+                                            BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr - buf_D;
 
         //      printf("Bv>Rv: i= %d, j= %d      res= %le",ii,jj,integOfBottTr);     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1217,27 +1218,27 @@ double integUnderBottTr(
 }
 
 double integUnderRigAngTr_UppLeft(
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *bv,
-        double *uv,
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                                  double par_a, //   -  Solution parameter.
+                                  //
+                                  double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                  double rbDom,
+                                  //
+                                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                  double ubDom,
+                                  //
+                                  double tau,
+                                  int iCurrTL, //   -  Index of current time layer.
+                                  //
+                                  double *bv,
+                                  double *uv,
+                                  //
+                                  const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                  int numOfOXSt, //   -  Number of OX steps.
+                                  //
+                                  const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                  int numOfOYSt, //   -  Number of OY steps.
+                                  //
+                                  double *rhoInPrevTL_asV) {
     //   return ( fabs( (uv[1] - bv[1]) * (bv[0] - uv[0]) /2.) );
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
@@ -1322,30 +1323,30 @@ double integUnderRigAngTr_UppLeft(
         }
         //   d. Integration.
         buf_D = integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the left side.
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom,
-                //
-                bbDom, ubDom,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                trPC, wTrPCI, //   -  double *bv,
-                trPN, wTrPNI, //   -  double *uv,
-                //
-                indCurSqOx, //   -  Indices where trPC and trPN are.
-                //
-                uv[0], indRB, //   -  double rb  =  Right boundary by Ox.
-                //
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                     par_a, //   -  Solution parameter.
+                                     //
+                                     lbDom, rbDom,
+                                     //
+                                     bbDom, ubDom,
+                                     //
+                                     tau, iCurrTL, //   -  Index of current time layer.
+                                     //
+                                     trPC, wTrPCI, //   -  double *bv,
+                                     trPN, wTrPNI, //   -  double *uv,
+                                     //
+                                     indCurSqOx, //   -  Indices where trPC and trPN are.
+                                     //
+                                     uv[0], indRB, //   -  double rb  =  Right boundary by Ox.
+                                     //
+                                     indCurSqOy, //   -  Index of current square by Oy axis.
+                                     //
+                                     masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                     numOfOXSt, //   -  Number of OX steps.
+                                     //
+                                     masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                     numOfOYSt, //   -  Number of OY steps.
+                                     //
+                                     rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr + buf_D;
         //   e. Updating.
         if (isTrDone == false) {
@@ -1379,27 +1380,27 @@ double integUnderRigAngTr_UppLeft(
 }
 
 double integUnderRigAngTr_UppRight(
-        double par_a, //   -  Solution parameter.
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *bv,
-        double *uv,
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV) {
+                                   double par_a, //   -  Solution parameter.
+                                   //
+                                   double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                   double rbDom,
+                                   //
+                                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                   double ubDom,
+                                   //
+                                   double tau,
+                                   int iCurrTL, //   -  Index of current time layer.
+                                   //
+                                   double *bv,
+                                   double *uv,
+                                   //
+                                   const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                   int numOfOXSt, //   -  Number of OX steps.
+                                   //
+                                   const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                   int numOfOYSt, //   -  Number of OY steps.
+                                   //
+                                   double *rhoInPrevTL_asV) {
     //   return ( fabs( (uv[1] - bv[1]) * (bv[0] - uv[0]) /2.) );
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
@@ -1487,30 +1488,30 @@ double integUnderRigAngTr_UppRight(
         }
         //   d. Integration.
         buf_D = integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on the Right side.
-                par_a, //   -  Solution parameter.
-                //
-                lbDom, rbDom,
-                //
-                bbDom, ubDom,
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                trPC, wTrPCI, //   -  double *bv,
-                trPN, wTrPNI, //   -  double *uv,
-                //
-                indCurSqOx, //   -  Indices where trPC and trPN are.
-                //
-                uv[0], indLB, //   -  double lb  =  Left boundary by Ox.
-                //
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                      par_a, //   -  Solution parameter.
+                                      //
+                                      lbDom, rbDom,
+                                      //
+                                      bbDom, ubDom,
+                                      //
+                                      tau, iCurrTL, //   -  Index of current time layer.
+                                      //
+                                      trPC, wTrPCI, //   -  double *bv,
+                                      trPN, wTrPNI, //   -  double *uv,
+                                      //
+                                      indCurSqOx, //   -  Indices where trPC and trPN are.
+                                      //
+                                      uv[0], indLB, //   -  double lb  =  Left boundary by Ox.
+                                      //
+                                      indCurSqOy, //   -  Index of current square by Oy axis.
+                                      //
+                                      masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                      numOfOXSt, //   -  Number of OX steps.
+                                      //
+                                      masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                      numOfOYSt, //   -  Number of OY steps.
+                                      //
+                                      rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr + buf_D;
         //   e. Updating.
         if (isTrDone == false) {
@@ -1544,72 +1545,72 @@ double integUnderRigAngTr_UppRight(
 }
 
 double integUnderUpperTr(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *LvUt, //   -  Left, Right and Upper vertices of Upper triangle.
-        double *RvUt, //   -  Left, Right and Upper vertices of Upper triangle.
-        double *UvUt, //   -  Left, Right and Upper vertices of Upper triangle.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY step
-        //
-        double *rhoInPrevTL_asV) {
+                         double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                         double par_b, //   -  Item of second parameter from "u_funcion".
+                         //
+                         double lbDom, //   -  Left and right boundaries of rectangular domain.
+                         double rbDom,
+                         //
+                         double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                         double ubDom,
+                         //
+                         double tau,
+                         int iCurrTL, //   -  Index of current time layer.
+                         //
+                         double *LvUt, //   -  Left, Right and Upper vertices of Upper triangle.
+                         double *RvUt, //   -  Left, Right and Upper vertices of Upper triangle.
+                         double *UvUt, //   -  Left, Right and Upper vertices of Upper triangle.
+                         //
+                         const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                         int numOfOXSt, //   -  Number of OX steps.
+                         //
+                         const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                         int numOfOYSt, //   -  Number of OY step
+                         //
+                         double *rhoInPrevTL_asV) {
     double integOfUppTr;
     double buf_D;
     //   Three ways are possible.
     //   1.
     if (UvUt[0] <= LvUt[0]) {
         buf_D = integUnderRigAngTr_UppRight(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            //
+                                            RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = buf_D;
         buf_D = integUnderRigAngTr_UppRight(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            //
+                                            LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr - buf_D;
         return integOfUppTr;
     }
     //   2.
     if ((UvUt[0] > LvUt[0]) && (UvUt[0] < RvUt[0])) {
         buf_D = integUnderRigAngTr_UppLeft(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                           par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                           //
+                                           LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = buf_D;
 
         buf_D = integUnderRigAngTr_UppRight(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            //
+                                            RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr + buf_D;
         return integOfUppTr;
     }
     //   3.
     if (UvUt[0] >= RvUt[0]) {
         buf_D = integUnderRigAngTr_UppLeft(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                           par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                           //
+                                           LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = buf_D;
         buf_D = integUnderRigAngTr_UppLeft(
-                par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
-                //
-                RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
+                                           par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                           //
+                                           RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr - buf_D;
         return integOfUppTr;
     }
@@ -1617,30 +1618,30 @@ double integUnderUpperTr(
 }
 
 double integUnderUnunifTr(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        double *firVer, //   -  First vertex of triangle.
-        double *secVer, //   -  Second vertex of triangle.
-        double *thiVer, //   -  Third vertex of triangle.
-        //
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *rhoInPrevTL_asV,
-        int ii, int jj) //!!!!!!!!!!!!!!!!!!!
+                          double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                          double par_b, //   -  Item of second parameter from "u_funcion".
+                          //
+                          double lbDom, //   -  Left and right boundaries of rectangular domain.
+                          double rbDom,
+                          //
+                          double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                          double ubDom,
+                          //
+                          double tau,
+                          int iCurrTL, //   -  Index of current time layer.
+                          //
+                          double *firVer, //   -  First vertex of triangle.
+                          double *secVer, //   -  Second vertex of triangle.
+                          double *thiVer, //   -  Third vertex of triangle.
+                          //
+                          const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                          int numOfOXSt, //   -  Number of OX steps.
+                          //
+                          const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                          int numOfOYSt, //   -  Number of OY steps.
+                          //
+                          double *rhoInPrevTL_asV,
+                          int ii, int jj) //!!!!!!!!!!!!!!!!!!!
 {
     double bv[2], mv[2], uv[2]; //   -  Botton, middle and upper vertices of triangle.
     bool isFirVUsed = false;
@@ -1733,22 +1734,22 @@ double integUnderUnunifTr(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                par_a, par_b,
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                LvBt, RvBt, BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
-                //
-                masOX, numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV,
-                ii, jj); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                         par_a, par_b,
+                                         //
+                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                         //
+                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         //
+                                         tau, iCurrTL, //   -  Index of current time layer.
+                                         //
+                                         LvBt, RvBt, BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                                         //
+                                         masOX, numOfOXSt, //   -  Number of OX steps.
+                                         //
+                                         masOY, numOfOYSt, //   -  Number of OY steps.
+                                         //
+                                         rhoInPrevTL_asV,
+                                         ii, jj); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         integ = integOfBottTr;
 
         //      printf("m<a:   i= %d, j= %d : integ= %le \n",ii,jj, integ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1761,21 +1762,21 @@ double integUnderUnunifTr(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                par_a, par_b,
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                LvUt, RvUt, UvUt, //   -  Left, Right and Botton vertices of Upper triangle.
-                //
-                masOX, numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                         par_a, par_b,
+                                         //
+                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                         //
+                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         //
+                                         tau, iCurrTL, //   -  Index of current time layer.
+                                         //
+                                         LvUt, RvUt, UvUt, //   -  Left, Right and Botton vertices of Upper triangle.
+                                         //
+                                         masOX, numOfOXSt, //   -  Number of OX steps.
+                                         //
+                                         masOY, numOfOYSt, //   -  Number of OY steps.
+                                         //
+                                         rhoInPrevTL_asV);
         integ = integ + integOfUppTr;
         return integ;
     }
@@ -1788,22 +1789,22 @@ double integUnderUnunifTr(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                par_a, par_b,
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                LvBt, RvBt, BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
-                //
-                masOX, numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV,
-                ii, jj); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                         par_a, par_b,
+                                         //
+                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                         //
+                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         //
+                                         tau, iCurrTL, //   -  Index of current time layer.
+                                         //
+                                         LvBt, RvBt, BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                                         //
+                                         masOX, numOfOXSt, //   -  Number of OX steps.
+                                         //
+                                         masOY, numOfOYSt, //   -  Number of OY steps.
+                                         //
+                                         rhoInPrevTL_asV,
+                                         ii, jj); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         integ = integOfBottTr;
 
         //      printf("m>a:   i= %d, j= %d : integ= %le \n",ii,jj, integ);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1816,37 +1817,37 @@ double integUnderUnunifTr(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                par_a, par_b,
-                //
-                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                //
-                bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                //
-                tau, iCurrTL, //   -  Index of current time layer.
-                //
-                LvUt, RvUt, UvUt, //   -  Left, Right and Botton vertices of Upper triangle.
-                //
-                masOX, numOfOXSt, //   -  Number of OX steps.
-                //
-                masOY, numOfOYSt, //   -  Number of OY steps.
-                //
-                rhoInPrevTL_asV);
+                                         par_a, par_b,
+                                         //
+                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                         //
+                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         //
+                                         tau, iCurrTL, //   -  Index of current time layer.
+                                         //
+                                         LvUt, RvUt, UvUt, //   -  Left, Right and Botton vertices of Upper triangle.
+                                         //
+                                         masOX, numOfOXSt, //   -  Number of OX steps.
+                                         //
+                                         masOY, numOfOYSt, //   -  Number of OY steps.
+                                         //
+                                         rhoInPrevTL_asV);
         return integ + integOfUppTr;
     }
     return integ;
 }
 
 double bottonBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double x) {
+                   double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                   //
+                   double lbDom, //   -  Left and right boundaries of rectangular domain.
+                   double rbDom,
+                   //
+                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                   double ubDom,
+                   //
+                   double t,
+                   double x) {
     return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, bbDom);
 }
 
@@ -1855,36 +1856,36 @@ double u_function(double par_b, double t, double x, double y) {
 }
 
 double v_function(
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t, double x, double y) {
+                  double lbDom, //   -  Left and right boundaries of rectangular domain.
+                  double rbDom,
+                  //
+                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                  double ubDom,
+                  //
+                  double t, double x, double y) {
     return atan((x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom) * (y - bbDom));
 }
 
 double f_function(//   -  It's item of right part of differential equation.
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        int iCurrTL, //   -  Index of current time layer.
-        //
-        int iOfOXN, //   -  Index of current OX node.
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt
-        int numOfOXSt, //   -  Number of OX steps (segments).
-        //
-        int iOfOYN, //   -  Index of current OY node.
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt) //   -  Number of OY steps (segments).
+                  double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                  double par_b, //   -  Item of second parameter from "u_funcion".
+                  //
+                  double lbDom, //   -  Left and right boundaries of rectangular domain.
+                  double rbDom,
+                  //
+                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                  double ubDom,
+                  //
+                  double tau,
+                  int iCurrTL, //   -  Index of current time layer.
+                  //
+                  int iOfOXN, //   -  Index of current OX node.
+                  const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt
+                  int numOfOXSt, //   -  Number of OX steps (segments).
+                  //
+                  int iOfOYN, //   -  Index of current OY node.
+                  const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                  int numOfOYSt) //   -  Number of OY steps (segments).
 {
     //printf("\ncpu f function \n");
     double t = tau * iCurrTL;
@@ -1922,34 +1923,34 @@ double f_function(//   -  It's item of right part of differential equation.
 }
 
 int quadrAngleType(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
-        //
-        int iOfOXN, //   -  Index of current OX node.
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        int iOfOYN, //   -  Index of current OY node.
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        double *firVfirT, //   -  First vertex of first triangle.
-        double *secVfirT, //   -  Second vertex of first triangle.
-        double *thiVfirT, //   -  Third vertex of first triangle.
-        //
-        double *firVsecT, //   -  First vertex of second triangle.
-        double *secVsecT, //   -  Second vertex of second triangle.
-        double *thiVsecT) //   -  Third vertex of second triangle.
- {
+                   double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                   double par_b, //   -  Item of second parameter from "u_funcion".
+                   //
+                   double lbDom, //   -  Left and right boundaries of rectangular domain.
+                   double rbDom,
+                   //
+                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                   double ubDom,
+                   //
+                   double tau,
+                   double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
+                   //
+                   int iOfOXN, //   -  Index of current OX node.
+                   const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                   int numOfOXSt, //   -  Number of OX steps.
+                   //
+                   int iOfOYN, //   -  Index of current OY node.
+                   const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                   int numOfOYSt, //   -  Number of OY steps.
+                   //
+                   double *firVfirT, //   -  First vertex of first triangle.
+                   double *secVfirT, //   -  Second vertex of first triangle.
+                   double *thiVfirT, //   -  Third vertex of first triangle.
+                   //
+                   double *firVsecT, //   -  First vertex of second triangle.
+                   double *secVsecT, //   -  Second vertex of second triangle.
+                   double *thiVsecT) //   -  Third vertex of second triangle.
+{
     int qAngType = 0;
 
     double alpha[2], betta[2], gamma[2], theta[2]; //   -  Vertexes of square. Anticlockwise order from left botton vertex.
@@ -2354,13 +2355,13 @@ int quadrAngleType(
 }
 
 double normOfMatrAtL1_asV(
-        const double *masOX, //   -  Massive of OX grid nodes. Dimension = dimOX.
-        int dimOX,
-        //
-        const double *masOY, //   -  Massive of OY grid nodes. Dimension = dimOY.
-        int dimOY,
-        //
-        double *mat_asV) {
+                          const double *masOX, //   -  Massive of OX grid nodes. Dimension = dimOX.
+                          int dimOX,
+                          //
+                          const double *masOY, //   -  Massive of OY grid nodes. Dimension = dimOY.
+                          int dimOY,
+                          //
+                          double *mat_asV) {
     double norm = 0.;
     double hx = masOX[1] - masOX[0];
     double hy = masOY[1] - masOY[0];
@@ -2374,90 +2375,90 @@ double normOfMatrAtL1_asV(
 }
 
 double spaceVolumeInPrevTL(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau,
-        double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
-        //
-        int iOfOXN, //   -  Index of current OX node.
-        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        int iOfOYN, //   -  Index of current OY node.
-        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        double *rhoInPrevTL_asV) {
+                           double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                           double par_b, //   -  Item of second parameter from "u_funcion".
+                           //
+                           double lbDom, //   -  Left and right boundaries of rectangular domain.
+                           double rbDom,
+                           //
+                           double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                           double ubDom,
+                           //
+                           double tau,
+                           double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
+                           //
+                           int iOfOXN, //   -  Index of current OX node.
+                           const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                           int numOfOXSt, //   -  Number of OX steps.
+                           //
+                           int iOfOYN, //   -  Index of current OY node.
+                           const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                           int numOfOYSt, //   -  Number of OY steps.
+                           double *rhoInPrevTL_asV) {
     double firVfirT[2], secVfirT[2], thiVfirT[2]; //   -  First, second and third vertices of first triangle.
     double firVsecT[2], secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
     int qAngType; //   -  Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
     double buf_D;
     //   Let's understand what type of quadrangle we have.
     qAngType = quadrAngleType(
-            par_a, par_b, //   -  Analitycal solution parameters.
-            //
-            lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-            //
-            bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-            //
-            tau, iCurrTL, //   -  Time data. Necessary for velocity.
-            //
-            iOfOXN, masOX, numOfOXSt, //   -  OX data.
-            //
-            iOfOYN, masOY, numOfOYSt, //   -  OY data.
-            //
-            firVfirT, secVfirT, thiVfirT, //   -  Vertices of first triangle.
-            //
-            firVsecT, secVsecT, thiVsecT); //   -  Vertices of second triangle.
+                              par_a, par_b, //   -  Analitycal solution parameters.
+                              //
+                              lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                              //
+                              bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                              //
+                              tau, iCurrTL, //   -  Time data. Necessary for velocity.
+                              //
+                              iOfOXN, masOX, numOfOXSt, //   -  OX data.
+                              //
+                              iOfOYN, masOY, numOfOYSt, //   -  OY data.
+                              //
+                              firVfirT, secVfirT, thiVfirT, //   -  Vertices of first triangle.
+                              //
+                              firVsecT, secVsecT, thiVsecT); //   -  Vertices of second triangle.
 
     //  printf("i= %d, j=%d, 1: %le    2: %le    3: %le \n", iOfOXN, iOfOYN, firVfirT[1], secVfirT[1], thiVfirT[1]);
 
     if (qAngType != 1) return -1.;
 
     buf_D = integUnderUnunifTr(
-            par_a, par_b, //   -  Analitycal solution parameters.
-            //
-            lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-            //
-            bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-            //
-            tau, iCurrTL, //   -  Index of current time layer.
-            //
-            firVfirT, secVfirT, thiVfirT, //   -  Vertices of first triangle.
-            //
-            masOX, numOfOXSt, //   -  Number of OX steps.
-            //
-            masOY, numOfOYSt, //   -  Number of OY steps.
-            rhoInPrevTL_asV,
-            iOfOXN, iOfOYN);
+                               par_a, par_b, //   -  Analitycal solution parameters.
+                               //
+                               lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                               //
+                               bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                               //
+                               tau, iCurrTL, //   -  Index of current time layer.
+                               //
+                               firVfirT, secVfirT, thiVfirT, //   -  Vertices of first triangle.
+                               //
+                               masOX, numOfOXSt, //   -  Number of OX steps.
+                               //
+                               masOY, numOfOYSt, //   -  Number of OY steps.
+                               rhoInPrevTL_asV,
+                               iOfOXN, iOfOYN);
 
     //  printf("i= %d, j=%d, sq: %le \n", iOfOXN, iOfOYN, buf_D);
 
     //  printf("********************************************************************* \n");
 
     return buf_D + integUnderUnunifTr(
-            par_a, par_b, //   -  Analitycal solution parameters.
-            //
-            lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-            //
-            bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-            //
-            tau, iCurrTL, //   -  Index of current time layer.
-            //
-            firVsecT, secVsecT, thiVsecT, //   -  Vertices of first triangle.
-            //
-            masOX, numOfOXSt, //   -  Number of OX steps.
-            //
-            masOY, numOfOYSt, //   -  Number of OY steps.
-            //
-            rhoInPrevTL_asV,
-            iOfOXN, iOfOYN);
+                                      par_a, par_b, //   -  Analitycal solution parameters.
+                                      //
+                                      lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                      //
+                                      bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                      //
+                                      tau, iCurrTL, //   -  Index of current time layer.
+                                      //
+                                      firVsecT, secVsecT, thiVsecT, //   -  Vertices of first triangle.
+                                      //
+                                      masOX, numOfOXSt, //   -  Number of OX steps.
+                                      //
+                                      masOY, numOfOYSt, //   -  Number of OY steps.
+                                      //
+                                      rhoInPrevTL_asV,
+                                      iOfOXN, iOfOYN);
 }
 
 void print_matrix_to_file(int n, int m, double *data, std::string filename) {
@@ -2494,28 +2495,28 @@ void compute_diff_write_to_file(double *result, int tl, int n, int m, double tau
     delete[] diff;
 }
 
-double solByEqualVolumes(
-        double par_a, //   -  Item of first initial or boundary data parameter.
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau, //   -  Time step.
-        int numOfTSt, //   -  A number of time steps.
-        //
-        double *masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        double *masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        int numOfSolOrd, //   -  For print only. Solution order which we want to get.
-        //
-        double *rhoInCurrTL_asV) //   -  Rho (solution) in Current Time Layer which we will compute.
+double solve(
+             double par_a, //   -  Item of first initial or boundary data parameter.
+             double par_b, //   -  Item of second parameter from "u_funcion".
+             //
+             double lbDom, //   -  Left and right boundaries of rectangular domain.
+             double rbDom,
+             //
+             double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
+             double ubDom,
+             //
+             double tau, //   -  Time step.
+             int numOfTSt, //   -  A number of time steps.
+             //
+             double *masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
+             int numOfOXSt, //   -  Number of OX steps.
+             //
+             double *masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
+             int numOfOYSt, //   -  Number of OY steps.
+             //
+             int numOfSolOrd, //   -  For print only. Solution order which we want to get.
+             //
+             double *rhoInCurrTL_asV) //   -  Rho (solution) in Current Time Layer which we will compute.
 {
     double *rhoInPrevTL_asV; //   -  Rho (solution) in Previous Time Layer which we have computed.
     double spVolInPrevTL; //   -  Space volume of rho in previous time layer.
@@ -2542,8 +2543,8 @@ double solByEqualVolumes(
         cout << "SchOrd = " << numOfSolOrd << ", Nx = " << numOfOXSt;
         cout << ", count of time levels " << numOfTSt;
     }
-      //  numOfTSt = 1;
-   // printf("[cpu] time count = %d\n", numOfTSt);
+    //  numOfTSt = 1;
+    // printf("[cpu] time count = %d\n", numOfTSt);
     for (iCurrTL = 1; iCurrTL < numOfTSt + 1; iCurrTL++) {
         if (canPrint) {
             cout << "\r \t \t \t \t \t \t \t \t \r";
@@ -2564,7 +2565,7 @@ double solByEqualVolumes(
             rhoInCurrTL_asV[ (numOfOXSt + 1) * iOfOYN ] = leftBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOY[ iOfOYN ]);
             rhoInCurrTL_asV[ (numOfOXSt + 1) * iOfOYN + numOfOXSt ] = rightBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOY[ iOfOYN ]);
         }
-        
+
         //   Enumeration from first unknown element to last one.
         for (iOfOYN = 1; iOfOYN < numOfOYSt; iOfOYN++) {
             for (iOfOXN = 1; iOfOXN < numOfOXSt; iOfOXN++) {
@@ -2572,67 +2573,67 @@ double solByEqualVolumes(
                 int opt = (numOfOXSt + 1) * iOfOYN + iOfOXN;
 
                 spVolInPrevTL = spaceVolumeInPrevTL(
-                        par_a, par_b, //   -  Items of parameters.
-                        //
-                        lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                        //
-                        bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                        //
-                        tau, iCurrTL, //   -  Time data. Necessary for velocity.
-                        //
-                        iOfOXN, masOX, numOfOXSt, //   -  OX data.
-                        //
-                        iOfOYN, masOY, numOfOYSt, //   -  OY data.
-                        rhoInPrevTL_asV);
-                
-//                if (opt == 12)
-//                {
-//                    printf("a = %f\n", par_a);
-//                    printf("b = %f\n", par_b);
-//                    printf("lbDom = %f\n", lbDom);
-//                    printf("rbDom = %f\n", rbDom);
-//                    printf("bbDom = %f\n", bbDom);
-//                    printf("ubDom = %f\n", ubDom);
-//                    printf("tau = %f\n", tau);
-//                    printf("iCurTl = %d\n", iCurrTL);
-//                     printf("iOfOXN = %d\n", iOfOXN);
-//                      printf("iOfOYN = %d\n", iOfOYN);
-//                       printf("numOfOXSt = %d\n", numOfOXSt);
-//                       printf("numOfOYSt = %d\n", numOfOYSt);
-//                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
-//                }
+                                                    par_a, par_b, //   -  Items of parameters.
+                                                    //
+                                                    lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                                    //
+                                                    bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
+                                                    //
+                                                    tau, iCurrTL, //   -  Time data. Necessary for velocity.
+                                                    //
+                                                    iOfOXN, masOX, numOfOXSt, //   -  OX data.
+                                                    //
+                                                    iOfOYN, masOY, numOfOYSt, //   -  OY data.
+                                                    rhoInPrevTL_asV);
+
+                //                if (opt == 12)
+                //                {
+                //                    printf("a = %f\n", par_a);
+                //                    printf("b = %f\n", par_b);
+                //                    printf("lbDom = %f\n", lbDom);
+                //                    printf("rbDom = %f\n", rbDom);
+                //                    printf("bbDom = %f\n", bbDom);
+                //                    printf("ubDom = %f\n", ubDom);
+                //                    printf("tau = %f\n", tau);
+                //                    printf("iCurTl = %d\n", iCurrTL);
+                //                     printf("iOfOXN = %d\n", iOfOXN);
+                //                      printf("iOfOYN = %d\n", iOfOYN);
+                //                       printf("numOfOXSt = %d\n", numOfOXSt);
+                //                       printf("numOfOYSt = %d\n", numOfOYSt);
+                //                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
+                //                }
 
                 buf_D = (masOX[iOfOXN + 1] - masOX[iOfOXN - 1]) / 2.;
                 spVolInPrevTL = spVolInPrevTL / buf_D;
                 buf_D = (masOY[iOfOYN + 1] - masOY[iOfOYN - 1]) / 2.;
                 spVolInPrevTL = spVolInPrevTL / buf_D;
-                
-//                if (opt == 12)
-//                {
-//                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
-//                }
+
+                //                if (opt == 12)
+                //                {
+                //                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
+                //                }
 
                 RPInCurrTL = f_function(par_a, par_b, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL, iOfOXN,
-                        masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                        numOfOXSt, //   -  Number of OX steps.
-                        //
-                        iOfOYN, //   -  Index of current OY node.
-                        masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                        numOfOYSt); //   -  Number of OY steps.
-//                if (opt == 12)
-//                {
-//                    printf("RPInCurrTL = %f\n", RPInCurrTL);
-//                    printf("tau * RPInCurrTL = %f\n", tau * RPInCurrTL);
-//                }
-//                 
-                
+                                        masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                        numOfOXSt, //   -  Number of OX steps.
+                                        //
+                                        iOfOYN, //   -  Index of current OY node.
+                                        masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                        numOfOYSt); //   -  Number of OY steps.
+                //                if (opt == 12)
+                //                {
+                //                    printf("RPInCurrTL = %f\n", RPInCurrTL);
+                //                    printf("tau * RPInCurrTL = %f\n", tau * RPInCurrTL);
+                //                }
+                //                 
+
                 rhoInCurrTL_asV[ opt ] = spVolInPrevTL;
                 rhoInCurrTL_asV[ opt ] += tau * RPInCurrTL;
-//                if (opt == 12)
-//                {
-//                    printf("rhoInCurrTL_asV[ opt ]  = %f\n", rhoInCurrTL_asV[ opt ]);
-//                    
-//                }
+                //                if (opt == 12)
+                //                {
+                //                    printf("rhoInCurrTL_asV[ opt ]  = %f\n", rhoInCurrTL_asV[ opt ]);
+                //                    
+                //                }
 
             }
         }
@@ -2647,77 +2648,52 @@ double solByEqualVolumes(
 }
 
 double *solve_cpu_test(
-        double par_a,
-        double par_b,
-        //
-        double lbDom,
-        double rbDom,
-        //
-        double bbDom,
-        double ubDom,
-        //
-        double tau,
-        int numOfTSt,
-        int numOfOXSt,
-        int numOfOYSt,
-        int gridStep, bool isComputeDiff) {
-    
-    int varNumOfTSt = numOfTSt;
-    double *varMasOX = NULL;
-    int varNumOfOXSt = numOfOXSt;
-    double *varMasOY = NULL;
-    int varNumOfOYSt = numOfOYSt;
-    double *rhoInCurrTL_asV = NULL;
+                       double a,
+                       double b,
+                       double lb,
+                       double rb,
+                       double bb,
+                       double ub,
+                       double time_step,
+                       int time_step_count,
+                       int ox_length,
+                       int oy_length,
+                       const int step, const bool is_compute_diff) {
+    int power = pow(2., step);
+    time_step /= power;
+    time_step_count *= power;
+    ox_length *= power;
+    oy_length *= power;
+    double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
+    double *ox = new double [ ox_length + 1 ];
+    double *oy = new double [ oy_length + 1 ];
 
-    double tmp;
-    int j, k;
-
-    //   New time step.
-    tau = tau / pow(2., gridStep);
-    varNumOfTSt = numOfTSt * pow(2., gridStep);
-    //   New absciss grid steps.
-    varNumOfOXSt = numOfOXSt * pow(2., gridStep);
-    //   New absciss grid.
-    varMasOX = new double [ varNumOfOXSt + 1 ];
-    tmp = (rbDom - lbDom) / varNumOfOXSt;
-    for (j = 0; j < varNumOfOXSt + 1; j++) {
-        varMasOX[j] = lbDom + ((double) j) * tmp;
+    for (int i = 0; i < ox_length + 1; i++) {
+        ox[i] = lb + i * (rb - lb) / ox_length;
     }
-    //   New ordinate grid steps.
-    varNumOfOYSt = numOfOYSt * pow(2., gridStep);
-    //   New absciss grid.
-    varMasOY = new double [ varNumOfOYSt + 1 ];
-    tmp = (ubDom - bbDom) / varNumOfOYSt;
-    for (k = 0; k < varNumOfOYSt + 1; k++) {
-        varMasOY[k] = bbDom + ((double) k) * tmp;
+
+    for (int i = 0; i < oy_length + 1; i++) {
+        oy[i] = bb + i * (ub - bb) / oy_length;
     }
-    rhoInCurrTL_asV = new double [ (varNumOfOXSt + 1) * (varNumOfOYSt + 1) ];
 
-    //   Computation of solution.
-    solByEqualVolumes(
-            par_a, par_b,
-            //
-            lbDom, rbDom,
-            //
-            bbDom, ubDom,
-            //
-            tau, //   -  Time step.
-            varNumOfTSt, //   -  A number of time steps.
-            //
-            varMasOX, //   -  Massive of abscissa grid points. Dimension = varNumOfOxGrSt +1.
-            varNumOfOXSt, //   -  Variable number of abscissa grid steps.
-            //
-            varMasOY, //   -  Massive of ordinate grid points. Dimension = varNumOfOyGrSt +1.
-            varNumOfOYSt, //   -  Variable number of ordinate grid steps.
-            //
-            1, //   -  For print only. Solution order which we want to get.
-            //
-            rhoInCurrTL_asV); //   -  Rho (solution) in Current (Last) Time Level.
+    solve(
+          a, b,
+          lb, rb,
+          bb, ub,
+          time_step,
+          time_step_count,
+          ox,
+          ox_length,
+          oy,
+          oy_length,
+          1,
+          density);
 
-    if (isComputeDiff)
-        compute_diff_write_to_file(rhoInCurrTL_asV, varNumOfTSt, varNumOfOXSt, varNumOfOYSt, tau);
+    if (is_compute_diff) {
+        compute_diff_write_to_file(density, time_step_count, ox_length, oy_length, time_step);
+    }
 
-    delete[] varMasOX;
-    delete[] varMasOY;
-    return rhoInCurrTL_asV;
+    delete[] ox;
+    delete[] oy;
+    return density;
 }
