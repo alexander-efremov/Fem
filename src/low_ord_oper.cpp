@@ -3,15 +3,13 @@
 double itemOfInteg_1SpecType(
                              double Py,
                              double Qy,
-                             //
                              double Gx,
                              double Hx,
-                             //
                              double a,
                              double b)
 {
     double integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
-    integ = integ * ((Qy - b) * (Qy - b) - (Py - b) * (Py - b));
+    integ *= (Qy - b) * (Qy - b) - (Py - b) * (Py - b);
     return integ / 4.;
 }
 
@@ -206,16 +204,7 @@ double integUnderRightTr_OneCell(double Py,
                                           rhoInPrevTL_asV);
 }
 
-double integUnderRectAng_OneCell(
-                                 double par_a, //   -  Solution parameter.
-                                 //
-                                 double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                 double rbDom,
-                                 //
-                                 double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                                 double ubDom,
-                                 //
-                                 double Py,
+double integUnderRectAng_OneCell(double Py,
                                  double Qy,
                                  //
                                  double Gx,
@@ -404,12 +393,6 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
         }
 
         buf_D = integUnderRectAng_OneCell(
-                                          par_a, //   -  Solution parameter.
-                                          //
-                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                          //
-                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                                          //
                                           bv[1], //   -  double Py,
                                           uv[1], //   -  double Qy,
                                           //
@@ -458,14 +441,7 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
             }
         }
 
-        buf_D = integUnderRectAng_OneCell(
-                                          par_a, //   -  Solution parameter.
-                                          //
-                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                          //
-                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                                          //
-                                          bv[1], //   -  double Py,
+        buf_D = integUnderRectAng_OneCell(bv[1], //   -  double Py,
                                           uv[1], //   -  double Qy,
                                           //
                                           Gx, //   -  double Gx,
@@ -686,14 +662,7 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
             }
         }
 
-        buf_D = integUnderRectAng_OneCell(
-                                          par_a, //   -  Solution parameter.
-                                          //
-                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                          //
-                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                                          //
-                                          bv[1], //   -  double Py,
+        buf_D = integUnderRectAng_OneCell(bv[1], //   -  double Py,
                                           uv[1], //   -  double Qy,
                                           //
                                           mv[0], //   -  double Gx,
@@ -745,14 +714,7 @@ double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the
         }
 
 
-        buf_D = integUnderRectAng_OneCell(
-                                          par_a, //   -  Solution parameter.
-                                          //
-                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                          //
-                                          bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                                          //
-                                          bv[1], //   -  double Py,
+        buf_D = integUnderRectAng_OneCell(bv[1], //   -  double Py,
                                           uv[1], //   -  double Qy,
                                           //
                                           Gx, //   -  double Gx,
