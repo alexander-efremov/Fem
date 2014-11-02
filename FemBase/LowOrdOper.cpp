@@ -578,12 +578,7 @@ bool solByEqualVolWithVarStepPlusPrint(
         {
             for (j = 0; j < varNumOfOXSt + 1; j++)
             {
-                //   Analytical solution in the corresponding time layer.
-
                 anSol = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, buf_D, varMasOX[j], varMasOY[k]);
-
-                //   rhoInCurrTL[j][k]  =  anSol  -  rhoInCurrTL[j][k];
-
                 rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ] = anSol - rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ];
             }
         }

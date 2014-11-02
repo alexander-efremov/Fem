@@ -12,18 +12,13 @@ double itemOfInteg_1SpecType(
 {
     double integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
     integ *= (Qy - b) * (Qy - b) - (Py - b) * (Py - b);
-    return integ / 4.;
+    return integ / 4;
 }
 
 double analytical_solution(
                            double t, double x, double y)
 {
     return 1.1 + sin(t * x * y);
-}
-
-double init_solution(double ox_value, double oy_value)
-{
-    return analytical_solution(0., ox_value, oy_value);
 }
 
 double itemOfInteg_2SpecType(
@@ -40,10 +35,10 @@ double itemOfInteg_2SpecType(
     //   Computing...
     tmp = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
     tmp = tmp - (Py - alpha) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
-    integ = tmp / (3. * a);
+    integ = tmp / (3 * a);
     tmp = (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
     tmp = tmp - (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
-    return integ - tmp / (12. * a * a);
+    return integ - tmp / (12 * a * a);
 }
 
 double integUnderLeftTr_OneCell(
@@ -2572,7 +2567,7 @@ double solve(
     {
         for (int i_ox = 0; i_ox < ox_length + 1; i_ox++)
         {
-            prev_density[ (ox_length + 1) * i_oy + i_ox ] = init_solution(ox[i_ox], oy[i_oy]);
+            prev_density[ (ox_length + 1) * i_oy + i_ox ] = analytical_solution(0., ox[i_ox], oy[i_oy]);
         }
     }
 
@@ -2642,9 +2637,7 @@ double solve(
                 density[ index ] = value + tau * rp;
             }
         }
-
         memcpy(prev_density, density, (ox_length + 1) * (oy_length + 1) * sizeof (double));
-
     }
 
     delete[] prev_density;

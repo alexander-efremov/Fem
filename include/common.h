@@ -22,9 +22,8 @@ public:
     ComputeParameters() {
         const int x_length_default = 10;
         const int y_length_default = 10;
-        t_count = 0;
-        tau = 0.02;
         t_count = 50;
+        tau = 0.02;
         a = 2.;
         b = 1.;
         lb = bb = 0.;
@@ -48,18 +47,12 @@ public:
         return y_size + 1;
     }
 
-    // получает размер внутренней матрицы
-    int get_inner_matrix_size() {
-        return (x_length() - 2) * (y_length() - 2);
-    }
-
-    int get_real_matrix_size() {
-        return x_length() * y_length();
-    }
-
-    // получает размер внутренней матрицы
-    int get_inner_x_size() {
-        return x_length() - 2;
+    void recompute_params(int step) {
+        int power = pow(2., step);
+        tau /= power;
+        t_count *= power;
+        x_size *= power;
+        y_size *= power;
     }
 };
 
