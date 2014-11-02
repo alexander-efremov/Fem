@@ -2625,12 +2625,20 @@ double solve(
                              i_oy,
                              value);*/
 
-                double tmp = (ox[i_ox + 1] - ox[i_ox - 1]) / 2.;
-                value /= tmp;
-                tmp = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
-                value /= tmp;
+                double h = (ox[i_ox + 1] - ox[i_ox - 1]) / 2.;
+                value /= h;
+                h = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
+                value /= h;
 
-                double rp = f_function(a, b, lb, rb, bb, ub, tau, i_tl, i_ox,
+                double rp = f_function(a, 
+                                       b, 
+                                       lb, 
+                                       rb, 
+                                       bb, 
+                                       ub, 
+                                       tau, 
+                                       i_tl, 
+                                       i_ox,
                                        ox,
                                        ox_length,
                                        i_oy,
