@@ -13,7 +13,7 @@ void print_matrix_to_file(int n, int m, double *data, std::string filename) {
     fclose(f);
 }
 
-void print_matrix(int n, int m, double *a, int precision = 8) {
+void print_matrix(double *a, int n, int m, int precision = 8) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
             int k = i * n + j;

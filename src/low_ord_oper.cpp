@@ -1,5 +1,7 @@
 #include "common.h"
 
+static const double C_pi = 3.14159265358979323846264338327;
+
 double itemOfInteg_1SpecType(
                              double Py,
                              double Qy,
@@ -2520,6 +2522,31 @@ double compute_value(
                                       iOfOXN, iOfOYN);
 }
 
+void print_params(
+                  double a,
+                  double b,
+                  double lb,
+                  double rb,
+                  double bb,
+                  double ub,
+                  double tau,
+                  int tl_count,
+                  int ox_length,
+                  int oy_length
+                  )
+{
+    printf("a = %f\n", a);
+    printf("b = %f\n", b);
+    printf("lbDom = %f\n", lb);
+    printf("rbDom = %f\n", rb);
+    printf("bbDom = %f\n", bb);
+    printf("ubDom = %f\n", ub);
+    printf("tau = %f\n", tau);
+    printf("Time level count = %d\n", tl_count);
+    printf("ox length = %d\n", ox_length);
+    printf("oy length = %d\n", oy_length);
+}
+
 void print_params(int index, int needed_index,
                   double a,
                   double b,
@@ -2651,18 +2678,17 @@ double solve(
     return 0;
 }
 
-double *cpu_solve(
-                       double a,
-                       double b,
-                       double lb,
-                       double rb,
-                       double bb,
-                       double ub,
-                       double time_step,
-                       int time_step_count,
-                       int ox_length,
-                       int oy_length,
-                       const int step)
+double *cpu_solve(double a,
+                  double b,
+                  double lb,
+                  double rb,
+                  double bb,
+                  double ub,
+                  double time_step,
+                  int time_step_count,
+                  int ox_length,
+                  int oy_length,
+                  const int step)
 {
     int power = pow(2., step);
     time_step /= power;
@@ -2683,8 +2709,19 @@ double *cpu_solve(
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
 
-    solve(
-          a, b,
+    print_params(a,
+                 b,
+                 lb,
+                 rb,
+                 bb,
+                 ub,
+                 time_step,
+                 time_step_count,
+                 ox_length,
+                 oy_length
+                 );
+
+    solve(a, b,
           lb, rb,
           bb, ub,
           time_step,
