@@ -231,10 +231,6 @@ void print_vector(const int, const double*);
 
 const std::string currentDateTime();
 
-void print_matrix(const int, const int, const double*);
-
-void print_matrix(const int, const int, const int*);
-
 void write_csv(double, double, double, const int, const int, const double, const std::string&, const std::string&);
 
 void write_info(double, double, double, const int, const int, double);
@@ -263,8 +259,6 @@ extern double h_bottomBound(ComputeParameters& p);
 extern double h_bottomBound(ComputeParameters* p);
 
 extern double d_initDataOfSol(ComputeParameters* p, int i, int j);
-
-extern float solve_cuda_params(ComputeParameters p);
 
 extern double d_solByEqualVolumes(ComputeParameters p);
 
@@ -327,29 +321,6 @@ extern double integUnderUnunifTr(
         int ii, int jj); //!!!!!!!!!!!!!!!!!!!
 
 
-extern double solByEqualVolumes(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau, //   -  Time step.
-        int numOfTSt, //   -  A number of time steps.
-        //
-        double *masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        double *masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        int numOfSolOrd, //   -  For print only. Solution order which we want to get.
-        //
-        double *rhoInCurrTL_asV); //   -  Rho (solution) in Last Time Level which we will compute.
-
 extern double *solve_cpu_test(
                        double a,
                        double b,
@@ -361,7 +332,7 @@ extern double *solve_cpu_test(
                        int time_step_count,
                        int ox_length,
                        int oy_length,
-                       const int step, const bool is_compute_diff);
+                       const int step);
 
 extern double spaceVolumeInPrevTL(
         double par_a, //   -  Item of left and right setback (parameter "a" in test).
@@ -406,54 +377,6 @@ extern double f_function(//   -  It's item of right part of differential equatio
         int iOfOYN, //   -  Index of current OY node.
         const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
         int numOfOYSt); //   -  Number of OY steps (segments).
-
-extern double rightBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double y);
-
-extern double bottonBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double x);
-
-extern double upperBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double x);
-
-extern double leftBound(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double t,
-        double y);
 
 extern double integUnderUnunifTr(
         double par_a, //   -  Item of left and right setback (parameter "a" in test).
@@ -547,32 +470,6 @@ double itemOfInteg_2SpecType_optimized(
 
 extern double analytical_solution(
         double t, double x, double y);
-extern float solve_at_gpu(ComputeParameters* p, bool tl1, bool compute_diff = false);
-
-
-extern void cuda_solve(
-        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  bottom and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau, //   -  Time step.
-        int numOfTSt, //   -  A number of time steps.
-        //
-        double * masOX, //   -  Massive of OX nodes. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        double * masOY, //   -  Massive of OY nodes. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        bool isTimeStShBeChan, //   -  Is time step should be change?
-        bool isGridStShBeChan, //   -  Is grid step should be change?
-        //
-        int numOfGrStepLayer); //   -  How many computations with different grid steps we want to make.
 
 extern double initDataOfSol(
         double par_a, //   -  Item of left and right setback (parameter "a" in test).

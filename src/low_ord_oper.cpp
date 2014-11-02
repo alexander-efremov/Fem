@@ -1,10 +1,3 @@
-#include <iostream>
-#include <math.h>
-#include <sstream>
-#include <fstream>
-#include <iomanip>
-#include <stdlib.h>
-#include "utils.h"
 #include "common.h"
 
 double itemOfInteg_1SpecType(
@@ -2567,28 +2560,7 @@ double compute_value(
                                       iOfOXN, iOfOYN);
 }
 
-void compute_diff_write_to_file(double *result, int tl, int n, int m, double tau)
-{
-    double c_h = 1. / n;
-    double *diff = new double[(n + 1) * (m + 1)]();
 
-    std::ostringstream oss;
-    oss << "diff_cpu_" << tl << ".bin";
-
-    std::string name(oss.str());
-
-    for (int j = 0; j <= m; j++)
-    {
-        for (int i = 0; i <= n; i++)
-        {
-            int opt = (n + 1) * j + i;
-            double f = analytical_solution(tl*tau, i*c_h, j * c_h);
-            diff [opt] = fabs(result[opt] - f);
-        }
-    }
-    print_matrix_to_file(n + 1, m + 1, diff, name);
-    delete[] diff;
-}
 
 void print_params(int index, int needed_index,
                   double a,
@@ -2732,7 +2704,7 @@ double *solve_cpu_test(
                        int time_step_count,
                        int ox_length,
                        int oy_length,
-                       const int step, const bool is_compute_diff)
+                       const int step)
 {
     int power = pow(2., step);
     time_step /= power;
@@ -2764,11 +2736,6 @@ double *solve_cpu_test(
           oy,
           oy_length,
           density);
-
-    if (is_compute_diff)
-    {
-        compute_diff_write_to_file(density, time_step_count, ox_length, oy_length, time_step);
-    }
 
     delete[] ox;
     delete[] oy;
