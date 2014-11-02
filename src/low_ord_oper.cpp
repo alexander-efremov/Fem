@@ -2651,7 +2651,7 @@ double solve(
     return 0;
 }
 
-double *solve_cpu_test(
+double *cpu_solve(
                        double a,
                        double b,
                        double lb,

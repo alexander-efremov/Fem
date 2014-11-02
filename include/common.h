@@ -98,7 +98,7 @@ public:
 };
 
 
-extern double *solve_cpu_test(
+extern double *cpu_solve(
         double a,
         double b,
         double lb,

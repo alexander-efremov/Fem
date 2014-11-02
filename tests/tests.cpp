@@ -8,9 +8,9 @@ class cpu : public testing::Test
 {
 protected:
 
-    double *GetCpuToLevel(ComputeParameters *p)
+    double *solve(ComputeParameters *p)
     {
-        return solve_cpu_test(p->a, p->b, p->lb, p->rb, p->bb,
+        return cpu_solve(p->a, p->b, p->lb, p->rb, p->bb,
                               p->ub, p->tau, p->t_count, p->x_size,
                               p->y_size, p->level);
     }
@@ -25,9 +25,8 @@ TEST_F(cpu, main_test)
     {
         ComputeParameters *p = new ComputeParameters(level);
         std::cout << *p << std::endl;
-        double *data = GetCpuToLevel(p);
+        double *data = solve(p);
         print_matrix(p->get_real_x_size(), p->get_real_y_size(), data);
-
         delete p;
         delete[] data;
     }
