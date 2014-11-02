@@ -20,17 +20,16 @@ static int C_numOfTSt; //   -  A number of time steps.
 
 inline void initCompOfGlVar() {
     double maxOfGrSt = 0.;
-    int j;
 
     //   Massive of OX steps. Dimension = C_numOfOXSt +1.
     masOX = new double[ C_numOfOXSt + 1];
-    for (j = 0; j < C_numOfOXSt + 1; j++) {
+    for (int j = 0; j < C_numOfOXSt + 1; j++) {
         //   Regular grid for simplification.
         masOX[j] = C_lbDom + (C_rbDom - C_lbDom) * ((double) j / C_numOfOXSt);
     }
 
     //   Let's find out maximum of OX step.
-    for (j = 0; j < C_numOfOXSt; j++) {
+    for (int j = 0; j < C_numOfOXSt; j++) {
         if (maxOfGrSt < (masOX[j + 1] - masOX[j])) {
             maxOfGrSt = (masOX[j + 1] - masOX[j]);
         }
@@ -38,13 +37,13 @@ inline void initCompOfGlVar() {
 
     //   Massive of OY steps. Dimension = C_numOfOYSt +1.
     masOY = new double[ C_numOfOYSt + 1];
-    for (j = 0; j < C_numOfOYSt + 1; j++) {
+    for (int j = 0; j < C_numOfOYSt + 1; j++) {
         //   Regular grid for simplification.
         masOY[j] = C_bbDom + (C_ubDom - C_bbDom) * ((double) j / C_numOfOYSt);
     }
 
     //   Let's find out maximum of OY step.
-    for (j = 0; j < C_numOfOYSt; j++) {
+    for (int j = 0; j < C_numOfOYSt; j++) {
         if (maxOfGrSt < (masOY[j + 1] - masOY[j])) {
             maxOfGrSt = (masOY[j + 1] - masOY[j]);
         }
@@ -56,25 +55,12 @@ inline void initCompOfGlVar() {
 
 
     if (fabs(C_numOfTSt * C_tau - C_timeEnd) < (C_tau * 1.e-7)) {
-        //   O.K. This error is error of computer arithmetic.
-
         return;
     }
 
     if (fabs(C_numOfTSt * C_tau - C_timeEnd) >= (C_tau * 1.e-7)) {
-        //   We need to change number of time steps and time step.
-
-        //cout<<"\nA number of time steps and time step itself have changed."<< flush;
-
         C_numOfTSt++;
-
         C_tau = C_timeEnd / C_numOfTSt;
-
-        //cout<<"\nNow time step = "<< C_tau << " and a number of such time steps = " << C_numOfTSt << flush;
-
-        //cout<<"\nSo finish time is "<< C_tau*C_numOfTSt <<flush;
-
-        return;
     }
 }
 
