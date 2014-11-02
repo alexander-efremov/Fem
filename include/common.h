@@ -19,6 +19,7 @@ private:
     int time_i;
     bool _initresult;
 public:
+    int level;
     double a;
     double b;
     double lb;
@@ -38,9 +39,10 @@ public:
     double *diff;
     bool _initdiff;
 
-    ComputeParameters(int level, bool initresult, bool initdiff = false) : currentTimeLevel(1), t_count(0) {
-        double tau = 0.02;
-        int time_step_count = 50;
+    ComputeParameters(int level_input, bool initresult, bool initdiff = false) : currentTimeLevel(1), t_count(0), level(0) {
+        tau = 0.02;
+        t_count = 50;
+        level = level_input;
         
         _initresult = initresult;
         _initdiff = initdiff;
@@ -55,7 +57,7 @@ public:
         double value = pow(2., level);
         int n = C_numOfOXSt * value;
         tau /= value;
-        t_count = time_step_count * value;
+        t_count *= value;
 
         x_size = n;
 
@@ -122,6 +124,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &output,
             const ComputeParameters &tr) {
+        output << "level = " << tr.level << std::endl;
         output << "a = " << tr.a << std::endl;
         output << "b = " << tr.b << std::endl;
         output << "lb = " << tr.lb << std::endl;

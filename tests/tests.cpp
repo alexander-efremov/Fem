@@ -4,26 +4,28 @@
 #include "common.h"
 #include "utils.h"
 
-class cpu : public testing::Test {
+class cpu : public testing::Test
+{
 protected:
-    double *GetCpuToLevel(int level) {
-        double tau = 0.02;
-        double time_step_count = 50;
-        return solve_cpu_test(C_par_a, C_par_b, C_lbDom, C_rbDom, C_bbDom,
-                C_ubDom, tau, time_step_count,  C_numOfOXSt,
-                C_numOfOYSt, level);
+
+    double *GetCpuToLevel(ComputeParameters *p)
+    {
+        return solve_cpu_test(p->a, p->b, p->lb, p->rb, p->bb,
+                              p->ub, p->tau, p->t_count, p->x_size,
+                              p->y_size, p->level);
     }
 };
 
-TEST_F(cpu, main_test) {
+TEST_F(cpu, main_test)
+{
     const int finishLevel = 1;
     const int startLevel = 0;
 
-    for (int level = startLevel; level < finishLevel; ++level) {
-        std::cout << "level = " << level << std::endl;
+    for (int level = startLevel; level < finishLevel; ++level)
+    {
         ComputeParameters *p = new ComputeParameters(level, true, false);
         std::cout << *p << std::endl;
-        double *data = GetCpuToLevel(level);
+        double *data = GetCpuToLevel(p);
         print_matrix(p->get_real_x_size(), p->get_real_y_size(), data);
 
         delete p;
