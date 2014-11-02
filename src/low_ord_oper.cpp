@@ -4,23 +4,21 @@
 #include <fstream>
 #include <iomanip>
 #include <stdlib.h>
+#include "utils.h"
+#include "common.h"
 
-#define C_pi_device 3.14159265358979323846264338327
-
-using namespace std;
-
-double h_u_function(double par_b, double t, double x,
+double u_function(double b, double t, double x,
                     double y)
 {
-    return par_b * y * (1. - y) * (C_pi_device / 2. + atan(-x));
+    return b * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
-double h_v_function(double lbDom, double rbDom,
-                    double bbDom, double ubDom, double t, double x, double y)
+double v_function(double lb, double rb,
+                    double bb, double ub, double t, double x, double y)
 {
     return atan(
-                (x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom)
-                * (y - bbDom));
+                (x - lb) * (x - rb) * (1. + t) / 10. * (y - ub)
+                * (y - bb));
 }
 
 double itemOfInteg_1SpecType(
@@ -59,7 +57,7 @@ double analytSolut(
     return 1.1 + sin(t * x * y);
 }
 
-double initDataOfSol(
+double init_solution(
                      double par_a, //   -  Item of left and right setback (parameter "a" in test).
                      //
                      double lbDom, //   -  Left and right boundaries of rectangular domain.
@@ -2030,7 +2028,7 @@ double bottom_bound(
                     double lbDom, //   -  Left and right boundaries of rectangular domain.
                     double rbDom,
                     //
-                    double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                    double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                     double ubDom,
                     //
                     double t,
@@ -2041,16 +2039,14 @@ double bottom_bound(
 
 double u_function(double par_b, double t, double x, double y)
 {
-    return par_b * y * (1. - y) * (C_pi_device / 2. + atan(-x));
+    return par_b * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
 double v_function(
-                  double lbDom, //   -  Left and right boundaries of rectangular domain.
-                  double rbDom,
-                  //
-                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                  double lbDom,  
+                  double rbDom, 
+                  double bbDom,  
                   double ubDom,
-                  //
                   double t, double x, double y)
 {
     return atan((x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom) * (y - bbDom));
@@ -2590,7 +2586,7 @@ double normOfMatrAtL1_asV(
     return hx * hy * norm;
 }
 
-double spaceVolumeInPrevTL(
+double compute_value(
                            double par_a, //   -  Item of left and right setback (parameter "a" in test).
                            double par_b, //   -  Item of second parameter from "u_funcion".
                            //
@@ -2678,23 +2674,6 @@ double spaceVolumeInPrevTL(
                                       iOfOXN, iOfOYN);
 }
 
-void print_matrix_to_file(int n, int m, double *data, std::string filename)
-{
-
-    FILE *f = fopen(filename.c_str(), "w");
-
-    for (int i = 0; i < n; ++i)
-    {
-        for (int j = 0; j < m; ++j)
-        {
-            int k = i * n + j;
-            fprintf(f, "%20.14le ", data[k]);
-        }
-        fprintf(f, "\n ");
-    }
-    fclose(f);
-}
-
 void compute_diff_write_to_file(double *result, int tl, int n, int m, double tau)
 {
     double c_h = 1. / n;
@@ -2755,24 +2734,19 @@ void print_params(int index, int needed_index,
 }
 
 double solve(
-             double a, //   -  Item of first initial or boundary data parameter.
-             double b, //   -  Item of second parameter from "u_funcion".
-             //
-             double lb, //   -  Left and right boundaries of rectangular domain.
+             double a,
+             double b,
+             double lb,
              double rb,
-             //
-             double bb, //   -  Bottom and upper boundaries of rectangular domain.
+             double bb,
              double ub,
-             //
-             double tau, //   -  Time step.
-             int numOfTSt, //   -  A number of time steps.
-             //
-             double *ox, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-             int ox_length, //   -  Number of OX steps.
-             //
-             double *oy, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-             int oy_length, //   -  Number of OY steps.
-             double *density) //   -  Rho (solution) in Current Time Layer which we will compute.
+             double tau,
+             int time_step_count,
+             double *ox,
+             int ox_length,
+             double *oy,
+             int oy_length,
+             double *density)
 {
     double *prev_density = new double [ (ox_length + 1) * (oy_length + 1) ];
 
@@ -2780,11 +2754,11 @@ double solve(
     {
         for (int j = 0; j < ox_length + 1; j++)
         {
-            prev_density[ (ox_length + 1) * k + j ] = initDataOfSol(a, lb, rb, bb, ub, j, ox, k, oy);
+            prev_density[ (ox_length + 1) * k + j ] = init_solution(a, lb, rb, bb, ub, j, ox, k, oy);
         }
     }
 
-    for (int i_tl = 1; i_tl < numOfTSt + 1; i_tl++)
+    for (int i_tl = 1; i_tl < time_step_count + 1; i_tl++)
     {
 
         for (int i = 0; i < ox_length + 1; i++)
@@ -2805,7 +2779,7 @@ double solve(
             {
                 int index = (ox_length + 1) * i_oy + i_ox;
 
-                double value = spaceVolumeInPrevTL(
+                double value = compute_value(
                                                    a, b,
                                                    lb, rb,
                                                    bb, ub,
@@ -2822,7 +2796,7 @@ double solve(
                              ub,
                              tau,
                              i_tl,
-                             numOfTSt,
+                             time_step_count,
                              ox_length,
                              oy_length,
                              i_ox,

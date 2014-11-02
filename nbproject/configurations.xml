@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>include/common.h</itemPath>
       <itemPath>include/timer.h</itemPath>
+      <itemPath>include/utils.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -79,6 +80,8 @@
       </item>
       <item path="include/timer.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="include/utils.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
@@ -124,6 +127,8 @@
       <item path="include/common.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
