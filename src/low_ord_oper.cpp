@@ -14,12 +14,12 @@ double itemOfInteg_1SpecType(
 }
 
 double analytical_solution(
-                   double t, double x, double y)
+                           double t, double x, double y)
 {
     return 1.1 + sin(t * x * y);
 }
 
-double init_solution(double ox_value, double oy_value)  
+double init_solution(double ox_value, double oy_value)
 {
     return analytical_solution(0., ox_value, oy_value);
 }
@@ -304,7 +304,7 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
                              double lbDom, //   -  Left and right boundaries of rectangular domain.
                              double rbDom,
                              //
-                             double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                             double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                              double ubDom,
                              //
                              double tau,
@@ -506,7 +506,7 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
     return integ;
 }
 
-double bottom_bound(double y, 
+double bottom_bound(double y,
                     double t,
                     double x)
 {
@@ -749,7 +749,7 @@ double integUnderRigAngTr_BottLeft(
                                    double lbDom, //   -  Left and right boundaries of rectangular domain.
                                    double rbDom,
                                    //
-                                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                   double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                                    double ubDom,
                                    //
                                    double tau,
@@ -935,7 +935,7 @@ double integUnderRigAngTr_BottRight(
                                     double lbDom, //   -  Left and right boundaries of rectangular domain.
                                     double rbDom,
                                     //
-                                    double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                    double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                                     double ubDom,
                                     //
                                     double tau,
@@ -1118,15 +1118,15 @@ double integUnderBottTr(
                         double lbDom, //   -  Left and right boundaries of rectangular domain.
                         double rbDom,
                         //
-                        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                        double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                         double ubDom,
                         //
                         double tau,
                         int iCurrTL, //   -  Index of current time layer.
                         //
-                        double *LvBt, //   -  Left, Right and Botton vertices of Botton triangle.
-                        double *RvBt, //   -  Left, Right and Botton vertices of Botton triangle.
-                        double *BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                        double *LvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
+                        double *RvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
+                        double *BvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
                         //
                         const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
                         int numOfOXSt, //   -  Number of OX steps.
@@ -1204,7 +1204,7 @@ double integUnderRigAngTr_UppLeft(
                                   double lbDom, //   -  Left and right boundaries of rectangular domain.
                                   double rbDom,
                                   //
-                                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                  double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                                   double ubDom,
                                   //
                                   double tau,
@@ -1390,7 +1390,7 @@ double integUnderRigAngTr_UppRight(
                                    double lbDom, //   -  Left and right boundaries of rectangular domain.
                                    double rbDom,
                                    //
-                                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                   double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                                    double ubDom,
                                    //
                                    double tau,
@@ -1582,7 +1582,7 @@ double integUnderUpperTr(
                          double lbDom, //   -  Left and right boundaries of rectangular domain.
                          double rbDom,
                          //
-                         double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                         double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                          double ubDom,
                          //
                          double tau,
@@ -1659,7 +1659,7 @@ double integUnderUnunifTr(
                           double lbDom, //   -  Left and right boundaries of rectangular domain.
                           double rbDom,
                           //
-                          double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                          double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                           double ubDom,
                           //
                           double tau,
@@ -1678,15 +1678,15 @@ double integUnderUnunifTr(
                           double *rhoInPrevTL_asV,
                           int ii, int jj) //!!!!!!!!!!!!!!!!!!!
 {
-    double bv[2], mv[2], uv[2]; //   -  Botton, middle and upper vertices of triangle.
+    double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
     bool isFirVUsed = false;
     bool isSecVUsed = false;
     bool isThiVUsed = false;
     bool is1VUsed, is2VUsed, is3VUsed;
     double a_LC, b_LC, c_LC; //   -  Coefficients of line betweeen "bv" and "uv" vertices.
     double ap[2]; //   -  Across point of line through "bv" to "uv" and "y == mv[1]"
-    double LvBt[2], RvBt[2], BvBt[2]; //   -  Left, Right and Botton vertices of Botton triangle.
-    double integOfBottTr; //   -  Item of integral under Botton triangle.
+    double LvBt[2], RvBt[2], BvBt[2]; //   -  Left, Right and Bottom vertices of Bottom triangle.
+    double integOfBottTr; //   -  Item of integral under Bottom triangle.
     double LvUt[2], RvUt[2], UvUt[2]; //   -  Left, Right and Upper vertices of Upper triangle.
     double integOfUppTr; //   -  Item of integral under Upper triangle.
     double integ = 0.; //   -  Item which I'm computing.
@@ -1771,7 +1771,7 @@ double integUnderUnunifTr(
     //   3. There the middle vertex relativly straight line is? Two ways are possible.
     if (mv[0] < ap[0])
     {
-        //   Left, Right and Botton vertices of Botton triangle.
+        //   Left, Right and Bottom vertices of Bottom triangle.
         LvBt[0] = mv[0];
         LvBt[1] = mv[1];
         RvBt[0] = ap[0];
@@ -1783,11 +1783,11 @@ double integUnderUnunifTr(
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
-                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
                                          //
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
-                                         LvBt, RvBt, BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                                         LvBt, RvBt, BvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
                                          //
                                          masOX, numOfOXSt, //   -  Number of OX steps.
                                          //
@@ -1811,11 +1811,11 @@ double integUnderUnunifTr(
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
-                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
                                          //
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
-                                         LvUt, RvUt, UvUt, //   -  Left, Right and Botton vertices of Upper triangle.
+                                         LvUt, RvUt, UvUt, //   -  Left, Right and Bottom vertices of Upper triangle.
                                          //
                                          masOX, numOfOXSt, //   -  Number of OX steps.
                                          //
@@ -1827,7 +1827,7 @@ double integUnderUnunifTr(
     }
     if (mv[0] >= ap[0])
     {
-        //   Left, Right and Botton vertices of Botton triangle.
+        //   Left, Right and Bottom vertices of Bottom triangle.
         LvBt[0] = ap[0];
         LvBt[1] = ap[1];
         RvBt[0] = mv[0];
@@ -1839,11 +1839,11 @@ double integUnderUnunifTr(
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
-                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
                                          //
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
-                                         LvBt, RvBt, BvBt, //   -  Left, Right and Botton vertices of Botton triangle.
+                                         LvBt, RvBt, BvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
                                          //
                                          masOX, numOfOXSt, //   -  Number of OX steps.
                                          //
@@ -1867,11 +1867,11 @@ double integUnderUnunifTr(
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
-                                         bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
                                          //
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
-                                         LvUt, RvUt, UvUt, //   -  Left, Right and Botton vertices of Upper triangle.
+                                         LvUt, RvUt, UvUt, //   -  Left, Right and Bottom vertices of Upper triangle.
                                          //
                                          masOX, numOfOXSt, //   -  Number of OX steps.
                                          //
@@ -1883,17 +1883,15 @@ double integUnderUnunifTr(
     return integ;
 }
 
-
-
 double u_function(double par_b, double t, double x, double y)
 {
     return par_b * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
 double v_function(
-                  double lbDom,  
-                  double rbDom, 
-                  double bbDom,  
+                  double lbDom,
+                  double rbDom,
+                  double bbDom,
                   double ubDom,
                   double t, double x, double y)
 {
@@ -1907,7 +1905,7 @@ double f_function(//   -  It's item of right part of differential equation.
                   double lbDom, //   -  Left and right boundaries of rectangular domain.
                   double rbDom,
                   //
-                  double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                  double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                   double ubDom,
                   //
                   double tau,
@@ -1963,7 +1961,7 @@ int quadrAngleType(
                    double lbDom, //   -  Left and right boundaries of rectangular domain.
                    double rbDom,
                    //
-                   double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                   double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
                    double ubDom,
                    //
                    double tau,
@@ -2435,26 +2433,26 @@ double normOfMatrAtL1_asV(
 }
 
 double compute_value(
-                           double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                           double par_b, //   -  Item of second parameter from "u_funcion".
-                           //
-                           double lbDom, //   -  Left and right boundaries of rectangular domain.
-                           double rbDom,
-                           //
-                           double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                           double ubDom,
-                           //
-                           double tau,
-                           double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
-                           //
-                           int iOfOXN, //   -  Index of current OX node.
-                           const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                           int numOfOXSt, //   -  Number of OX steps.
-                           //
-                           int iOfOYN, //   -  Index of current OY node.
-                           const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                           int numOfOYSt, //   -  Number of OY steps.
-                           double *rhoInPrevTL_asV)
+                     double par_a, //   -  Item of left and right setback (parameter "a" in test).
+                     double par_b, //   -  Item of second parameter from "u_funcion".
+                     //
+                     double lbDom, //   -  Left and right boundaries of rectangular domain.
+                     double rbDom,
+                     //
+                     double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
+                     double ubDom,
+                     //
+                     double tau,
+                     double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
+                     //
+                     int iOfOXN, //   -  Index of current OX node.
+                     const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                     int numOfOXSt, //   -  Number of OX steps.
+                     //
+                     int iOfOYN, //   -  Index of current OY node.
+                     const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                     int numOfOYSt, //   -  Number of OY steps.
+                     double *rhoInPrevTL_asV)
 {
     double firVfirT[2], secVfirT[2], thiVfirT[2]; //   -  First, second and third vertices of first triangle.
     double firVsecT[2], secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
@@ -2466,7 +2464,7 @@ double compute_value(
                               //
                               lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                               //
-                              bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                              bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
                               //
                               tau, iCurrTL, //   -  Time data. Necessary for velocity.
                               //
@@ -2487,7 +2485,7 @@ double compute_value(
                                //
                                lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                //
-                               bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                               bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
                                //
                                tau, iCurrTL, //   -  Index of current time layer.
                                //
@@ -2508,7 +2506,7 @@ double compute_value(
                                       //
                                       lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                       //
-                                      bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                      bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
                                       //
                                       tau, iCurrTL, //   -  Index of current time layer.
                                       //
@@ -2521,8 +2519,6 @@ double compute_value(
                                       rhoInPrevTL_asV,
                                       iOfOXN, iOfOYN);
 }
-
-
 
 void print_params(int index, int needed_index,
                   double a,
@@ -2607,13 +2603,13 @@ double solve(
                 int index = (ox_length + 1) * i_oy + i_ox;
 
                 double value = compute_value(
-                                                   a, b,
-                                                   lb, rb,
-                                                   bb, ub,
-                                                   tau, i_tl,
-                                                   i_ox, ox, ox_length,
-                                                   i_oy, oy, oy_length,
-                                                   prev_density);
+                                             a, b,
+                                             lb, rb,
+                                             bb, ub,
+                                             tau, i_tl,
+                                             i_ox, ox, ox_length,
+                                             i_oy, oy, oy_length,
+                                             prev_density);
                 print_params(index, 12,
                              a,
                              b,
@@ -2646,8 +2642,8 @@ double solve(
         }
 
         for (int i = 0; i < (ox_length + 1) * (oy_length + 1); i++)
-        { 
-            prev_density[ i ] = density[ i ]; 
+        {
+            prev_density[ i ] = density[ i ];
         }
     }
 
