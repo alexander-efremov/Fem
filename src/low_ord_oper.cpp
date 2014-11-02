@@ -508,43 +508,31 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
     return integ;
 }
 
-double bottom_bound(double y,
-                    double t,
-                    double x)
+enum bound_side
 {
-    return analytical_solution(t, x, y);
+    up,
+    bottom,
+    left,
+    right
+};
+
+double init_bound(double x, double y, double t,  bound_side side)
+{
+    switch (side)
+    {
+    case up:
+        return analytical_solution(t, x, y);
+    case bottom:
+        return analytical_solution(t, x, y);
+    case left:
+        return analytical_solution(t, x, y);
+    case right:
+        return analytical_solution(t, x, y);
+    }
+    return 0;
 }
 
-double upper_bound(double y,
-                   double t,
-                   double x)
-{
-    return analytical_solution(t, x, y);
-}
-
-double right_bound(double x,
-                   double t,
-                   double y)
-{
-    return analytical_solution(t, x, y);
-}
-
-double left_bound(double x,
-                  double t,
-                  double y)
-{
-    return analytical_solution(t, x, y);
-}
-
-double integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the left side.
-                            double par_a, //   -  Solution parameter.
-                            //
-                            double lbDom, //   -  Left and right boundaries of rectangular domain.
-                            double rbDom,
-                            //
-                            double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                            double ubDom,
-                            //
+double integOfChan_SLLeftSd(
                             double tau,
                             int iCurrTL, //   -  Index of current time layer.
                             //
@@ -866,13 +854,7 @@ double integUnderRigAngTr_BottLeft(
             wTrPNI = 0;
         }
         //   d. Integration.
-        buf_D = integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the left side.
-                                     par_a, //   -  Solution parameter.
-                                     //
-                                     lbDom, rbDom,
-                                     //
-                                     bbDom, ubDom,
-                                     //
+        buf_D = integOfChan_SLLeftSd(
                                      tau, iCurrTL, //   -  Index of current time layer.
                                      //
                                      trPC, wTrPCI, //   -  double *bv,
@@ -1321,13 +1303,7 @@ double integUnderRigAngTr_UppLeft(
             wTrPNI = 0;
         }
         //   d. Integration.
-        buf_D = integOfChan_SLLeftSd(//   -  The domain is Channel with Slant Line on the left side.
-                                     par_a, //   -  Solution parameter.
-                                     //
-                                     lbDom, rbDom,
-                                     //
-                                     bbDom, ubDom,
-                                     //
+        buf_D = integOfChan_SLLeftSd(
                                      tau, iCurrTL, //   -  Index of current time layer.
                                      //
                                      trPC, wTrPCI, //   -  double *bv,
@@ -2608,17 +2584,16 @@ double solve(
 
     for (int i_tl = 1; i_tl < time_step_count + 1; i_tl++)
     {
-
         for (int i = 0; i < ox_length + 1; i++)
         {
-            density[ i ] = bottom_bound(bb, tau * i_tl, ox[ i ]);
-            density[ (ox_length + 1) * oy_length + i ] = upper_bound(ub, tau * i_tl, ox[ i ]);
+            density[ i ] = init_bound(ox[ i ], bb, tau * i_tl, bottom);
+            density[ (ox_length + 1) * oy_length + i ] = init_bound(ox[ i ], ub, tau * i_tl, up);
         }
 
         for (int i = 0; i < oy_length + 1; i++)
         {
-            density[ (ox_length + 1) * i ] = left_bound(lb, tau * i_tl, oy[ i ]);
-            density[ (ox_length + 1) * i + ox_length ] = right_bound(rb, tau * i_tl, oy[ i ]);
+            density[ (ox_length + 1) * i ] = init_bound(lb, oy[ i ], tau * i_tl, left);
+            density[ (ox_length + 1) * i + ox_length ] = init_bound(rb, oy[ i ], tau * i_tl, right);
         }
 
         for (int i_oy = 1; i_oy < oy_length; i_oy++)
