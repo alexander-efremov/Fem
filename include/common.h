@@ -18,57 +18,6 @@ static double *masOY; //   -  Massive of OY points. Dimension = C_numOfOYSt +1.
 static double C_tau; //   -  Time step. Will be computed by relation "C_StepsRel" with small correction.
 static int C_numOfTSt; //   -  A number of time steps.
 
-inline void initCompOfGlVar() {
-    double max = 0.;
-
-    masOX = new double[ C_numOfOXSt + 1];
-    masOY = new double[ C_numOfOYSt + 1];
-    
-    for (int j = 0; j < C_numOfOXSt + 1; j++) { 
-        masOX[j] = C_lbDom + (C_rbDom - C_lbDom) * ((double) j / C_numOfOXSt);
-    }
-
-    //   Let's find out maximum of OX step.
-    for (int j = 0; j < C_numOfOXSt; j++) {
-        if (max < (masOX[j + 1] - masOX[j])) {
-            max = (masOX[j + 1] - masOX[j]);
-        }
-    }
-
-    //   Massive of OY steps. Dimension = C_numOfOYSt +1.
-    
-    for (int j = 0; j < C_numOfOYSt + 1; j++) { 
-        masOY[j] = C_bbDom + (C_ubDom - C_bbDom) * ((double) j / C_numOfOYSt);
-    }
-
-    //   Let's find out maximum of OY step.
-    for (int j = 0; j < C_numOfOYSt; j++) {
-        if (max < (masOY[j + 1] - masOY[j])) {
-            max = (masOY[j + 1] - masOY[j]);
-        }
-    }
-
-    C_tau = C_StepsRel * max;
-
-    C_numOfTSt = (int) (C_timeEnd / C_tau);
-
-
-    if (fabs(C_numOfTSt * C_tau - C_timeEnd) < (C_tau * 1.e-7)) {
-        return;
-    }
-
-    if (fabs(C_numOfTSt * C_tau - C_timeEnd) >= (C_tau * 1.e-7)) {
-        //printf("hello1\n");
-        C_numOfTSt++;
-        C_tau = C_timeEnd / C_numOfTSt;
-    }
-}
-
-inline void memClean() {
-    delete[] masOX;
-    delete[] masOY;
-}
-
 struct ComputeParameters {
 private:
     int time_i;
