@@ -2573,7 +2573,6 @@ double solve(
              double *density)
 {
     double *prev_density = new double [ (ox_length + 1) * (oy_length + 1) ];
-
     for (int i_oy = 0; i_oy < oy_length + 1; i_oy++)
     {
         for (int i_ox = 0; i_ox < ox_length + 1; i_ox++)
