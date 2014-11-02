@@ -556,7 +556,7 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
     return integ;
 }
 
-double upperBound(
+double upper_bound(
                   double par_a, //   -  Item of left and right setback (parameter "a" in test).
                   //
                   double lbDom, //   -  Left and right boundaries of rectangular domain.
@@ -570,7 +570,7 @@ double upperBound(
     return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, x, ubDom);
 }
 
-double rightBound(
+double right_bound(
                   double par_a, //   -  Item of left and right setback (parameter "a" in test).
                   //
                   double lbDom, //   -  Left and right boundaries of rectangular domain.
@@ -584,7 +584,7 @@ double rightBound(
     return analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, t, rbDom, y);
 }
 
-double leftBound(
+double left_bound(
                  double par_a, //   -  Item of left and right setback (parameter "a" in test).
                  //
                  double lbDom, //   -  Left and right boundaries of rectangular domain.
@@ -1837,7 +1837,7 @@ double integUnderUnunifTr(
     return integ;
 }
 
-double bottonBound(
+double bottom_bound(
                    double par_a, //   -  Item of left and right setback (parameter "a" in test).
                    //
                    double lbDom, //   -  Left and right boundaries of rectangular domain.
@@ -2495,155 +2495,134 @@ void compute_diff_write_to_file(double *result, int tl, int n, int m, double tau
     delete[] diff;
 }
 
+void print_params(int index, int needed_index,
+                  double a,
+                  double b,
+                  double lb,
+                  double rb,
+                  double bb,
+                  double ub,
+                  double tau,
+                  int tl,
+                  int tl_count,
+                  int ox_length,
+                  int oy_length,
+                  int cur_x,
+                  int cur_y,
+                  double value) {
+    if (index == needed_index) {
+        printf("index = %d\n", index);
+        printf("a = %f\n", a);
+        printf("b = %f\n", b);
+        printf("lbDom = %f\n", lb);
+        printf("rbDom = %f\n", rb);
+        printf("bbDom = %f\n", bb);
+        printf("ubDom = %f\n", ub);
+        printf("tau = %f\n", tau);
+        printf("Time level count = %d\n", tl_count);
+        printf("current time level = %d\n", tl);
+        printf("current x = %d\n", cur_x);
+        printf("current y = %d\n", cur_y);
+        printf("ox length = %d\n", ox_length);
+        printf("oy length = %d\n", oy_length);
+        printf("value = %f\n", value);
+    }
+}
+
 double solve(
-             double par_a, //   -  Item of first initial or boundary data parameter.
-             double par_b, //   -  Item of second parameter from "u_funcion".
+             double a, //   -  Item of first initial or boundary data parameter.
+             double b, //   -  Item of second parameter from "u_funcion".
              //
-             double lbDom, //   -  Left and right boundaries of rectangular domain.
-             double rbDom,
+             double lb, //   -  Left and right boundaries of rectangular domain.
+             double rb,
              //
-             double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-             double ubDom,
+             double bb, //   -  Bottom and upper boundaries of rectangular domain.
+             double ub,
              //
              double tau, //   -  Time step.
              int numOfTSt, //   -  A number of time steps.
              //
-             double *masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-             int numOfOXSt, //   -  Number of OX steps.
+             double *ox, //   -  Massive of OX points. Dimension = numOfOXSt +1.
+             int ox_length, //   -  Number of OX steps.
              //
-             double *masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-             int numOfOYSt, //   -  Number of OY steps.
-             //
-             int numOfSolOrd, //   -  For print only. Solution order which we want to get.
-             //
-             double *rhoInCurrTL_asV) //   -  Rho (solution) in Current Time Layer which we will compute.
+             double *oy, //   -  Massive of OY points. Dimension = numOfOYSt +1.
+             int oy_length, //   -  Number of OY steps.
+             double *density) //   -  Rho (solution) in Current Time Layer which we will compute.
 {
-    double *rhoInPrevTL_asV; //   -  Rho (solution) in Previous Time Layer which we have computed.
-    double spVolInPrevTL; //   -  Space volume of rho in previous time layer.
-    double RPInCurrTL; //   -  Right part in current time layer.
-    int iCurrTL; //   -  Index of current time Layer IN WHICH we computing solution.
-    int iOfOXN; //   -  Index of current OX node.
-    int iOfOYN; //   -  Index of current OY node.
-    int iOfThr; //   -  Through OXY plane index.
-    double buf_D; //   -  Buffer. Only.
-    int j, k;
+    double *prev_density = new double [ (ox_length + 1) * (oy_length + 1) ];
 
-    //   New memory.
-    rhoInPrevTL_asV = new double [ (numOfOXSt + 1) * (numOfOYSt + 1) ];
-    //   Initial data of rho.
-    for (k = 0; k < numOfOYSt + 1; k++) {
-        for (j = 0; j < numOfOXSt + 1; j++) {
-            rhoInPrevTL_asV[ (numOfOXSt + 1) * k + j ] = initDataOfSol(par_a, lbDom, rbDom, bbDom, ubDom, j, masOX, k, masOY);
+    for (int k = 0; k < oy_length + 1; k++) {
+        for (int j = 0; j < ox_length + 1; j++) {
+            prev_density[ (ox_length + 1) * k + j ] = initDataOfSol(a, lb, rb, bb, ub, j, ox, k, oy);
         }
     }
 
-    bool canPrint = false;
-    if (canPrint) {
-        cout << "\r \t \t \t \t \t \t \t \t \r";
-        cout << "SchOrd = " << numOfSolOrd << ", Nx = " << numOfOXSt;
-        cout << ", count of time levels " << numOfTSt;
-    }
-    //  numOfTSt = 1;
-    // printf("[cpu] time count = %d\n", numOfTSt);
-    for (iCurrTL = 1; iCurrTL < numOfTSt + 1; iCurrTL++) {
-        if (canPrint) {
-            cout << "\r \t \t \t \t \t \t \t \t \r";
-            cout << "SchOrd = " << numOfSolOrd << ", Nx = " << numOfOXSt;
-            cout << ", indexOfCurrTL = " << iCurrTL << " ( " << numOfTSt << " ) " << flush;
+    for (int i_tl = 1; i_tl < numOfTSt + 1; i_tl++) {
+      
+        for (int i = 0; i < ox_length + 1; i++) {
+            density[ i ] = bottom_bound(a, lb, rb, bb, ub, tau * i_tl, ox[ i ]);
+            density[ (ox_length + 1) * oy_length + i ] = upper_bound(a, lb, rb, bb, ub, tau * i_tl, ox[ i ]);
         }
 
-        //   If we know solution on the boundary we can use it.
-        for (iOfOXN = 0; iOfOXN < numOfOXSt + 1; iOfOXN++) {
-
-            rhoInCurrTL_asV[ iOfOXN ] = bottonBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOX[ iOfOXN ]);
-
-            //   Upper boundary.
-            rhoInCurrTL_asV[ (numOfOXSt + 1) * numOfOYSt + iOfOXN ] = upperBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOX[ iOfOXN ]);
+        for (int i = 0; i < oy_length + 1; i++) {
+            density[ (ox_length + 1) * i ] = left_bound(a, lb, rb, bb, ub, tau * i_tl, oy[ i ]);
+            density[ (ox_length + 1) * i + ox_length ] = right_bound(a, lb, rb, bb, ub, tau * i_tl, oy[ i ]);
         }
+        
+        for (int i_oy = 1; i_oy < oy_length; i_oy++) {
+            for (int i_ox = 1; i_ox < ox_length; i_ox++) {
 
-        for (iOfOYN = 0; iOfOYN < numOfOYSt + 1; iOfOYN++) {
-            rhoInCurrTL_asV[ (numOfOXSt + 1) * iOfOYN ] = leftBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOY[ iOfOYN ]);
-            rhoInCurrTL_asV[ (numOfOXSt + 1) * iOfOYN + numOfOXSt ] = rightBound(par_a, lbDom, rbDom, bbDom, ubDom, tau * iCurrTL, masOY[ iOfOYN ]);
-        }
+                int opt = (ox_length + 1) * i_oy + i_ox;
 
-        //   Enumeration from first unknown element to last one.
-        for (iOfOYN = 1; iOfOYN < numOfOYSt; iOfOYN++) {
-            for (iOfOXN = 1; iOfOXN < numOfOXSt; iOfOXN++) {
+                double value = spaceVolumeInPrevTL(
+                                                   a, b, //   -  Items of parameters.
+                                                   //
+                                                   lb, rb, //   -  Left and right boundaries of rectangular domain.
+                                                   //
+                                                   bb, ub, //   -  Bottom and upper boundaries of rectangular domain.
+                                                   //
+                                                   tau, i_tl, //   -  Time data. Necessary for velocity.
+                                                   //
+                                                   i_ox, ox, ox_length, //   -  OX data.
+                                                   //
+                                                   i_oy, oy, oy_length, //   -  OY data.
+                                                   prev_density);
+                print_params(opt, 12,
+                             a,
+                             b,
+                             lb,
+                             rb,
+                             bb,
+                             ub,
+                             tau,
+                             i_tl,
+                             numOfTSt,
+                             ox_length,
+                             oy_length,
+                             i_ox,
+                             i_oy,
+                             value);
 
-                int opt = (numOfOXSt + 1) * iOfOYN + iOfOXN;
+                double tmp = (ox[i_ox + 1] - ox[i_ox - 1]) / 2.;
+                value /= tmp;
+                tmp = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
+                value /= tmp;
 
-                spVolInPrevTL = spaceVolumeInPrevTL(
-                                                    par_a, par_b, //   -  Items of parameters.
-                                                    //
-                                                    lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                                    //
-                                                    bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                                    //
-                                                    tau, iCurrTL, //   -  Time data. Necessary for velocity.
-                                                    //
-                                                    iOfOXN, masOX, numOfOXSt, //   -  OX data.
-                                                    //
-                                                    iOfOYN, masOY, numOfOYSt, //   -  OY data.
-                                                    rhoInPrevTL_asV);
-
-                //                if (opt == 12)
-                //                {
-                //                    printf("a = %f\n", par_a);
-                //                    printf("b = %f\n", par_b);
-                //                    printf("lbDom = %f\n", lbDom);
-                //                    printf("rbDom = %f\n", rbDom);
-                //                    printf("bbDom = %f\n", bbDom);
-                //                    printf("ubDom = %f\n", ubDom);
-                //                    printf("tau = %f\n", tau);
-                //                    printf("iCurTl = %d\n", iCurrTL);
-                //                     printf("iOfOXN = %d\n", iOfOXN);
-                //                      printf("iOfOYN = %d\n", iOfOYN);
-                //                       printf("numOfOXSt = %d\n", numOfOXSt);
-                //                       printf("numOfOYSt = %d\n", numOfOYSt);
-                //                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
-                //                }
-
-                buf_D = (masOX[iOfOXN + 1] - masOX[iOfOXN - 1]) / 2.;
-                spVolInPrevTL = spVolInPrevTL / buf_D;
-                buf_D = (masOY[iOfOYN + 1] - masOY[iOfOYN - 1]) / 2.;
-                spVolInPrevTL = spVolInPrevTL / buf_D;
-
-                //                if (opt == 12)
-                //                {
-                //                    printf("spVolInPrevTL = %f\n", spVolInPrevTL);
-                //                }
-
-                RPInCurrTL = f_function(par_a, par_b, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL, iOfOXN,
-                                        masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                        numOfOXSt, //   -  Number of OX steps.
-                                        //
-                                        iOfOYN, //   -  Index of current OY node.
-                                        masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                        numOfOYSt); //   -  Number of OY steps.
-                //                if (opt == 12)
-                //                {
-                //                    printf("RPInCurrTL = %f\n", RPInCurrTL);
-                //                    printf("tau * RPInCurrTL = %f\n", tau * RPInCurrTL);
-                //                }
-                //                 
-
-                rhoInCurrTL_asV[ opt ] = spVolInPrevTL;
-                rhoInCurrTL_asV[ opt ] += tau * RPInCurrTL;
-                //                if (opt == 12)
-                //                {
-                //                    printf("rhoInCurrTL_asV[ opt ]  = %f\n", rhoInCurrTL_asV[ opt ]);
-                //                    
-                //                }
-
+                double rp = f_function(a, b, lb, rb, bb, ub, tau, i_tl, i_ox,
+                                       ox,
+                                       ox_length,
+                                       i_oy,
+                                       oy,
+                                       oy_length);
+                density[ opt ] = value + tau * rp;
             }
         }
 
-        for (iOfThr = 0; iOfThr < (numOfOXSt + 1) * (numOfOYSt + 1); iOfThr++)
-            rhoInPrevTL_asV[ iOfThr ] = rhoInCurrTL_asV[ iOfThr ];
+        for (int i = 0; i < (ox_length + 1) * (oy_length + 1); i++)
+            prev_density[ i ] = density[ i ];
     }
 
-    //ex:
-    delete[] rhoInPrevTL_asV;
+    delete[] prev_density;
     return 0;
 }
 
@@ -2686,7 +2665,6 @@ double *solve_cpu_test(
           ox_length,
           oy,
           oy_length,
-          1,
           density);
 
     if (is_compute_diff) {
