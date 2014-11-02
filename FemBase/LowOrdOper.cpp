@@ -16,27 +16,27 @@ using namespace std;
 //   #include "RichExtrap.h"
 
 bool solByEqualVolumes(
-        double par_a, //   -  Item of first initial or boundary data parameter.
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau, //   -  Time step.
-        int numOfTSt, //   -  A number of time steps.
-        //
-        double *masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        double *masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        int numOfSolOrd, //   -  For print only. Solution order which we want to get.
-        //
-        double *rhoInCurrTL_asV) //   -  Rho (solution) in Current Time Layer which we will compute.
+                       double par_a, //   -  Item of first initial or boundary data parameter.
+                       double par_b, //   -  Item of second parameter from "u_funcion".
+                       //
+                       double lbDom, //   -  Left and right boundaries of rectangular domain.
+                       double rbDom,
+                       //
+                       double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                       double ubDom,
+                       //
+                       double tau, //   -  Time step.
+                       int numOfTSt, //   -  A number of time steps.
+                       //
+                       double *masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
+                       int numOfOXSt, //   -  Number of OX steps.
+                       //
+                       double *masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
+                       int numOfOYSt, //   -  Number of OY steps.
+                       //
+                       int numOfSolOrd, //   -  For print only. Solution order which we want to get.
+                       //
+                       double *rhoInCurrTL_asV) //   -  Rho (solution) in Current Time Layer which we will compute.
 {
 
 
@@ -96,8 +96,10 @@ bool solByEqualVolumes(
 
     //   Initial data of rho.
 
-    for (k = 0; k < numOfOYSt + 1; k++) {
-        for (j = 0; j < numOfOXSt + 1; j++) {
+    for (k = 0; k < numOfOYSt + 1; k++)
+    {
+        for (j = 0; j < numOfOXSt + 1; j++)
+        {
             rhoInPrevTL_asV[ (numOfOXSt + 1) * k + j ] = initDataOfSol(par_a, lbDom, rbDom, bbDom, ubDom, j, masOX, k, masOY);
         }
     }
@@ -107,7 +109,8 @@ bool solByEqualVolumes(
     //   Let's do it. It's easy.
     //numOfTSt = 1;
     //printf("tl setted to 1\n");
-    for (iCurrTL = 1; iCurrTL < numOfTSt + 1; iCurrTL++) {
+    for (iCurrTL = 1; iCurrTL < numOfTSt + 1; iCurrTL++)
+    {
         //   "iCurrTL" - index of current time layer in which we computing the solution.
 
         //   I want to see what is computing :)
@@ -122,7 +125,8 @@ bool solByEqualVolumes(
 
         //   If we know solution on the boundary we can use it.
 
-        for (iOfOXN = 0; iOfOXN < numOfOXSt + 1; iOfOXN++) {
+        for (iOfOXN = 0; iOfOXN < numOfOXSt + 1; iOfOXN++)
+        {
             //   Botton boundary.
 
             //   rhoInCurrTL[ iOfOXN ][ 0 ]  =   bottonBound( par_a,   lbDom, rbDom,   bbDom, ubDom,   tau*iCurrTL, masOX[ iOfOXN ] );
@@ -137,7 +141,8 @@ bool solByEqualVolumes(
         }
 
 
-        for (iOfOYN = 0; iOfOYN < numOfOYSt + 1; iOfOYN++) {
+        for (iOfOYN = 0; iOfOYN < numOfOYSt + 1; iOfOYN++)
+        {
             //   Left boundary.
 
             //   rhoInCurrTL[ 0 ][ iOfOYN ]  =  leftBound( par_a,   lbDom, rbDom,   bbDom, ubDom,   tau*iCurrTL, masOY[ iOfOYN ] );
@@ -155,25 +160,27 @@ bool solByEqualVolumes(
 
         //   Enumeration from first unknown element to last one.
 
-        for (iOfOYN = 1; iOfOYN < numOfOYSt; iOfOYN++) {
-            for (iOfOXN = 1; iOfOXN < numOfOXSt; iOfOXN++) {
+        for (iOfOYN = 1; iOfOYN < numOfOYSt; iOfOYN++)
+        {
+            for (iOfOXN = 1; iOfOXN < numOfOXSt; iOfOXN++)
+            {
                 //   And now the mo-o-o-o-st intresting....!  The volume computation.
 
                 spVolInPrevTL = spaceVolumeInPrevTL(
-                        par_a, par_b, //   -  Items of parameters.
-                        //
-                        lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                        //
-                        bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
-                        //
-                        tau, iCurrTL, //   -  Time data. Necessary for velocity.
-                        //
-                        iOfOXN, masOX, numOfOXSt, //   -  OX data.
-                        //
-                        iOfOYN, masOY, numOfOYSt, //   -  OY data.
-                        //
-                        isSpVolComp, //   -  Is space volume computed?
-                        rhoInPrevTL_asV);
+                                                    par_a, par_b, //   -  Items of parameters.
+                                                    //
+                                                    lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
+                                                    //
+                                                    bbDom, ubDom, //   -  Botton and upper boundaries of rectangular domain.
+                                                    //
+                                                    tau, iCurrTL, //   -  Time data. Necessary for velocity.
+                                                    //
+                                                    iOfOXN, masOX, numOfOXSt, //   -  OX data.
+                                                    //
+                                                    iOfOYN, masOY, numOfOYSt, //   -  OY data.
+                                                    //
+                                                    isSpVolComp, //   -  Is space volume computed?
+                                                    rhoInPrevTL_asV);
 
                 /*  if ((numOfOXSt +1)*iOfOYN + iOfOXN == 12)
                   {
@@ -210,21 +217,21 @@ bool solByEqualVolumes(
                 //   2. Let's compute new item of rho :)
 
                 RPInCurrTL = f_function(//   -  It's an initial right part of differential equation.
-                        par_a, par_b,
-                        //
-                        lbDom, rbDom,
-                        bbDom, ubDom,
-                        //
-                        tau,
-                        iCurrTL, //   -  Index of current time layer.
-                        //
-                        iOfOXN, //   -  Index of current OX node.
-                        masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                        numOfOXSt, //   -  Number of OX steps.
-                        //
-                        iOfOYN, //   -  Index of current OY node.
-                        masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                        numOfOYSt); //   -  Number of OY steps.
+                                        par_a, par_b,
+                                        //
+                                        lbDom, rbDom,
+                                        bbDom, ubDom,
+                                        //
+                                        tau,
+                                        iCurrTL, //   -  Index of current time layer.
+                                        //
+                                        iOfOXN, //   -  Index of current OX node.
+                                        masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                        numOfOXSt, //   -  Number of OX steps.
+                                        //
+                                        iOfOYN, //   -  Index of current OY node.
+                                        masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                        numOfOYSt); //   -  Number of OY steps.
 
 
 
@@ -254,10 +261,13 @@ bool solByEqualVolumes(
 
         //   Printing if it's necessary.
 
-        if (((int) ((int) (iCurrTL / iForPrint) * iForPrint) == iCurrTL)) {
+        if (((int) ((int) (iCurrTL / iForPrint) * iForPrint) == iCurrTL))
+        {
 
-            for (iOfOYN = 0; iOfOYN < numOfOYSt + 1; iOfOYN++) {
-                for (iOfOXN = 0; iOfOXN < numOfOXSt + 1; iOfOXN++) {
+            for (iOfOYN = 0; iOfOYN < numOfOYSt + 1; iOfOYN++)
+            {
+                for (iOfOXN = 0; iOfOXN < numOfOXSt + 1; iOfOXN++)
+                {
                     anSol = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, iCurrTL *tau, masOX[ iOfOXN ], masOY[ iOfOYN ]);
 
                     //   Let's use "rhoInPrevTSt" as absolute error.
@@ -271,40 +281,40 @@ bool solByEqualVolumes(
             //   Solution visualization.
 
             bul = printSurface_asV(
-                    "rho", //   -  char *fileName,
-                    //
-                    numOfOXSt, //   -  Number of OX steps. Grid parameter.
-                    iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
-                    numOfSolOrd, //   -  Solution order which we want to print.
-                    //
-                    numOfTSt, //   -  A number of time steps.
-                    //
-                    masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-                    numOfOXSt, //   -  Number of OX steps.
-                    //
-                    masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-                    numOfOYSt, //   -  Number of OY steps.
-                    //
-                    rhoInCurrTL_asV); //   -  Matrix of data.
+                                   "rho", //   -  char *fileName,
+                                   //
+                                   numOfOXSt, //   -  Number of OX steps. Grid parameter.
+                                   iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
+                                   numOfSolOrd, //   -  Solution order which we want to print.
+                                   //
+                                   numOfTSt, //   -  A number of time steps.
+                                   //
+                                   masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
+                                   numOfOXSt, //   -  Number of OX steps.
+                                   //
+                                   masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
+                                   numOfOYSt, //   -  Number of OY steps.
+                                   //
+                                   rhoInCurrTL_asV); //   -  Matrix of data.
 
             //   Error visualization.
 
             bul = printSurface_asV(
-                    "rhoErr", //   -  char *fileName,
-                    //
-                    numOfOXSt, //   -  Number of OX steps. Grid parameter.
-                    iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
-                    numOfSolOrd, //   -  Solution order which we want to print.
-                    //
-                    numOfTSt, //   -  A number of time steps.
-                    //
-                    masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-                    numOfOXSt, //   -  Number of OX steps.
-                    //
-                    masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-                    numOfOYSt, //   -  Number of OY steps.
-                    //
-                    rhoInPrevTL_asV); //   -  Matrix of data. We use "rhoInPrevTSt" as absolute error.
+                                   "rhoErr", //   -  char *fileName,
+                                   //
+                                   numOfOXSt, //   -  Number of OX steps. Grid parameter.
+                                   iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
+                                   numOfSolOrd, //   -  Solution order which we want to print.
+                                   //
+                                   numOfTSt, //   -  A number of time steps.
+                                   //
+                                   masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
+                                   numOfOXSt, //   -  Number of OX steps.
+                                   //
+                                   masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
+                                   numOfOYSt, //   -  Number of OY steps.
+                                   //
+                                   rhoInPrevTL_asV); //   -  Matrix of data. We use "rhoInPrevTSt" as absolute error.
 
 
             //   Error item.
@@ -316,7 +326,8 @@ bool solByEqualVolumes(
 
         //   Data update. Only after printing.
 
-        for (iOfThr = 0; iOfThr < (numOfOXSt + 1) * (numOfOYSt + 1); iOfThr++) {
+        for (iOfThr = 0; iOfThr < (numOfOXSt + 1) * (numOfOYSt + 1); iOfThr++)
+        {
             rhoInPrevTL_asV[ iOfThr ] = rhoInCurrTL_asV[ iOfThr ];
         }
 
@@ -343,35 +354,39 @@ bool solByEqualVolumes(
     return true;
 }
 
-void print_matrix(int n, int m, double *a, int precision = 8) {
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < m; ++j) {
+void print_matrix(int n, int m, double *a, int precision = 8)
+{
+    for (int i = 0; i < n; ++i)
+    {
+        for (int j = 0; j < m; ++j)
+        {
             int k = i * n + j;
-            switch (precision) {
-                case 1:
-                    printf("%.1f ", a[k]);
-                    break;
-                case 2:
-                    printf("%.2f ", a[k]);
-                    break;
-                case 3:
-                    printf("%.3f ", a[k]);
-                    break;
-                case 4:
-                    printf("%.4f ", a[k]);
-                    break;
-                case 5:
-                    printf("%.5f ", a[k]);
-                    break;
-                case 6:
-                    printf("%.6f ", a[k]);
-                    break;
-                case 7:
-                    printf("%.7f ", a[k]);
-                    break;
-                case 8:
-                    printf("%.8f ", a[k]);
-                    break;
+            switch (precision)
+            {
+            case 1:
+                printf("%.1f ", a[k]);
+                break;
+            case 2:
+                printf("%.2f ", a[k]);
+                break;
+            case 3:
+                printf("%.3f ", a[k]);
+                break;
+            case 4:
+                printf("%.4f ", a[k]);
+                break;
+            case 5:
+                printf("%.5f ", a[k]);
+                break;
+            case 6:
+                printf("%.6f ", a[k]);
+                break;
+            case 7:
+                printf("%.7f ", a[k]);
+                break;
+            case 8:
+                printf("%.8f ", a[k]);
+                break;
             }
         }
         printf("\n");
@@ -379,28 +394,28 @@ void print_matrix(int n, int m, double *a, int precision = 8) {
 }
 
 bool solByEqualVolWithVarStepPlusPrint(
-        double par_a, //   -  Item of first initial or boundary data parameter.
-        double par_b, //   -  Item of second parameter from "u_funcion".
-        //
-        double lbDom, //   -  Left and right boundaries of rectangular domain.
-        double rbDom,
-        //
-        double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-        double ubDom,
-        //
-        double tau, //   -  Time step.
-        int numOfTSt, //   -  A number of time steps.
-        //
-        double * masOX, //   -  Massive of OX nodes. Dimension = numOfOXSt +1.
-        int numOfOXSt, //   -  Number of OX steps.
-        //
-        double * masOY, //   -  Massive of OY nodes. Dimension = numOfOYSt +1.
-        int numOfOYSt, //   -  Number of OY steps.
-        //
-        bool isTimeStShBeChan, //   -  Is time step shoulb be change?
-        bool isGridStShBeChan, //   -  Is grid step shoulb be change?
-        //
-        int numOfGrStepLayer) //   -  How many computations with different grid steps we want to make.
+                                       double par_a, //   -  Item of first initial or boundary data parameter.
+                                       double par_b, //   -  Item of second parameter from "u_funcion".
+                                       //
+                                       double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                       double rbDom,
+                                       //
+                                       double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                       double ubDom,
+                                       //
+                                       double tau, //   -  Time step.
+                                       int numOfTSt, //   -  A number of time steps.
+                                       //
+                                       double * masOX, //   -  Massive of OX nodes. Dimension = numOfOXSt +1.
+                                       int numOfOXSt, //   -  Number of OX steps.
+                                       //
+                                       double * masOY, //   -  Massive of OY nodes. Dimension = numOfOYSt +1.
+                                       int numOfOYSt, //   -  Number of OY steps.
+                                       //
+                                       bool isTimeStShBeChan, //   -  Is time step shoulb be change?
+                                       bool isGridStShBeChan, //   -  Is grid step shoulb be change?
+                                       //
+                                       int numOfGrStepLayer) //   -  How many computations with different grid steps we want to make.
 {
 
 
@@ -467,10 +482,12 @@ bool solByEqualVolWithVarStepPlusPrint(
 
 
 
-    for (indByNumOfGridSteps = 0; indByNumOfGridSteps < numOfGrStepLayer; indByNumOfGridSteps++) {
+    for (indByNumOfGridSteps = 0; indByNumOfGridSteps < numOfGrStepLayer; indByNumOfGridSteps++)
+    {
         //   New time step.
 
-        if ((isTimeStShBeChan == true) || (indByNumOfGridSteps == 0)) {
+        if ((isTimeStShBeChan == true) || (indByNumOfGridSteps == 0))
+        {
             varTau = tau / pow(2, indByNumOfGridSteps);
 
             varNumOfTSt = numOfTSt * pow(2, indByNumOfGridSteps);
@@ -478,7 +495,8 @@ bool solByEqualVolWithVarStepPlusPrint(
 
 
 
-        if ((isGridStShBeChan == true) || (indByNumOfGridSteps == 0)) {
+        if ((isGridStShBeChan == true) || (indByNumOfGridSteps == 0))
+        {
             //   New absciss grid steps.
 
             varNumOfOXSt = numOfOXSt * pow(2, indByNumOfGridSteps);
@@ -489,7 +507,8 @@ bool solByEqualVolWithVarStepPlusPrint(
 
             buf_D = (rbDom - lbDom) / varNumOfOXSt;
 
-            for (j = 0; j < varNumOfOXSt + 1; j++) {
+            for (j = 0; j < varNumOfOXSt + 1; j++)
+            {
                 varMasOX[j] = lbDom + ((double) j) * buf_D;
             }
 
@@ -505,7 +524,8 @@ bool solByEqualVolWithVarStepPlusPrint(
 
             buf_D = (ubDom - bbDom) / varNumOfOYSt;
 
-            for (k = 0; k < varNumOfOYSt + 1; k++) {
+            for (k = 0; k < varNumOfOYSt + 1; k++)
+            {
                 varMasOY[k] = bbDom + ((double) k) * buf_D;
             }
 
@@ -527,26 +547,26 @@ bool solByEqualVolWithVarStepPlusPrint(
         //   Computation of solution.
 
         bul = solByEqualVolumes(
-                par_a, par_b,
-                //
-                lbDom, rbDom,
-                //
-                bbDom, ubDom,
-                //
-                varTau, //   -  Time step.
-                varNumOfTSt, //   -  A number of time steps.
-                //
-                varMasOX, //   -  Massive of abscissa grid points. Dimension = varNumOfOxGrSt +1.
-                varNumOfOXSt, //   -  Variable number of abscissa grid steps.
-                //
-                varMasOY, //   -  Massive of ordinate grid points. Dimension = varNumOfOyGrSt +1.
-                varNumOfOYSt, //   -  Variable number of ordinate grid steps.
-                //
-                0, //   -  For print only. Solution order which we want to get.
-                //
-                rhoInCurrTL_asV); //   -  Rho (solution) in Current (Last) Time Level.
+                                par_a, par_b,
+                                //
+                                lbDom, rbDom,
+                                //
+                                bbDom, ubDom,
+                                //
+                                varTau, //   -  Time step.
+                                varNumOfTSt, //   -  A number of time steps.
+                                //
+                                varMasOX, //   -  Massive of abscissa grid points. Dimension = varNumOfOxGrSt +1.
+                                varNumOfOXSt, //   -  Variable number of abscissa grid steps.
+                                //
+                                varMasOY, //   -  Massive of ordinate grid points. Dimension = varNumOfOyGrSt +1.
+                                varNumOfOYSt, //   -  Variable number of ordinate grid steps.
+                                //
+                                0, //   -  For print only. Solution order which we want to get.
+                                //
+                                rhoInCurrTL_asV); //   -  Rho (solution) in Current (Last) Time Level.
 
-        //print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
+        print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
 
         //   :) Now we know solution! It's great. What we need more?
 
@@ -554,8 +574,10 @@ bool solByEqualVolWithVarStepPlusPrint(
 
         buf_D = varNumOfTSt * varTau;
 
-        for (k = 0; k < varNumOfOYSt + 1; k++) {
-            for (j = 0; j < varNumOfOXSt + 1; j++) {
+        for (k = 0; k < varNumOfOYSt + 1; k++)
+        {
+            for (j = 0; j < varNumOfOXSt + 1; j++)
+            {
                 //   Analytical solution in the corresponding time layer.
 
                 anSol = analytSolut(par_a, lbDom, rbDom, bbDom, ubDom, buf_D, varMasOX[j], varMasOY[k]);
@@ -565,21 +587,22 @@ bool solByEqualVolWithVarStepPlusPrint(
                 rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ] = anSol - rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ];
             }
         }
-       // printf("\nError\n");
-       // print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
+        // printf("\nError\n");
+        // print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
         //   maxModAbsErr[ indByNumOfGridSteps ]  =  MaxModItemOfMatr( rhoInCurrTL, varNumOfOXSt +1, varNumOfOYSt +1);
 
 
 
         maxModAbsErr[ indByNumOfGridSteps ] = norm_at_L_1(
-                varMasOX, varNumOfOXSt + 1, 
-                varMasOY, varNumOfOYSt + 1, rhoInCurrTL_asV);
+                                                          varMasOX, varNumOfOXSt + 1,
+                                                          varMasOY, varNumOfOYSt + 1, rhoInCurrTL_asV);
 
         printf("\nindByNumOfGridSteps = %d\n Norm %f\n", indByNumOfGridSteps, maxModAbsErr[ indByNumOfGridSteps ]);
-       
+
         //   Let's compute order of numerical solution.
 
-        if (indByNumOfGridSteps > 0) {
+        if (indByNumOfGridSteps > 0)
+        {
             masOfGrStepItem[ indByNumOfGridSteps - 1] = indByNumOfGridSteps - 0.5;
 
 
@@ -587,34 +610,37 @@ bool solByEqualVolWithVarStepPlusPrint(
 
             ordOfErr[ indByNumOfGridSteps - 1] = log(buf_D) / log(2.);
         }
-        
+
         //   Memory clearing.
 
-        if (isGridStShBeChan == true) {
+        if (isGridStShBeChan == true)
+        {
             delete varMasOX;
             delete varMasOY;
             delete rhoInCurrTL_asV;
         }
-    } 
-    
-    if (numOfGrStepLayer > 1) {
+    }
+
+    if (numOfGrStepLayer > 1)
+    {
         //   Let's write data to file.
 
         bul = printVectorBy3D(
-                "ordOfRhoErr", //   -  char *fileName,
-                //
-                numOfOXSt, //   -  �������������� �����.
-                numOfGrStepLayer, //   -  � �������� �����.
-                1. / 3., //   -  ��������� ���� �� ������� � ���� �� ������������.
-                numOfGrStepLayer, //   -  ����� ����� ����� �� ����.
-                //
-                masOfGrStepItem, //   -  double *masOx,
-                ordOfErr, //   -  double *VectorOfData,
-                //
-                numOfGrStepLayer - 1); //   -  dimOfVect.
+                              "ordOfRhoErr", //   -  char *fileName,
+                              //
+                              numOfOXSt, //   -  �������������� �����.
+                              numOfGrStepLayer, //   -  � �������� �����.
+                              1. / 3., //   -  ��������� ���� �� ������� � ���� �� ������������.
+                              numOfGrStepLayer, //   -  ����� ����� ����� �� ����.
+                              //
+                              masOfGrStepItem, //   -  double *masOx,
+                              ordOfErr, //   -  double *VectorOfData,
+                              //
+                              numOfGrStepLayer - 1); //   -  dimOfVect.
     }
-    
-    if (isGridStShBeChan == false) {
+
+    if (isGridStShBeChan == false)
+    {
         delete varMasOX;
         delete varMasOY;
         delete rhoInCurrTL_asV;

@@ -2610,7 +2610,7 @@ double solve(
                                              i_ox, ox, ox_length,
                                              i_oy, oy, oy_length,
                                              prev_density);
-                print_params(index, 12,
+                /*print_params(index, 12,
                              a,
                              b,
                              lb,
@@ -2624,7 +2624,7 @@ double solve(
                              oy_length,
                              i_ox,
                              i_oy,
-                             value);
+                             value);*/
 
                 double tmp = (ox[i_ox + 1] - ox[i_ox - 1]) / 2.;
                 value /= tmp;

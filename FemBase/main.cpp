@@ -24,7 +24,7 @@ int main()
 
 
 
-int numOfGrStepLayer = 4;                            //   -  How many computations with different grid steps we want to make.
+int numOfGrStepLayer = 1;                            //   -  How many computations with different grid steps we want to make.
 
 double buf_D;
 

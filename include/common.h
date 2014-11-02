@@ -19,37 +19,26 @@ static double C_tau; //   -  Time step. Will be computed by relation "C_StepsRel
 static int C_numOfTSt; //   -  A number of time steps.
 
 inline void initCompOfGlVar() {
-    double maxOfGrSt = 0.;
-
-    //   Massive of OX steps. Dimension = C_numOfOXSt +1.
+    double max = 0.;
     masOX = new double[ C_numOfOXSt + 1];
-    for (int j = 0; j < C_numOfOXSt + 1; j++) {
-        //   Regular grid for simplification.
-        masOX[j] = C_lbDom + (C_rbDom - C_lbDom) * ((double) j / C_numOfOXSt);
-    }
-
-    //   Let's find out maximum of OX step.
-    for (int j = 0; j < C_numOfOXSt; j++) {
-        if (maxOfGrSt < (masOX[j + 1] - masOX[j])) {
-            maxOfGrSt = (masOX[j + 1] - masOX[j]);
-        }
-    }
-
-    //   Massive of OY steps. Dimension = C_numOfOYSt +1.
     masOY = new double[ C_numOfOYSt + 1];
-    for (int j = 0; j < C_numOfOYSt + 1; j++) {
-        //   Regular grid for simplification.
-        masOY[j] = C_bbDom + (C_ubDom - C_bbDom) * ((double) j / C_numOfOYSt);
+    
+    for (int j = 0; j < C_numOfOXSt + 1; j++) { 
+        masOX[j] = C_lbDom + (C_rbDom - C_lbDom) * ((double) j / C_numOfOXSt);
+        if (max < (masOX[j + 1] - masOX[j]) && j < C_numOfOXSt) {
+            max = (masOX[j + 1] - masOX[j]);
+        }
     }
-
-    //   Let's find out maximum of OY step.
-    for (int j = 0; j < C_numOfOYSt; j++) {
-        if (maxOfGrSt < (masOY[j + 1] - masOY[j])) {
-            maxOfGrSt = (masOY[j + 1] - masOY[j]);
+    
+    //   Massive of OY steps. Dimension = C_numOfOYSt +1.
+    for (int j = 0; j < C_numOfOYSt + 1; j++) { 
+        masOY[j] = C_bbDom + (C_ubDom - C_bbDom) * ((double) j / C_numOfOYSt);
+        if (max < (masOY[j + 1] - masOY[j]) && j < C_numOfOXSt) {
+            max = (masOY[j + 1] - masOY[j]);
         }
     }
 
-    C_tau = C_StepsRel * maxOfGrSt;
+    C_tau = C_StepsRel * max;
 
     C_numOfTSt = (int) (C_timeEnd / C_tau);
 
@@ -59,6 +48,7 @@ inline void initCompOfGlVar() {
     }
 
     if (fabs(C_numOfTSt * C_tau - C_timeEnd) >= (C_tau * 1.e-7)) {
+        //printf("hello1\n");
         C_numOfTSt++;
         C_tau = C_timeEnd / C_numOfTSt;
     }
