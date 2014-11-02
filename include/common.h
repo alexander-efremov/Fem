@@ -45,12 +45,11 @@ public:
     ComputeParameters(int lvl) : ComputeParameters() {
         level = lvl;
         double value = pow(2., level);
-        int n = C_numOfOXSt * value;
-        tau /= value;
-        t_count *= value;
-        x_size = n;
+        x_size = C_numOfOXSt * value;
         y_size = C_numOfOYSt * value;
         size = (x_size + 1) * (y_size + 1);
+        tau /= value;
+        t_count *= value;
     }
 
     ~ComputeParameters() {
