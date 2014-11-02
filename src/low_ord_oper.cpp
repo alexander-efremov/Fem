@@ -2644,7 +2644,7 @@ double solve(
         }
 
         memcpy(prev_density, density, (ox_length + 1) * (oy_length + 1) * sizeof (double));
-        
+
     }
 
     delete[] prev_density;
@@ -2662,7 +2662,7 @@ double *cpu_solve(double a,
                   int ox_length,
                   int oy_length,
                   const int step)
-{  
+{
     double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
     double *ox = new double [ ox_length + 1 ];
     double *oy = new double [ oy_length + 1 ];
@@ -2700,7 +2700,7 @@ double *cpu_solve(double a,
           density);
 
     double norm = get_norm_of_error(density, ox_length, oy_length, ox, oy,
-                                    time_step_count*time_step);
+                                    time_step_count * time_step);
     printf("Norm L1 = %f\n", norm);
     delete[] ox;
     delete[] oy;
