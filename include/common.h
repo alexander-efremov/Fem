@@ -6,17 +6,13 @@
 
 static const double C_pi = 3.14159265358979323846264338327;
 static const double C_par_a = 2.; //   -  Solution parameter.
-static const int C_numOfOXSt = 10; //   -  Number of OX steps (segments).
 static const double C_par_b = 1.; //-  Item of second parameter from "u_funcion" or "v_funcion".
-static const int C_numOfOYSt = 10; //   -  Number of OY steps (segments).
 static const double C_StepsRel = 1. / 5.; //   -  A relation of the time step "C_tau" to the max grid step "maxOfGrSt";
 static const double C_timeEnd = 1.; //   -  Finish time.
+static const int C_numOfOXSt = 10; //   -  Number of OX steps (segments).
+static const int C_numOfOYSt = 10; //   -  Number of OY steps (segments).
 static double C_lbDom = 0., C_rbDom = 1.; //   -  Left and right boundaries of rectangular domain.
-static double *masOX; //   -  Massive of OX points. Dimension = C_numOfOXSt +1.
-static double C_bbDom = 0., C_ubDom = 1.; //   -  Botton and upper boundaries of rectangular domain.
-static double *masOY; //   -  Massive of OY points. Dimension = C_numOfOYSt +1.
-static double C_tau; //   -  Time step. Will be computed by relation "C_StepsRel" with small correction.
-static int C_numOfTSt; //   -  A number of time steps.
+static double C_bbDom = 0., C_ubDom = 1.; //   -  Bottom and upper boundaries of rectangular domain.
 
 struct ComputeParameters {
 private:
@@ -43,6 +39,9 @@ public:
     bool _initdiff;
 
     ComputeParameters(int level, bool initresult, bool initdiff = false) : currentTimeLevel(1), t_count(0) {
+        double tau = 0.02;
+        int time_step_count = 50;
+        
         _initresult = initresult;
         _initdiff = initdiff;
 
@@ -55,8 +54,8 @@ public:
 
         double value = pow(2., level);
         int n = C_numOfOXSt * value;
-        tau = C_tau / value;
-        t_count = C_numOfTSt * value;
+        tau /= value;
+        t_count = time_step_count * value;
 
         x_size = n;
 

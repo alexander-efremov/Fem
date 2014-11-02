@@ -7,10 +7,10 @@
 class cpu : public testing::Test {
 protected:
     double *GetCpuToLevel(int level) {
-        C_tau = 0.02;
-        C_numOfTSt = 50;
+        double tau = 0.02;
+        double time_step_count = 50;
         return solve_cpu_test(C_par_a, C_par_b, C_lbDom, C_rbDom, C_bbDom,
-                C_ubDom, C_tau, C_numOfTSt,  C_numOfOXSt,
+                C_ubDom, tau, time_step_count,  C_numOfOXSt,
                 C_numOfOYSt, level);
     }
 };
