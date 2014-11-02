@@ -55,28 +55,28 @@ public:
     ~ComputeParameters() {
     }
     
-    int get_real_x_size() {
+    int x_size() {
         return x_size + 1;
     }
 
-    int get_real_y_size() {
+    int y_size() {
         return y_size + 1;
     }
 
     // получает размер внутренней матрицы
 
     int get_inner_matrix_size() {
-        return (get_real_x_size() - 2) * (get_real_y_size() - 2);
+        return (x_size() - 2) * (y_size() - 2);
     }
 
     int get_real_matrix_size() {
-        return get_real_x_size() * get_real_y_size();
+        return x_size() * y_size();
     }
 
     // получает размер внутренней матрицы
 
     int get_inner_x_size() {
-        return get_real_x_size() - 2;
+        return x_size() - 2;
     }
 
     friend std::ostream &operator<<(std::ostream &output,

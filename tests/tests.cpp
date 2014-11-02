@@ -1,13 +1,11 @@
 #include <iostream>
 #include <gtest/gtest.h>
-#include "timer.h"
 #include "common.h"
 #include "utils.h"
 
 class cpu : public testing::Test
 {
 protected:
-
     double *solve(ComputeParameters *p)
     {
         return cpu_solve(p->a, p->b, p->lb, p->rb, p->bb,
@@ -18,15 +16,15 @@ protected:
 
 TEST_F(cpu, main_test)
 {
-    const int finishLevel = 1;
-    const int startLevel = 0;
-
-    for (int level = startLevel; level < finishLevel; ++level)
+    const int first = 0;
+    const int last = 1;
+    
+    for (int lvl = first; lvl < last; ++lvl)
     {
-        ComputeParameters *p = new ComputeParameters(level);
+        ComputeParameters *p = new ComputeParameters(lvl);
         std::cout << *p << std::endl;
         double *data = solve(p);
-        print_matrix(p->get_real_x_size(), p->get_real_y_size(), data);
+        print_matrix(p->x_size(), p->y_size(), data);
         delete p;
         delete[] data;
     }
