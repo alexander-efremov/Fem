@@ -516,7 +516,7 @@ enum bound_side
     right
 };
 
-double init_bound(double x, double y, double t,  bound_side side)
+double init_bound(double x, double y, double t, bound_side side)
 {
     switch (side)
     {
@@ -2387,29 +2387,6 @@ int quadrAngleType(
     return qAngType;
 }
 
-double normOfMatrAtL1_asV(
-                          const double *masOX, //   -  Massive of OX grid nodes. Dimension = dimOX.
-                          int dimOX,
-                          //
-                          const double *masOY, //   -  Massive of OY grid nodes. Dimension = dimOY.
-                          int dimOY,
-                          //
-                          double *mat_asV)
-{
-    double norm = 0.;
-    double hx = masOX[1] - masOX[0];
-    double hy = masOY[1] - masOY[0];
-
-    for (int k = 1; k < dimOY - 1; k++)
-    {
-        for (int j = 1; j < dimOX - 1; j++)
-        {
-            norm += fabs(mat_asV[ dimOX * k + j ]);
-        }
-    }
-    return hx * hy * norm;
-}
-
 double compute_value(
                      double par_a, //   -  Item of left and right setback (parameter "a" in test).
                      double par_b, //   -  Item of second parameter from "u_funcion".
@@ -2557,6 +2534,25 @@ void print_params(int index, int needed_index,
     }
 }
 
+double get_norm_of_error(double* density, int x_length, int y_length, double* ox,
+                         double* oy,
+                         double ts_count_mul_steps)
+{
+    double norm = 0.;
+    for (int k = 0; k <= y_length; k++)
+    {
+        for (int j = 0; j <= x_length; j++)
+        {
+            double value = analytical_solution(ts_count_mul_steps, ox[j], oy[k]);
+            norm += fabs(value - density[ (x_length + 1) * k + j ]);
+        }
+    }
+    double hx = ox[1] - ox[0];
+    double hy = oy[1] - oy[0];
+
+    return hx * hy * norm;
+}
+
 double solve(
              double a,
              double b,
@@ -2630,14 +2626,14 @@ double solve(
                 h = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
                 value /= h;
 
-                double rp = f_function(a, 
-                                       b, 
-                                       lb, 
-                                       rb, 
-                                       bb, 
-                                       ub, 
-                                       tau, 
-                                       i_tl, 
+                double rp = f_function(a,
+                                       b,
+                                       lb,
+                                       rb,
+                                       bb,
+                                       ub,
+                                       tau,
+                                       i_tl,
                                        i_ox,
                                        ox,
                                        ox_length,
@@ -2647,8 +2643,8 @@ double solve(
                 density[ index ] = value + tau * rp;
             }
         }
-        
-        memcpy(prev_density, density, (ox_length + 1) * (oy_length + 1) * sizeof(double));
+
+        memcpy(prev_density, density, (ox_length + 1) * (oy_length + 1) * sizeof (double));
     }
 
     delete[] prev_density;
@@ -2686,16 +2682,16 @@ double *cpu_solve(double a,
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
 
-//    print_params(a,
-//                 b,
-//                 lb,
-//                 rb,
-//                 bb,
-//                 ub,
-//                 time_step,
-//                 time_step_count,
-//                 ox_length,
-//                 oy_length);
+    //    print_params(a,
+    //                 b,
+    //                 lb,
+    //                 rb,
+    //                 bb,
+    //                 ub,
+    //                 time_step,
+    //                 time_step_count,
+    //                 ox_length,
+    //                 oy_length);
 
     solve(a, b,
           lb, rb,
@@ -2708,6 +2704,9 @@ double *cpu_solve(double a,
           oy_length,
           density);
 
+    double norm = get_norm_of_error(density, ox_length, oy_length, ox, oy,
+                                    time_step_count*time_step);
+    printf("Norm L1 = %f\n", norm);
     delete[] ox;
     delete[] oy;
     return density;
