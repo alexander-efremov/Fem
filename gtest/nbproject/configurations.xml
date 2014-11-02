@@ -29,6 +29,7 @@
       </toolsSet>
       <compileType>
         <ccTool>
+          <architecture>2</architecture>
           <incDir>
             <pElem>../gtest-1.7.0/include</pElem>
             <pElem>../gtest-1.7.0</pElem>

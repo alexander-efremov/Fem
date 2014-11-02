@@ -48,6 +48,9 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <architecture>2</architecture>
+        </ccTool>
       </compileType>
       <item path="Const.h" ex="false" tool="3" flavor2="0">
       </item>
