@@ -2647,11 +2647,8 @@ double solve(
                 density[ index ] = value + tau * rp;
             }
         }
-
-        for (int i = 0; i < (ox_length + 1) * (oy_length + 1); i++)
-        {
-            prev_density[ i ] = density[ i ];
-        }
+        
+        memcpy(prev_density, density, (ox_length + 1) * (oy_length + 1) * sizeof(double));
     }
 
     delete[] prev_density;
@@ -2679,26 +2676,26 @@ double *cpu_solve(double a,
     double *ox = new double [ ox_length + 1 ];
     double *oy = new double [ oy_length + 1 ];
 
-    for (int i = 0; i < ox_length + 1; i++)
+    for (int i = 0; i <= ox_length; i++)
     {
         ox[i] = lb + i * (rb - lb) / ox_length;
     }
 
-    for (int i = 0; i < oy_length + 1; i++)
+    for (int i = 0; i <= oy_length; i++)
     {
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
 
-    print_params(a,
-                 b,
-                 lb,
-                 rb,
-                 bb,
-                 ub,
-                 time_step,
-                 time_step_count,
-                 ox_length,
-                 oy_length);
+//    print_params(a,
+//                 b,
+//                 lb,
+//                 rb,
+//                 bb,
+//                 ub,
+//                 time_step,
+//                 time_step_count,
+//                 ox_length,
+//                 oy_length);
 
     solve(a, b,
           lb, rb,

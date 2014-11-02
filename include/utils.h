@@ -1,8 +1,8 @@
 #ifndef UTILS_H
 #define	UTILS_H
 
-void print_matrix_to_file(int n, int m, double *data, std::string filename) {
-    FILE *f = fopen(filename.c_str(), "w");
+void print_matrix_to_file(int n, int m, double *data, char* filename) {
+    FILE *f = fopen(filename, "w");
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
             int k = i * n + j;

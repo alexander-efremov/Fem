@@ -1,7 +1,8 @@
 #ifndef COMMON_H_INCLUDED
 #define COMMON_H_INCLUDED
-#include <iostream>
+#include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 struct ComputeParameters {
 public:
@@ -48,7 +49,6 @@ public:
     }
 
     // получает размер внутренней матрицы
-
     int get_inner_matrix_size() {
         return (x_length() - 2) * (y_length() - 2);
     }
@@ -58,26 +58,8 @@ public:
     }
 
     // получает размер внутренней матрицы
-
     int get_inner_x_size() {
         return x_length() - 2;
-    }
-
-    friend std::ostream &operator<<(std::ostream &output,
-            const ComputeParameters &tr) {
-
-        output << "a = " << tr.a << std::endl;
-        output << "b = " << tr.b << std::endl;
-        output << "lb = " << tr.lb << std::endl;
-        output << "rb = " << tr.rb << std::endl;
-        output << "bb = " << tr.bb << std::endl;
-        output << "ub = " << tr.ub << std::endl;
-        output << "size = " << tr.size << std::endl;
-        output << "tau = " << tr.tau << std::endl;
-        output << "Time levels = " << tr.t_count << std::endl;
-        output << "x size = " << tr.x_size << std::endl;
-        output << "y size = " << tr.y_size << std::endl;
-        return output;
     }
 };
 
