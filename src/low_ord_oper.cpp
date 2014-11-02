@@ -2539,9 +2539,9 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
                          double ts_count_mul_steps)
 {
     double norm = 0.;
-    for (int k = 0; k <= y_length; k++)
+    for (int k = 0; k <= y_length; ++k)
     {
-        for (int j = 0; j <= x_length; j++)
+        for (int j = 0; j <= x_length; ++j)
         {
             double value = analytical_solution(ts_count_mul_steps, ox[j], oy[k]);
             norm += fabs(value - density[ (x_length + 1) * k + j ]);
@@ -2549,7 +2549,6 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
     }
     double hx = ox[1] - ox[0];
     double hy = oy[1] - oy[0];
-
     return hx * hy * norm;
 }
 
@@ -2579,13 +2578,13 @@ double solve(
 
     for (int i_tl = 1; i_tl < time_step_count + 1; i_tl++)
     {
-        for (int i = 0; i < ox_length + 1; i++)
+        for (int i = 0; i <= ox_length; i++)
         {
             density[ i ] = init_bound(ox[ i ], bb, tau * i_tl, bottom);
             density[ (ox_length + 1) * oy_length + i ] = init_bound(ox[ i ], ub, tau * i_tl, up);
         }
 
-        for (int i = 0; i < oy_length + 1; i++)
+        for (int i = 0; i <= oy_length; i++)
         {
             density[ (ox_length + 1) * i ] = init_bound(lb, oy[ i ], tau * i_tl, left);
             density[ (ox_length + 1) * i + ox_length ] = init_bound(rb, oy[ i ], tau * i_tl, right);
@@ -2645,6 +2644,7 @@ double solve(
         }
 
         memcpy(prev_density, density, (ox_length + 1) * (oy_length + 1) * sizeof (double));
+        
     }
 
     delete[] prev_density;
@@ -2662,12 +2662,7 @@ double *cpu_solve(double a,
                   int ox_length,
                   int oy_length,
                   const int step)
-{
-    int power = pow(2., step);
-    time_step /= power;
-    time_step_count *= power;
-    ox_length *= power;
-    oy_length *= power;
+{  
     double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
     double *ox = new double [ ox_length + 1 ];
     double *oy = new double [ oy_length + 1 ];
@@ -2682,16 +2677,16 @@ double *cpu_solve(double a,
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
 
-    //    print_params(a,
-    //                 b,
-    //                 lb,
-    //                 rb,
-    //                 bb,
-    //                 ub,
-    //                 time_step,
-    //                 time_step_count,
-    //                 ox_length,
-    //                 oy_length);
+    print_params(a,
+                 b,
+                 lb,
+                 rb,
+                 bb,
+                 ub,
+                 time_step,
+                 time_step_count,
+                 ox_length,
+                 oy_length);
 
     solve(a, b,
           lb, rb,
