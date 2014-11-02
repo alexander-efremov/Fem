@@ -2522,8 +2522,7 @@ double compute_value(
                                       iOfOXN, iOfOYN);
 }
 
-void print_params(
-                  double a,
+void print_params(double a,
                   double b,
                   double lb,
                   double rb,
@@ -2532,8 +2531,7 @@ void print_params(
                   double tau,
                   int tl_count,
                   int ox_length,
-                  int oy_length
-                  )
+                  int oy_length)
 {
     printf("a = %f\n", a);
     printf("b = %f\n", b);
@@ -2718,8 +2716,7 @@ double *cpu_solve(double a,
                  time_step,
                  time_step_count,
                  ox_length,
-                 oy_length
-                 );
+                 oy_length);
 
     solve(a, b,
           lb, rb,
