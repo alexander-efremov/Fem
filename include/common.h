@@ -4,6 +4,33 @@
 #include <math.h>
 #include <string.h>
 
+enum bound_side {
+    up,
+    bottom,
+    left,
+    right
+};
+
+struct point_t {
+
+    point_t() {
+        x = 0.;
+        y = 0.;
+    }
+    double x;
+    double y;
+    
+};
+
+
+enum quad_type {
+    wall,
+    normal,
+    convex,
+    concave,
+    pseudo
+};
+
 struct ComputeParameters {
 public:
 
@@ -14,6 +41,7 @@ public:
     double bb;
     double ub;
     double tau;
+    double norm;
     int size;
     int t_count;
     int x_size;
@@ -25,9 +53,9 @@ public:
         t_count = 50;
         tau = 0.02;
         a = 2.;
-       // b = 6.486; // при этом значении будут появлятся попадания на стенку для 21 на 21
+        // b = 6.486; // при этом значении будут появлятся попадания на стенку для 21 на 21
         b = 10.;
-      //  b = 1.;
+        //  b = 1.;
         lb = bb = 0.;
         rb = ub = 1.;
         double value = pow(2., 0);
@@ -56,14 +84,13 @@ public:
         x_size *= power;
         y_size *= power;
     }
-    
-    int get_size(){
+
+    int get_size() {
         return x_length() * y_length();
     }
 };
 
-extern double *cpu_solve(
-        double a,
+extern double *solve(
         double b,
         double lb,
         double rb,
@@ -73,6 +100,6 @@ extern double *cpu_solve(
         int time_step_count,
         int ox_length,
         int oy_length,
-        const int step);
+        double *norm);
 
 #endif
