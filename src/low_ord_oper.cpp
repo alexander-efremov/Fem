@@ -2617,7 +2617,7 @@ double *solve(double a,
               int time_step_count,
               int ox_length,
               int oy_length,
-              const int step)
+              double* norm)
 {
     double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
     double *ox = new double [ ox_length + 1 ];
@@ -2657,9 +2657,9 @@ double *solve(double a,
           oy_length,
           density);
 
-    double norm = get_norm_of_error(density, ox_length, oy_length, ox, oy,
-                                    time_step_count * time_step);
-    printf("Norm L1 = %f\n", norm);
+    *norm = get_norm_of_error(density, ox_length, oy_length, ox, oy,
+                              time_step_count * time_step);
+    //  printf("Norm L1 = %f\n", *norm);
     printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_counter);
     delete[] ox;
     delete[] oy;
