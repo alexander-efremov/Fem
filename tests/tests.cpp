@@ -17,7 +17,7 @@ protected:
 TEST_F(cpu, main_test)
 {
     const int first = 0;
-    const int last = 2;
+    const int last = 1;
     ComputeParameters *p = new ComputeParameters();
     
     for (int lvl = first; lvl < last; ++lvl)

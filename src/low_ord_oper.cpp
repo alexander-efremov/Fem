@@ -1,6 +1,7 @@
 #include "common.h"
 
 static const double C_pi = 3.14159265358979323846264338327;
+static int wall_counter = 0;
 
 double itemOfInteg_1SpecType(
                              double Py,
@@ -32,7 +33,6 @@ double itemOfInteg_2SpecType(
                              double betta)
 {
     double tmp, integ;
-    //   Computing...
     tmp = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
     tmp = tmp - (Py - alpha) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
     integ = tmp / (3 * a);
@@ -83,7 +83,7 @@ double integUnderLeftTr_OneCell(
 
     // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
     // норма должна уменьшиться
-    if ((indCurSqOx[0] < 0) || (indCurSqOx[1] > numOfOXSt) || (indCurSqOy[0] < 0) || (indCurSqOy[1] > numOfOYSt))
+    if (indCurSqOx[0] < 0 || indCurSqOx[1] > numOfOXSt || indCurSqOy[0] < 0 || indCurSqOy[1] > numOfOYSt)
     {
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
@@ -97,6 +97,8 @@ double integUnderLeftTr_OneCell(
         x = indCurSqOx[1] * hx;
         y = indCurSqOy[1] * hy;
         rho[1][1] = analytical_solution(t, x, y);
+
+        wall_counter++;
     }
 
     //   1.
@@ -251,6 +253,9 @@ double integUnderRectAng_OneCell(double Py,
         x = indCurSqOx[1] * hx;
         y = indCurSqOy[1] * hy;
         rho[1][1] = analytical_solution(t, x, y);
+
+        wall_counter++;
+
     }
 
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0))
@@ -729,14 +734,6 @@ double integOfChan_SLLeftSd(
 }
 
 double integUnderRigAngTr_BottLeft(
-                                   double par_a, //   -  Solution parameter.
-                                   //
-                                   double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                   double rbDom,
-                                   //
-                                   double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                   double ubDom,
-                                   //
                                    double tau,
                                    int iCurrTL, //   -  Index of current time layer.
                                    //
@@ -1141,7 +1138,7 @@ double integUnderBottTr(
     if ((BvBt[0] > LvBt[0]) && (BvBt[0] < RvBt[0]))
     {
         buf_D = integUnderRigAngTr_BottLeft(
-                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            tau, iCurrTL,
                                             //
                                             BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = buf_D;
@@ -1160,12 +1157,12 @@ double integUnderBottTr(
     if (BvBt[0] >= RvBt[0])
     {
         buf_D = integUnderRigAngTr_BottLeft(
-                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            tau, iCurrTL,
                                             //
                                             BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = buf_D;
         buf_D = integUnderRigAngTr_BottLeft(
-                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            tau, iCurrTL,
                                             //
                                             BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr - buf_D;
@@ -1178,14 +1175,6 @@ double integUnderBottTr(
 }
 
 double integUnderRigAngTr_UppLeft(
-                                  double par_a, //   -  Solution parameter.
-                                  //
-                                  double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                  double rbDom,
-                                  //
-                                  double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                  double ubDom,
-                                  //
                                   double tau,
                                   int iCurrTL, //   -  Index of current time layer.
                                   //
@@ -1595,7 +1584,7 @@ double integUnderUpperTr(
     if ((UvUt[0] > LvUt[0]) && (UvUt[0] < RvUt[0]))
     {
         buf_D = integUnderRigAngTr_UppLeft(
-                                           par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                           tau, iCurrTL,
                                            //
                                            LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = buf_D;
@@ -1611,12 +1600,12 @@ double integUnderUpperTr(
     if (UvUt[0] >= RvUt[0])
     {
         buf_D = integUnderRigAngTr_UppLeft(
-                                           par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                           tau, iCurrTL,
                                            //
                                            LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = buf_D;
         buf_D = integUnderRigAngTr_UppLeft(
-                                           par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                           tau, iCurrTL,
                                            //
                                            RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr - buf_D;
@@ -1625,31 +1614,24 @@ double integUnderUpperTr(
     return integOfUppTr;
 }
 
-double integUnderUnunifTr(
-                          double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                          double par_b, //   -  Item of second parameter from "u_funcion".
-                          //
-                          double lbDom, //   -  Left and right boundaries of rectangular domain.
+double integ_under_uniform_triangle(
+                          double par_a,
+                          double par_b,
+                          double lbDom,
                           double rbDom,
-                          //
-                          double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
+                          double bbDom,
                           double ubDom,
-                          //
                           double tau,
-                          int iCurrTL, //   -  Index of current time layer.
-                          //
-                          double *firVer, //   -  First vertex of triangle.
-                          double *secVer, //   -  Second vertex of triangle.
-                          double *thiVer, //   -  Third vertex of triangle.
-                          //
-                          const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                          int numOfOXSt, //   -  Number of OX steps.
-                          //
-                          const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                          int numOfOYSt, //   -  Number of OY steps.
-                          //
+                          int iCurrTL, 
+                          double *firVer, 
+                          double *secVer,
+                          double *thiVer,
+                          const double *masOX,
+                          int numOfOXSt,
+                          const double *masOY,
+                          int numOfOYSt, 
                           double *rhoInPrevTL_asV,
-                          int ii, int jj) //!!!!!!!!!!!!!!!!!!!
+                          int ii, int jj)
 {
     double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
     bool isFirVUsed = false;
@@ -1927,7 +1909,9 @@ double f_function(//   -  It's item of right part of differential equation.
     return res;
 }
 
-int quadrAngleType(
+
+// Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
+int get_quadrangle_type(
                    double par_a, //   -  Item of left and right setback (parameter "a" in test).
                    double par_b, //   -  Item of second parameter from "u_funcion".
                    //
@@ -2383,91 +2367,64 @@ int quadrAngleType(
 }
 
 double compute_value(
-                     double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                     double par_b, //   -  Item of second parameter from "u_funcion".
-                     //
-                     double lbDom, //   -  Left and right boundaries of rectangular domain.
-                     double rbDom,
-                     //
-                     double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                     double ubDom,
-                     //
+                     double a,
+                     double b,
+                     double lb,
+                     double rb,
+                     double bb,
+                     double ub,
                      double tau,
-                     double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
-                     //
-                     int iOfOXN, //   -  Index of current OX node.
-                     const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                     int numOfOXSt, //   -  Number of OX steps.
-                     //
-                     int iOfOYN, //   -  Index of current OY node.
-                     const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                     int numOfOYSt, //   -  Number of OY steps.
-                     double *rhoInPrevTL_asV)
+                     double curr_tl,
+                     int i_ox,
+                     const double *ox,
+                     int ox_length,
+                     int i_oy,
+                     const double *oy,
+                     int oy_length,
+                     double *prev_density)
 {
     double firVfirT[2], secVfirT[2], thiVfirT[2]; //   -  First, second and third vertices of first triangle.
     double firVsecT[2], secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
-    int qAngType; //   -  Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
-    double buf_D;
+
     //   Let's understand what type of quadrangle we have.
-    qAngType = quadrAngleType(
-                              par_a, par_b, //   -  Analitycal solution parameters.
-                              //
-                              lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                              //
-                              bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                              //
-                              tau, iCurrTL, //   -  Time data. Necessary for velocity.
-                              //
-                              iOfOXN, masOX, numOfOXSt, //   -  OX data.
-                              //
-                              iOfOYN, masOY, numOfOYSt, //   -  OY data.
-                              //
-                              firVfirT, secVfirT, thiVfirT, //   -  Vertices of first triangle.
-                              //
-                              firVsecT, secVsecT, thiVsecT); //   -  Vertices of second triangle.
+    int type = get_quadrangle_type(
+                              a, b, 
+                              lb, rb, 
+                              bb, ub, 
+                              tau, curr_tl, 
+                              i_ox, ox, ox_length, 
+                              i_oy, oy, oy_length, 
+                              firVfirT, secVfirT, thiVfirT, 
+                              firVsecT, secVsecT, thiVsecT);
 
     //  printf("i= %d, j=%d, 1: %le    2: %le    3: %le \n", iOfOXN, iOfOYN, firVfirT[1], secVfirT[1], thiVfirT[1]);
 
-    if (qAngType != 1) return -1.;
+    if (type != 1) return -1.;
 
-    buf_D = integUnderUnunifTr(
-                               par_a, par_b, //   -  Analitycal solution parameters.
-                               //
-                               lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                               //
-                               bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                               //
-                               tau, iCurrTL, //   -  Index of current time layer.
-                               //
-                               firVfirT, secVfirT, thiVfirT, //   -  Vertices of first triangle.
-                               //
-                               masOX, numOfOXSt, //   -  Number of OX steps.
-                               //
-                               masOY, numOfOYSt, //   -  Number of OY steps.
-                               rhoInPrevTL_asV,
-                               iOfOXN, iOfOYN);
+    double value1 = integ_under_uniform_triangle(
+                               a, b,
+                               lb, rb, 
+                               bb, ub, 
+                               tau, curr_tl,
+                               firVfirT, secVfirT, thiVfirT,
+                               ox, ox_length,
+                               oy, oy_length,
+                               prev_density,
+                               i_ox, i_oy);
 
-    //  printf("i= %d, j=%d, sq: %le \n", iOfOXN, iOfOYN, buf_D);
-
-    //  printf("********************************************************************* \n");
-
-    return buf_D + integUnderUnunifTr(
-                                      par_a, par_b, //   -  Analitycal solution parameters.
-                                      //
-                                      lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                      //
-                                      bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                      //
-                                      tau, iCurrTL, //   -  Index of current time layer.
-                                      //
-                                      firVsecT, secVsecT, thiVsecT, //   -  Vertices of first triangle.
-                                      //
-                                      masOX, numOfOXSt, //   -  Number of OX steps.
-                                      //
-                                      masOY, numOfOYSt, //   -  Number of OY steps.
-                                      //
-                                      rhoInPrevTL_asV,
-                                      iOfOXN, iOfOYN);
+    //  printf("i= %d, j=%d, sq: %le \n", iOfOXN, iOfOYN, value1);
+    
+    double value2 = integ_under_uniform_triangle(
+                                      a, b, 
+                                      lb, rb, 
+                                      bb, ub, 
+                                      tau, curr_tl, 
+                                      firVsecT, secVsecT, thiVsecT, 
+                                      ox, ox_length, 
+                                      oy, oy_length, 
+                                      prev_density,
+                                      i_ox, i_oy);
+    return value1 + value2;
 }
 
 void print_params(double a,
@@ -2489,8 +2446,8 @@ void print_params(double a,
     printf("ubDom = %f\n", ub);
     printf("tau = %f\n", tau);
     printf("Time level count = %d\n", tl_count);
-    printf("ox length = %d\n", ox_length);
-    printf("oy length = %d\n", oy_length);
+    printf("ox length = %d\n", ox_length + 1);
+    printf("oy length = %d\n", oy_length + 1);
 }
 
 void print_params(int index, int needed_index,
@@ -2523,8 +2480,8 @@ void print_params(int index, int needed_index,
         printf("current time level = %d\n", tl);
         printf("current x = %d\n", cur_x);
         printf("current y = %d\n", cur_y);
-        printf("ox length = %d\n", ox_length);
-        printf("oy length = %d\n", oy_length);
+        printf("ox length = %d\n", ox_length + 1);
+        printf("oy length = %d\n", oy_length + 1);
         printf("value = %f\n", value);
     }
 }
@@ -2534,12 +2491,12 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
                          double ts_count_mul_steps)
 {
     double norm = 0.;
-    for (int k = 0; k <= y_length; ++k)
+    for (int k = 1; k < y_length; ++k)
     {
-        for (int j = 0; j <= x_length; ++j)
+        for (int j = 1; j < x_length; ++j)
         {
-            double value = analytical_solution(ts_count_mul_steps, ox[j], oy[k]);
-            norm += fabs(value - density[ (x_length + 1) * k + j ]);
+            norm += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
+                         - density[ (x_length + 1) * k + j ]);
         }
     }
     double hx = ox[1] - ox[0];
@@ -2681,6 +2638,8 @@ double *cpu_solve(double a,
                  ox_length,
                  oy_length);
 
+    time_step_count = 1;
+    printf("!!!!!!!!TIME STEP SETTED TO ONE!!!!!!\n");
     solve(a, b,
           lb, rb,
           bb, ub,
@@ -2695,6 +2654,7 @@ double *cpu_solve(double a,
     double norm = get_norm_of_error(density, ox_length, oy_length, ox, oy,
                                     time_step_count * time_step);
     printf("Norm L1 = %f\n", norm);
+    printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_counter);
     delete[] ox;
     delete[] oy;
     return density;
