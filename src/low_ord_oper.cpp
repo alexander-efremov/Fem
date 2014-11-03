@@ -219,7 +219,7 @@ double integUnderRectAng_OneCell(double Py,
                                  int numOfOXSt, //   -  Number of OX steps.
                                  //
                                  const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                
+
                                  double *rhoInPrevTL_asV)
 {
     //   return ( fabs( (Qy - Py) * (Hx - Gx) ) );
@@ -401,7 +401,7 @@ double integOfChan_SLRightSd(
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                          
+
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -448,7 +448,7 @@ double integOfChan_SLRightSd(
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                          
+
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -648,7 +648,7 @@ double integOfChan_SLLeftSd(
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                         
+
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -699,7 +699,7 @@ double integOfChan_SLLeftSd(
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                          
+
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -1075,11 +1075,11 @@ double integUnderBottTr(
     //   1.
     if (BvBt[0] <= LvBt[0])
     {
-        buf_D = integUnderRigAngTr_BottRight( tau, iCurrTL,
+        buf_D = integUnderRigAngTr_BottRight(tau, iCurrTL,
                                              //
                                              BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = buf_D;
-        buf_D = integUnderRigAngTr_BottRight( tau, iCurrTL,
+        buf_D = integUnderRigAngTr_BottRight(tau, iCurrTL,
                                              //
                                              BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr - buf_D;
@@ -1478,7 +1478,7 @@ double integUnderRigAngTr_UppRight(
 }
 
 double integUnderUpperTr(
-                         
+
                          double tau,
                          int iCurrTL, //   -  Index of current time layer.
                          //
@@ -1676,7 +1676,7 @@ double integ_under_uniform_triangle(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                                         
+
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvBt, RvBt, BvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
@@ -1699,7 +1699,7 @@ double integ_under_uniform_triangle(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                                         
+
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvUt, RvUt, UvUt, //   -  Left, Right and Bottom vertices of Upper triangle.
@@ -1722,7 +1722,7 @@ double integ_under_uniform_triangle(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                                         
+
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvBt, RvBt, BvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
@@ -1745,7 +1745,7 @@ double integ_under_uniform_triangle(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                                         
+
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvUt, RvUt, UvUt, //   -  Left, Right and Bottom vertices of Upper triangle.
@@ -2316,28 +2316,24 @@ double compute_value(
                                          firVfirT, secVfirT, thiVfirT,
                                          firVsecT, secVsecT, thiVsecT);
 
-    if (type != normal &&
-            type != wall) return -1.;
+    if (type != normal && type != wall)
+    {
+        return -1.;
+    }
 
     // check the type of triangle to select appropriate compute methods
-
     double result = 0.;
-
     switch (type)
     {
     case wall:
-        result += wall_integ_under_uniform_triangle(
-                                                   
-                                                    tau, curr_tl,
+        result += wall_integ_under_uniform_triangle(tau, curr_tl,
                                                     firVfirT, secVfirT, thiVfirT,
                                                     ox, ox_length,
                                                     oy, oy_length,
                                                     prev_density,
                                                     i_ox, i_oy);
 
-        result += wall_integ_under_uniform_triangle(
-                                                    
-                                                    tau, curr_tl,
+        result += wall_integ_under_uniform_triangle(tau, curr_tl,
                                                     firVsecT, secVsecT, thiVsecT,
                                                     ox, ox_length,
                                                     oy, oy_length,
@@ -2345,18 +2341,14 @@ double compute_value(
                                                     i_ox, i_oy);
         break;
     case normal:
-        result += integ_under_uniform_triangle(
-                                               
-                                               tau, curr_tl,
+        result += integ_under_uniform_triangle(tau, curr_tl,
                                                firVfirT, secVfirT, thiVfirT,
                                                ox, ox_length,
                                                oy, oy_length,
                                                prev_density,
                                                i_ox, i_oy);
 
-        result += integ_under_uniform_triangle(
-                                              
-                                               tau, curr_tl,
+        result += integ_under_uniform_triangle(tau, curr_tl,
                                                firVsecT, secVsecT, thiVsecT,
                                                ox, ox_length,
                                                oy, oy_length,
