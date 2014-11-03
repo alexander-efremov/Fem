@@ -1,4 +1,5 @@
 #include "common.h"
+#include "misc.h"
 
 static const double C_pi = 3.14159265358979323846264338327;
 static int wall_counter = 0;
@@ -1648,18 +1649,18 @@ double integ_under_uniform_triangle(
         mv[0] = thiVer[0];
     }
     //   2. I want to compute across point.
-    //   2.a Let's compute line coefficients betweeen "bv" and "uv" vertices.
+    //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
     //   a_LC * x  +  b_LC * y  = c_LC.
     a_LC = uv[1] - bv[1];
-    b_LC = bv[0] - uv[0];
-    c_LC = (bv[0] - uv[0]) * bv[1] + (uv[1] - bv[1]) * bv[0];
-    //   2.b Across point.
-    ap[1] = mv[1];
     if (fabs(a_LC) < 1.e-12)
     {
         //   This triangle has very small height. I guess further computation isn't correct.
         return 1.e-12;
     }
+    b_LC = bv[0] - uv[0];
+    c_LC = (bv[0] - uv[0]) * bv[1] + (uv[1] - bv[1]) * bv[0];
+    //   2.b Across point.
+    ap[1] = mv[1];
     ap[0] = (c_LC - b_LC * ap[1]) / a_LC;
 
     //  printf("i= %d, j= %d : ap[0]= %le      mv[0]= %le \n",ii,jj, ap[0], mv[0]); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1840,93 +1841,101 @@ void compute_coordinate_on_prev_layer(double par_b,
                                       int numOfOXSt,
                                       int iOfOYN,
                                       const double *masOY,
-                                      int numOfOYSt, double *alNew, double *beNew, double *gaNew, double *thNew)
+                                      int numOfOYSt,
+                                      point_t *alNew, point_t *beNew, point_t *gaNew, point_t *thNew)
 {
-    double alpha[2], beta[2], gamma[2], theta[2]; //   -  Vertexes of square. Anticlockwise order from left bottom vertex.
+    point_t alpha, beta, gamma, theta; //   -  Vertexes of square. Anticlockwise order from left bottom vertex.
     double u, v; //   -  Items of velocity components.
 
     //   1. First of all let's compute coordinates of square vertexes.
     //  OX:
     if (iOfOXN == 0)
     {
-        alpha[0] = masOX[ iOfOXN ];
-        beta[0] = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
-        gamma[0] = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
-        theta[0] = masOX[ iOfOXN ];
+        alpha.x = masOX[ iOfOXN ];
+        beta.x = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
+        gamma.x = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
+        theta.x = masOX[ iOfOXN ];
     }
     else if (iOfOXN == numOfOXSt)
     {
-        alpha[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-        beta[0] = masOX[ iOfOXN ];
-        gamma[0] = masOX[ iOfOXN ];
-        theta[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        alpha.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        beta.x = masOX[ iOfOXN ];
+        gamma.x = masOX[ iOfOXN ];
+        theta.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
     }
     else if (iOfOXN > 0 && iOfOXN < numOfOXSt)
     {
-        alpha[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-        beta[0] = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
-        gamma[0] = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
-        theta[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        alpha.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        beta.x = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
+        gamma.x = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
+        theta.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
     }
 
     //  OY:
     if (iOfOYN == 0)
     {
-        alpha[1] = masOY[ iOfOYN ];
-        beta[1] = masOY[ iOfOYN ];
-        gamma[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-        theta[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        alpha.y = masOY[ iOfOYN ];
+        beta.y = masOY[ iOfOYN ];
+        gamma.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        theta.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
     }
     else if (iOfOYN == numOfOYSt)
     {
-        alpha[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        beta[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        gamma[1] = masOY[ iOfOYN ];
-        theta[1] = masOY[ iOfOYN ];
+        alpha.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        beta.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        gamma.y = masOY[ iOfOYN ];
+        theta.y = masOY[ iOfOYN ];
     }
     else if (iOfOYN > 0 && iOfOYN < numOfOYSt)
     {
-        alpha[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        beta[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        gamma[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-        theta[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        alpha.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        beta.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        gamma.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        theta.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
     }
 
     //   2. Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     //  alNew.
-    u = u_function(par_b, alpha[0], alpha[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, alpha[0], alpha[1]);
-    alNew[0] = alpha[0] - tau * u;
-    alNew[1] = alpha[1] - tau * v;
+    u = u_function(par_b, alpha.x, alpha.y);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, alpha.x, alpha.y);
+    alNew->x = alpha.x - tau * u;
+    alNew->y = alpha.y - tau * v;
 
     //  beNew.
-    u = u_function(par_b, beta[0], beta[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, beta[0], beta[1]);
-    beNew[0] = beta[0] - tau * u;
-    beNew[1] = beta[1] - tau * v;
+    u = u_function(par_b, beta.x, beta.y);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, beta.x, beta.y);
+    beNew->x = beta.x - tau * u;
+    beNew->y = beta.y - tau * v;
 
     //  gaNew.
-    u = u_function(par_b, gamma[0], gamma[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, gamma[0], gamma[1]);
-    gaNew[0] = gamma[0] - tau * u;
-    gaNew[1] = gamma[1] - tau * v;
+    u = u_function(par_b, gamma.x, gamma.y);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, gamma.x, gamma.y);
+    gaNew->x = gamma.x - tau * u;
+    gaNew->y = gamma.y - tau * v;
 
     //  thNew.
-    u = u_function(par_b, theta[0], theta[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, theta[0], theta[1]);
-    thNew[0] = theta[0] - tau * u;
-    thNew[1] = theta[1] - tau * v;
+    u = u_function(par_b, theta.x, theta.y);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, theta.x, theta.y);
+    thNew->x = theta.x - tau * u;
+    thNew->y = theta.y - tau * v;
 
 }
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
-quad_type get_quadrangle_type(
-                              double *alNew,
-                              double *beNew,
-                              double *gaNew,
-                              double *thNew,
-
+quad_type get_quadrangle_type(double b,
+                              double lb,
+                              double rb,
+                              double bb,
+                              double ub,
+                              double tau,
+                              int curr_tl,
+                              int i_ox,
+                              const double *ox,
+                              int ox_length,
+                              int i_oy,
+                              const double *oy,
+                              int oy_length,
                               double *firVfirT, //   -  First vertex of first triangle.
                               double *secVfirT, //   -  Second vertex of first triangle.
                               double *thiVfirT, //   -  Third vertex of first triangle.
@@ -1935,77 +1944,44 @@ quad_type get_quadrangle_type(
                               double *secVsecT, //   -  Second vertex of second triangle.
                               double *thiVsecT) //   -  Third vertex of second triangle.
 {
-    quad_type type = pseudo;
-    
-    //   3.a Let's compute coefficients of first line between "alNew" and "gaNew" points.
-    //   a_1LC * x  +  b_1LC * y  = c_1LC.
+    point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
-    point_t alpha_to_gamma;
-    point_t beta_to_theta; //   -  Vectors: 1) from "alNew" to "gaNew" 2) from "beNew" to "thNew".
-    double a_1LC, b_1LC, c_1LC; //   -  a_1LC * x  +  b_1LC * y  = c_1LC. Line equation through "alNew" and "gaNew".
-    double a_2LC, b_2LC, c_2LC; //   -  a_2LC * x  +  b_2LC * y  = c_2LC. Line equation through "beNew" and "thNew".
-    point_t cross; //   -  Across point of two lines
-    point_t alpha_to_beta; //   -  Vectors for computing vertexes sequence order by vector production.
-    point_t alpha_to_theta; //   -  Vectors for computing vertexes sequence order by vector production.
-    double vectProdOz; //   -  Z-axis of vector production.
+    compute_coordinate_on_prev_layer(b,
+                                     lb, rb,
+                                     bb, ub,
+                                     tau, curr_tl,
+                                     i_ox, ox, ox_length,
+                                     i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
 
-    alpha_to_gamma.x = gaNew[0] - alNew[0];
-    alpha_to_gamma.y = gaNew[1] - alNew[1];
-    a_1LC = alpha_to_gamma.y;
-    b_1LC = -alpha_to_gamma.x;
-    c_1LC = alpha_to_gamma.y * alNew[0] - alpha_to_gamma.x * alNew[1];
+    point_t intersection = get_intersection_point(&alpha, &beta, &gamma, &theta);
+    if ((beta.y - intersection.y) * (theta.y - intersection.y) > 0.) return pseudo; // ??
+    if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0.) return pseudo; // ?? 
 
-    //   3.b Let's compute coefficients of second line between "beNew" and "thNew" points.
-    //   a_2LC * x  +  b_2LC * y  = c_2LC.
+    double product = get_vector_product(&alpha, &beta, &theta);
+    if (product < 0.) return pseudo;
 
-    beta_to_theta.x = thNew[0] - beNew[0];
-    beta_to_theta.y = thNew[1] - beNew[1];
-    a_2LC = beta_to_theta.y;
-    b_2LC = -beta_to_theta.x;
-    c_2LC = beta_to_theta.y * beNew[0] - beta_to_theta.x * beNew[1];
+    // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
+    // It's convex.
+    firVfirT[0] = alpha.x;
+    firVfirT[1] = alpha.y;
 
-    cross.x = (b_1LC * c_2LC - b_2LC * c_1LC) / (b_1LC * a_2LC - b_2LC * a_1LC);
-    cross.y = (a_1LC * c_2LC - a_2LC * c_1LC) / (-b_1LC * a_2LC + b_2LC * a_1LC);
+    secVfirT[0] = beta.x;
+    secVfirT[1] = beta.y;
 
-    //  Now let's consider SECOND case 5.b "(  (beNew[1] - AcrP[1])*(thNew[1] - AcrP[1])  )  <= 0."
-    if ((beNew[1] - cross.y) * (thNew[1] - cross.y) > 0.) return pseudo;
-    if ((alNew[0] - cross.x) * (gaNew[0] - cross.x) > 0.) return pseudo;
+    thiVfirT[0] = gamma.x;
+    thiVfirT[1] = gamma.y;
 
-    //   O.K. the quadrangle is convex. Is it has the same vertices sequence order.
-    alpha_to_beta.x = beNew[0] - alNew[0];
-    alpha_to_beta.y = beNew[1] - alNew[1];
-    alpha_to_theta.x = thNew[0] - alNew[0];
-    alpha_to_theta.y = thNew[1] - alNew[1];
+    //   Second triangle.
+    firVsecT[0] = alpha.x;
+    firVsecT[1] = alpha.y;
 
-    vectProdOz = alpha_to_beta.x * alpha_to_theta.y - alpha_to_beta.y * alpha_to_theta.x;
+    secVsecT[0] = theta.x;
+    secVsecT[1] = theta.y;
 
-    if (vectProdOz >= 0.)
-    {
-        type = normal;
+    thiVsecT[0] = gamma.x;
+    thiVsecT[1] = gamma.y;
 
-        //   Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. It's convex.
-        firVfirT[0] = alNew[0];
-        firVfirT[1] = alNew[1];
-
-        secVfirT[0] = beNew[0];
-        secVfirT[1] = beNew[1];
-
-        thiVfirT[0] = gaNew[0];
-        thiVfirT[1] = gaNew[1];
-
-        //   Second triangle.
-
-        firVsecT[0] = alNew[0];
-        firVsecT[1] = alNew[1];
-
-        secVsecT[0] = thNew[0];
-        secVsecT[1] = thNew[1];
-
-        thiVsecT[0] = gaNew[0];
-        thiVsecT[1] = gaNew[1];
-    }
-
-    return type;
+    return normal;
 }
 
 double compute_value(
@@ -2029,16 +2005,15 @@ double compute_value(
     double firVsecT[2], secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
 
     //   Let's understand what type of quadrangle we have.
-    
-    double alpha[2], beta[2], gamma[2], theta[2]; // coordinates on previous time layer
-    compute_coordinate_on_prev_layer(b,
-                                     lb, rb,
-                                     bb, ub,
-                                     tau, curr_tl,
-                                     i_ox, ox, ox_length,
-                                     i_oy, oy, oy_length, alpha, beta, gamma, theta);
-    
-    quad_type type = get_quadrangle_type(alpha, beta, gamma, theta,
+
+
+
+    quad_type type = get_quadrangle_type(b,
+                                         lb, rb,
+                                         bb, ub,
+                                         tau, curr_tl,
+                                         i_ox, ox, ox_length,
+                                         i_oy, oy, oy_length,
                                          firVfirT, secVfirT, thiVfirT,
                                          firVsecT, secVsecT, thiVsecT);
 
