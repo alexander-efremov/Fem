@@ -4,12 +4,12 @@ static const double C_pi = 3.14159265358979323846264338327;
 static int wall_counter = 0;
 
 double _itemOfInteg_1SpecType(
-                             double Py,
-                             double Qy,
-                             double Gx,
-                             double Hx,
-                             double a,
-                             double b)
+                              double Py,
+                              double Qy,
+                              double Gx,
+                              double Hx,
+                              double a,
+                              double b)
 {
     double integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
     integ *= (Qy - b) * (Qy - b) - (Py - b) * (Py - b);
@@ -23,14 +23,14 @@ double analytical_solution(
 }
 
 double _itemOfInteg_2SpecType(
-                             double Py,
-                             double Qy,
-                             //
-                             double alpha,
-                             //
-                             double a,
-                             double b,
-                             double betta)
+                              double Py,
+                              double Qy,
+                              //
+                              double alpha,
+                              //
+                              double a,
+                              double b,
+                              double betta)
 {
     double tmp, integ;
     tmp = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
@@ -507,14 +507,6 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
 
     return integ;
 }
-
-enum bound_side
-{
-    up,
-    bottom,
-    left,
-    right
-};
 
 double init_bound(double x, double y, double t, bound_side side)
 {
@@ -1615,23 +1607,23 @@ double integUnderUpperTr(
 }
 
 double integ_under_uniform_triangle(
-                          double par_a,
-                          double par_b,
-                          double lbDom,
-                          double rbDom,
-                          double bbDom,
-                          double ubDom,
-                          double tau,
-                          int iCurrTL, 
-                          double *firVer, 
-                          double *secVer,
-                          double *thiVer,
-                          const double *masOX,
-                          int numOfOXSt,
-                          const double *masOY,
-                          int numOfOYSt, 
-                          double *rhoInPrevTL_asV,
-                          int ii, int jj)
+                                    double par_a,
+                                    double par_b,
+                                    double lbDom,
+                                    double rbDom,
+                                    double bbDom,
+                                    double ubDom,
+                                    double tau,
+                                    int iCurrTL,
+                                    double *firVer,
+                                    double *secVer,
+                                    double *thiVer,
+                                    const double *masOX,
+                                    int numOfOXSt,
+                                    const double *masOY,
+                                    int numOfOYSt,
+                                    double *rhoInPrevTL_asV,
+                                    int ii, int jj)
 {
     double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
     bool isFirVUsed = false;
@@ -1911,36 +1903,36 @@ double f_function(//   -  It's item of right part of differential equation.
 
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
-int get_quadrangle_type(
-                   double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                   double par_b, //   -  Item of second parameter from "u_funcion".
-                   //
-                   double lbDom, //   -  Left and right boundaries of rectangular domain.
-                   double rbDom,
-                   //
-                   double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                   double ubDom,
-                   //
-                   double tau,
-                   double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
-                   //
-                   int iOfOXN, //   -  Index of current OX node.
-                   const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                   int numOfOXSt, //   -  Number of OX steps.
-                   //
-                   int iOfOYN, //   -  Index of current OY node.
-                   const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                   int numOfOYSt, //   -  Number of OY steps.
-                   //
-                   double *firVfirT, //   -  First vertex of first triangle.
-                   double *secVfirT, //   -  Second vertex of first triangle.
-                   double *thiVfirT, //   -  Third vertex of first triangle.
-                   //
-                   double *firVsecT, //   -  First vertex of second triangle.
-                   double *secVsecT, //   -  Second vertex of second triangle.
-                   double *thiVsecT) //   -  Third vertex of second triangle.
+
+quad_type get_quadrangle_type(
+                              double par_b, //   -  Item of second parameter from "u_funcion".
+                              //
+                              double lbDom, //   -  Left and right boundaries of rectangular domain.
+                              double rbDom,
+                              //
+                              double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
+                              double ubDom,
+                              //
+                              double tau,
+                              double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
+                              //
+                              int iOfOXN, //   -  Index of current OX node.
+                              const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                              int numOfOXSt, //   -  Number of OX steps.
+                              //
+                              int iOfOYN, //   -  Index of current OY node.
+                              const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                              int numOfOYSt, //   -  Number of OY steps.
+                              //
+                              double *firVfirT, //   -  First vertex of first triangle.
+                              double *secVfirT, //   -  Second vertex of first triangle.
+                              double *thiVfirT, //   -  Third vertex of first triangle.
+                              //
+                              double *firVsecT, //   -  First vertex of second triangle.
+                              double *secVsecT, //   -  Second vertex of second triangle.
+                              double *thiVsecT) //   -  Third vertex of second triangle.
 {
-    int qAngType = 0;
+    quad_type type = pseudo;
 
     double alpha[2], betta[2], gamma[2], theta[2]; //   -  Vertexes of square. Anticlockwise order from left botton vertex.
     double u, v; //   -  Items of velocity components.
@@ -2061,7 +2053,7 @@ int get_quadrangle_type(
     {
         //   Not checked.
 
-        qAngType = 0.;
+        type = pseudo;
 
         //   Pseudo case. Anyway I need to compute some values.
 
@@ -2102,7 +2094,7 @@ int get_quadrangle_type(
             thiVsecT[1] = alNew[1];
         }
 
-        return qAngType;
+        return type;
     }
 
 
@@ -2113,7 +2105,7 @@ int get_quadrangle_type(
     {
         if (((alNew[0] - AcrP[0]) * (gaNew[0] - AcrP[0])) > 0.)
         {
-            qAngType = 0;
+            type = pseudo;
             firVfirT[0] = alNew[0];
             firVfirT[1] = alNew[1];
             secVfirT[0] = beNew[0];
@@ -2151,7 +2143,7 @@ int get_quadrangle_type(
                 thiVsecT[1] = alNew[1];
             }
 
-            return qAngType;
+            return type;
         } //   "if(  (  (alNew[0] - AcrP[0])*(gaNew[0] - AcsP[0])  )  >  0.  )".
 
 
@@ -2170,7 +2162,7 @@ int get_quadrangle_type(
             {
                 //   The vertex "beNew" is NOT in triangle "alNew - gaNew - thNew".
 
-                qAngType = 0;
+                type = pseudo;
 
                 //   Pseudo case. Anyway I need to find some solution. So
 
@@ -2190,7 +2182,7 @@ int get_quadrangle_type(
                 thiVsecT[0] = gaNew[0];
                 thiVsecT[1] = gaNew[1];
 
-                return qAngType;
+                return type;
             }
 
             if (vectProdOz >= 0.)
@@ -2199,7 +2191,7 @@ int get_quadrangle_type(
 
                 //   Now let's compute all vertices which I need.
 
-                qAngType = 2;
+                type = concave;
 
                 //   First triangle.
 
@@ -2219,7 +2211,7 @@ int get_quadrangle_type(
                 thiVsecT[0] = gaNew[0];
                 thiVsecT[1] = gaNew[1];
 
-                return qAngType;
+                return type;
             }
         } //   "if(  (  (alNew[0] - AcsP[0])*(gaNew[0] - AcsP[0])  )  <=  0.  )".   //   Last second case of second criterion.
     } //   end of "if (  (  (beNew[1] - AcrP[1])*(thNew[1] - AcrP[1])  )  >  0.  )"
@@ -2243,7 +2235,7 @@ int get_quadrangle_type(
 
             if (vectProdOz >= 0.)
             {
-                qAngType = 2;
+                type = concave;
 
                 //   The quadrangle is concave. First triangle.
 
@@ -2265,12 +2257,12 @@ int get_quadrangle_type(
                 thiVsecT[0] = gaNew[0];
                 thiVsecT[1] = gaNew[1];
 
-                return qAngType;
+                return type;
             }
 
             if (vectProdOz < 0.)
             {
-                qAngType = 0;
+                type = pseudo;
 
                 //   This concave quadrangle do has NO write anticlockwise vertices sequence order. It's pseudo.
 
@@ -2294,7 +2286,7 @@ int get_quadrangle_type(
                 thiVsecT[0] = gaNew[0];
                 thiVsecT[1] = gaNew[1];
 
-                return qAngType;
+                return type;
             }
         } //   end of "if(  (  (alNew[0] - AcrP[0])*(gaNew[0] - AcsP[0])  )  >  0.  )". First case of second criterion.
 
@@ -2317,7 +2309,7 @@ int get_quadrangle_type(
 
             if (vectProdOz >= 0.)
             {
-                qAngType = 1;
+                type = normal;
 
                 //   Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. It's convex.
 
@@ -2341,12 +2333,12 @@ int get_quadrangle_type(
                 thiVsecT[0] = gaNew[0];
                 thiVsecT[1] = gaNew[1];
 
-                return qAngType;
+                return type;
             }
 
             if (vectProdOz < 0.)
             {
-                qAngType = 0;
+                type = pseudo;
                 firVfirT[0] = alNew[0];
                 firVfirT[1] = alNew[1];
                 secVfirT[0] = beNew[0];
@@ -2359,11 +2351,11 @@ int get_quadrangle_type(
                 secVsecT[1] = thNew[1];
                 thiVsecT[0] = gaNew[0];
                 thiVsecT[1] = gaNew[1];
-                return qAngType;
+                return type;
             }
         } //   end of "if(  (  (alNew[0] - AcrP[0])*(gaNew[0] - AcsP[0])  )  <=  0.  )". //   Second case of second criterion.
     }
-    return qAngType;
+    return type;
 }
 
 double compute_value(
@@ -2387,44 +2379,58 @@ double compute_value(
     double firVsecT[2], secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
 
     //   Let's understand what type of quadrangle we have.
-    int type = get_quadrangle_type(
-                              a, b, 
-                              lb, rb, 
-                              bb, ub, 
-                              tau, curr_tl, 
-                              i_ox, ox, ox_length, 
-                              i_oy, oy, oy_length, 
-                              firVfirT, secVfirT, thiVfirT, 
-                              firVsecT, secVsecT, thiVsecT);
+    quad_type type = get_quadrangle_type(
+                                         b,
+                                         lb, rb,
+                                         bb, ub,
+                                         tau, curr_tl,
+                                         i_ox, ox, ox_length,
+                                         i_oy, oy, oy_length,
+                                         firVfirT, secVfirT, thiVfirT,
+                                         firVsecT, secVsecT, thiVsecT);
 
-    //  printf("i= %d, j=%d, 1: %le    2: %le    3: %le \n", iOfOXN, iOfOYN, firVfirT[1], secVfirT[1], thiVfirT[1]);
+    if (type != normal &&
+            type != wall) return -1.;
 
-    if (type != 1) return -1.;
+    // check the type of triangle to select appropriate compute methods
 
-    double value1 = integ_under_uniform_triangle(
-                               a, b,
-                               lb, rb, 
-                               bb, ub, 
-                               tau, curr_tl,
-                               firVfirT, secVfirT, thiVfirT,
-                               ox, ox_length,
-                               oy, oy_length,
-                               prev_density,
-                               i_ox, i_oy);
+    double result = 0.;
 
-    //  printf("i= %d, j=%d, sq: %le \n", iOfOXN, iOfOYN, value1);
-    
-    double value2 = integ_under_uniform_triangle(
-                                      a, b, 
-                                      lb, rb, 
-                                      bb, ub, 
-                                      tau, curr_tl, 
-                                      firVsecT, secVsecT, thiVsecT, 
-                                      ox, ox_length, 
-                                      oy, oy_length, 
-                                      prev_density,
-                                      i_ox, i_oy);
-    return value1 + value2;
+    switch (type)
+    {
+    case wall:
+
+        break;
+    case normal:
+        result += integ_under_uniform_triangle(
+                                               a, b,
+                                               lb, rb,
+                                               bb, ub,
+                                               tau, curr_tl,
+                                               firVfirT, secVfirT, thiVfirT,
+                                               ox, ox_length,
+                                               oy, oy_length,
+                                               prev_density,
+                                               i_ox, i_oy);
+
+        result += integ_under_uniform_triangle(
+                                               a, b,
+                                               lb, rb,
+                                               bb, ub,
+                                               tau, curr_tl,
+                                               firVsecT, secVsecT, thiVsecT,
+                                               ox, ox_length,
+                                               oy, oy_length,
+                                               prev_density,
+                                               i_ox, i_oy);
+        break;
+    case concave:
+    case convex:
+    case pseudo:
+        break;
+    }
+
+    return result;
 }
 
 void print_params(double a,
@@ -2601,17 +2607,17 @@ double solve(
     return 0;
 }
 
-double *cpu_solve(double a,
-                  double b,
-                  double lb,
-                  double rb,
-                  double bb,
-                  double ub,
-                  double time_step,
-                  int time_step_count,
-                  int ox_length,
-                  int oy_length,
-                  const int step)
+double *solve(double a,
+              double b,
+              double lb,
+              double rb,
+              double bb,
+              double ub,
+              double time_step,
+              int time_step_count,
+              int ox_length,
+              int oy_length,
+              const int step)
 {
     double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
     double *ox = new double [ ox_length + 1 ];
@@ -2638,8 +2644,8 @@ double *cpu_solve(double a,
                  ox_length,
                  oy_length);
 
-   // time_step_count = 1;
-   // printf("!!!!!!!!TIME STEP SETTED TO ONE!!!!!!\n");
+    // time_step_count = 1;
+    // printf("!!!!!!!!TIME STEP SETTED TO ONE!!!!!!\n");
     solve(a, b,
           lb, rb,
           bb, ub,
