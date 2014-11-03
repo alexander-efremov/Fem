@@ -6,6 +6,7 @@
 using namespace std;
 
 #include <math.h>
+#include <string.h>
 
 #include "InitAndBoundaryData.h"                      //   -  Initial and Boundary data.
 
@@ -393,29 +394,27 @@ void print_matrix(int n, int m, double *a, int precision = 8)
     }
 }
 
-bool solByEqualVolWithVarStepPlusPrint(
-                                       double par_a, //   -  Item of first initial or boundary data parameter.
-                                       double par_b, //   -  Item of second parameter from "u_funcion".
-                                       //
-                                       double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                       double rbDom,
-                                       //
-                                       double bbDom, //   -  Botton and upper boundaries of rectangular domain.
-                                       double ubDom,
-                                       //
-                                       double tau, //   -  Time step.
-                                       int numOfTSt, //   -  A number of time steps.
-                                       //
-                                       double * masOX, //   -  Massive of OX nodes. Dimension = numOfOXSt +1.
-                                       int numOfOXSt, //   -  Number of OX steps.
-                                       //
-                                       double * masOY, //   -  Massive of OY nodes. Dimension = numOfOYSt +1.
-                                       int numOfOYSt, //   -  Number of OY steps.
-                                       //
-                                       bool isTimeStShBeChan, //   -  Is time step shoulb be change?
-                                       bool isGridStShBeChan, //   -  Is grid step shoulb be change?
-                                       //
-                                       int numOfGrStepLayer) //   -  How many computations with different grid steps we want to make.
+double* solByEqualVolWithVarStepPlusPrint(
+                                          double par_a, //   -  Item of first initial or boundary data parameter.
+                                          double par_b, //   -  Item of second parameter from "u_funcion".
+                                          //
+                                          double lbDom, //   -  Left and right boundaries of rectangular domain.
+                                          double rbDom,
+                                          //
+                                          double bbDom, //   -  Botton and upper boundaries of rectangular domain.
+                                          double ubDom,
+                                          //
+                                          double tau, //   -  Time step.
+                                          int numOfTSt, //   -  A number of time steps.
+                                          
+                                          int numOfOXSt, //   -  Number of OX steps.
+                                         
+                                          int numOfOYSt, //   -  Number of OY steps.
+                                          //
+                                          bool isTimeStShBeChan, //   -  Is time step shoulb be change?
+                                          bool isGridStShBeChan, //   -  Is grid step shoulb be change?
+                                          //
+                                          int numOfGrStepLayer) //   -  How many computations with different grid steps we want to make.
 {
 
 
@@ -454,7 +453,7 @@ bool solByEqualVolWithVarStepPlusPrint(
 
     //   double **absErr; - To save memory we can use "rhoInCurrTL".  //   -  Absolute error in time for error solution estamation.
 
-
+    double* result = NULL;
 
     double buf_D;
 
@@ -566,8 +565,11 @@ bool solByEqualVolWithVarStepPlusPrint(
                                 //
                                 rhoInCurrTL_asV); //   -  Rho (solution) in Current (Last) Time Level.
 
-        print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
+      //  print_matrix(varNumOfOXSt + 1, varNumOfOYSt + 1, rhoInCurrTL_asV);
 
+        // copy result to tmp
+        result = new double[(varNumOfOXSt + 1)*(varNumOfOYSt + 1)];
+        memcpy(result, rhoInCurrTL_asV, (varNumOfOXSt + 1)*(varNumOfOYSt + 1) * sizeof (double));
         //   :) Now we know solution! It's great. What we need more?
 
         //   May be error distribution and it's maximum? It's easy :)
@@ -592,7 +594,7 @@ bool solByEqualVolWithVarStepPlusPrint(
                                                           varMasOX, varNumOfOXSt + 1,
                                                           varMasOY, varNumOfOYSt + 1, rhoInCurrTL_asV);
 
-        printf("\nindByNumOfGridSteps = %d\n Norm %f\n", indByNumOfGridSteps, maxModAbsErr[ indByNumOfGridSteps ]);
+      //  printf("\nindByNumOfGridSteps = %d\n Norm %f\n", indByNumOfGridSteps, maxModAbsErr[ indByNumOfGridSteps ]);
 
         //   Let's compute order of numerical solution.
 
@@ -643,6 +645,6 @@ bool solByEqualVolWithVarStepPlusPrint(
     delete maxModAbsErr;
     delete masOfGrStepItem;
     delete ordOfErr;
-    return true;
+    return result;
 }
 

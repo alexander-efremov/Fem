@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 
 using namespace std;
 
@@ -24,7 +24,7 @@ int main()
 
 
 
-int numOfGrStepLayer = 2;                            //   -  How many computations with different grid steps we want to make.
+int numOfGrStepLayer = 1;                            //   -  How many computations with different grid steps we want to make.
 
 double buf_D;
 
@@ -40,7 +40,7 @@ initCompOfGlVar();
 
 
 
-/*
+
 buf_D = itemOfInteg_2SpecType(
               1.,   //   Py,
               3.,   //   Qy,
@@ -50,10 +50,10 @@ buf_D = itemOfInteg_2SpecType(
               2.;   //   a,
               9.,   //   b,
               4. ); //   betta
-*/
 
 
-bul = solByEqualVolWithVarStepPlusPrint(
+
+solByEqualVolWithVarStepPlusPrint(
               C_par_a,                                //   -  Item of first parameter.
               C_par_b,                                //   -  Item of second parameter from "u_funcion".
               //
@@ -64,10 +64,10 @@ bul = solByEqualVolWithVarStepPlusPrint(
               C_tau,                                  //   -  Time step.
               C_numOfTSt,                             //   -  A number of time steps.
               //
-              masOX,                                  //   -  Massive of OX points. Dimension = C_numOfOXSt +1.
+                                             //   -  Massive of OX points. Dimension = C_numOfOXSt +1.
               C_numOfOXSt,                            //   -  Number of OX steps.
               //
-              masOY,                                  //   -  Massive of OY points. Dimension = C_numOfOXSt +1.
+                                           //   -  Massive of OY points. Dimension = C_numOfOXSt +1.
               C_numOfOYSt,                            //   -  Number of OY steps.
               //
               true,                                   //   -  Is time step shoulb be change?
@@ -78,7 +78,7 @@ bul = solByEqualVolWithVarStepPlusPrint(
 
 
 
-/*
+
 bul = RichExtrPlusPrint(
               C_par_a,                                //   -  Item of left and right setback (parameter "a" in test).
               C_par_b,                                //   -  Item of second parameter from "u_funcion".
@@ -89,7 +89,7 @@ bul = RichExtrPlusPrint(
               C_numOfTimeSteps,                       //   -  A number of time steps.
               //
               2 );                                    //   -  "numOfSolOrd"  -  ������� �������, ������� �� ����� ��������.
-*/
+
 
 
 
@@ -99,4 +99,4 @@ bul = RichExtrPlusPrint(
 memClean();
 
 return 0;
-}
+}*/

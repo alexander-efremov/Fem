@@ -15,7 +15,7 @@ const double C_pi = 3.14159265358979323846264338327;
 
 const double C_par_a = 2.; //   -  Solution parameter.
 
-const double C_par_b = 1.; //   -  Item of second parameter from "u_funcion" or "v_funcion".
+const double C_par_b = 10.; //   -  Item of second parameter from "u_funcion" or "v_funcion".
 
 
 

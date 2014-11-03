@@ -27,6 +27,7 @@ public:
         a = 2.;
        // b = 6.486; // при этом значении будут появлятся попадания на стенку для 21 на 21
         b = 10.;
+      //  b = 1.;
         lb = bb = 0.;
         rb = ub = 1.;
         double value = pow(2., 0);
@@ -54,6 +55,10 @@ public:
         t_count *= power;
         x_size *= power;
         y_size *= power;
+    }
+    
+    int get_size(){
+        return x_length() * y_length();
     }
 };
 

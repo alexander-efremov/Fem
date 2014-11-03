@@ -28,7 +28,7 @@ extern bool solByEqualVolumes(
 
 
 
-extern bool solByEqualVolWithVarStepPlusPrint(
+extern double* solByEqualVolWithVarStepPlusPrint(
               double par_a,                           //   -  Item of left and right setback (parameter "a" in test).
               double par_b,                           //   -  Item of second parameter from "u_funcion".
               //
@@ -41,10 +41,8 @@ extern bool solByEqualVolWithVarStepPlusPrint(
               double tau,                             //   -  Time step.
               int numOfTSt,                           //   -  A number of time steps.
               //
-              double * masOX,                         //   -  Massive of OX nodes. Dimension = numOfOXSt +1.
               int numOfOXSt,                          //   -  Number of OX steps.
               //
-              double * masOY,                         //   -  Massive of OY nodes. Dimension = numOfOYSt +1.
               int numOfOYSt,                          //   -  Number of OY steps.
               //
               bool isTimeStShBeChan,                  //   -  Is time step shoulb be change?

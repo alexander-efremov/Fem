@@ -3,7 +3,7 @@
 static const double C_pi = 3.14159265358979323846264338327;
 static int wall_counter = 0;
 
-double itemOfInteg_1SpecType(
+double _itemOfInteg_1SpecType(
                              double Py,
                              double Qy,
                              double Gx,
@@ -22,7 +22,7 @@ double analytical_solution(
     return 1.1 + sin(t * x * y);
 }
 
-double itemOfInteg_2SpecType(
+double _itemOfInteg_2SpecType(
                              double Py,
                              double Qy,
                              //
@@ -106,12 +106,12 @@ double integUnderLeftTr_OneCell(
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0))
     {
         buf_D = buf_D * (Hx - masOX[ indCurSqOx[1] ]) * (Hx - masOX[ indCurSqOx[1] ]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
     }
     else
     {
         buf_D = buf_D * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[1]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[1]);
     }
     buf_D = buf_D - bufInteg_D / 2.;
     integ = buf_D * rho[0][0] / hx / hy;
@@ -121,12 +121,12 @@ double integUnderLeftTr_OneCell(
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[1] >= 0))
     {
         buf_D = -1. * buf_D * (Hx - masOX[ indCurSqOx[0] ]) * (Hx - masOX[ indCurSqOx[0] ]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
     }
     else
     {
         buf_D = -1. * buf_D * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[0]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[0]);
     }
     buf_D = buf_D + bufInteg_D / 2.;
     integ = integ + buf_D * rho[1][0] / hx / hy;
@@ -136,12 +136,12 @@ double integUnderLeftTr_OneCell(
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[0] >= 0))
     {
         buf_D = -1. * buf_D * (Hx - masOX[ indCurSqOx[1] ]) * (Hx - masOX[ indCurSqOx[1] ]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
     }
     else
     {
         buf_D = -1. * buf_D * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[1]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[1]);
     }
     buf_D = buf_D + bufInteg_D / 2.;
     integ = integ + buf_D * rho[0][1] / hx / hy;
@@ -151,12 +151,12 @@ double integUnderLeftTr_OneCell(
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[0] >= 0))
     {
         buf_D = buf_D * (Hx - masOX[ indCurSqOx[0] ]) * (Hx - masOX[ indCurSqOx[0] ]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
     }
     else
     {
         buf_D = buf_D * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
-        bufInteg_D = itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[0]);
+        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[0]);
     }
     buf_D = buf_D - bufInteg_D / 2.;
     integ += buf_D * rho[1][1] / hx / hy;
@@ -260,41 +260,41 @@ double integUnderRectAng_OneCell(double Py,
 
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0))
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[1] ]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[1] ]);
     }
     else
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
     }
     buf_D = buf_D / hx / hy;
     integ = buf_D * rho[0][0]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[1] >= 0))
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[1] ]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[1] ]);
     }
     else
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
     }
     buf_D = buf_D / hx / hy;
     integ = integ - buf_D * rho[1][0]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[0] ];
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[0] >= 0))
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[0] ]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[0] ]);
     }
     else
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
     }
     buf_D = buf_D / hx / hy;
     integ = integ - buf_D * rho[0][1]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[1] ];
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[0] >= 0))
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[0] ]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[0] ]);
     }
     else
     {
-        buf_D = itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
+        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
     }
     buf_D = buf_D / hx / hy;
     return integ + buf_D * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
@@ -2638,8 +2638,8 @@ double *cpu_solve(double a,
                  ox_length,
                  oy_length);
 
-    time_step_count = 1;
-    printf("!!!!!!!!TIME STEP SETTED TO ONE!!!!!!\n");
+   // time_step_count = 1;
+   // printf("!!!!!!!!TIME STEP SETTED TO ONE!!!!!!\n");
     solve(a, b,
           lb, rb,
           bb, ub,

@@ -41,7 +41,7 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="1">
+    <conf name="Debug" type="3">
       <toolsSet>
         <compilerSet>CLang|CLang</compilerSet>
         <dependencyChecking>true</dependencyChecking>
@@ -51,6 +51,8 @@
         <ccTool>
           <architecture>2</architecture>
         </ccTool>
+        <archiverTool>
+        </archiverTool>
       </compileType>
       <item path="Const.h" ex="false" tool="3" flavor2="0">
       </item>

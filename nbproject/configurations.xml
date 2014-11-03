@@ -57,6 +57,7 @@
             <pElem>gtest-1.7.0/include</pElem>
             <pElem>gtest-1.7.0</pElem>
             <pElem>include</pElem>
+            <pElem>FemBase</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -72,6 +73,18 @@
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgtest.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="FemBase"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="FemBase"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfembase.a">
               </makeArtifact>
             </linkerLibProjectItem>
           </linkerLibItems>
