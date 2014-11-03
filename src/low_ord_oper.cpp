@@ -1830,18 +1830,18 @@ double f_function(
 }
 
 void compute_coordinate_on_prev_layer(double par_b,
-                                      double lbDom,
-                                      double rbDom,
-                                      double bbDom,
-                                      double ubDom,
+                                      double lb,
+                                      double rb,
+                                      double bb,
+                                      double ub,
                                       double tau,
                                       int cur_tl,
                                       int i_ox,
                                       const double *masOX,
-                                      int numOfOXSt,
+                                      int ox_length,
                                       int i_oy,
                                       const double *masOY,
-                                      int numOfOYSt,
+                                      int oy_length,
                                       point_t *alNew, point_t *beNew, point_t *gaNew, point_t *thNew)
 {
     point_t alpha, beta, gamma, theta; //   -  Vertexes of square. Anticlockwise order from left bottom vertex.
@@ -1855,14 +1855,14 @@ void compute_coordinate_on_prev_layer(double par_b,
         gamma.x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
         theta.x = masOX[ i_ox ];
     }
-    else if (i_ox == numOfOXSt)
+    else if (i_ox == ox_length)
     {
         alpha.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
         beta.x = masOX[ i_ox ];
         gamma.x = masOX[ i_ox ];
         theta.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
     }
-    else if (i_ox > 0 && i_ox < numOfOXSt)
+    else
     {
         alpha.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
         beta.x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
@@ -1878,14 +1878,14 @@ void compute_coordinate_on_prev_layer(double par_b,
         gamma.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
         theta.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
     }
-    else if (i_oy == numOfOYSt)
+    else if (i_oy == oy_length)
     {
         alpha.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         beta.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         gamma.y = masOY[ i_oy ];
         theta.y = masOY[ i_oy ];
     }
-    else if (i_oy > 0 && i_oy < numOfOYSt)
+    else
     {
         alpha.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         beta.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
@@ -1897,28 +1897,27 @@ void compute_coordinate_on_prev_layer(double par_b,
     //   2. Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     //  alNew.
     u = u_function(par_b, alpha.x, alpha.y);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, alpha.x, alpha.y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, alpha.x, alpha.y);
     alNew->x = alpha.x - tau * u;
     alNew->y = alpha.y - tau * v;
 
     //  beNew.
     u = u_function(par_b, beta.x, beta.y);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, beta.x, beta.y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, beta.x, beta.y);
     beNew->x = beta.x - tau * u;
     beNew->y = beta.y - tau * v;
 
     //  gaNew.
     u = u_function(par_b, gamma.x, gamma.y);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, gamma.x, gamma.y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, gamma.x, gamma.y);
     gaNew->x = gamma.x - tau * u;
     gaNew->y = gamma.y - tau * v;
 
     //  thNew.
     u = u_function(par_b, theta.x, theta.y);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, theta.x, theta.y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, theta.x, theta.y);
     thNew->x = theta.x - tau * u;
     thNew->y = theta.y - tau * v;
-
 }
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
