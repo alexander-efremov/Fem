@@ -1550,7 +1550,7 @@ double integUnderUpperTr(
 double wall_integ_under_uniform_triangle(
                                          double tau,
                                          int iCurrTL,
-                                         double *firVer,
+                                         point_t *t_1_a,
                                          double *secVer,
                                          double *thiVer,
                                          const double *masOX,
@@ -1566,7 +1566,7 @@ double wall_integ_under_uniform_triangle(
 double integ_under_uniform_triangle(
                                     double tau,
                                     int iCurrTL,
-                                    double *firVer,
+                                    point_t *firVer,
                                     double *secVer,
                                     double *thiVer,
                                     const double *masOX,
@@ -1589,8 +1589,8 @@ double integ_under_uniform_triangle(
     double integOfUppTr; //   -  Item of integral under Upper triangle.
     double integ = 0.; //   -  Item which I'm computing.
     //   1. I need to understand which vertex is bottom, middle and upper.
-    bv[1] = firVer[1];
-    bv[0] = firVer[0];
+    bv[1] = firVer->y;
+    bv[0] = firVer->x;
     isFirVUsed = true;
     if (bv[1] > secVer[1])
     {
@@ -1611,10 +1611,10 @@ double integ_under_uniform_triangle(
     is1VUsed = false;
     is2VUsed = false;
     is3VUsed = false;
-    if ((uv[1] < firVer[1]) && (isFirVUsed == false))
+    if ((uv[1] < firVer->y) && (isFirVUsed == false))
     {
-        uv[1] = firVer[1];
-        uv[0] = firVer[0];
+        uv[1] = firVer->y;
+        uv[0] = firVer->x;
         is1VUsed = true;
     }
     if ((uv[1] < secVer[1]) && (isSecVUsed == false))
@@ -1635,8 +1635,8 @@ double integ_under_uniform_triangle(
     //   Dangerous.
     if ((isFirVUsed == false) && (is1VUsed == false))
     {
-        mv[1] = firVer[1];
-        mv[0] = firVer[0];
+        mv[1] = firVer->y;
+        mv[0] = firVer->x;
     }
     if ((isSecVUsed == false) && (is2VUsed == false))
     {
@@ -1836,64 +1836,64 @@ void compute_coordinate_on_prev_layer(double par_b,
                                       double ubDom,
                                       double tau,
                                       int cur_tl,
-                                      int iOfOXN,
+                                      int i_ox,
                                       const double *masOX,
                                       int numOfOXSt,
-                                      int iOfOYN,
+                                      int i_oy,
                                       const double *masOY,
                                       int numOfOYSt,
                                       point_t *alNew, point_t *beNew, point_t *gaNew, point_t *thNew)
 {
     point_t alpha, beta, gamma, theta; //   -  Vertexes of square. Anticlockwise order from left bottom vertex.
-    double u, v; //   -  Items of velocity components.
 
     //   1. First of all let's compute coordinates of square vertexes.
     //  OX:
-    if (iOfOXN == 0)
+    if (i_ox == 0)
     {
-        alpha.x = masOX[ iOfOXN ];
-        beta.x = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
-        gamma.x = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
-        theta.x = masOX[ iOfOXN ];
+        alpha.x = masOX[ i_ox ];
+        beta.x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
+        gamma.x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
+        theta.x = masOX[ i_ox ];
     }
-    else if (iOfOXN == numOfOXSt)
+    else if (i_ox == numOfOXSt)
     {
-        alpha.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-        beta.x = masOX[ iOfOXN ];
-        gamma.x = masOX[ iOfOXN ];
-        theta.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        alpha.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
+        beta.x = masOX[ i_ox ];
+        gamma.x = masOX[ i_ox ];
+        theta.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
     }
-    else if (iOfOXN > 0 && iOfOXN < numOfOXSt)
+    else if (i_ox > 0 && i_ox < numOfOXSt)
     {
-        alpha.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-        beta.x = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
-        gamma.x = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
-        theta.x = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        alpha.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
+        beta.x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
+        gamma.x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
+        theta.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
     }
 
     //  OY:
-    if (iOfOYN == 0)
+    if (i_oy == 0)
     {
-        alpha.y = masOY[ iOfOYN ];
-        beta.y = masOY[ iOfOYN ];
-        gamma.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-        theta.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        alpha.y = masOY[ i_oy ];
+        beta.y = masOY[ i_oy ];
+        gamma.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
+        theta.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
     }
-    else if (iOfOYN == numOfOYSt)
+    else if (i_oy == numOfOYSt)
     {
-        alpha.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        beta.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        gamma.y = masOY[ iOfOYN ];
-        theta.y = masOY[ iOfOYN ];
+        alpha.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        beta.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        gamma.y = masOY[ i_oy ];
+        theta.y = masOY[ i_oy ];
     }
-    else if (iOfOYN > 0 && iOfOYN < numOfOYSt)
+    else if (i_oy > 0 && i_oy < numOfOYSt)
     {
-        alpha.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        beta.y = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        gamma.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-        theta.y = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        alpha.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        beta.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        gamma.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
+        theta.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
     }
-
+    
+    double u,v;
     //   2. Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     //  alNew.
     u = u_function(par_b, alpha.x, alpha.y);
@@ -1936,11 +1936,11 @@ quad_type get_quadrangle_type(double b,
                               int i_oy,
                               const double *oy,
                               int oy_length,
-                              double *firVfirT, //   -  First vertex of first triangle.
+                              point_t *t_1_a, //   -  First vertex of first triangle.
                               double *secVfirT, //   -  Second vertex of first triangle.
                               double *thiVfirT, //   -  Third vertex of first triangle.
                               //
-                              double *firVsecT, //   -  First vertex of second triangle.
+                              point_t *t_2_a, //   -  First vertex of second triangle.
                               double *secVsecT, //   -  Second vertex of second triangle.
                               double *thiVsecT) //   -  Third vertex of second triangle.
 {
@@ -1962,9 +1962,8 @@ quad_type get_quadrangle_type(double b,
 
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
     // It's convex.
-    firVfirT[0] = alpha.x;
-    firVfirT[1] = alpha.y;
-
+    ptcpy(t_1_a, &alpha);
+    
     secVfirT[0] = beta.x;
     secVfirT[1] = beta.y;
 
@@ -1972,8 +1971,7 @@ quad_type get_quadrangle_type(double b,
     thiVfirT[1] = gamma.y;
 
     //   Second triangle.
-    firVsecT[0] = alpha.x;
-    firVsecT[1] = alpha.y;
+    ptcpy(t_2_a, &alpha);
 
     secVsecT[0] = theta.x;
     secVsecT[1] = theta.y;
@@ -2001,8 +1999,10 @@ double compute_value(
                      int oy_length,
                      double *prev_density)
 {
-    double firVfirT[2], secVfirT[2], thiVfirT[2]; //   -  First, second and third vertices of first triangle.
-    double firVsecT[2], secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
+    point_t t_1_a;
+    point_t t_2_a;
+    double secVfirT[2], thiVfirT[2]; //   -  First, second and third vertices of first triangle.
+    double  secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
 
     //   Let's understand what type of quadrangle we have.
 
@@ -2014,8 +2014,8 @@ double compute_value(
                                          tau, curr_tl,
                                          i_ox, ox, ox_length,
                                          i_oy, oy, oy_length,
-                                         firVfirT, secVfirT, thiVfirT,
-                                         firVsecT, secVsecT, thiVsecT);
+                                         &t_1_a, secVfirT, thiVfirT,
+                                         &t_2_a, secVsecT, thiVsecT);
 
     if (type != normal && type != wall)
     {
@@ -2028,14 +2028,14 @@ double compute_value(
     {
     case wall:
         result += wall_integ_under_uniform_triangle(tau, curr_tl,
-                                                    firVfirT, secVfirT, thiVfirT,
+                                                    &t_1_a, secVfirT, thiVfirT,
                                                     ox, ox_length,
                                                     oy, oy_length,
                                                     prev_density,
                                                     i_ox, i_oy);
 
         result += wall_integ_under_uniform_triangle(tau, curr_tl,
-                                                    firVsecT, secVsecT, thiVsecT,
+                                                    &t_2_a, secVsecT, thiVsecT,
                                                     ox, ox_length,
                                                     oy, oy_length,
                                                     prev_density,
@@ -2043,14 +2043,14 @@ double compute_value(
         break;
     case normal:
         result += integ_under_uniform_triangle(tau, curr_tl,
-                                               firVfirT, secVfirT, thiVfirT,
+                                               &t_1_a, secVfirT, thiVfirT,
                                                ox, ox_length,
                                                oy, oy_length,
                                                prev_density,
                                                i_ox, i_oy);
 
         result += integ_under_uniform_triangle(tau, curr_tl,
-                                               firVsecT, secVsecT, thiVsecT,
+                                               &t_2_a, secVsecT, thiVsecT,
                                                ox, ox_length,
                                                oy, oy_length,
                                                prev_density,
