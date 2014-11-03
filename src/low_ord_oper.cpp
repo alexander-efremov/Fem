@@ -219,8 +219,7 @@ double integUnderRectAng_OneCell(double Py,
                                  int numOfOXSt, //   -  Number of OX steps.
                                  //
                                  const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                 int numOfOYSt, //   -  Number of OY steps.
-                                 //
+                                
                                  double *rhoInPrevTL_asV)
 {
     //   return ( fabs( (Qy - Py) * (Hx - Gx) ) );
@@ -300,15 +299,7 @@ double integUnderRectAng_OneCell(double Py,
     return integ + buf_D * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
 }
 
-double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on the right side.
-                             double par_a, //   -  Solution parameter.
-                             //
-                             double lbDom, //   -  Left and right boundaries of rectangular domain.
-                             double rbDom,
-                             //
-                             double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                             double ubDom,
-                             //
+double integOfChan_SLRightSd(
                              double tau,
                              int iCurrTL, //   -  Index of current time layer.
                              //
@@ -410,8 +401,7 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                          numOfOYSt, //   -  Number of OY steps.
-                                          //
+                                          
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -458,8 +448,7 @@ double integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on th
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                          numOfOYSt, //   -  Number of OY steps.
-                                          //
+                                          
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -659,8 +648,7 @@ double integOfChan_SLLeftSd(
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                          numOfOYSt, //   -  Number of OY steps.
-                                          //
+                                         
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -711,8 +699,7 @@ double integOfChan_SLLeftSd(
                                           numOfOXSt, //   -  Number of OX steps.
                                           //
                                           masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                          numOfOYSt, //   -  Number of OY steps.
-                                          //
+                                          
                                           rhoInPrevTL_asV);
 
         integ += buf_D;
@@ -898,14 +885,6 @@ double integUnderRigAngTr_BottLeft(
 }
 
 double integUnderRigAngTr_BottRight(
-                                    double par_a, //   -  Solution parameter.
-                                    //
-                                    double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                    double rbDom,
-                                    //
-                                    double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                    double ubDom,
-                                    //
                                     double tau,
                                     int iCurrTL, //   -  Index of current time layer.
                                     //
@@ -1014,13 +993,7 @@ double integUnderRigAngTr_BottRight(
             wTrPNI = 0;
         }
         //   d. Integration.
-        buf_D = integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on the Right side.
-                                      par_a, //   -  Solution parameter.
-                                      //
-                                      lbDom, rbDom,
-                                      //
-                                      bbDom, ubDom,
-                                      //
+        buf_D = integOfChan_SLRightSd(
                                       tau, iCurrTL, //   -  Index of current time layer.
                                       //
                                       trPC, wTrPCI, //   -  double *bv,
@@ -1081,8 +1054,7 @@ double integUnderRigAngTr_BottRight(
 
 double integUnderBottTr(
                         double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                        double par_b, //   -  Item of second parameter from "u_funcion".
-                        //
+                       
                         double lbDom, //   -  Left and right boundaries of rectangular domain.
                         double rbDom,
                         //
@@ -1111,13 +1083,11 @@ double integUnderBottTr(
     //   1.
     if (BvBt[0] <= LvBt[0])
     {
-        buf_D = integUnderRigAngTr_BottRight(
-                                             par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+        buf_D = integUnderRigAngTr_BottRight( tau, iCurrTL,
                                              //
                                              BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = buf_D;
-        buf_D = integUnderRigAngTr_BottRight(
-                                             par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+        buf_D = integUnderRigAngTr_BottRight( tau, iCurrTL,
                                              //
                                              BvBt, LvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr - buf_D;
@@ -1136,7 +1106,7 @@ double integUnderBottTr(
         integOfBottTr = buf_D;
 
         buf_D = integUnderRigAngTr_BottRight(
-                                             par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                             tau, iCurrTL,
                                              //
                                              BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr + buf_D;
@@ -1339,14 +1309,6 @@ double integUnderRigAngTr_UppLeft(
 }
 
 double integUnderRigAngTr_UppRight(
-                                   double par_a, //   -  Solution parameter.
-                                   //
-                                   double lbDom, //   -  Left and right boundaries of rectangular domain.
-                                   double rbDom,
-                                   //
-                                   double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                   double ubDom,
-                                   //
                                    double tau,
                                    int iCurrTL, //   -  Index of current time layer.
                                    //
@@ -1464,13 +1426,7 @@ double integUnderRigAngTr_UppRight(
             wTrPNI = 0;
         }
         //   d. Integration.
-        buf_D = integOfChan_SLRightSd(//   -  The domain is Channel with Slant Line on the Right side.
-                                      par_a, //   -  Solution parameter.
-                                      //
-                                      lbDom, rbDom,
-                                      //
-                                      bbDom, ubDom,
-                                      //
+        buf_D = integOfChan_SLRightSd(
                                       tau, iCurrTL, //   -  Index of current time layer.
                                       //
                                       trPC, wTrPCI, //   -  double *bv,
@@ -1531,8 +1487,7 @@ double integUnderRigAngTr_UppRight(
 
 double integUnderUpperTr(
                          double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                         double par_b, //   -  Item of second parameter from "u_funcion".
-                         //
+                       
                          double lbDom, //   -  Left and right boundaries of rectangular domain.
                          double rbDom,
                          //
@@ -1561,12 +1516,12 @@ double integUnderUpperTr(
     if (UvUt[0] <= LvUt[0])
     {
         buf_D = integUnderRigAngTr_UppRight(
-                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            tau, iCurrTL,
                                             //
                                             RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = buf_D;
         buf_D = integUnderRigAngTr_UppRight(
-                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            tau, iCurrTL,
                                             //
                                             LvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr - buf_D;
@@ -1582,7 +1537,7 @@ double integUnderUpperTr(
         integOfUppTr = buf_D;
 
         buf_D = integUnderRigAngTr_UppRight(
-                                            par_a, lbDom, rbDom, bbDom, ubDom, tau, iCurrTL,
+                                            tau, iCurrTL,
                                             //
                                             RvUt, UvUt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr + buf_D;
@@ -1606,9 +1561,31 @@ double integUnderUpperTr(
     return integOfUppTr;
 }
 
+double wall_integ_under_uniform_triangle(
+                                         double par_a,
+                                         double par_b,
+                                         double lbDom,
+                                         double rbDom,
+                                         double bbDom,
+                                         double ubDom,
+                                         double tau,
+                                         int iCurrTL,
+                                         double *firVer,
+                                         double *secVer,
+                                         double *thiVer,
+                                         const double *masOX,
+                                         int numOfOXSt,
+                                         const double *masOY,
+                                         int numOfOYSt,
+                                         double *rhoInPrevTL_asV,
+                                         int ii, int jj)
+{
+    return 0;
+}
+
 double integ_under_uniform_triangle(
                                     double par_a,
-                                    double par_b,
+                                    
                                     double lbDom,
                                     double rbDom,
                                     double bbDom,
@@ -1726,7 +1703,7 @@ double integ_under_uniform_triangle(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                                         par_a, par_b,
+                                         par_a, 
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
@@ -1754,7 +1731,7 @@ double integ_under_uniform_triangle(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                                         par_a, par_b,
+                                         par_a,
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
@@ -1782,7 +1759,7 @@ double integ_under_uniform_triangle(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                                         par_a, par_b,
+                                         par_a, 
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
@@ -1810,7 +1787,7 @@ double integ_under_uniform_triangle(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                                         par_a, par_b,
+                                         par_a, 
                                          //
                                          lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
                                          //
@@ -1830,7 +1807,7 @@ double integ_under_uniform_triangle(
     return integ;
 }
 
-double u_function(double par_b, double t, double x, double y)
+double u_function(double par_b, double x, double y)
 {
     return par_b * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
@@ -1845,8 +1822,7 @@ double v_function(
     return atan((x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom) * (y - bbDom));
 }
 
-double f_function(//   -  It's item of right part of differential equation.
-                  double par_a, //   -  Item of left and right setback (parameter "a" in test).
+double f_function(
                   double par_b, //   -  Item of second parameter from "u_funcion".
                   //
                   double lbDom, //   -  Left and right boundaries of rectangular domain.
@@ -1860,11 +1836,9 @@ double f_function(//   -  It's item of right part of differential equation.
                   //
                   int iOfOXN, //   -  Index of current OX node.
                   const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt
-                  int numOfOXSt, //   -  Number of OX steps (segments).
-                  //
+
                   int iOfOYN, //   -  Index of current OY node.
-                  const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                  int numOfOYSt) //   -  Number of OY steps (segments).
+                  const double *masOY) //   -  Number of OY steps (segments).
 {
     //printf("\ncpu f function \n");
     double t = tau * iCurrTL;
@@ -1886,7 +1860,7 @@ double f_function(//   -  It's item of right part of differential equation.
     //  printf("cpu dRhoDX = %f\n", dRhoDX);
     dRhoDY = t * x * cos(t * x * y);
     //  printf("cpu dRhoDY = %f\n", dRhoDY);
-    u = u_function(par_b, t, x, y);
+    u = u_function(par_b, x, y);
     //  printf("cpu u = %f\n", u);
     duDX = -par_b * y * (1. - y) / (1. + x * x);
     //  printf("cpu duDX = %f\n", duDX);
@@ -2004,31 +1978,31 @@ quad_type get_quadrangle_type(
     //   2. Now let's compute new coordinates on the previous time level of alpha, betta, gamma, theta points.
     //  alNew.
 
-    u = u_function(par_b, iCurrTL * tau, alpha[0], alpha[1]);
+    u = u_function(par_b, alpha[0], alpha[1]);
     v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, alpha[0], alpha[1]);
     alNew[0] = alpha[0] - tau * u;
     alNew[1] = alpha[1] - tau * v;
 
     //  beNew.
-    u = u_function(par_b, iCurrTL * tau, betta[0], betta[1]);
+    u = u_function(par_b, betta[0], betta[1]);
     v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, betta[0], betta[1]);
     beNew[0] = betta[0] - tau * u;
     beNew[1] = betta[1] - tau * v;
 
     //  gaNew.
 
-    u = u_function(par_b, iCurrTL * tau, gamma[0], gamma[1]);
+    u = u_function(par_b, gamma[0], gamma[1]);
     v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, gamma[0], gamma[1]);
     gaNew[0] = gamma[0] - tau * u;
     gaNew[1] = gamma[1] - tau * v;
 
     //  thNew.
-    u = u_function(par_b, iCurrTL * tau, theta[0], theta[1]);
+    u = u_function(par_b, theta[0], theta[1]);
     v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, theta[0], theta[1]);
     thNew[0] = theta[0] - tau * u;
     thNew[1] = theta[1] - tau * v;
 
-    //   3.a Let's compute coefficients of first line betweeen "alNew" and "gaNew" points.
+    //   3.a Let's compute coefficients of first line between "alNew" and "gaNew" points.
     //   a_1LC * x  +  b_1LC * y  = c_1LC.
 
     vectAlGa[0] = gaNew[0] - alNew[0];
@@ -2037,7 +2011,7 @@ quad_type get_quadrangle_type(
     b_1LC = -vectAlGa[0];
     c_1LC = vectAlGa[1] * alNew[0] - vectAlGa[0] * alNew[1];
 
-    //   3.b Let's compute coefficients of second line betweeen "beNew" and "thNew" points.
+    //   3.b Let's compute coefficients of second line between "beNew" and "thNew" points.
     //   a_2LC * x  +  b_2LC * y  = c_2LC.
 
     vectBeTh[0] = thNew[0] - beNew[0];
@@ -2067,7 +2041,7 @@ quad_type get_quadrangle_type(
         thiVfirT[1] = gaNew[1];
 
 
-        //   Vertices of second triagle depends on scalar production.
+        //   Vertices of second triangle depends on scalar production.
 
         vectAlGa[0] = gaNew[0] - alNew[0];
         vectAlGa[1] = gaNew[1] - alNew[1];
@@ -2399,11 +2373,31 @@ double compute_value(
     switch (type)
     {
     case wall:
+        result += wall_integ_under_uniform_triangle(
+                                                    a, b,
+                                                    lb, rb,
+                                                    bb, ub,
+                                                    tau, curr_tl,
+                                                    firVfirT, secVfirT, thiVfirT,
+                                                    ox, ox_length,
+                                                    oy, oy_length,
+                                                    prev_density,
+                                                    i_ox, i_oy);
 
+        result += wall_integ_under_uniform_triangle(
+                                                    a, b,
+                                                    lb, rb,
+                                                    bb, ub,
+                                                    tau, curr_tl,
+                                                    firVsecT, secVsecT, thiVsecT,
+                                                    ox, ox_length,
+                                                    oy, oy_length,
+                                                    prev_density,
+                                                    i_ox, i_oy);
         break;
     case normal:
         result += integ_under_uniform_triangle(
-                                               a, b,
+                                               a,
                                                lb, rb,
                                                bb, ub,
                                                tau, curr_tl,
@@ -2414,7 +2408,7 @@ double compute_value(
                                                i_ox, i_oy);
 
         result += integ_under_uniform_triangle(
-                                               a, b,
+                                               a, 
                                                lb, rb,
                                                bb, ub,
                                                tau, curr_tl,
@@ -2583,8 +2577,7 @@ double solve(
                 h = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
                 value /= h;
 
-                double rp = f_function(a,
-                                       b,
+                double rp = f_function(b,
                                        lb,
                                        rb,
                                        bb,
@@ -2593,10 +2586,8 @@ double solve(
                                        i_tl,
                                        i_ox,
                                        ox,
-                                       ox_length,
                                        i_oy,
-                                       oy,
-                                       oy_length);
+                                       oy);
                 density[ index ] = value + tau * rp;
             }
         }
