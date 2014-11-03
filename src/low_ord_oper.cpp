@@ -1053,14 +1053,6 @@ double integUnderRigAngTr_BottRight(
 }
 
 double integUnderBottTr(
-                        double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                       
-                        double lbDom, //   -  Left and right boundaries of rectangular domain.
-                        double rbDom,
-                        //
-                        double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                        double ubDom,
-                        //
                         double tau,
                         int iCurrTL, //   -  Index of current time layer.
                         //
@@ -1486,14 +1478,7 @@ double integUnderRigAngTr_UppRight(
 }
 
 double integUnderUpperTr(
-                         double par_a, //   -  Item of left and right setback (parameter "a" in test).
-                       
-                         double lbDom, //   -  Left and right boundaries of rectangular domain.
-                         double rbDom,
-                         //
-                         double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                         double ubDom,
-                         //
+                         
                          double tau,
                          int iCurrTL, //   -  Index of current time layer.
                          //
@@ -1562,12 +1547,6 @@ double integUnderUpperTr(
 }
 
 double wall_integ_under_uniform_triangle(
-                                         double par_a,
-                                         double par_b,
-                                         double lbDom,
-                                         double rbDom,
-                                         double bbDom,
-                                         double ubDom,
                                          double tau,
                                          int iCurrTL,
                                          double *firVer,
@@ -1584,12 +1563,6 @@ double wall_integ_under_uniform_triangle(
 }
 
 double integ_under_uniform_triangle(
-                                    double par_a,
-                                    
-                                    double lbDom,
-                                    double rbDom,
-                                    double bbDom,
-                                    double ubDom,
                                     double tau,
                                     int iCurrTL,
                                     double *firVer,
@@ -1607,14 +1580,14 @@ double integ_under_uniform_triangle(
     bool isSecVUsed = false;
     bool isThiVUsed = false;
     bool is1VUsed, is2VUsed, is3VUsed;
-    double a_LC, b_LC, c_LC; //   -  Coefficients of line betweeen "bv" and "uv" vertices.
+    double a_LC, b_LC, c_LC; //   -  Coefficients of line between "bv" and "uv" vertices.
     double ap[2]; //   -  Across point of line through "bv" to "uv" and "y == mv[1]"
     double LvBt[2], RvBt[2], BvBt[2]; //   -  Left, Right and Bottom vertices of Bottom triangle.
     double integOfBottTr; //   -  Item of integral under Bottom triangle.
     double LvUt[2], RvUt[2], UvUt[2]; //   -  Left, Right and Upper vertices of Upper triangle.
     double integOfUppTr; //   -  Item of integral under Upper triangle.
     double integ = 0.; //   -  Item which I'm computing.
-    //   1. I need to understand which vertex is botton, middle and upper.
+    //   1. I need to understand which vertex is bottom, middle and upper.
     bv[1] = firVer[1];
     bv[0] = firVer[0];
     isFirVUsed = true;
@@ -1703,12 +1676,7 @@ double integ_under_uniform_triangle(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                                         par_a, 
-                                         //
-                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                         //
-                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                         //
+                                         
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvBt, RvBt, BvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
@@ -1731,12 +1699,7 @@ double integ_under_uniform_triangle(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                                         par_a,
-                                         //
-                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                         //
-                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                         //
+                                         
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvUt, RvUt, UvUt, //   -  Left, Right and Bottom vertices of Upper triangle.
@@ -1759,12 +1722,7 @@ double integ_under_uniform_triangle(
         BvBt[0] = bv[0];
         BvBt[1] = bv[1];
         integOfBottTr = integUnderBottTr(
-                                         par_a, 
-                                         //
-                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                         //
-                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                         //
+                                         
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvBt, RvBt, BvBt, //   -  Left, Right and Bottom vertices of Bottom triangle.
@@ -1787,12 +1745,7 @@ double integ_under_uniform_triangle(
         UvUt[0] = uv[0];
         UvUt[1] = uv[1];
         integOfUppTr = integUnderUpperTr(
-                                         par_a, 
-                                         //
-                                         lbDom, rbDom, //   -  Left and right boundaries of rectangular domain.
-                                         //
-                                         bbDom, ubDom, //   -  Bottom and upper boundaries of rectangular domain.
-                                         //
+                                         
                                          tau, iCurrTL, //   -  Index of current time layer.
                                          //
                                          LvUt, RvUt, UvUt, //   -  Left, Right and Bottom vertices of Upper triangle.
@@ -2374,9 +2327,7 @@ double compute_value(
     {
     case wall:
         result += wall_integ_under_uniform_triangle(
-                                                    a, b,
-                                                    lb, rb,
-                                                    bb, ub,
+                                                   
                                                     tau, curr_tl,
                                                     firVfirT, secVfirT, thiVfirT,
                                                     ox, ox_length,
@@ -2385,9 +2336,7 @@ double compute_value(
                                                     i_ox, i_oy);
 
         result += wall_integ_under_uniform_triangle(
-                                                    a, b,
-                                                    lb, rb,
-                                                    bb, ub,
+                                                    
                                                     tau, curr_tl,
                                                     firVsecT, secVsecT, thiVsecT,
                                                     ox, ox_length,
@@ -2397,9 +2346,7 @@ double compute_value(
         break;
     case normal:
         result += integ_under_uniform_triangle(
-                                               a,
-                                               lb, rb,
-                                               bb, ub,
+                                               
                                                tau, curr_tl,
                                                firVfirT, secVfirT, thiVfirT,
                                                ox, ox_length,
@@ -2408,9 +2355,7 @@ double compute_value(
                                                i_ox, i_oy);
 
         result += integ_under_uniform_triangle(
-                                               a, 
-                                               lb, rb,
-                                               bb, ub,
+                                              
                                                tau, curr_tl,
                                                firVsecT, secVsecT, thiVsecT,
                                                ox, ox_length,
