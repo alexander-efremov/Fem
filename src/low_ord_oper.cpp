@@ -1550,9 +1550,9 @@ double integUnderUpperTr(
 double wall_integ_under_uniform_triangle(
                                          double tau,
                                          int iCurrTL,
-                                         point_t *t_1_a,
-                                         double *secVer,
-                                         double *thiVer,
+                                         point_t *a,
+                                         point_t *b,
+                                         point_t *c,
                                          const double *masOX,
                                          int numOfOXSt,
                                          const double *masOY,
@@ -1567,8 +1567,8 @@ double integ_under_uniform_triangle(
                                     double tau,
                                     int iCurrTL,
                                     point_t *firVer,
-                                    double *secVer,
-                                    double *thiVer,
+                                    point_t *secVer,
+                                    point_t *thiVer,
                                     const double *masOX,
                                     int numOfOXSt,
                                     const double *masOY,
@@ -1592,17 +1592,17 @@ double integ_under_uniform_triangle(
     bv[1] = firVer->y;
     bv[0] = firVer->x;
     isFirVUsed = true;
-    if (bv[1] > secVer[1])
+    if (bv[1] > secVer->y)
     {
-        bv[1] = secVer[1];
-        bv[0] = secVer[0];
+        bv[1] = secVer->y;
+        bv[0] = secVer->x;
         isFirVUsed = false;
         isSecVUsed = true;
     }
-    if (bv[1] > thiVer[1])
+    if (bv[1] > thiVer->y)
     {
-        bv[1] = thiVer[1];
-        bv[0] = thiVer[0];
+        bv[1] = thiVer->y;
+        bv[0] = thiVer->x;
         isFirVUsed = false;
         isSecVUsed = false;
         isThiVUsed = true;
@@ -1617,17 +1617,17 @@ double integ_under_uniform_triangle(
         uv[0] = firVer->x;
         is1VUsed = true;
     }
-    if ((uv[1] < secVer[1]) && (isSecVUsed == false))
+    if ((uv[1] < secVer->y) && (isSecVUsed == false))
     {
-        uv[1] = secVer[1];
-        uv[0] = secVer[0];
+        uv[1] = secVer->y;
+        uv[0] = secVer->x;
         is2VUsed = true;
         is1VUsed = false;
     }
-    if ((uv[1] < thiVer[1]) && (isThiVUsed == false))
+    if ((uv[1] < thiVer->y) && (isThiVUsed == false))
     {
-        uv[1] = thiVer[1];
-        uv[0] = thiVer[0];
+        uv[1] = thiVer->y;
+        uv[0] = thiVer->x;
         is3VUsed = true;
         is2VUsed = false;
         is1VUsed = false;
@@ -1640,13 +1640,13 @@ double integ_under_uniform_triangle(
     }
     if ((isSecVUsed == false) && (is2VUsed == false))
     {
-        mv[1] = secVer[1];
-        mv[0] = secVer[0];
+        mv[1] = secVer->y;
+        mv[0] = secVer->x;
     }
     if ((isThiVUsed == false) && (is3VUsed == false))
     {
-        mv[1] = thiVer[1];
-        mv[0] = thiVer[0];
+        mv[1] = thiVer->y;
+        mv[0] = thiVer->x;
     }
     //   2. I want to compute across point.
     //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
@@ -1937,12 +1937,12 @@ quad_type get_quadrangle_type(double b,
                               const double *oy,
                               int oy_length,
                               point_t *t_1_a, //   -  First vertex of first triangle.
-                              double *secVfirT, //   -  Second vertex of first triangle.
-                              double *thiVfirT, //   -  Third vertex of first triangle.
+                              point_t *t_1_b, //   -  Second vertex of first triangle.
+                              point_t *t_1_c, //   -  Third vertex of first triangle.
                               //
                               point_t *t_2_a, //   -  First vertex of second triangle.
-                              double *secVsecT, //   -  Second vertex of second triangle.
-                              double *thiVsecT) //   -  Third vertex of second triangle.
+                              point_t *t_2_b, //   -  Second vertex of second triangle.
+                              point_t *t_2_c) //   -  Third vertex of second triangle.
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
@@ -1962,22 +1962,13 @@ quad_type get_quadrangle_type(double b,
 
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
     // It's convex.
-    ptcpy(t_1_a, &alpha);
     
-    secVfirT[0] = beta.x;
-    secVfirT[1] = beta.y;
-
-    thiVfirT[0] = gamma.x;
-    thiVfirT[1] = gamma.y;
-
-    //   Second triangle.
+    ptcpy(t_1_a, &alpha);
+    ptcpy(t_1_b, &beta);
+    ptcpy(t_1_c, &gamma);
     ptcpy(t_2_a, &alpha);
-
-    secVsecT[0] = theta.x;
-    secVsecT[1] = theta.y;
-
-    thiVsecT[0] = gamma.x;
-    thiVsecT[1] = gamma.y;
+    ptcpy(t_2_b, &theta);
+    ptcpy(t_2_c, &gamma);
 
     return normal;
 }
@@ -1999,23 +1990,18 @@ double compute_value(
                      int oy_length,
                      double *prev_density)
 {
-    point_t t_1_a;
-    point_t t_2_a;
-    double secVfirT[2], thiVfirT[2]; //   -  First, second and third vertices of first triangle.
-    double  secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
-
+    point_t t_1_a, t_1_b, t_1_c;
+    point_t t_2_a, t_2_b, t_2_c;
+   
     //   Let's understand what type of quadrangle we have.
-
-
-
     quad_type type = get_quadrangle_type(b,
                                          lb, rb,
                                          bb, ub,
                                          tau, curr_tl,
                                          i_ox, ox, ox_length,
                                          i_oy, oy, oy_length,
-                                         &t_1_a, secVfirT, thiVfirT,
-                                         &t_2_a, secVsecT, thiVsecT);
+                                         &t_1_a, &t_1_b, &t_1_c,
+                                         &t_2_a, &t_2_b, &t_2_c);
 
     if (type != normal && type != wall)
     {
@@ -2028,14 +2014,14 @@ double compute_value(
     {
     case wall:
         result += wall_integ_under_uniform_triangle(tau, curr_tl,
-                                                    &t_1_a, secVfirT, thiVfirT,
+                                                    &t_1_a, &t_1_b, &t_1_c,
                                                     ox, ox_length,
                                                     oy, oy_length,
                                                     prev_density,
                                                     i_ox, i_oy);
 
         result += wall_integ_under_uniform_triangle(tau, curr_tl,
-                                                    &t_2_a, secVsecT, thiVsecT,
+                                                    &t_2_a, &t_2_b, &t_2_c,
                                                     ox, ox_length,
                                                     oy, oy_length,
                                                     prev_density,
@@ -2043,14 +2029,14 @@ double compute_value(
         break;
     case normal:
         result += integ_under_uniform_triangle(tau, curr_tl,
-                                               &t_1_a, secVfirT, thiVfirT,
+                                               &t_1_a, &t_1_b, &t_1_c,
                                                ox, ox_length,
                                                oy, oy_length,
                                                prev_density,
                                                i_ox, i_oy);
 
         result += integ_under_uniform_triangle(tau, curr_tl,
-                                               &t_2_a, secVsecT, thiVsecT,
+                                               &t_2_a, &t_2_b, &t_2_c,
                                                ox, ox_length,
                                                oy, oy_length,
                                                prev_density,
