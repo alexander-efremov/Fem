@@ -1828,29 +1828,105 @@ double f_function(
     return res;
 }
 
+void compute_coordinate_on_prev_layer(double par_b,
+                                      double lbDom,
+                                      double rbDom,
+                                      double bbDom,
+                                      double ubDom,
+                                      double tau,
+                                      int cur_tl,
+                                      int iOfOXN,
+                                      const double *masOX,
+                                      int numOfOXSt,
+                                      int iOfOYN,
+                                      const double *masOY,
+                                      int numOfOYSt, double *alNew, double *beNew, double *gaNew, double *thNew)
+{
+    double alpha[2], beta[2], gamma[2], theta[2]; //   -  Vertexes of square. Anticlockwise order from left bottom vertex.
+    double u, v; //   -  Items of velocity components.
+
+    //   1. First of all let's compute coordinates of square vertexes.
+    //  OX:
+    if (iOfOXN == 0)
+    {
+        alpha[0] = masOX[ iOfOXN ];
+        beta[0] = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
+        gamma[0] = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
+        theta[0] = masOX[ iOfOXN ];
+    }
+    else if (iOfOXN == numOfOXSt)
+    {
+        alpha[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        beta[0] = masOX[ iOfOXN ];
+        gamma[0] = masOX[ iOfOXN ];
+        theta[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+    }
+    else if (iOfOXN > 0 && iOfOXN < numOfOXSt)
+    {
+        alpha[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+        beta[0] = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
+        gamma[0] = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
+        theta[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
+    }
+
+    //  OY:
+    if (iOfOYN == 0)
+    {
+        alpha[1] = masOY[ iOfOYN ];
+        beta[1] = masOY[ iOfOYN ];
+        gamma[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        theta[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+    }
+    else if (iOfOYN == numOfOYSt)
+    {
+        alpha[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        beta[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        gamma[1] = masOY[ iOfOYN ];
+        theta[1] = masOY[ iOfOYN ];
+    }
+    else if (iOfOYN > 0 && iOfOYN < numOfOYSt)
+    {
+        alpha[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        beta[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
+        gamma[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+        theta[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
+    }
+
+    //   2. Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
+    //  alNew.
+    u = u_function(par_b, alpha[0], alpha[1]);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, alpha[0], alpha[1]);
+    alNew[0] = alpha[0] - tau * u;
+    alNew[1] = alpha[1] - tau * v;
+
+    //  beNew.
+    u = u_function(par_b, beta[0], beta[1]);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, beta[0], beta[1]);
+    beNew[0] = beta[0] - tau * u;
+    beNew[1] = beta[1] - tau * v;
+
+    //  gaNew.
+    u = u_function(par_b, gamma[0], gamma[1]);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, gamma[0], gamma[1]);
+    gaNew[0] = gamma[0] - tau * u;
+    gaNew[1] = gamma[1] - tau * v;
+
+    //  thNew.
+    u = u_function(par_b, theta[0], theta[1]);
+    v = v_function(lbDom, rbDom, bbDom, ubDom, tau*cur_tl, theta[0], theta[1]);
+    thNew[0] = theta[0] - tau * u;
+    thNew[1] = theta[1] - tau * v;
+
+}
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
 quad_type get_quadrangle_type(
-                              double par_b, //   -  Item of second parameter from "u_funcion".
-                              //
-                              double lbDom, //   -  Left and right boundaries of rectangular domain.
-                              double rbDom,
-                              //
-                              double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                              double ubDom,
-                              //
-                              double tau,
-                              double iCurrTL, //   -  Index of current time layer. Necessary for velocity.
-                              //
-                              int iOfOXN, //   -  Index of current OX node.
-                              const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                              int numOfOXSt, //   -  Number of OX steps.
-                              //
-                              int iOfOYN, //   -  Index of current OY node.
-                              const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                              int numOfOYSt, //   -  Number of OY steps.
-                              //
+                              double *alNew,
+                              double *beNew,
+                              double *gaNew,
+                              double *thNew,
+
                               double *firVfirT, //   -  First vertex of first triangle.
                               double *secVfirT, //   -  Second vertex of first triangle.
                               double *thiVfirT, //   -  Third vertex of first triangle.
@@ -1860,428 +1936,75 @@ quad_type get_quadrangle_type(
                               double *thiVsecT) //   -  Third vertex of second triangle.
 {
     quad_type type = pseudo;
-
-    double alpha[2], betta[2], gamma[2], theta[2]; //   -  Vertexes of square. Anticlockwise order from left botton vertex.
-    double u, v; //   -  Items of velocity components.
-    double alNew[2], beNew[2], gaNew[2], thNew[2]; //   -  New positions of vertexes. Vertexes of quadrangle.
-    double vectAlGa[2], vectBeTh[2]; //   -  Vectors: 1) from "alNew" to "gaNew" 2) from "beNew" to "thNew".
-    double a_1LC, b_1LC, c_1LC; //   -  a_1LC * x  +  b_1LC * y  = c_1LC. Line equation through "alNew" and "gaNew".
-    double a_2LC, b_2LC, c_2LC; //   -  a_2LC * x  +  b_2LC * y  = c_2LC. Line equation through "beNew" and "thNew".
-    double AcrP[2]; //   -  Across point of two lines
-    double vectAlBe[2]; //   -  Vectors for computing vertexes sequence order by vector production.
-    double vectAlTh[2]; //   -  Vectors for computing vertexes sequence order by vector production.
-    double vectBeGa[2]; //   -  Vectors for computing vertexes sequence order by vector production.
-    double vectBeAl[2]; //   -  Vectors for computing vertexes sequence order by vector production.
-    double vectProdOz; //   -  Z-axis of vector production.
-    double scalProd; //   -  Scalar production of two vectors.
-
-    //   1. First of all let's compute coordinates of square vertexes.
-
-    //  OX:
-
-    if (iOfOXN == 0)
-    {
-        alpha[0] = masOX[ iOfOXN ];
-        betta[0] = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
-        gamma[0] = (masOX[iOfOXN] + masOX[iOfOXN + 1]) / 2.;
-        theta[0] = masOX[ iOfOXN ];
-    }
-
-    if (iOfOXN == numOfOXSt)
-    {
-        alpha[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-        betta[0] = masOX[ iOfOXN ];
-        gamma[0] = masOX[ iOfOXN ];
-        theta[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-    }
-
-    if ((iOfOXN > 0) && (iOfOXN < numOfOXSt))
-    {
-        alpha[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-        betta[0] = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
-        gamma[0] = (masOX[iOfOXN + 1] + masOX[iOfOXN]) / 2.;
-        theta[0] = (masOX[iOfOXN - 1] + masOX[iOfOXN]) / 2.;
-    }
-
-    //  OY:
-    if (iOfOYN == 0)
-    {
-        alpha[1] = masOY[ iOfOYN ];
-        betta[1] = masOY[ iOfOYN ];
-        gamma[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-        theta[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-    }
-
-    if (iOfOYN == numOfOYSt)
-    {
-        alpha[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        betta[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        gamma[1] = masOY[ iOfOYN ];
-        theta[1] = masOY[ iOfOYN ];
-    }
-
-    if ((iOfOYN > 0) && (iOfOYN < numOfOYSt))
-    {
-        alpha[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        betta[1] = (masOY[iOfOYN] + masOY[ iOfOYN - 1]) / 2.;
-        gamma[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-        theta[1] = (masOY[iOfOYN] + masOY[ iOfOYN + 1]) / 2.;
-    }
-
-    //   2. Now let's compute new coordinates on the previous time level of alpha, betta, gamma, theta points.
-    //  alNew.
-
-    u = u_function(par_b, alpha[0], alpha[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, alpha[0], alpha[1]);
-    alNew[0] = alpha[0] - tau * u;
-    alNew[1] = alpha[1] - tau * v;
-
-    //  beNew.
-    u = u_function(par_b, betta[0], betta[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, betta[0], betta[1]);
-    beNew[0] = betta[0] - tau * u;
-    beNew[1] = betta[1] - tau * v;
-
-    //  gaNew.
-
-    u = u_function(par_b, gamma[0], gamma[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, gamma[0], gamma[1]);
-    gaNew[0] = gamma[0] - tau * u;
-    gaNew[1] = gamma[1] - tau * v;
-
-    //  thNew.
-    u = u_function(par_b, theta[0], theta[1]);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, iCurrTL * tau, theta[0], theta[1]);
-    thNew[0] = theta[0] - tau * u;
-    thNew[1] = theta[1] - tau * v;
-
+    
     //   3.a Let's compute coefficients of first line between "alNew" and "gaNew" points.
     //   a_1LC * x  +  b_1LC * y  = c_1LC.
 
-    vectAlGa[0] = gaNew[0] - alNew[0];
-    vectAlGa[1] = gaNew[1] - alNew[1];
-    a_1LC = vectAlGa[1];
-    b_1LC = -vectAlGa[0];
-    c_1LC = vectAlGa[1] * alNew[0] - vectAlGa[0] * alNew[1];
+    point_t alpha_to_gamma;
+    point_t beta_to_theta; //   -  Vectors: 1) from "alNew" to "gaNew" 2) from "beNew" to "thNew".
+    double a_1LC, b_1LC, c_1LC; //   -  a_1LC * x  +  b_1LC * y  = c_1LC. Line equation through "alNew" and "gaNew".
+    double a_2LC, b_2LC, c_2LC; //   -  a_2LC * x  +  b_2LC * y  = c_2LC. Line equation through "beNew" and "thNew".
+    point_t cross; //   -  Across point of two lines
+    point_t alpha_to_beta; //   -  Vectors for computing vertexes sequence order by vector production.
+    point_t alpha_to_theta; //   -  Vectors for computing vertexes sequence order by vector production.
+    double vectProdOz; //   -  Z-axis of vector production.
+
+    alpha_to_gamma.x = gaNew[0] - alNew[0];
+    alpha_to_gamma.y = gaNew[1] - alNew[1];
+    a_1LC = alpha_to_gamma.y;
+    b_1LC = -alpha_to_gamma.x;
+    c_1LC = alpha_to_gamma.y * alNew[0] - alpha_to_gamma.x * alNew[1];
 
     //   3.b Let's compute coefficients of second line between "beNew" and "thNew" points.
     //   a_2LC * x  +  b_2LC * y  = c_2LC.
 
-    vectBeTh[0] = thNew[0] - beNew[0];
-    vectBeTh[1] = thNew[1] - beNew[1];
-    a_2LC = vectBeTh[1];
-    b_2LC = -vectBeTh[0];
-    c_2LC = vectBeTh[1] * beNew[0] - vectBeTh[0] * beNew[1];
+    beta_to_theta.x = thNew[0] - beNew[0];
+    beta_to_theta.y = thNew[1] - beNew[1];
+    a_2LC = beta_to_theta.y;
+    b_2LC = -beta_to_theta.x;
+    c_2LC = beta_to_theta.y * beNew[0] - beta_to_theta.x * beNew[1];
 
-    //   4. Let's compute coordinates of across point of this two lines.
-    //   Are lines parallel?
+    cross.x = (b_1LC * c_2LC - b_2LC * c_1LC) / (b_1LC * a_2LC - b_2LC * a_1LC);
+    cross.y = (a_1LC * c_2LC - a_2LC * c_1LC) / (-b_1LC * a_2LC + b_2LC * a_1LC);
 
-    if (fabs(b_1LC * a_2LC - b_2LC * a_1LC) < 1.e-14)
+    //  Now let's consider SECOND case 5.b "(  (beNew[1] - AcrP[1])*(thNew[1] - AcrP[1])  )  <= 0."
+    if ((beNew[1] - cross.y) * (thNew[1] - cross.y) > 0.) return pseudo;
+    if ((alNew[0] - cross.x) * (gaNew[0] - cross.x) > 0.) return pseudo;
+
+    //   O.K. the quadrangle is convex. Is it has the same vertices sequence order.
+    alpha_to_beta.x = beNew[0] - alNew[0];
+    alpha_to_beta.y = beNew[1] - alNew[1];
+    alpha_to_theta.x = thNew[0] - alNew[0];
+    alpha_to_theta.y = thNew[1] - alNew[1];
+
+    vectProdOz = alpha_to_beta.x * alpha_to_theta.y - alpha_to_beta.y * alpha_to_theta.x;
+
+    if (vectProdOz >= 0.)
     {
-        //   Not checked.
+        type = normal;
 
-        type = pseudo;
-
-        //   Pseudo case. Anyway I need to compute some values.
-
-        //   First triangle.
-
+        //   Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. It's convex.
         firVfirT[0] = alNew[0];
         firVfirT[1] = alNew[1];
+
         secVfirT[0] = beNew[0];
         secVfirT[1] = beNew[1];
+
         thiVfirT[0] = gaNew[0];
         thiVfirT[1] = gaNew[1];
 
+        //   Second triangle.
 
-        //   Vertices of second triangle depends on scalar production.
+        firVsecT[0] = alNew[0];
+        firVsecT[1] = alNew[1];
 
-        vectAlGa[0] = gaNew[0] - alNew[0];
-        vectAlGa[1] = gaNew[1] - alNew[1];
-        vectBeTh[0] = thNew[0] - beNew[0];
-        vectBeTh[1] = thNew[1] - beNew[1];
-
-
-        scalProd = vectAlGa[0] * vectBeTh[0] + vectAlGa[1] * vectBeTh[1];
-        firVsecT[0] = beNew[0];
-        firVsecT[1] = beNew[1];
         secVsecT[0] = thNew[0];
         secVsecT[1] = thNew[1];
 
-
-        if (scalProd >= 0.)
-        {
-            thiVsecT[0] = gaNew[0];
-            thiVsecT[1] = gaNew[1];
-        }
-
-        if (scalProd < 0.)
-        {
-            thiVsecT[0] = alNew[0];
-            thiVsecT[1] = alNew[1];
-        }
-
-        return type;
+        thiVsecT[0] = gaNew[0];
+        thiVsecT[1] = gaNew[1];
     }
 
-
-    AcrP[0] = (b_1LC * c_2LC - b_2LC * c_1LC) / (b_1LC * a_2LC - b_2LC * a_1LC);
-    AcrP[1] = (a_1LC * c_2LC - a_2LC * c_1LC) / (-b_1LC * a_2LC + b_2LC * a_1LC);
-
-    if (((beNew[1] - AcrP[1]) * (thNew[1] - AcrP[1])) > 0.)
-    {
-        if (((alNew[0] - AcrP[0]) * (gaNew[0] - AcrP[0])) > 0.)
-        {
-            type = pseudo;
-            firVfirT[0] = alNew[0];
-            firVfirT[1] = alNew[1];
-            secVfirT[0] = beNew[0];
-            secVfirT[1] = beNew[1];
-            thiVfirT[0] = gaNew[0];
-            thiVfirT[1] = gaNew[1];
-
-            //   Second triangle.
-
-            firVsecT[0] = beNew[0];
-            firVsecT[1] = beNew[1];
-            secVsecT[0] = thNew[0];
-            secVsecT[1] = thNew[1];
-
-
-            //   Third vertex computing...
-
-            vectAlGa[0] = gaNew[0] - alNew[0];
-            vectAlGa[1] = gaNew[1] - alNew[1];
-
-            vectBeTh[0] = thNew[0] - beNew[0];
-            vectBeTh[1] = thNew[1] - beNew[1];
-
-            scalProd = vectAlGa[0] * vectBeTh[0] + vectAlGa[1] * vectBeTh[1];
-
-            if (scalProd >= 0.)
-            {
-                thiVsecT[0] = gaNew[0];
-                thiVsecT[1] = gaNew[1];
-            }
-
-            if (scalProd < 0.)
-            {
-                thiVsecT[0] = alNew[0];
-                thiVsecT[1] = alNew[1];
-            }
-
-            return type;
-        } //   "if(  (  (alNew[0] - AcrP[0])*(gaNew[0] - AcsP[0])  )  >  0.  )".
-
-
-        //   Second criterion. Second case.
-
-        if (((alNew[0] - AcrP[0]) * (gaNew[0] - AcrP[0])) <= 0.)
-        {
-            vectAlBe[0] = beNew[0] - alNew[0];
-            vectAlBe[1] = beNew[1] - alNew[1];
-            vectAlTh[0] = thNew[0] - alNew[0];
-            vectAlTh[1] = thNew[1] - alNew[1];
-
-            vectProdOz = vectAlBe[0] * vectAlTh[1] - vectAlBe[1] * vectAlTh[0];
-
-            if (vectProdOz < 0.)
-            {
-                //   The vertex "beNew" is NOT in triangle "alNew - gaNew - thNew".
-
-                type = pseudo;
-
-                //   Pseudo case. Anyway I need to find some solution. So
-
-                firVfirT[0] = alNew[0];
-                firVfirT[1] = alNew[1];
-                secVfirT[0] = beNew[0];
-                secVfirT[1] = beNew[1];
-                thiVfirT[0] = thNew[0];
-                thiVfirT[1] = thNew[1];
-
-                //   Second triangle.
-
-                firVsecT[0] = beNew[0];
-                firVsecT[1] = beNew[1];
-                secVsecT[0] = thNew[0];
-                secVsecT[1] = thNew[1];
-                thiVsecT[0] = gaNew[0];
-                thiVsecT[1] = gaNew[1];
-
-                return type;
-            }
-
-            if (vectProdOz >= 0.)
-            {
-                //  It's all write. We have a good concave quadrangle.
-
-                //   Now let's compute all vertices which I need.
-
-                type = concave;
-
-                //   First triangle.
-
-                firVfirT[0] = alNew[0];
-                firVfirT[1] = alNew[1];
-                secVfirT[0] = beNew[0];
-                secVfirT[1] = beNew[1];
-                thiVfirT[0] = thNew[0];
-                thiVfirT[1] = thNew[1];
-
-                //   Second triangle.
-
-                firVsecT[0] = beNew[0];
-                firVsecT[1] = beNew[1];
-                secVsecT[0] = thNew[0];
-                secVsecT[1] = thNew[1];
-                thiVsecT[0] = gaNew[0];
-                thiVsecT[1] = gaNew[1];
-
-                return type;
-            }
-        } //   "if(  (  (alNew[0] - AcsP[0])*(gaNew[0] - AcsP[0])  )  <=  0.  )".   //   Last second case of second criterion.
-    } //   end of "if (  (  (beNew[1] - AcrP[1])*(thNew[1] - AcrP[1])  )  >  0.  )"
-
-    //  Now let's consider SECOND case 5.b "(  (beNew[1] - AcrP[1])*(thNew[1] - AcrP[1])  )  <= 0."
-
-    if (((beNew[1] - AcrP[1]) * (thNew[1] - AcrP[1])) <= 0.)
-    {
-        if (((alNew[0] - AcrP[0]) * (gaNew[0] - AcrP[0])) > 0.)
-        {
-            //  It means the across point IS NOT between "alNew" and "gaNew" vertices by Ox-axis?
-
-            //   O.K. the quadrangle IS NOT CONVEX. Is it concave or pseudo? Third criterion.
-
-            vectBeGa[0] = gaNew[0] - beNew[0];
-            vectBeGa[1] = gaNew[1] - beNew[1];
-            vectBeAl[0] = alNew[0] - beNew[0];
-            vectBeAl[1] = alNew[1] - beNew[1];
-
-            vectProdOz = vectBeGa[0] * vectBeAl[1] - vectBeGa[1] * vectBeAl[0];
-
-            if (vectProdOz >= 0.)
-            {
-                type = concave;
-
-                //   The quadrangle is concave. First triangle.
-
-                firVfirT[0] = alNew[0];
-                firVfirT[1] = alNew[1];
-                secVfirT[0] = beNew[0];
-                secVfirT[1] = beNew[1];
-                thiVfirT[0] = gaNew[0];
-                thiVfirT[1] = gaNew[1];
-
-                //   Second triangle.
-
-                firVsecT[0] = alNew[0];
-                firVsecT[1] = alNew[1];
-
-                secVsecT[0] = thNew[0];
-                secVsecT[1] = thNew[1];
-
-                thiVsecT[0] = gaNew[0];
-                thiVsecT[1] = gaNew[1];
-
-                return type;
-            }
-
-            if (vectProdOz < 0.)
-            {
-                type = pseudo;
-
-                //   This concave quadrangle do has NO write anticlockwise vertices sequence order. It's pseudo.
-
-                firVfirT[0] = alNew[0];
-                firVfirT[1] = alNew[1];
-
-                secVfirT[0] = beNew[0];
-                secVfirT[1] = beNew[1];
-
-                thiVfirT[0] = gaNew[0];
-                thiVfirT[1] = gaNew[1];
-
-                //   Second triangle.
-
-                firVsecT[0] = alNew[0];
-                firVsecT[1] = alNew[1];
-
-                secVsecT[0] = thNew[0];
-                secVsecT[1] = thNew[1];
-
-                thiVsecT[0] = gaNew[0];
-                thiVsecT[1] = gaNew[1];
-
-                return type;
-            }
-        } //   end of "if(  (  (alNew[0] - AcrP[0])*(gaNew[0] - AcsP[0])  )  >  0.  )". First case of second criterion.
-
-
-        //   Second criterion. Second case.
-
-        if (((alNew[0] - AcrP[0]) * (gaNew[0] - AcrP[0])) <= 0.)
-        {
-            //   O.K. the quadrangle is convex. Is it has the same vertices sequence order.
-
-            vectAlBe[0] = beNew[0] - alNew[0];
-
-            vectAlBe[1] = beNew[1] - alNew[1];
-
-            vectAlTh[0] = thNew[0] - alNew[0];
-
-            vectAlTh[1] = thNew[1] - alNew[1];
-
-            vectProdOz = vectAlBe[0] * vectAlTh[1] - vectAlBe[1] * vectAlTh[0];
-
-            if (vectProdOz >= 0.)
-            {
-                type = normal;
-
-                //   Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. It's convex.
-
-                firVfirT[0] = alNew[0];
-                firVfirT[1] = alNew[1];
-
-                secVfirT[0] = beNew[0];
-                secVfirT[1] = beNew[1];
-
-                thiVfirT[0] = gaNew[0];
-                thiVfirT[1] = gaNew[1];
-
-                //   Second triangle.
-
-                firVsecT[0] = alNew[0];
-                firVsecT[1] = alNew[1];
-
-                secVsecT[0] = thNew[0];
-                secVsecT[1] = thNew[1];
-
-                thiVsecT[0] = gaNew[0];
-                thiVsecT[1] = gaNew[1];
-
-                return type;
-            }
-
-            if (vectProdOz < 0.)
-            {
-                type = pseudo;
-                firVfirT[0] = alNew[0];
-                firVfirT[1] = alNew[1];
-                secVfirT[0] = beNew[0];
-                secVfirT[1] = beNew[1];
-                thiVfirT[0] = gaNew[0];
-                thiVfirT[1] = gaNew[1];
-                firVsecT[0] = alNew[0];
-                firVsecT[1] = alNew[1];
-                secVsecT[0] = thNew[0];
-                secVsecT[1] = thNew[1];
-                thiVsecT[0] = gaNew[0];
-                thiVsecT[1] = gaNew[1];
-                return type;
-            }
-        } //   end of "if(  (  (alNew[0] - AcrP[0])*(gaNew[0] - AcsP[0])  )  <=  0.  )". //   Second case of second criterion.
-    }
     return type;
 }
 
@@ -2306,13 +2029,16 @@ double compute_value(
     double firVsecT[2], secVsecT[2], thiVsecT[2]; //   -  First, second and third vertices of second triangle.
 
     //   Let's understand what type of quadrangle we have.
-    quad_type type = get_quadrangle_type(
-                                         b,
-                                         lb, rb,
-                                         bb, ub,
-                                         tau, curr_tl,
-                                         i_ox, ox, ox_length,
-                                         i_oy, oy, oy_length,
+    
+    double alpha[2], beta[2], gamma[2], theta[2]; // coordinates on previous time layer
+    compute_coordinate_on_prev_layer(b,
+                                     lb, rb,
+                                     bb, ub,
+                                     tau, curr_tl,
+                                     i_ox, ox, ox_length,
+                                     i_oy, oy, oy_length, alpha, beta, gamma, theta);
+    
+    quad_type type = get_quadrangle_type(alpha, beta, gamma, theta,
                                          firVfirT, secVfirT, thiVfirT,
                                          firVsecT, secVsecT, thiVsecT);
 
