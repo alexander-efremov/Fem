@@ -1,5 +1,5 @@
 #include "common.h"
-#include "misc.h"
+#include "point_misc.h"
 
 static const double C_pi = 3.14159265358979323846264338327;
 static int wall_counter = 0;
@@ -174,9 +174,9 @@ double integUnderRightTr_OneCell(double Py,
                                  int *indCurSqOx, //   -  Index of current square by Ox axis.
                                  int *indCurSqOy, //   -  Index of current square by Oy axis.
                                  const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                 int numOfOXSt, 
+                                 int numOfOXSt,
                                  const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                 int numOfOYSt, 
+                                 int numOfOYSt,
                                  double *rhoInPrevTL_asV)
 {
     return -1. * integUnderLeftTr_OneCell(
@@ -202,11 +202,11 @@ double integUnderRectAng_OneCell(double Py,
                                  double Gx,
                                  double Hx,
                                  double tau,
-                                 int iCurrTL, 
+                                 int iCurrTL,
                                  int *indCurSqOx, //   -  Index of current square by Ox axis.
-                                 int *indCurSqOy, 
+                                 int *indCurSqOy,
                                  const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                 int numOfOXSt, 
+                                 int numOfOXSt,
                                  const double *masOY,
                                  double *rhoInPrevTL_asV)
 {
@@ -1050,14 +1050,14 @@ double integ_under_bott_triangle(double tau,
     double result = 0.;
     if (bv[0] <= lv[0])
     {
-        result = integUnderRigAngTr_BottRight(tau, curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density); 
+        result = integUnderRigAngTr_BottRight(tau, curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
         result -= integUnderRigAngTr_BottRight(tau, curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
     if (bv[0] > lv[0] && bv[0] < rv[0])
     {
-        result  = integUnderRigAngTr_BottLeft(tau, curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
-        result += integUnderRigAngTr_BottRight(tau, curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density); 
+        result = integUnderRigAngTr_BottLeft(tau, curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
+        result += integUnderRigAngTr_BottRight(tau, curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
     if (bv[0] >= rv[0])
@@ -1648,26 +1648,26 @@ double f_function(
 }
 
 quad_type compute_coordinate_on_prev_layer(double par_b,
-                                      double lb,
-                                      double rb,
-                                      double bb,
-                                      double ub,
-                                      double tau,
-                                      int cur_tl,
-                                      int i_ox,
-                                      const double *masOX,
-                                      int ox_length,
-                                      int i_oy,
-                                      const double *masOY,
-                                      int oy_length,
-                                      point_t *alpha, point_t *beta, point_t *gamma, point_t *theta)
+                                           double lb,
+                                           double rb,
+                                           double bb,
+                                           double ub,
+                                           double tau,
+                                           int cur_tl,
+                                           int i_ox,
+                                           const double *masOX,
+                                           int ox_length,
+                                           int i_oy,
+                                           const double *masOY,
+                                           int oy_length,
+                                           point_t *alpha, point_t *beta, point_t *gamma, point_t *theta)
 {
     //   1. First of all let's compute coordinates of square vertexes.
     //  OX:
     if (i_ox == 0)
     {
         alpha->x = masOX[ i_ox ];
-        beta->x = (masOX[i_ox] + masOX[i_ox + 1])  / 2.;
+        beta->x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
         gamma->x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
         theta->x = masOX[ i_ox ];
     }
@@ -1681,7 +1681,7 @@ quad_type compute_coordinate_on_prev_layer(double par_b,
     else
     {
         alpha->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
-        beta->x = (masOX[i_ox + 1] + masOX[i_ox])  / 2.;
+        beta->x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
         gamma->x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
         theta->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
     }
@@ -1697,20 +1697,20 @@ quad_type compute_coordinate_on_prev_layer(double par_b,
     else if (i_oy == oy_length)
     {
         alpha->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
-        beta->y = (masOY[i_oy] + masOY[ i_oy - 1])  / 2.;
+        beta->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         gamma->y = masOY[ i_oy ];
         theta->y = masOY[ i_oy ];
     }
     else
     {
         alpha->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
-        beta->y = (masOY[i_oy] + masOY[ i_oy - 1])  / 2.;
+        beta->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         gamma->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
         theta->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
     }
 
     double u, v;
-    
+
     // Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     u = u_function(par_b, alpha->x, alpha->y);
     v = v_function(lb, rb, bb, ub, tau*cur_tl, alpha->x, alpha->y);
@@ -1731,16 +1731,16 @@ quad_type compute_coordinate_on_prev_layer(double par_b,
     v = v_function(lb, rb, bb, ub, tau*cur_tl, theta->x, theta->y);
     theta->x -= tau * u;
     theta->y -= tau * v;
-    
+
     point_t intersection = get_intersection_point(alpha, beta, gamma, theta);
     if ((beta->y - intersection.y) * (theta->y - intersection.y) > 0.) return pseudo; // ??
     if ((alpha->x - intersection.x) * (gamma->x - intersection.x) > 0.) return pseudo; // ??
     double product = get_vector_product(alpha, beta, theta); // ?
     if (product < 0.) return pseudo;
-    
+
     // значит что точка удетела за левую границу
     if (theta->x < 0 ||
-          theta->y < 0 ||  
+            theta->y < 0 ||
             beta->x < 0 ||
             beta->y < 0 ||
             gamma->x < 0 ||
@@ -1781,12 +1781,12 @@ quad_type get_quadrangle_type(double b,
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
     quad_type type = compute_coordinate_on_prev_layer(b,
-                                     lb, rb,
-                                     bb, ub,
-                                     tau, curr_tl,
-                                     i_ox, ox, ox_length,
-                                     i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
-    
+                                                      lb, rb,
+                                                      bb, ub,
+                                                      tau, curr_tl,
+                                                      i_ox, ox, ox_length,
+                                                      i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
+
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
     // It's convex.
 
@@ -1816,7 +1816,7 @@ double compute_value(double b,
                      double *prev_density)
 {
     point_t t_1_a, t_1_b, t_1_c, t_2_a, t_2_b, t_2_c;
-    
+
     quad_type type = get_quadrangle_type(b, lb, rb, bb, ub, tau, curr_tl,
                                          i_ox, ox, ox_length,
                                          i_oy, oy, oy_length,
@@ -1928,7 +1928,7 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
         for (int j = 1; j < x_length; ++j)
         {
             result += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
-                         - density[ (x_length + 1) * k + j ]);
+                           - density[ (x_length + 1) * k + j ]);
         }
     }
     double hx = ox[1] - ox[0];
@@ -2060,7 +2060,7 @@ double *solve(double b,
                  time_step_count,
                  ox_length,
                  oy_length);
-    
+
     solve(b,
           lb, rb,
           bb, ub,
@@ -2076,7 +2076,7 @@ double *solve(double b,
                               time_step_count * time_step);
     //  printf("Norm L1 = %f\n", *norm);
     printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_counter);
-    
+
     delete[] ox;
     delete[] oy;
     return density;
