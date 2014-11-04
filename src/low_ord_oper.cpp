@@ -16,14 +16,12 @@ double _itemOfInteg_1SpecType(double Py,
     return integ / 4;
 }
 
-double analytical_solution(
-                           double t, double x, double y)
+double analytical_solution(double t, double x, double y)
 {
     return 1.1 + sin(t * x * y);
 }
 
-double _itemOfInteg_2SpecType(
-                              double Py,
+double _itemOfInteg_2SpecType(double Py,
                               double Qy,
                               //
                               double alpha,
@@ -1453,17 +1451,16 @@ double wall_integ_under_uniform_triangle(double tau,
     return 0;
 }
 
-double integ_under_uniform_triangle(
-                                    double tau,
-                                    int iCurrTL,
+double integ_under_uniform_triangle(double tau,
+                                    int curr_tl,
                                     point_t *a,
                                     point_t *b,
                                     point_t *c,
-                                    const double *masOX,
-                                    int numOfOXSt,
-                                    const double *masOY,
-                                    int numOfOYSt,
-                                    double *rhoInPrevTL_asV)
+                                    const double *ox,
+                                    int ox_length,
+                                    const double *oy,
+                                    int oy_length,
+                                    double *prev_density)
 {
     const double MIN_VALUE = 1.e-12;
     double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
@@ -1475,9 +1472,11 @@ double integ_under_uniform_triangle(
     bool is3VUsed = false;
     double a_LC, b_LC, c_LC; //   -  Coefficients of line between "bv" and "uv" vertices.
     double ap[2]; //   -  Across point of line through "bv" to "uv" and "y == mv[1]"
-    double result = 0.;
+   
 
     //   1. I need to understand which vertex is bottom, middle and upper.
+   
+    // ===================================
     bv[0] = a->x;
     bv[1] = a->y;
     isFirVUsed = true;
@@ -1497,7 +1496,7 @@ double integ_under_uniform_triangle(
         isThiVUsed = true;
     }
 
-    uv[1] = masOY[0]; //   -  The minimum possible value.
+    uv[1] = oy[0]; //   -  The minimum possible value.
     if (uv[1] < a->y && isFirVUsed == false)
     {
         uv[1] = a->y;
@@ -1535,6 +1534,8 @@ double integ_under_uniform_triangle(
         mv[1] = c->y;
         mv[0] = c->x;
     }
+    // ===================================
+    
     //   2. I want to compute across point.
     //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
     //   a_LC * x  +  b_LC * y  = c_LC.
@@ -1547,34 +1548,36 @@ double integ_under_uniform_triangle(
     ap[1] = mv[1];
     ap[0] = (c_LC - b_LC * ap[1]) / a_LC;
 
-    //   3. There the middle vertex relatively straight line is? Two ways are possible.
-    if (mv[0] < ap[0])
+    //   3. Возможны 2 случая расположения точки перечеения относительно средней
+    //   слева или справа.
+    double result = 0.;
+    if (mv[0] < ap[0])  // средная точка слева от точки пересечения
     {
-        result = integ_under_bott_triangle(tau, iCurrTL,
+        result = integ_under_bott_triangle(tau, curr_tl,
                                            mv, ap, bv,
-                                           masOX, numOfOXSt,
-                                           masOY, numOfOYSt,
-                                           rhoInPrevTL_asV);
+                                           ox, ox_length,
+                                           oy, oy_length,
+                                           prev_density);
 
-        result += integ_under_upper_triangle(tau, iCurrTL,
+        result += integ_under_upper_triangle(tau, curr_tl,
                                              mv, ap, uv,
-                                             masOX, numOfOXSt,
-                                             masOY, numOfOYSt,
-                                             rhoInPrevTL_asV);
+                                             ox, ox_length,
+                                             oy, oy_length,
+                                             prev_density);
     }
-    else
+    else // средняя точка справа от точки пересечения
     {
-        result = integ_under_bott_triangle(tau, iCurrTL,
+        result = integ_under_bott_triangle(tau, curr_tl,
                                            ap, mv, bv,
-                                           masOX, numOfOXSt,
-                                           masOY, numOfOYSt,
-                                           rhoInPrevTL_asV);
+                                           ox, ox_length,
+                                           oy, oy_length,
+                                           prev_density);
 
-        result += integ_under_upper_triangle(tau, iCurrTL,
+        result += integ_under_upper_triangle(tau, curr_tl,
                                              ap, mv, uv,
-                                             masOX, numOfOXSt,
-                                             masOY, numOfOYSt,
-                                             rhoInPrevTL_asV);
+                                             ox, ox_length,
+                                             oy, oy_length,
+                                             prev_density);
     }
     return result;
 }
