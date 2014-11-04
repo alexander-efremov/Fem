@@ -1452,10 +1452,10 @@ double wall_integ_under_uniform_triangle(double tau,
 }
 
 double integ_under_uniform_triangle(double tau,
-                                    int curr_tl,
-                                    point_t *a,
-                                    point_t *b,
-                                    point_t *c,
+                                    int tl,
+                                    point_t *x,
+                                    point_t *y,
+                                    point_t *z,
                                     const double *ox,
                                     int ox_length,
                                     const double *oy,
@@ -1464,62 +1464,47 @@ double integ_under_uniform_triangle(double tau,
 {
     const double MIN_VALUE = 1.e-12;
     double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
-   // point_t bv mv, uv;
-    double a_LC, b_LC, c_LC; //   -  Coefficients of line between "bv" and "uv" vertices.
-    double ap[2]; //   -  Intersection point of line through "bv" to "uv" and "y == mv[1]"
-   
-    
-    bv[0] = a->x;
-    bv[1] = a->y;
-    mv[0] = b->x;
-    mv[1] = b->y;
-    uv[0] = c->x;
-    uv[1] = c->y;
-    
-    //   2. I want to compute across point.
-    //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
-    //   a_LC * x  +  b_LC * y  = c_LC.
-    a_LC = uv[1] - bv[1];
-    if (fabs(a_LC) < MIN_VALUE) return MIN_VALUE;
+    double ip[2];
 
-    b_LC = bv[0] - uv[0];
-    c_LC = b_LC * bv[1] + a_LC * bv[0];
+    bv[0] = x->x;
+    bv[1] = x->y;
+    mv[0] = y->x;
+    mv[1] = y->y;
+    uv[0] = z->x;
+    uv[1] = z->y;
+
+    //   2. I want to compute intersection point.
+    //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
+    //   a * x  +  b * y  = c.
+    double a = z->y - x->y;
+    if (fabs(a) < MIN_VALUE) return MIN_VALUE;
+
+    double b = x->x - z->x;
+    double c = b * x->y + a * x->x;
     //   2.b Intersection point.
-    ap[1] = mv[1];
-    ap[0] = (c_LC - b_LC * ap[1]) / a_LC;
+    ip[1] = mv[1];
+    ip[0] = (c - b * mv[1]) / a;
 
     //   3. Возможны 2 случая расположения точки перечеения относительно средней
     //   слева или справа.
-    double result = 0.;
-    if (mv[0] < ap[0])  // средная точка слева от точки пересечения
-    {
-        result = integ_under_bott_triangle(tau, curr_tl,
-                                           mv, ap, bv,
-                                           ox, ox_length,
-                                           oy, oy_length,
-                                           prev_density);
 
-        result += integ_under_upper_triangle(tau, curr_tl,
-                                             mv, ap, uv,
-                                             ox, ox_length,
-                                             oy, oy_length,
-                                             prev_density);
+    if (mv[0] >= ip[0]) // средняя точка справа от точки пересечения
+    { // обменяем местами  X координаты, чтобы использовать один код для расчета
+        double tx = mv[0];
+        mv[0] = ip[0];
+        ip[0] = tx;
     }
-    else // средняя точка справа от точки пересечения
-    {
-        result = integ_under_bott_triangle(tau, curr_tl,
-                                           ap, mv, bv,
-                                           ox, ox_length,
-                                           oy, oy_length,
-                                           prev_density);
 
-        result += integ_under_upper_triangle(tau, curr_tl,
-                                             ap, mv, uv,
-                                             ox, ox_length,
-                                             oy, oy_length,
-                                             prev_density);
-    }
-    return result;
+    return integ_under_bott_triangle(tau, tl,
+                                     mv, ip, bv,
+                                     ox, ox_length,
+                                     oy, oy_length,
+                                     prev_density)
+            + integ_under_upper_triangle(tau, tl,
+                                         mv, ip, uv,
+                                         ox, ox_length,
+                                         oy, oy_length,
+                                         prev_density);
 }
 
 inline double u_function(double par_b, double x, double y)
@@ -1739,7 +1724,7 @@ quad_type get_quadrangle_type(double b,
     ptcpy(t_2_a, &alpha);
     ptcpy(t_2_b, &theta);
     ptcpy(t_2_c, &gamma);
-    
+
     return type;
 }
 
@@ -1765,16 +1750,16 @@ double compute_value(double b,
                                          i_oy, oy, oy_length,
                                          &t_1_a, &t_1_b, &t_1_c,
                                          &t_2_a, &t_2_b, &t_2_c);
-   
+
     if (type != normal && type != wall)
     {
         return -1.;
     }
-    
+
     // чтобы правилно отработала процедура интегрирования
     // точки должны идти в порядке возрастания y координаты
-    sort_by_y(t_1_a,t_1_b,t_1_c); 
-    sort_by_y(t_2_a,t_2_b,t_2_c);
+    sort_by_y(t_1_a, t_1_b, t_1_c);
+    sort_by_y(t_2_a, t_2_b, t_2_c);
 
 
     // check the type of triangle to select appropriate computation method
