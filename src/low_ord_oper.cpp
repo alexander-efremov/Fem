@@ -1484,7 +1484,7 @@ double integ_under_uniform_triangle(double tau,
 
     b_LC = bv[0] - uv[0];
     c_LC = b_LC * bv[1] + a_LC * bv[0];
-    //   2.b Across point.
+    //   2.b Intersection point.
     ap[1] = mv[1];
     ap[0] = (c_LC - b_LC * ap[1]) / a_LC;
 

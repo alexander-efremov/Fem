@@ -41,7 +41,6 @@
       <compileType>
         <ccTool>
           <architecture>2</architecture>
-          <standard>8</standard>
           <incDir>
             <pElem>include</pElem>
           </incDir>
@@ -65,7 +64,6 @@
             <pElem>include</pElem>
             <pElem>FemBase</pElem>
           </incDir>
-          <commandLine>-std=c++11</commandLine>
         </ccTool>
         <linkerTool>
           <output>${TESTDIR}/TestFiles/f1</output>

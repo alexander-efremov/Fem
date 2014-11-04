@@ -11,10 +11,6 @@ struct point_t {
         return (i == 0) ? x : y;
     }
 
-    point_t(point_t&& other)
-    : x(std::move(other.x)), y(std::move(other.y)) {
-    }
-
     point_t(double x = 0, double y = 0)
     : x(x), y(y) {
     }
