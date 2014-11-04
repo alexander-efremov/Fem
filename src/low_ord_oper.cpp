@@ -1763,13 +1763,16 @@ double compute_value(double b,
                                          i_oy, oy, oy_length,
                                          &t_1_a, &t_1_b, &t_1_c,
                                          &t_2_a, &t_2_b, &t_2_c);
-    sort_by_y(t_1_a,t_1_b,t_1_c);
-    sort_by_y(t_2_a,t_2_b,t_2_c);
-
+   
     if (type != normal && type != wall)
     {
         return -1.;
     }
+    
+    sort_by_y(t_1_a,t_1_b,t_1_c); // чтобы правилно отработала процедура интегрирования
+                                   // точки должны идти в порядке возрастания y координаты
+    sort_by_y(t_2_a,t_2_b,t_2_c);
+
 
     // check the type of triangle to select appropriate computation method
     double result = 0.;
