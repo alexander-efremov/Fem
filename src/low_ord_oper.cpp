@@ -1463,9 +1463,8 @@ double integ_under_uniform_triangle(double tau,
                                     double *prev_density)
 {
     const double MIN_VALUE = 1.e-12;
-    double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
-    double ip[2];
-
+    double bv[2], mv[2], uv[2], ip[2]; //   -  Bottom, middle and upper vertices + intersection point
+    
     bv[0] = x->x;
     bv[1] = x->y;
     mv[0] = y->x;
@@ -1478,10 +1477,8 @@ double integ_under_uniform_triangle(double tau,
     //   a * x  +  b * y  = c.
     double a = z->y - x->y;
     if (fabs(a) < MIN_VALUE) return MIN_VALUE;
-
     double b = x->x - z->x;
     double c = b * x->y + a * x->x;
-    //   2.b Intersection point.
     ip[1] = mv[1];
     ip[0] = (c - b * mv[1]) / a;
 
