@@ -1,5 +1,5 @@
 #include "common.h"
-#include "point_misc.h"
+#include "point.h"
 
 static const double C_pi = 3.14159265358979323846264338327;
 static int wall_counter = 0;
@@ -1464,77 +1464,15 @@ double integ_under_uniform_triangle(double tau,
 {
     const double MIN_VALUE = 1.e-12;
     double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
-    bool isFirVUsed = false;
-    bool isSecVUsed = false;
-    bool isThiVUsed = false;
-    bool is1VUsed = false;
-    bool is2VUsed = false;
-    bool is3VUsed = false;
     double a_LC, b_LC, c_LC; //   -  Coefficients of line between "bv" and "uv" vertices.
     double ap[2]; //   -  Across point of line through "bv" to "uv" and "y == mv[1]"
    
-
-    //   1. I need to understand which vertex is bottom, middle and upper.
-   
-    // ===================================
     bv[0] = a->x;
     bv[1] = a->y;
-    isFirVUsed = true;
-    if (bv[1] > b->y)
-    {
-        bv[1] = b->y;
-        bv[0] = b->x;
-        isFirVUsed = false;
-        isSecVUsed = true;
-    }
-    if (bv[1] > c->y)
-    {
-        bv[1] = c->y;
-        bv[0] = c->x;
-        isFirVUsed = false;
-        isSecVUsed = false;
-        isThiVUsed = true;
-    }
-
-    uv[1] = oy[0]; //   -  The minimum possible value.
-    if (uv[1] < a->y && isFirVUsed == false)
-    {
-        uv[1] = a->y;
-        uv[0] = a->x;
-        is1VUsed = true;
-    }
-    if (uv[1] < b->y && isSecVUsed == false)
-    {
-        uv[1] = b->y;
-        uv[0] = b->x;
-        is2VUsed = true;
-        is1VUsed = false;
-    }
-    if (uv[1] < c->y && isThiVUsed == false)
-    {
-        uv[1] = c->y;
-        uv[0] = c->x;
-        is3VUsed = true;
-        is2VUsed = false;
-        is1VUsed = false;
-    }
-    //   Dangerous.
-    if (isFirVUsed == false && is1VUsed == false)
-    {
-        mv[1] = a->y;
-        mv[0] = a->x;
-    }
-    if (isSecVUsed == false && is2VUsed == false)
-    {
-        mv[1] = b->y;
-        mv[0] = b->x;
-    }
-    if (isThiVUsed == false && is3VUsed == false)
-    {
-        mv[1] = c->y;
-        mv[0] = c->x;
-    }
-    // ===================================
+    mv[0] = b->x;
+    mv[1] = b->y;
+    uv[0] = c->x;
+    uv[1] = c->y;
     
     //   2. I want to compute across point.
     //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
@@ -1799,7 +1737,7 @@ quad_type get_quadrangle_type(double b,
     ptcpy(t_2_a, &alpha);
     ptcpy(t_2_b, &theta);
     ptcpy(t_2_c, &gamma);
-
+    
     return type;
 }
 
@@ -1825,6 +1763,8 @@ double compute_value(double b,
                                          i_oy, oy, oy_length,
                                          &t_1_a, &t_1_b, &t_1_c,
                                          &t_2_a, &t_2_b, &t_2_c);
+    sort_by_y(t_1_a,t_1_b,t_1_c);
+    sort_by_y(t_2_a,t_2_b,t_2_c);
 
     if (type != normal && type != wall)
     {
