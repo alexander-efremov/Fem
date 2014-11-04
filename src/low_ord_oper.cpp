@@ -924,7 +924,7 @@ double integUnderRigAngTr_BottRight(
 
     indCurSqOx[0] = (int) ((trPC[0] + 1.e-14) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the right side.
 
-    if ((trPC[0] + 1.e-14) <= 0) indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
+    if ((trPC[0] + 1.e-14) <= 0) indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" is negative.
 
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indLB[0] = indCurSqOx[0];
@@ -1120,7 +1120,7 @@ double integUnderBottTr(
                                             tau, iCurrTL,
                                             //
                                             BvBt, RvBt, masOX, numOfOXSt, masOY, numOfOYSt, rhoInPrevTL_asV);
-        integOfBottTr = integOfBottTr - buf_D;
+        integOfBottTr -= buf_D;
 
         //      printf("Bv>Rv: i= %d, j= %d      res= %le",ii,jj,integOfBottTr);     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1666,7 +1666,7 @@ double integ_under_uniform_triangle(
     //  printf("i= %d, j= %d : ap[0]= %le      mv[0]= %le \n",ii,jj, ap[0], mv[0]); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-    //   3. There the middle vertex relativly straight line is? Two ways are possible.
+    //   3. There the middle vertex relatively straight line is? Two ways are possible.
     if (mv[0] < ap[0])
     {
         //   Left, Right and Bottom vertices of Bottom triangle.
@@ -1761,12 +1761,12 @@ double integ_under_uniform_triangle(
     return integ;
 }
 
-double u_function(double par_b, double x, double y)
+inline double u_function(double par_b, double x, double y)
 {
     return par_b * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
-double v_function(
+inline double v_function(
                   double lbDom,
                   double rbDom,
                   double bbDom,
@@ -1842,82 +1842,80 @@ void compute_coordinate_on_prev_layer(double par_b,
                                       int i_oy,
                                       const double *masOY,
                                       int oy_length,
-                                      point_t *alNew, point_t *beNew, point_t *gaNew, point_t *thNew)
+                                      point_t *alpha, point_t *beta, point_t *gamma, point_t *theta)
 {
-    point_t alpha, beta, gamma, theta; //   -  Vertexes of square. Anticlockwise order from left bottom vertex.
-
     //   1. First of all let's compute coordinates of square vertexes.
     //  OX:
     if (i_ox == 0)
     {
-        alpha.x = masOX[ i_ox ];
-        beta.x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
-        gamma.x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
-        theta.x = masOX[ i_ox ];
+        alpha->x = masOX[ i_ox ];
+        beta->x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
+        gamma->x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
+        theta->x = masOX[ i_ox ];
     }
     else if (i_ox == ox_length)
     {
-        alpha.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
-        beta.x = masOX[ i_ox ];
-        gamma.x = masOX[ i_ox ];
-        theta.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
+        alpha->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
+        beta->x = masOX[ i_ox ];
+        gamma->x = masOX[ i_ox ];
+        theta->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
     }
     else
     {
-        alpha.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
-        beta.x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
-        gamma.x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
-        theta.x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
+        alpha->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
+        beta->x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
+        gamma->x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
+        theta->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
     }
 
     //  OY:
     if (i_oy == 0)
     {
-        alpha.y = masOY[ i_oy ];
-        beta.y = masOY[ i_oy ];
-        gamma.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
-        theta.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
+        alpha->y = masOY[ i_oy ];
+        beta->y = masOY[ i_oy ];
+        gamma->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
+        theta->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
     }
     else if (i_oy == oy_length)
     {
-        alpha.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
-        beta.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
-        gamma.y = masOY[ i_oy ];
-        theta.y = masOY[ i_oy ];
+        alpha->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        beta->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        gamma->y = masOY[ i_oy ];
+        theta->y = masOY[ i_oy ];
     }
     else
     {
-        alpha.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
-        beta.y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
-        gamma.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
-        theta.y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
+        alpha->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        beta->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
+        gamma->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
+        theta->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
     }
     
     double u,v;
     //   2. Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
-    //  alNew.
-    u = u_function(par_b, alpha.x, alpha.y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, alpha.x, alpha.y);
-    alNew->x = alpha.x - tau * u;
-    alNew->y = alpha.y - tau * v;
+     
+    u = u_function(par_b, alpha->x, alpha->y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, alpha->x, alpha->y);
+    alpha->x = alpha->x - tau * u;
+    alpha->y = alpha->y - tau * v;
 
-    //  beNew.
-    u = u_function(par_b, beta.x, beta.y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, beta.x, beta.y);
-    beNew->x = beta.x - tau * u;
-    beNew->y = beta.y - tau * v;
+     
+    u = u_function(par_b, beta->x, beta->y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, beta->x, beta->y);
+    beta->x = beta->x - tau * u;
+    beta->y = beta->y - tau * v;
 
-    //  gaNew.
-    u = u_function(par_b, gamma.x, gamma.y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, gamma.x, gamma.y);
-    gaNew->x = gamma.x - tau * u;
-    gaNew->y = gamma.y - tau * v;
+     
+    u = u_function(par_b, gamma->x, gamma->y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, gamma->x, gamma->y);
+    gamma->x = gamma->x - tau * u;
+    gamma->y = gamma->y - tau * v;
 
-    //  thNew.
-    u = u_function(par_b, theta.x, theta.y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, theta.x, theta.y);
-    thNew->x = theta.x - tau * u;
-    thNew->y = theta.y - tau * v;
+     
+    u = u_function(par_b, theta->x, theta->y);
+    v = v_function(lb, rb, bb, ub, tau*cur_tl, theta->x, theta->y);
+    theta->x = theta->x - tau * u;
+    theta->y = theta->y - tau * v;
 }
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
@@ -1956,7 +1954,7 @@ quad_type get_quadrangle_type(double b,
     if ((beta.y - intersection.y) * (theta.y - intersection.y) > 0.) return pseudo; // ??
     if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0.) return pseudo; // ?? 
 
-    double product = get_vector_product(&alpha, &beta, &theta);
+    double product = get_vector_product(&alpha, &beta, &theta); // ?
     if (product < 0.) return pseudo;
 
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
@@ -1972,9 +1970,7 @@ quad_type get_quadrangle_type(double b,
     return normal;
 }
 
-double compute_value(
-                     double a,
-                     double b,
+double compute_value(double b,
                      double lb,
                      double rb,
                      double bb,
@@ -2050,7 +2046,7 @@ double compute_value(
     return result;
 }
 
-void print_params(double a,
+void print_params(
                   double b,
                   double lb,
                   double rb,
@@ -2061,7 +2057,7 @@ void print_params(double a,
                   int ox_length,
                   int oy_length)
 {
-    printf("a = %f\n", a);
+    
     printf("b = %f\n", b);
     printf("lbDom = %f\n", lb);
     printf("rbDom = %f\n", rb);
@@ -2074,7 +2070,7 @@ void print_params(double a,
 }
 
 void print_params(int index, int needed_index,
-                  double a,
+                  
                   double b,
                   double lb,
                   double rb,
@@ -2092,7 +2088,7 @@ void print_params(int index, int needed_index,
     if (index == needed_index)
     {
         printf("index = %d\n", index);
-        printf("a = %f\n", a);
+      
         printf("b = %f\n", b);
         printf("lbDom = %f\n", lb);
         printf("rbDom = %f\n", rb);
@@ -2128,7 +2124,6 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
 }
 
 double solve(
-             double a,
              double b,
              double lb,
              double rb,
@@ -2171,8 +2166,7 @@ double solve(
             {
                 int index = (ox_length + 1) * i_oy + i_ox;
 
-                double value = compute_value(
-                                             a, b,
+                double value = compute_value( b,
                                              lb, rb,
                                              bb, ub,
                                              tau, i_tl,
@@ -2180,7 +2174,7 @@ double solve(
                                              i_oy, oy, oy_length,
                                              prev_density);
                 /*print_params(index, 12,
-                             a,
+                             
                              b,
                              lb,
                              rb,
@@ -2221,7 +2215,7 @@ double solve(
     return 0;
 }
 
-double *solve(double a,
+double *solve(
               double b,
               double lb,
               double rb,
@@ -2247,7 +2241,7 @@ double *solve(double a,
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
 
-    print_params(a,
+    print_params(
                  b,
                  lb,
                  rb,
@@ -2260,7 +2254,7 @@ double *solve(double a,
 
     // time_step_count = 1;
     // printf("!!!!!!!!TIME STEP SETTED TO ONE!!!!!!\n");
-    solve(a, b,
+    solve(b,
           lb, rb,
           bb, ub,
           time_step,
