@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <algorithm>
 
 enum bound_side {
     up,
@@ -10,18 +11,6 @@ enum bound_side {
     left,
     right
 };
-
-struct point_t {
-
-    point_t() {
-        x = 0.;
-        y = 0.;
-    }
-    double x;
-    double y;
-    
-};
-
 
 enum quad_type {
     wall,

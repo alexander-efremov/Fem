@@ -1464,9 +1464,11 @@ double integ_under_uniform_triangle(double tau,
 {
     const double MIN_VALUE = 1.e-12;
     double bv[2], mv[2], uv[2]; //   -  Bottom, middle and upper vertices of triangle.
+   // point_t bv mv, uv;
     double a_LC, b_LC, c_LC; //   -  Coefficients of line between "bv" and "uv" vertices.
-    double ap[2]; //   -  Across point of line through "bv" to "uv" and "y == mv[1]"
+    double ap[2]; //   -  Intersection point of line through "bv" to "uv" and "y == mv[1]"
    
+    
     bv[0] = a->x;
     bv[1] = a->y;
     mv[0] = b->x;
@@ -1769,8 +1771,9 @@ double compute_value(double b,
         return -1.;
     }
     
-    sort_by_y(t_1_a,t_1_b,t_1_c); // чтобы правилно отработала процедура интегрирования
-                                   // точки должны идти в порядке возрастания y координаты
+    // чтобы правилно отработала процедура интегрирования
+    // точки должны идти в порядке возрастания y координаты
+    sort_by_y(t_1_a,t_1_b,t_1_c); 
     sort_by_y(t_2_a,t_2_b,t_2_c);
 
 
