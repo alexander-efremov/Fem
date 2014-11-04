@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>include/common.h</itemPath>
+      <itemPath>include/misc.h</itemPath>
       <itemPath>include/timer.h</itemPath>
       <itemPath>include/utils.h</itemPath>
     </logicalFolder>
@@ -43,7 +44,11 @@
           <incDir>
             <pElem>include</pElem>
           </incDir>
+          <commandLine>-O0</commandLine>
         </ccTool>
+        <asmTool>
+          <architecture>2</architecture>
+        </asmTool>
       </compileType>
       <folder path="TestFiles/f1">
         <cTool>
@@ -92,6 +97,8 @@
       </folder>
       <item path="include/common.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="include/misc.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="include/timer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/utils.h" ex="false" tool="3" flavor2="0">
@@ -139,6 +146,8 @@
         </linkerTool>
       </folder>
       <item path="include/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/misc.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/timer.h" ex="false" tool="3" flavor2="0">
       </item>

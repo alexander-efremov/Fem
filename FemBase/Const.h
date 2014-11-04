@@ -7,7 +7,7 @@ using namespace std;
 
 #include <math.h>
 
-        
+
 
 const double C_pi = 3.14159265358979323846264338327;
 

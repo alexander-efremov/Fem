@@ -166,23 +166,17 @@ double integUnderLeftTr_OneCell(
 
 double integUnderRightTr_OneCell(double Py,
                                  double Qy,
-                                 //
                                  double a_SL,
                                  double b_SL,
                                  double Gx,
-                                 //
                                  double tau,
-                                 int iCurrTL, //   -  Index of current time layer.
-                                 //
+                                 int iCurrTL,
                                  int *indCurSqOx, //   -  Index of current square by Ox axis.
                                  int *indCurSqOy, //   -  Index of current square by Oy axis.
-                                 //
                                  const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                 int numOfOXSt, //   -  Number of OX steps.
-                                 //
+                                 int numOfOXSt, 
                                  const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                 int numOfOYSt, //   -  Number of OY steps.
-                                 //
+                                 int numOfOYSt, 
                                  double *rhoInPrevTL_asV)
 {
     return -1. * integUnderLeftTr_OneCell(
@@ -1653,9 +1647,7 @@ double f_function(
     return res;
 }
 
-static int wall_count2 = 0;
-
-void compute_coordinate_on_prev_layer(double par_b,
+quad_type compute_coordinate_on_prev_layer(double par_b,
                                       double lb,
                                       double rb,
                                       double bb,
@@ -1740,6 +1732,13 @@ void compute_coordinate_on_prev_layer(double par_b,
     theta->x -= tau * u;
     theta->y -= tau * v;
     
+    point_t intersection = get_intersection_point(alpha, beta, gamma, theta);
+    if ((beta->y - intersection.y) * (theta->y - intersection.y) > 0.) return pseudo; // ??
+    if ((alpha->x - intersection.x) * (gamma->x - intersection.x) > 0.) return pseudo; // ??
+    double product = get_vector_product(alpha, beta, theta); // ?
+    if (product < 0.) return pseudo;
+    
+    // значит что точка удетела за левую границу
     if (theta->x < 0 ||
           theta->y < 0 ||  
             beta->x < 0 ||
@@ -1747,11 +1746,12 @@ void compute_coordinate_on_prev_layer(double par_b,
             gamma->x < 0 ||
             gamma->y < 0 ||
             alpha->x < 0 ||
-            alpha->y < 0 
-            )
+            alpha->y < 0)
     {
-        wall_count2++;
+        return normal;
+        //return wall;
     }
+    return normal;
 }
 
 
@@ -1780,20 +1780,13 @@ quad_type get_quadrangle_type(double b,
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
-    compute_coordinate_on_prev_layer(b,
+    quad_type type = compute_coordinate_on_prev_layer(b,
                                      lb, rb,
                                      bb, ub,
                                      tau, curr_tl,
                                      i_ox, ox, ox_length,
                                      i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
-
-    point_t intersection = get_intersection_point(&alpha, &beta, &gamma, &theta);
-    if ((beta.y - intersection.y) * (theta.y - intersection.y) > 0.) return pseudo; // ??
-    if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0.) return pseudo; // ?? 
-
-    double product = get_vector_product(&alpha, &beta, &theta); // ?
-    if (product < 0.) return pseudo;
-
+    
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
     // It's convex.
 
@@ -1804,7 +1797,7 @@ quad_type get_quadrangle_type(double b,
     ptcpy(t_2_b, &theta);
     ptcpy(t_2_c, &gamma);
 
-    return normal;
+    return type;
 }
 
 double compute_value(double b,
@@ -1870,8 +1863,7 @@ double compute_value(double b,
     }
 }
 
-void print_params(
-                  double b,
+void print_params(double b,
                   double lb,
                   double rb,
                   double bb,
@@ -1881,7 +1873,6 @@ void print_params(
                   int ox_length,
                   int oy_length)
 {
-
     printf("b = %f\n", b);
     printf("lbDom = %f\n", lb);
     printf("rbDom = %f\n", rb);
@@ -1894,7 +1885,6 @@ void print_params(
 }
 
 void print_params(int index, int needed_index,
-
                   double b,
                   double lb,
                   double rb,
@@ -1912,7 +1902,6 @@ void print_params(int index, int needed_index,
     if (index == needed_index)
     {
         printf("index = %d\n", index);
-
         printf("b = %f\n", b);
         printf("lbDom = %f\n", lb);
         printf("rbDom = %f\n", rb);
@@ -1933,22 +1922,21 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
                          double* oy,
                          double ts_count_mul_steps)
 {
-    double norm = 0.;
+    double result = 0.;
     for (int k = 1; k < y_length; ++k)
     {
         for (int j = 1; j < x_length; ++j)
         {
-            norm += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
+            result += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
                          - density[ (x_length + 1) * k + j ]);
         }
     }
     double hx = ox[1] - ox[0];
     double hy = oy[1] - oy[0];
-    return hx * hy * norm;
+    return hx * hy * result;
 }
 
-double solve(
-             double b,
+double solve(double b,
              double lb,
              double rb,
              double bb,
@@ -1998,7 +1986,6 @@ double solve(
                                              i_oy, oy, oy_length,
                                              prev_density);
                 /*print_params(index, 12,
-                             
                              b,
                              lb,
                              rb,
@@ -2039,8 +2026,7 @@ double solve(
     return 0;
 }
 
-double *solve(
-              double b,
+double *solve(double b,
               double lb,
               double rb,
               double bb,
@@ -2065,8 +2051,7 @@ double *solve(
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
 
-    print_params(
-                 b,
+    print_params(b,
                  lb,
                  rb,
                  bb,
@@ -2075,9 +2060,7 @@ double *solve(
                  time_step_count,
                  ox_length,
                  oy_length);
-
-    // time_step_count = 1;
-    // printf("!!!!!!!!TIME STEP SETTED TO ONE!!!!!!\n");
+    
     solve(b,
           lb, rb,
           bb, ub,
@@ -2093,7 +2076,7 @@ double *solve(
                               time_step_count * time_step);
     //  printf("Norm L1 = %f\n", *norm);
     printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_counter);
-    printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_count2);
+    
     delete[] ox;
     delete[] oy;
     return density;
