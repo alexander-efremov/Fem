@@ -17,31 +17,11 @@ protected:
 
     double* get_model_result(ComputeParameters *p, int lvl)
     {
-
         return solByEqualVolWithVarStepPlusPrint1(p->a, p->b, p->lb, p->rb, p->bb,
                                                   p->ub, p->tau, p->t_count, p->x_size,
                                                   p->y_size, lvl, &p->norm);
     }
 };
-
-
-TEST_F(cpu, DISABLED_main_test)
-{
-    const int first = 0;
-    const int last = 3;
-
-    ComputeParameters *p = new ComputeParameters();
-
-    for (int lvl = first; lvl < last; ++lvl)
-    {
-        printf("level = %d\n", lvl);
-        p->recompute_params(lvl);
-        double *data = solve_internal(p);
-        print_matrix(data, p->x_length(), p->y_length());
-        delete[] data;
-    }
-    delete p;
-}
 
 TEST_F(cpu, test_to_model)
 {
