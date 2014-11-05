@@ -7,6 +7,7 @@ using namespace std;
 
 #include <math.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "InitAndBoundaryData.h"                      //   -  Initial and Boundary data.
 
