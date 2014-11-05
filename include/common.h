@@ -5,7 +5,7 @@
 #include <string.h>
 #include <algorithm>
 
-enum bound_side {
+enum bound {
     up,
     bottom,
     left,
@@ -79,7 +79,7 @@ public:
     }
 };
 
-extern double *solve(
+extern double *compute_density(
         double b,
         double lb,
         double rb,

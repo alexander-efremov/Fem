@@ -35,8 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/src/low_ord_oper.o \
-	${OBJECTDIR}/src/main.o
+	${OBJECTDIR}/src/low_ord_oper.o
 
 # Test Directory
 TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
@@ -63,21 +62,18 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
+	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a ${OBJECTFILES} 
+	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
 
 ${OBJECTDIR}/src/low_ord_oper.o: src/low_ord_oper.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Iinclude -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp
-
-${OBJECTDIR}/src/main.o: src/main.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Iinclude -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main.o src/main.cpp
 
 # Subprojects
 .build-subprojects:
@@ -92,7 +88,7 @@ ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/tests.o ${OBJECTFILES:%.o=%_nomain.o}
 ${TESTDIR}/tests/tests.o: tests/tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Iinclude -I. -Igtest-1.7.0/include -Igtest-1.7.0 -Iinclude -IFemBase -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
+	$(COMPILE.cc) -g -Iinclude -I. -Igtest-1.7.0/include -Igtest-1.7.0 -Iinclude -IFemBase -Itest_inc -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
 
 
 ${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp 
@@ -108,19 +104,6 @@ ${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_
 	    ${CP} ${OBJECTDIR}/src/low_ord_oper.o ${OBJECTDIR}/src/low_ord_oper_nomain.o;\
 	fi
 
-${OBJECTDIR}/src/main_nomain.o: ${OBJECTDIR}/src/main.o src/main.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/main.o`; \
-	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
-	then  \
-	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -g -Iinclude -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main_nomain.o src/main.cpp;\
-	else  \
-	    ${CP} ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/main_nomain.o;\
-	fi
-
 # Run Test Targets
 .test-conf:
 	@if [ "${TEST}" = "" ]; \
@@ -133,7 +116,7 @@ ${OBJECTDIR}/src/main_nomain.o: ${OBJECTDIR}/src/main.o src/main.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
 
 # Subprojects
 .clean-subprojects:

@@ -13,13 +13,13 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>src/low_ord_oper.cpp</itemPath>
-      <itemPath>src/main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
       <logicalFolder name="f1" displayName="Tests" projectFiles="true" kind="TEST">
+        <itemPath>test_inc/test_utils.h</itemPath>
         <itemPath>tests/tests.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
@@ -32,7 +32,7 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="1">
+    <conf name="Debug" type="3">
       <toolsSet>
         <compilerSet>CLang|CLang</compilerSet>
         <dependencyChecking>true</dependencyChecking>
@@ -49,6 +49,8 @@
         <asmTool>
           <architecture>2</architecture>
         </asmTool>
+        <archiverTool>
+        </archiverTool>
       </compileType>
       <folder path="TestFiles/f1">
         <cTool>
@@ -63,6 +65,7 @@
             <pElem>gtest-1.7.0</pElem>
             <pElem>include</pElem>
             <pElem>FemBase</pElem>
+            <pElem>test_inc</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -105,7 +108,7 @@
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="test_inc/test_utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -155,7 +158,7 @@
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="test_inc/test_utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>

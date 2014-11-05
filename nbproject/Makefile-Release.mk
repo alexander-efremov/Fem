@@ -35,8 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/src/low_ord_oper.o \
-	${OBJECTDIR}/src/main.o
+	${OBJECTDIR}/src/low_ord_oper.o
 
 # Test Directory
 TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
@@ -74,11 +73,6 @@ ${OBJECTDIR}/src/low_ord_oper.o: src/low_ord_oper.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp
 
-${OBJECTDIR}/src/main.o: src/main.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main.o src/main.cpp
-
 # Subprojects
 .build-subprojects:
 
@@ -106,19 +100,6 @@ ${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_
 	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/low_ord_oper_nomain.o src/low_ord_oper.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/low_ord_oper.o ${OBJECTDIR}/src/low_ord_oper_nomain.o;\
-	fi
-
-${OBJECTDIR}/src/main_nomain.o: ${OBJECTDIR}/src/main.o src/main.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/main.o`; \
-	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
-	then  \
-	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main_nomain.o src/main.cpp;\
-	else  \
-	    ${CP} ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/main_nomain.o;\
 	fi
 
 # Run Test Targets
