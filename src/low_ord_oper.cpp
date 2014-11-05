@@ -61,7 +61,79 @@ double integrate_second_type(double py,
     return integ - tmp / (12 * a * a);
 }
 
-double integUnderLeftTr_OneCell(
+
+double integrate_rectangle_one_cell(double Py,
+        double Qy,
+        double Gx,
+        double Hx,
+        int tl,
+        int *indCurSqOx, //   -  Index of current square by Ox axis.
+        int *indCurSqOy,
+        const double *ox,
+        const double *oy,
+        double *density) {
+    double hx = ox[1] - ox[0];
+    double hy = oy[1] - oy[0];
+    double result = 0;
+    double tmp;
+    double rho[2][2];
+    double t = TAU * (tl - 1.);
+    double x, y;
+    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
+        rho[0][0] = density[ (OX_LEN + 1) * indCurSqOy[0] + indCurSqOx[0] ];
+        rho[0][1] = density[ (OX_LEN + 1) * indCurSqOy[1] + indCurSqOx[0] ];
+        rho[1][0] = density[ (OX_LEN + 1) * indCurSqOy[0] + indCurSqOx[1] ];
+        rho[1][1] = density[ (OX_LEN + 1) * indCurSqOy[1] + indCurSqOx[1] ];
+    } else {
+        // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
+        x = indCurSqOx[0] * hx;
+        y = indCurSqOy[0] * hy;
+        rho[0][0] = analytical_solution(t, x, y);
+        x = indCurSqOx[0] * hx;
+        y = indCurSqOy[1] * hy;
+        rho[0][1] = analytical_solution(t, x, y);
+        x = indCurSqOx[1] * hx;
+        y = indCurSqOy[0] * hy;
+        rho[1][0] = analytical_solution(t, x, y);
+        x = indCurSqOx[1] * hx;
+        y = indCurSqOy[1] * hy;
+        rho[1][1] = analytical_solution(t, x, y);
+
+        TMP_WALL_CNT++;
+
+    }
+
+    if (indCurSqOx[1] >= 0 && indCurSqOy[1] >= 0) {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[1] ]);
+    } else {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
+    }
+    tmp = tmp / hx / hy;
+    result = tmp * rho[0][0]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
+    if (indCurSqOx[0] >= 0 && indCurSqOy[1] >= 0) {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[1] ]);
+    } else {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
+    }
+    tmp = tmp / hx / hy;
+    result = result - tmp * rho[1][0]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[0] ];
+    if (indCurSqOx[1] >= 0 && indCurSqOy[0] >= 0) {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[0] ]);
+    } else {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
+    }
+    tmp = tmp / hx / hy;
+    result -= tmp * rho[0][1]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[1] ];
+    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[0] ]);
+    } else {
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
+    }
+    tmp = tmp / hx / hy;
+    return result + tmp * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
+}
+
+double integrate_triangle_left_one_cell(
         double Py,
         double Qy,
         double a_SL,
@@ -159,78 +231,7 @@ double integUnderLeftTr_OneCell(
     return result;
 }
 
-double integUnderRectAng_OneCell(double Py,
-        double Qy,
-        double Gx,
-        double Hx,
-        int tl,
-        int *indCurSqOx, //   -  Index of current square by Ox axis.
-        int *indCurSqOy,
-        const double *ox,
-        const double *oy,
-        double *density) {
-    double hx = ox[1] - ox[0];
-    double hy = oy[1] - oy[0];
-    double result = 0;
-    double tmp;
-    double rho[2][2];
-    double t = TAU * (tl - 1.);
-    double x, y;
-    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
-        rho[0][0] = density[ (OX_LEN + 1) * indCurSqOy[0] + indCurSqOx[0] ];
-        rho[0][1] = density[ (OX_LEN + 1) * indCurSqOy[1] + indCurSqOx[0] ];
-        rho[1][0] = density[ (OX_LEN + 1) * indCurSqOy[0] + indCurSqOx[1] ];
-        rho[1][1] = density[ (OX_LEN + 1) * indCurSqOy[1] + indCurSqOx[1] ];
-    } else {
-        // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
-        x = indCurSqOx[0] * hx;
-        y = indCurSqOy[0] * hy;
-        rho[0][0] = analytical_solution(t, x, y);
-        x = indCurSqOx[0] * hx;
-        y = indCurSqOy[1] * hy;
-        rho[0][1] = analytical_solution(t, x, y);
-        x = indCurSqOx[1] * hx;
-        y = indCurSqOy[0] * hy;
-        rho[1][0] = analytical_solution(t, x, y);
-        x = indCurSqOx[1] * hx;
-        y = indCurSqOy[1] * hy;
-        rho[1][1] = analytical_solution(t, x, y);
-
-        TMP_WALL_CNT++;
-
-    }
-
-    if (indCurSqOx[1] >= 0 && indCurSqOy[1] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[1] ]);
-    } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
-    }
-    tmp = tmp / hx / hy;
-    result = tmp * rho[0][0]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
-    if (indCurSqOx[0] >= 0 && indCurSqOy[1] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[1] ]);
-    } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
-    }
-    tmp = tmp / hx / hy;
-    result = result - tmp * rho[1][0]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[0] ];
-    if (indCurSqOx[1] >= 0 && indCurSqOy[0] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[0] ]);
-    } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
-    }
-    tmp = tmp / hx / hy;
-    result -= tmp * rho[0][1]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[1] ];
-    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[0] ]);
-    } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
-    }
-    tmp = tmp / hx / hy;
-    return result + tmp * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
-}
-
-double integUnderRightTr_OneCell(double py,
+double integrate_triangle_right_one_cell(double py,
         double qy,
         double a_SL,
         double b_SL,
@@ -241,7 +242,7 @@ double integUnderRightTr_OneCell(double py,
         const double *ox,
         const double *oy,
         double *density) {
-    return -1. * integUnderLeftTr_OneCell(
+    return -1. * integrate_triangle_left_one_cell(
             py, qy,
             a_SL, b_SL, gx,
             tl,
@@ -321,7 +322,7 @@ double integrate_chanel_slant_right(int tl,
             Gx = lb;
         }
 
-        tmp = integUnderRectAng_OneCell(
+        tmp = integrate_rectangle_one_cell(
                 bv[1], //   -  double Py,
                 uv[1], //   -  double Qy,
                 Gx, //   -  double Gx,
@@ -359,7 +360,7 @@ double integrate_chanel_slant_right(int tl,
             }
         }
 
-        tmp = integUnderRectAng_OneCell(bv[1], //   -  double Py,
+        tmp = integrate_rectangle_one_cell(bv[1], //   -  double Py,
                 uv[1], //   -  double Qy,
                 //
                 Gx, //   -  double Gx,
@@ -389,7 +390,7 @@ double integrate_chanel_slant_right(int tl,
         //   Integration under one cell triangle.
 
         if (fabs(a_SL) > _MIN_VALUE) {
-            tmp = integUnderRightTr_OneCell(
+            tmp = integrate_triangle_right_one_cell(
                     bv[1], //   -  double Py,
                     uv[1], //   -  double Qy,
                     //
@@ -471,7 +472,7 @@ double integrate_chanel_slant_left(
 
         //   Integration under one cell triangle.
         if (fabs(a_SL) > _MIN_VALUE) {
-            tmp = integUnderLeftTr_OneCell(
+            tmp = integrate_triangle_left_one_cell(
                     bv[1], //   -  double Py
                     uv[1], //   -  double Qy                    
                     a_SL, b_SL, mv[0], //   -  double Hx,                   
@@ -501,7 +502,7 @@ double integrate_chanel_slant_left(
             }
         }
 
-        tmp = integUnderRectAng_OneCell(bv[1], //   -  double Py,
+        tmp = integrate_rectangle_one_cell(bv[1], //   -  double Py,
                 uv[1], //   -  double Qy,                
                 mv[0], //   -  double Gx,
                 hx, //   -  double Hx,                
@@ -540,7 +541,7 @@ double integrate_chanel_slant_left(
         }
 
 
-        tmp = integUnderRectAng_OneCell(bv[1], //   -  double Py,
+        tmp = integrate_rectangle_one_cell(bv[1], //   -  double Py,
                 uv[1], //   -  double Qy,
                 //
                 gx, //   -  double Gx,
