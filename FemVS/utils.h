@@ -2,15 +2,15 @@
 #define	UTILS_H
 
 
-void print_params(double b,
-                  double lb,
-                  double rb,
-                  double bb,
-                  double ub,
-                  double tau,
-                  int tl_count,
-                  int ox_length,
-                  int oy_length)
+inline void print_params(double b,
+                         double lb,
+                         double rb,
+                         double bb,
+                         double ub,
+                         double tau,
+                         int tl_count,
+                         int ox_length,
+                         int oy_length)
 {
 	printf("b = %f\n", b);
 	printf("lbDom = %f\n", lb);
@@ -23,20 +23,20 @@ void print_params(double b,
 	printf("oy length = %d\n", oy_length + 1);
 }
 
-void print_params(int index, int needed_index,
-                  double b,
-                  double lb,
-                  double rb,
-                  double bb,
-                  double ub,
-                  double tau,
-                  int tl,
-                  int tl_count,
-                  int ox_length,
-                  int oy_length,
-                  int cur_x,
-                  int cur_y,
-                  double value)
+inline void print_params(int index, int needed_index,
+                         double b,
+                         double lb,
+                         double rb,
+                         double bb,
+                         double ub,
+                         double tau,
+                         int tl,
+                         int tl_count,
+                         int ox_length,
+                         int oy_length,
+                         int cur_x,
+                         int cur_y,
+                         double value)
 {
 	if (index == needed_index)
 	{
@@ -57,7 +57,7 @@ void print_params(int index, int needed_index,
 	}
 }
 
-void print_matrix_to_file(int n, int m, double* data, char* filename)
+inline void print_matrix_to_file(int n, int m, double* data, char* filename)
 {
 	FILE* f = fopen(filename, "w");
 	for (int i = 0; i < n; ++i)
@@ -72,7 +72,7 @@ void print_matrix_to_file(int n, int m, double* data, char* filename)
 	fclose(f);
 }
 
-void print_matrix(double* a, int n, int m, int precision = 8)
+inline void print_matrix(double* a, int n, int m, int precision = 8)
 {
 	for (int i = 0; i < n; ++i)
 	{
