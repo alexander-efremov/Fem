@@ -1364,8 +1364,7 @@ quad_type get_quadrangle_type(int curr_tl,
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
     quad_type type = get_coordinates_on_prev_layer(curr_tl,
-            ix, ox,
-            iy, oy, &alpha, &beta, &gamma, &theta);
+            ix, ox, iy, oy, &alpha, &beta, &gamma, &theta);
 
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
     // It's convex.
@@ -1402,7 +1401,6 @@ double integrate(double curr_tl,
     // точки должны идти в порядке возрастания y координаты
     sort_by_y(t_1_a, t_1_b, t_1_c);
     sort_by_y(t_2_a, t_2_b, t_2_c);
-
 
     // check the type of triangle to select appropriate computation method
     double result = 0.;
