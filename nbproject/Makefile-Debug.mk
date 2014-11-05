@@ -82,13 +82,13 @@ ${OBJECTDIR}/src/low_ord_oper.o: src/low_ord_oper.cpp
 .build-tests-conf: .build-conf ${TESTFILES}
 ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/tests.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} gtest/dist/Debug/MinGW-Windows/libgtest.a gtest/dist/Debug/MinGW-Windows/libgtest.a FemBase/dist/Debug/MinGW-Windows/libfembase.a 
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} gtest/dist/Debug/MinGW-Windows/libgtest.a FemBase/dist/Debug/MinGW-Windows/libfembase.a 
 
 
 ${TESTDIR}/tests/tests.o: tests/tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Iinclude -I. -Igtest-1.7.0 -Igtest-1.7.0/include -Iinclude -IFemBase -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
+	$(COMPILE.cc) -g -Iinclude -I. -Igtest-1.7.0 -Igtest-1.7.0/include -Iinclude -IFemBase -Itest_inc -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
 
 
 ${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp 

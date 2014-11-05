@@ -19,6 +19,7 @@
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
       <logicalFolder name="f1" displayName="Test" projectFiles="true" kind="TEST">
+        <itemPath>test_inc/test_utils.h</itemPath>
         <itemPath>tests/tests.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
@@ -60,23 +61,12 @@
             <pElem>gtest-1.7.0/include</pElem>
             <pElem>include</pElem>
             <pElem>FemBase</pElem>
+            <pElem>test_inc</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
           <output>${TESTDIR}/TestFiles/f1</output>
           <linkerLibItems>
-            <linkerLibProjectItem>
-              <makeArtifact PL="gtest"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="gtest"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgtest.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
             <linkerLibProjectItem>
               <makeArtifact PL="gtest"
                             CT="3"
@@ -113,6 +103,8 @@
       <item path="include/utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="test_inc/test_utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -163,6 +155,8 @@
       <item path="include/utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="test_inc/test_utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
