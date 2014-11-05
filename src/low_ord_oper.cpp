@@ -262,7 +262,7 @@ double integUnderRectAng_OneCell(double Py,
     return result + tmp * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
 }
 
-double integOfChan_SLRightSd(int tl,
+double integrate_chanel_slant_right(int tl,
         double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
         double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
         //
@@ -432,7 +432,7 @@ double integOfChan_SLRightSd(int tl,
     return result;
 }
 
-double integOfChan_SLLeftSd(
+double integrate_chanel_slant_left(
         int tl,
         double *bv, int wTrPCI, //   -  Where travel point current (bottom vertex) is.
         double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
@@ -698,7 +698,7 @@ double integrate_right_triangle_bottom_left(
             wTrPNI = 0;
         }
         //   d. Integration.
-        tmp = integOfChan_SLLeftSd(
+        tmp = integrate_chanel_slant_left(
                 tl, //   -  Index of current time layer.
                 //
                 trPC, wTrPCI, //   -  double *bv,
@@ -757,11 +757,15 @@ double integrate_right_triangle_bottom_right(double *bv,
         const double *oy,
         int oy_length,
         double *density) {
-    double trPC[2]; //   -  Travel point current;
-    int wTrPCI = 0; //   -  Where travel point current is?
-    double trPN[2]; //   -  Travel point next;
-    int wTrPNI = 0; //   -  Where travel point next is?
-    double ang; //   -  Angle of slant line. Should be greater zero.
+        
+    if (fabs(bv[0] - uv[0]) < MIN_VALUE) return fabs(bv[0] - uv[0]);
+    double ang = (uv[1] - bv[1]) / (uv[0] - bv[0]); //   -  Angle of slant line. Should be greater zero.
+    if (fabs(ang) < MIN_VALUE) return fabs(ang);
+    
+    double trPC[2], trPN[2]; //   -  Travel point current; Travel point next;
+    int wTrPCI = 0, wTrPNI = 0; //   -  Where travel point current is? Where travel point next is?   
+    
+    
     int indCurSqOx[2], indCurSqOy[2]; //   -  Index of current square by Ox and Oy axes.
     int indLB[2]; //   -  Index of left boundary.
     double distOx, distOy; //   -  Distance to near Ox and Oy straight lines.
@@ -773,14 +777,14 @@ double integrate_right_triangle_bottom_right(double *bv,
 
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) return fabs(bv[0] - uv[0]);
+    
 
-    ang = (uv[1] - bv[1]) / (uv[0] - bv[0]);
-    if (fabs(ang) < MIN_VALUE) return fabs(ang);
+    
 
     indCurSqOx[0] = (int) ((trPC[0] + MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the right side.
 
-    if ((trPC[0] + MIN_VALUE_1) <= 0) indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" is negative.
+    if (trPC[0] + MIN_VALUE_1 <= 0) 
+        indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" is negative.
 
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indLB[0] = indCurSqOx[0];
@@ -837,7 +841,7 @@ double integrate_right_triangle_bottom_right(double *bv,
             wTrPNI = 0;
         }
         //   d. Integration.
-        tmp = integOfChan_SLRightSd(
+        tmp = integrate_chanel_slant_right(
                 tl,
                 trPC, wTrPCI, //   -  double *bv,
                 trPN, wTrPNI, //   -  double *uv,
@@ -883,7 +887,7 @@ double integrate_right_triangle_bottom_right(double *bv,
     return result;
 }
 
-double integrate_right_triangle_up_left(double *bv,
+double integrate_right_triangle_upper_left(double *bv,
         double *uv,
         int tl,
         const double *ox,
@@ -973,7 +977,7 @@ double integrate_right_triangle_up_left(double *bv,
             wTrPNI = 0;
         }
         //   d. Integration.
-        buf_D = integOfChan_SLLeftSd(
+        buf_D = integrate_chanel_slant_left(
                 tl, //   -  Index of current time layer.
                 //
                 trPC, wTrPCI, //   -  double *bv,
@@ -1024,7 +1028,7 @@ double integrate_right_triangle_up_left(double *bv,
     return integOfUppTr;
 }
 
-double integrate_right_triangle_up_right(double *bv,
+double integrate_right_triangle_upper_right(double *bv,
         double *uv,
         int tl,
         const double *ox,
@@ -1043,7 +1047,7 @@ double integrate_right_triangle_up_right(double *bv,
     bool isTrDone = false; //   -  Is travel done.
     double hx = ox[1] - ox[0];
     double hy = oy[1] - oy[0];
-    double result = 0.; //   -  Value which we are computing.
+    double result = 0.;
     double tmp;
     //   Initial data.
     trPC[0] = bv[0];
@@ -1117,7 +1121,7 @@ double integrate_right_triangle_up_right(double *bv,
             wTrPNI = 0;
         }
         //   d. Integration.
-        tmp = integOfChan_SLRightSd(tl, //   -  Index of current time layer.
+        tmp = integrate_chanel_slant_right(tl, //   -  Index of current time layer.
                 //
                 trPC, wTrPCI, //   -  double *bv,
                 trPN, wTrPNI, //   -  double *uv,
@@ -1202,18 +1206,18 @@ double integrate_upper_triangle(int tl,
         double *density) {
     double result = 0.;
     if (u[0] == l[0]) {
-        result = integrate_right_triangle_up_right(r, u, tl, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_upper_right(r, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] == r[0]) {
-        result = integrate_right_triangle_up_left(l, u, tl, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_upper_left(l, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] < l[0]) {
-        result = integrate_right_triangle_up_right(r, u, tl, ox, ox_length, oy, oy_length, density);
-        result -= integrate_right_triangle_up_right(l, u, tl, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_upper_right(r, u, tl, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_upper_right(l, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] > l[0] && u[0] < r[0]) {
-        result = integrate_right_triangle_up_left(l, u, tl, ox, ox_length, oy, oy_length, density);
-        result += integrate_right_triangle_up_right(r, u, tl, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_upper_left(l, u, tl, ox, ox_length, oy, oy_length, density);
+        result += integrate_right_triangle_upper_right(r, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] > r[0]) {
-        result = integrate_right_triangle_up_left(l, u, tl, ox, ox_length, oy, oy_length, density);
-        result -= integrate_right_triangle_up_left(r, u, tl, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_upper_left(l, u, tl, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_upper_left(r, u, tl, ox, ox_length, oy, oy_length, density);
     }
     return result;
 }
@@ -1290,15 +1294,15 @@ inline double v_function(double t, double x, double y) {
 
 double f_function(
         double tl_on_tau,
-        int iOfOXN,
-        const double *masOX,
-        int iOfOYN,
-        const double *masOY) {
+        int ox_length,
+        const double *ox,
+        int oy_length,
+        const double *oy) {
     //printf("\ncpu f function \n");  
     //printf("cpu t = %f\n", t);
-    double x = masOX[ iOfOXN ];
+    double x = ox[ ox_length ];
     //printf("cpu x = %f\n", x);
-    double y = masOY[ iOfOYN ];
+    double y = oy[ oy_length ];
     //printf("cpu y = %f\n", y);
     double arg_v = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - UB) * (y - BB);
     //printf("cpu arg_v = %f\n", arg_v);
@@ -1328,7 +1332,7 @@ double f_function(
     return res;
 }
 
-quad_type compute_coordinate_on_prev_layer(int cur_tl,
+quad_type get_coordinates_on_prev_layer(int cur_tl,
         int i_ox,
         const double *masOX,
         int ox_length,
@@ -1437,7 +1441,7 @@ quad_type get_quadrangle_type(int curr_tl,
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
-    quad_type type = compute_coordinate_on_prev_layer(curr_tl,
+    quad_type type = get_coordinates_on_prev_layer(curr_tl,
             i_ox, ox, ox_length,
             i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
 
@@ -1454,7 +1458,7 @@ quad_type get_quadrangle_type(int curr_tl,
     return type;
 }
 
-double compute_value(double curr_tl,
+double integrate(double curr_tl,
         int i_ox,
         const double *ox,
         int ox_length,
@@ -1557,7 +1561,7 @@ double solve(int time_step_count,
             for (int i_ox = 1; i_ox < ox_length; i_ox++) {
                 int index = (ox_length + 1) * i_oy + i_ox;
 
-                double value = compute_value(i_tl,
+                double value = integrate(i_tl,
                         i_ox, ox, ox_length,
                         i_oy, oy, oy_length,
                         prev_density);
@@ -1597,7 +1601,7 @@ double solve(int time_step_count,
     return 0;
 }
 
-double *solve(double b,
+double *compute_density(double b,
         double lb,
         double rb,
         double bb,
@@ -1612,7 +1616,7 @@ double *solve(double b,
     BB = bb;
     LB = lb;
     RB = rb;
-    TAU = tau;
+    TAU = tau;    
 
     double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
     double *ox = new double [ ox_length + 1 ];
