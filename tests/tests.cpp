@@ -10,7 +10,7 @@ protected:
 
     double *solve_internal(ComputeParameters *p)
     {
-        return solve(p->b, p->lb, p->rb, p->bb,
+        return compute_density(p->b, p->lb, p->rb, p->bb,
                      p->ub, p->tau, p->t_count, p->x_size,
                      p->y_size, &p->norm);
     }

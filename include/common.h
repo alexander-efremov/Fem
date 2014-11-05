@@ -79,7 +79,7 @@ public:
     }
 };
 
-extern double *solve(
+extern double *compute_density(
         double b,
         double lb,
         double rb,
