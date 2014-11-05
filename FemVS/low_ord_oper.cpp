@@ -79,7 +79,7 @@ double integrate_rectangle_one_cell(double Py,
 {
 	double hx = ox[1] - ox[0];
 	double hy = oy[1] - oy[0];
-	double result = 0;
+	double result;
 	double tmp;
 	double rho[2][2];
 	double t = TAU * (tl - 1.);
@@ -167,7 +167,7 @@ double integrate_triangle_left_one_cell(
 {
 	double hx = ox[1] - ox[0];
 	double hy = oy[1] - oy[0];
-	double result = 0;
+	double result;
 	double tmp, bufInteg_D;
 	double rho[2][2];
 	double t = TAU * (tl - 1.);
@@ -303,11 +303,11 @@ double integrate_chanel_slant_right(int tl,
                                     double* density)
 {
 	double mv[2], rv[2]; //   -  Middle and right vertices.
-	int wMvI; //   -  Where middle vertex is.
+	int wMvI = 0; //   -  Where middle vertex is.
 	int indCurSqOxToCh[2]; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
 	double h = ox[1] - ox[0];
 	double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
-	double Gx, Hx; //   -  Left boundary for each integration.
+	double Gx = 0, Hx = 0; //   -  Left boundary for each integration.
 	double result = 0.;
 	double tmp;
 
@@ -479,11 +479,11 @@ double integrate_chanel_slant_left(
 	double* density)
 {
 	double lv[2], mv[2]; //   -  Left and middle vertices.
-	int wMvI; //   -  Where middle vertex is.
+	int wMvI = 0; //   -  Where middle vertex is.
 	int indCurSqOxToCh[2]; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
 	double h = ox[1] - ox[0];
 	double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
-	double gx, hx; //   -  Left and right boundary for each integration.
+	double gx = 0, hx = 0; //   -  Left and right boundary for each integration.
 	double result = 0.;
 	double tmp;
 	int j;
@@ -644,7 +644,7 @@ double integrate_right_triangle_bottom_left(
 	double ang; //   -  Angle of slant line. Should be greater zero.
 	int indCurSqOx[2], indCurSqOy[2]; //   -  Index of current square by Ox and Oy axes.
 	int indRB[2]; //   -  Index of right boundary.
-	double distOx, distOy; //   -  Distance to near Ox and Oy straight lines.
+	double distOx = 0, distOy = 0; //   -  Distance to near Ox and Oy straight lines.
 	bool isTrDone = false; //   -  Is travel done.
 	double hx = ox[1] - ox[0];
 	double hy = oy[1] - oy[0];
@@ -663,7 +663,7 @@ double integrate_right_triangle_bottom_left(
 		//   This triangle has very small height. I guess further computation isn't correct.
 		return fabs(ang);
 	}
-	indCurSqOx[0] = (int) ((trPC[0] - _MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx[1].
+	indCurSqOx[0] = static_cast<int>((trPC[0] - _MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx[1].
 	if ((trPC[0] - _MIN_VALUE_1) <= 0)
 	{
 		indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
@@ -671,7 +671,7 @@ double integrate_right_triangle_bottom_left(
 	indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
 	indRB[0] = indCurSqOx[0];
 	indRB[1] = indRB[0] + 1;
-	indCurSqOy[0] = (int) ((trPC[1] + _MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx[0] and indCurSqOx[1].
+	indCurSqOy[0] = static_cast<int>((trPC[1] + _MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx[0] and indCurSqOx[1].
 	if ((trPC[1] + _MIN_VALUE_1) <= 0)
 	{
 		indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
@@ -806,7 +806,7 @@ double integrate_right_triangle_bottom_right(
 
 	int indCurSqOx[2], indCurSqOy[2]; //   -  Index of current square by Ox and Oy axes.
 	int indLB[2]; //   -  Index of left boundary.
-	double distOx, distOy; //   -  Distance to near Ox and Oy straight lines.
+	double distOx = 0, distOy = 0; //   -  Distance to near Ox and Oy straight lines.
 	bool isTrDone = false; //   -  Is travel done.
 	double hx = ox[1] - ox[0];
 	double hy = oy[1] - oy[0];
@@ -815,7 +815,7 @@ double integrate_right_triangle_bottom_right(
 
 	trPC = bv;
 
-	indCurSqOx[0] = (int) ((trPC.x + _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be between in the right side.
+	indCurSqOx[0] = static_cast<int>((trPC.x + _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be between in the right side.
 
 	if (trPC.x + _MIN_VALUE_1 <= 0)
 		indCurSqOx[0] -= 1; //   -  The case when "trPC.x" is negative.
@@ -823,7 +823,7 @@ double integrate_right_triangle_bottom_right(
 	indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
 	indLB[0] = indCurSqOx[0];
 	indLB[1] = indLB[0] + 1;
-	indCurSqOy[0] = (int) ((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper side.
+	indCurSqOy[0] = static_cast<int>((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper side.
 	if ((trPC.y + _MIN_VALUE_1) <= 0)
 	{
 		indCurSqOy[0] -= 1; //   -  The case when "trPC.x" ia negative.
@@ -954,7 +954,7 @@ double integrate_right_triangle_upper_left(
 	double ang; //   -  Angle of slant line. Should be greater zero.
 	int indCurSqOx[2], indCurSqOy[2]; //   -  Index of current square by Ox and Oy axes.
 	int indRB[2]; //   -  Index of right boundary.
-	double distOx, distOy; //   -  Distance to near Ox and Oy straight lines.
+	double distOx = 0, distOy = 0; //   -  Distance to near Ox and Oy straight lines.
 	bool isTrDone = false; //   -  Is travel done.
 	double hx = ox[1] - ox[0];
 	double hy = oy[1] - oy[0];
@@ -969,19 +969,19 @@ double integrate_right_triangle_upper_left(
 	if (fabs(ang) < _MIN_VALUE) return fabs(ang);
 
 	//   The follow equations are quite important.
-	indCurSqOx[0] = (int) ((trPC.x + _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be in the right side.
+	indCurSqOx[0] = static_cast<int>((trPC.x + _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be in the right side.
 	if ((trPC.x + _MIN_VALUE_1) <= 0)
 	{
 		indCurSqOx[0] -= 1; //   -  The case when "trPC.x" ia negative.
 	}
 	indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-	indCurSqOy[0] = (int) ((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper square.
+	indCurSqOy[0] = static_cast<int>((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper square.
 	if ((trPC.y + _MIN_VALUE_1) <= 0)
 	{
 		indCurSqOy[0] -= 1; //   -  The case when "trPC.x" ia negative.
 	}
 	indCurSqOy[1] = indCurSqOy[0] + 1;
-	indRB[0] = (int) ((uv[0] - _MIN_VALUE_1) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
+	indRB[0] = static_cast<int>((uv[0] - _MIN_VALUE_1) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
 	if ((uv[0] - _MIN_VALUE_1) <= 0)
 	{
 		indRB[0] -= 1; //   -  The case when "trPC.x" ia negative.
@@ -1111,7 +1111,7 @@ double integrate_right_triangle_upper_right(
 	double ang; //   -  Angle of slant line. Should be greater zero.
 	int indCurSqOx[2], indCurSqOy[2]; //   -  Index of current square by Ox and Oy axes.
 	int indLB[2]; //   -  Index of left boundary.
-	double distOx, distOy; //   -  Distance to near Ox and Oy straight lines.
+	double distOx = 0, distOy = 0; //   -  Distance to near Ox and Oy straight lines.
 	bool isTrDone = false; //   -  Is travel done.
 	double hx = ox[1] - ox[0];
 	double hy = oy[1] - oy[0];
@@ -1130,19 +1130,19 @@ double integrate_right_triangle_upper_right(
 		//   This triangle has very small height. I guess further computation isn't correct.
 		return fabs(ang);
 	}
-	indCurSqOx[0] = (int) ((trPC.x - _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be between in the left side.
+	indCurSqOx[0] = static_cast<int>((trPC.x - _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be between in the left side.
 	if ((trPC.x - _MIN_VALUE_1) <= 0)
 	{
 		indCurSqOx[0] -= 1; //   -  The case when "trPC.x" ia negative.
 	}
 	indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-	indLB[0] = (int) ((uv[0] + _MIN_VALUE_1) / hx);
+	indLB[0] = static_cast<int>((uv[0] + _MIN_VALUE_1) / hx);
 	if ((uv[0] + _MIN_VALUE_1) <= 0)
 	{
 		indLB[0] -= 1; //   -  The case when "trPC.x" ia negative.
 	}
 	indLB[1] = indLB[0] + 1;
-	indCurSqOy[0] = (int) ((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper side.
+	indCurSqOy[0] = static_cast<int>((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper side.
 	if ((trPC.y + _MIN_VALUE_1) <= 0)
 	{
 		indCurSqOy[0] -= 1; //   -  The case when "trPC.x" ia negative.
@@ -1567,6 +1567,7 @@ double integrate(double tl, int ix, int iy,
 	case pseudo:
 		return 0.;
 	}
+	return 0;
 }
 
 double get_norm_of_error(double* density, int x_length, int y_length, double* ox,
@@ -1676,7 +1677,7 @@ double* compute_density(double b,
 	}
 
 	print_params(B, LB, RB, BB, UB, TAU, time_step_count, OX_LEN, OY_LEN);
-	 
+
 	solve(ox, oy, density);
 
 	*norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy,

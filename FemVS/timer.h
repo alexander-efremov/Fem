@@ -21,14 +21,14 @@ struct timeval timerStart;
 #endif
 
 inline
-	void StartTimer()
+void StartTimer()
 {
 #ifdef WIN32
 	LARGE_INTEGER li;
-	if(!QueryPerformanceFrequency(&li))
-	printf("QueryPerformanceFrequency failed!\n");
+	if (!QueryPerformanceFrequency(&li))
+		printf("QueryPerformanceFrequency failed!\n");
 
-	PCFreq = (double)li.QuadPart/1000.0;
+	PCFreq = (double)li.QuadPart / 1000.0;
 
 	QueryPerformanceCounter(&li);
 	timerStart = li.QuadPart;
@@ -39,12 +39,12 @@ inline
 
 // time elapsed in ms
 inline
-	double GetTimer()
+double GetTimer()
 {
 #ifdef WIN32
 	LARGE_INTEGER li;
 	QueryPerformanceCounter(&li);
-	return (double)(li.QuadPart-timerStart)/PCFreq;
+	return (double)(li.QuadPart - timerStart) / PCFreq;
 #else
 	struct timeval timerStop, timerElapsed;
 	gettimeofday(&timerStop, NULL);
