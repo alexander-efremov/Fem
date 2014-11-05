@@ -2,11 +2,10 @@
 #include "point.h"
 #include "utils.h"
 
-static const double C_pi = 3.14159265358979323846264338327;
-static const double MIN_VALUE = 1.e-12;
-static const double MIN_VALUE_1 = 1.e-14;
-static int wall_counter = 0;
-
+static int TMP_WALL_CNT = 0;
+static const double _PI = 3.14159265358979323846264338327;
+static const double _MIN_VALUE = 1.e-12;
+static const double _MIN_VALUE_1 = 1.e-14;
 static double B;
 static double UB;
 static double BB;
@@ -22,8 +21,8 @@ double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
 }
 
-double init_bound(double x, double y, double t, bound_side side) {
-    switch (side) {
+double init_side(double x, double y, double t, bound bound) {
+    switch (bound) {
         case up:
             return analytical_solution(t, x, y);
         case bottom:
@@ -106,7 +105,7 @@ double integUnderLeftTr_OneCell(
         y = indCurSqOy[1] * hy;
         rho[1][1] = analytical_solution(t, x, y);
 
-        wall_counter++;
+        TMP_WALL_CNT++;
     }
 
     //   1.
@@ -197,7 +196,7 @@ double integUnderRectAng_OneCell(double Py,
         y = indCurSqOy[1] * hy;
         rho[1][1] = analytical_solution(t, x, y);
 
-        wall_counter++;
+        TMP_WALL_CNT++;
 
     }
 
@@ -292,7 +291,7 @@ double integrate_chanel_slant_right(int tl,
         rv[1] = uv[1];
     }
 
-    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE) {
+    if ((fabs(uv[1] - bv[1])) <= _MIN_VALUE) {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
         //   buf_D  =  (uv[1] - bv[1])  *  ((uv[0] + bv[0]) /2.  -  lb) * rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
         return fabs(uv[1] - bv[1]); //   fabs(uv[1] - bv[1]);
@@ -380,7 +379,7 @@ double integrate_chanel_slant_right(int tl,
 
     //   B. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > MIN_VALUE) {
+    if (fabs(uv[1] - bv[1]) > _MIN_VALUE) {
         //   integ += fabs(uv[1] - bv[1]) * (rv[0] - mv[0]) /2.;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv[0] - bv[0]) / (uv[1] - bv[1]);
@@ -389,7 +388,7 @@ double integrate_chanel_slant_right(int tl,
 
         //   Integration under one cell triangle.
 
-        if (fabs(a_SL) > MIN_VALUE) {
+        if (fabs(a_SL) > _MIN_VALUE) {
             tmp = integUnderRightTr_OneCell(
                     bv[1], //   -  double Py,
                     uv[1], //   -  double Qy,
@@ -455,7 +454,7 @@ double integrate_chanel_slant_left(
         wMvI = wTrPNI;
     }
 
-    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE) {
+    if ((fabs(uv[1] - bv[1])) <= _MIN_VALUE) {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
         //   buf_D  =  (uv[1] - bv[1])  *  (rb  - (uv[0] + bv[0]) /2.) * rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
         return fabs(uv[1] - bv[1]); //   fabs(uv[1] - bv[1]);
@@ -465,13 +464,13 @@ double integrate_chanel_slant_left(
 
     //   A. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > MIN_VALUE) {
+    if (fabs(uv[1] - bv[1]) > _MIN_VALUE) {
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv[0] - bv[0]) / (uv[1] - bv[1]);
         b_SL = bv[0] - a_SL * bv[1];
 
         //   Integration under one cell triangle.
-        if (fabs(a_SL) > MIN_VALUE) {
+        if (fabs(a_SL) > _MIN_VALUE) {
             tmp = integUnderLeftTr_OneCell(
                     bv[1], //   -  double Py
                     uv[1], //   -  double Qy                    
@@ -587,24 +586,24 @@ double integrate_right_triangle_bottom_left(
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) {
+    if ((fabs(bv[0] - uv[0])) < _MIN_VALUE) {
         //   This triangle has very small width. I guess further computation isn't correct.
         return fabs(bv[0] - uv[0]);
     }
     ang = (uv[1] - bv[1]) / (bv[0] - uv[0]);
-    if (fabs(ang) < MIN_VALUE) {
+    if (fabs(ang) < _MIN_VALUE) {
         //   This triangle has very small height. I guess further computation isn't correct.
         return fabs(ang);
     }
-    indCurSqOx[0] = (int) ((trPC[0] - MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx[1].
-    if ((trPC[0] - MIN_VALUE_1) <= 0) {
+    indCurSqOx[0] = (int) ((trPC[0] - _MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx[1].
+    if ((trPC[0] - _MIN_VALUE_1) <= 0) {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indRB[0] = indCurSqOx[0];
     indRB[1] = indRB[0] + 1;
-    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx[0] and indCurSqOx[1].
-    if ((trPC[1] + MIN_VALUE_1) <= 0) {
+    indCurSqOy[0] = (int) ((trPC[1] + _MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx[0] and indCurSqOx[1].
+    if ((trPC[1] + _MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
@@ -646,7 +645,7 @@ double integrate_right_triangle_bottom_left(
             trPN[1] = bv[1] - ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] < (uv[0] + MIN_VALUE_1)) {
+        if (trPN[0] < (uv[0] + _MIN_VALUE_1)) {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
             isTrDone = true;
@@ -707,9 +706,9 @@ double integrate_right_triangle_bottom_right(double *bv,
         const double *oy,
         double *density) {
 
-    if (fabs(bv[0] - uv[0]) < MIN_VALUE) return fabs(bv[0] - uv[0]);
+    if (fabs(bv[0] - uv[0]) < _MIN_VALUE) return fabs(bv[0] - uv[0]);
     double ang = (uv[1] - bv[1]) / (uv[0] - bv[0]); //   -  Angle of slant line. Should be greater zero.
-    if (fabs(ang) < MIN_VALUE) return fabs(ang);
+    if (fabs(ang) < _MIN_VALUE) return fabs(ang);
 
     double trPC[2], trPN[2]; //   -  Travel point current; Travel point next;
     int wTrPCI = 0, wTrPNI = 0; //   -  Where travel point current is? Where travel point next is?   
@@ -730,16 +729,16 @@ double integrate_right_triangle_bottom_right(double *bv,
 
 
 
-    indCurSqOx[0] = (int) ((trPC[0] + MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the right side.
+    indCurSqOx[0] = (int) ((trPC[0] + _MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the right side.
 
-    if (trPC[0] + MIN_VALUE_1 <= 0)
+    if (trPC[0] + _MIN_VALUE_1 <= 0)
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" is negative.
 
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indLB[0] = indCurSqOx[0];
     indLB[1] = indLB[0] + 1;
-    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
-    if ((trPC[1] + MIN_VALUE_1) <= 0) {
+    indCurSqOy[0] = (int) ((trPC[1] + _MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
+    if ((trPC[1] + _MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
@@ -782,7 +781,7 @@ double integrate_right_triangle_bottom_right(double *bv,
             trPN[1] = bv[1] + ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] > (uv[0] - MIN_VALUE_1)) {
+        if (trPN[0] > (uv[0] - _MIN_VALUE_1)) {
             //   -  Without "fabs"!!!
             trPN[0] = uv[0];
             trPN[1] = uv[1];
@@ -858,24 +857,24 @@ double integrate_right_triangle_upper_left(double *bv,
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) return fabs(bv[0] - uv[0]);
+    if ((fabs(bv[0] - uv[0])) < _MIN_VALUE) return fabs(bv[0] - uv[0]);
 
     ang = (uv[1] - bv[1]) / (uv[0] - bv[0]);
-    if (fabs(ang) < MIN_VALUE) return fabs(ang);
+    if (fabs(ang) < _MIN_VALUE) return fabs(ang);
 
     //   The follow equations are quite important.
-    indCurSqOx[0] = (int) ((trPC[0] + MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be in the right side.
-    if ((trPC[0] + MIN_VALUE_1) <= 0) {
+    indCurSqOx[0] = (int) ((trPC[0] + _MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be in the right side.
+    if ((trPC[0] + _MIN_VALUE_1) <= 0) {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper square.
-    if ((trPC[1] + MIN_VALUE_1) <= 0) {
+    indCurSqOy[0] = (int) ((trPC[1] + _MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper square.
+    if ((trPC[1] + _MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1;
-    indRB[0] = (int) ((uv[0] - MIN_VALUE_1) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
-    if ((uv[0] - MIN_VALUE_1) <= 0) {
+    indRB[0] = (int) ((uv[0] - _MIN_VALUE_1) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
+    if ((uv[0] - _MIN_VALUE_1) <= 0) {
         indRB[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indRB[1] = indRB[0] + 1;
@@ -917,7 +916,7 @@ double integrate_right_triangle_upper_left(double *bv,
             trPN[1] = bv[1] + ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] > (uv[0] - MIN_VALUE_1)) {
+        if (trPN[0] > (uv[0] - _MIN_VALUE_1)) {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
             isTrDone = true;
@@ -992,27 +991,27 @@ double integrate_right_triangle_upper_right(double *bv,
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) {
+    if ((fabs(bv[0] - uv[0])) < _MIN_VALUE) {
         //   This triangle has very small width. I guess further computation isn't correct.
         return fabs(bv[0] - uv[0]);
     }
     ang = (uv[1] - bv[1]) / (bv[0] - uv[0]);
-    if (fabs(ang) < MIN_VALUE) {
+    if (fabs(ang) < _MIN_VALUE) {
         //   This triangle has very small height. I guess further computation isn't correct.
         return fabs(ang);
     }
-    indCurSqOx[0] = (int) ((trPC[0] - MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side.
-    if ((trPC[0] - MIN_VALUE_1) <= 0) {
+    indCurSqOx[0] = (int) ((trPC[0] - _MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side.
+    if ((trPC[0] - _MIN_VALUE_1) <= 0) {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    indLB[0] = (int) ((uv[0] + MIN_VALUE_1) / hx);
-    if ((uv[0] + MIN_VALUE_1) <= 0) {
+    indLB[0] = (int) ((uv[0] + _MIN_VALUE_1) / hx);
+    if ((uv[0] + _MIN_VALUE_1) <= 0) {
         indLB[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indLB[1] = indLB[0] + 1;
-    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
-    if ((trPC[1] + MIN_VALUE_1) <= 0) {
+    indCurSqOy[0] = (int) ((trPC[1] + _MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
+    if ((trPC[1] + _MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
@@ -1054,7 +1053,7 @@ double integrate_right_triangle_upper_right(double *bv,
             trPN[1] = bv[1] - ang * (trPN[0] - bv[0]);
         }
         //   c. Checking.
-        if (trPN[0] < (uv[0] + MIN_VALUE_1)) {
+        if (trPN[0] < (uv[0] + _MIN_VALUE_1)) {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
             isTrDone = true;
@@ -1186,7 +1185,7 @@ double integrate_uniform_triangle(int tl,
     //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
     //   a * x  +  b * y  = c.
     double a = z->y - x->y;
-    if (fabs(a) < MIN_VALUE) return MIN_VALUE;
+    if (fabs(a) < _MIN_VALUE) return _MIN_VALUE;
     double b = x->x - z->x;
     double c = b * x->y + a * x->x;
     ip[0] = (c - b * mv[1]) / a;
@@ -1213,7 +1212,7 @@ double integrate_uniform_triangle(int tl,
 }
 
 inline double func_u(double x, double y) {
-    return B * y * (1. - y) * (C_pi / 2. + atan(-x));
+    return B * y * (1. - y) * (_PI / 2. + atan(-x));
 }
 
 inline double func_v(double t, double x, double y) {
@@ -1449,13 +1448,13 @@ double solve(const double *ox, const double *oy, double *density) {
 
     for (int it = 1; it < TIME_STEP_CNT + 1; it++) {
         for (int i = 0; i <= OX_LEN; i++) {
-            density[ i ] = init_bound(ox[ i ], BB, TAU * it, bottom);
-            density[ (OX_LEN + 1) * OY_LEN + i ] = init_bound(ox[ i ], UB, TAU * it, up);
+            density[ i ] = init_side(ox[ i ], BB, TAU * it, bottom);
+            density[ (OX_LEN + 1) * OY_LEN + i ] = init_side(ox[ i ], UB, TAU * it, up);
         }
 
         for (int i = 0; i <= OY_LEN; i++) {
-            density[ (OX_LEN + 1) * i ] = init_bound(LB, oy[ i ], TAU * it, left);
-            density[ (OX_LEN + 1) * i + OX_LEN ] = init_bound(RB, oy[ i ], TAU * it, right);
+            density[ (OX_LEN + 1) * i ] = init_side(LB, oy[ i ], TAU * it, left);
+            density[ (OX_LEN + 1) * i + OX_LEN ] = init_side(RB, oy[ i ], TAU * it, right);
         }
 
         for (int iy = 1; iy < OY_LEN; iy++) {
@@ -1520,7 +1519,7 @@ double *compute_density(double b,
     *norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy,
             time_step_count * TAU);
     //  printf("Norm L1 = %f\n", *norm);
-    printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_counter);
+    printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, TMP_WALL_CNT);
 
     delete[] ox;
     delete[] oy;
