@@ -5,9 +5,9 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>include/common.h</itemPath>
-      <itemPath>include/const.h</itemPath>
-      <itemPath>include/file_reader.h</itemPath>
+      <itemPath>include/point.h</itemPath>
       <itemPath>include/timer.h</itemPath>
+      <itemPath>include/utils.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -16,7 +16,6 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>src/file_reader.cpp</itemPath>
       <itemPath>src/low_ord_oper.cpp</itemPath>
       <itemPath>src/main.cpp</itemPath>
     </logicalFolder>
@@ -24,8 +23,8 @@
                    displayName="Test Files"
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
-      <logicalFolder name="f1" displayName="Tests" projectFiles="true" kind="TEST">
-        <itemPath>src/tests.cpp</itemPath>
+      <logicalFolder name="f1" displayName="Test" projectFiles="true" kind="TEST">
+        <itemPath>tests/tests.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -54,6 +53,7 @@
         <cTool>
           <incDir>
             <pElem>.</pElem>
+            <pElem>.</pElem>
           </incDir>
         </cTool>
         <ccTool>
@@ -61,6 +61,8 @@
             <pElem>.</pElem>
             <pElem>gtest-1.7.0</pElem>
             <pElem>gtest-1.7.0/include</pElem>
+            <pElem>include</pElem>
+            <pElem>FemBase</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
@@ -78,24 +80,46 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgtest.a">
               </makeArtifact>
             </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="gtest"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="gtest"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgtest.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="FemBase"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="FemBase"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfembase.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
           </linkerLibItems>
         </linkerTool>
       </folder>
       <item path="include/common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="include/const.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="include/file_reader.h" ex="false" tool="3" flavor2="0">
+      <item path="include/point.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/timer.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/file_reader.cpp" ex="false" tool="1" flavor2="0">
+      <item path="include/utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="src/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -122,10 +146,12 @@
         <cTool>
           <incDir>
             <pElem>.</pElem>
+            <pElem>.</pElem>
           </incDir>
         </cTool>
         <ccTool>
           <incDir>
+            <pElem>.</pElem>
             <pElem>.</pElem>
           </incDir>
         </ccTool>
@@ -135,19 +161,17 @@
       </folder>
       <item path="include/common.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="include/const.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="include/file_reader.h" ex="false" tool="3" flavor2="0">
+      <item path="include/point.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/timer.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/file_reader.cpp" ex="false" tool="1" flavor2="0">
+      <item path="include/utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="src/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>

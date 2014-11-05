@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/src/file_reader.o \
 	${OBJECTDIR}/src/low_ord_oper.o \
 	${OBJECTDIR}/src/main.o
 
@@ -70,11 +69,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/src/file_reader.o: src/file_reader.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/file_reader.o src/file_reader.cpp
-
 ${OBJECTDIR}/src/low_ord_oper.o: src/low_ord_oper.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
@@ -90,29 +84,16 @@ ${OBJECTDIR}/src/main.o: src/main.cpp
 
 # Build Test Targets
 .build-tests-conf: .build-conf ${TESTFILES}
-${TESTDIR}/TestFiles/f1: ${TESTDIR}/src/tests.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/tests.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} 
 
 
-${TESTDIR}/src/tests.o: src/tests.cpp 
-	${MKDIR} -p ${TESTDIR}/src
+${TESTDIR}/tests/tests.o: tests/tests.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/src/tests.o src/tests.cpp
+	$(COMPILE.cc) -O2 -I. -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
 
-
-${OBJECTDIR}/src/file_reader_nomain.o: ${OBJECTDIR}/src/file_reader.o src/file_reader.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src
-	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/file_reader.o`; \
-	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
-	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
-	then  \
-	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/file_reader_nomain.o src/file_reader.cpp;\
-	else  \
-	    ${CP} ${OBJECTDIR}/src/file_reader.o ${OBJECTDIR}/src/file_reader_nomain.o;\
-	fi
 
 ${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
