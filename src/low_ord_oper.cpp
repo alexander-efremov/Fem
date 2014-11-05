@@ -13,35 +13,37 @@ static double LB;
 static double RB;
 static double TAU;
 
-double _itemOfInteg_1SpecType(double Py,
-        double Qy,
-        double Gx,
-        double Hx,
+double integrate_first_type(double py,
+        double qy,
+        double gx,
+        double hx,
         double a,
         double b) {
-    double integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
-    integ *= (Qy - b) * (Qy - b) - (Py - b) * (Py - b);
+    double integ = (hx - a) * (hx - a) - (gx - a) * (gx - a);
+    integ *= (qy - b) * (qy - b) - (py - b) * (py - b);
     return integ / 4;
+}
+
+double integrate_second_type(double py,
+        double qy,
+        double alpha,
+        double a,
+        double b,
+        double betta) {
+    double tmp, integ;
+    tmp = (qy - alpha) * (a * qy + b - betta) * (a * qy + b - betta) * (a * qy + b - betta);
+    tmp = tmp - (py - alpha) * (a * py + b - betta) * (a * py + b - betta) * (a * py + b - betta);
+    integ = tmp / (3 * a);
+    tmp = (a * qy + b - betta) * (a * qy + b - betta) * (a * qy + b - betta) * (a * qy + b - betta);
+    tmp = tmp - (a * py + b - betta) * (a * py + b - betta) * (a * py + b - betta) * (a * py + b - betta);
+    return integ - tmp / (12 * a * a);
 }
 
 double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
 }
 
-double _itemOfInteg_2SpecType(double Py,
-        double Qy,
-        double alpha,
-        double a,
-        double b,
-        double betta) {
-    double tmp, integ;
-    tmp = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
-    tmp = tmp - (Py - alpha) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
-    integ = tmp / (3 * a);
-    tmp = (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
-    tmp = tmp - (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
-    return integ - tmp / (12 * a * a);
-}
+
 
 double integUnderLeftTr_OneCell(
         double Py,
@@ -102,10 +104,10 @@ double integUnderLeftTr_OneCell(
     buf_D = (Qy - masOY[ indCurSqOy[1] ]) * (Qy - masOY[ indCurSqOy[1] ]) - (Py - masOY[ indCurSqOy[1] ]) * (Py - masOY[ indCurSqOy[1] ]);
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0)) {
         buf_D = buf_D * (Hx - masOX[ indCurSqOx[1] ]) * (Hx - masOX[ indCurSqOx[1] ]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
+        bufInteg_D = integrate_second_type(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
     } else {
         buf_D = buf_D * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[1]);
+        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[1]);
     }
     buf_D = buf_D - bufInteg_D / 2.;
     integ = buf_D * rho[0][0] / hx / hy;
@@ -114,10 +116,10 @@ double integUnderLeftTr_OneCell(
     buf_D = (Qy - masOY[ indCurSqOy[1] ]) * (Qy - masOY[ indCurSqOy[1] ]) - (Py - masOY[ indCurSqOy[1] ]) * (Py - masOY[ indCurSqOy[1] ]);
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[1] >= 0)) {
         buf_D = -1. * buf_D * (Hx - masOX[ indCurSqOx[0] ]) * (Hx - masOX[ indCurSqOx[0] ]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
+        bufInteg_D = integrate_second_type(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
     } else {
         buf_D = -1. * buf_D * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[0]);
+        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[0]);
     }
     buf_D = buf_D + bufInteg_D / 2.;
     integ = integ + buf_D * rho[1][0] / hx / hy;
@@ -126,10 +128,10 @@ double integUnderLeftTr_OneCell(
     buf_D = (Qy - masOY[ indCurSqOy[0] ]) * (Qy - masOY[ indCurSqOy[0] ]) - (Py - masOY[ indCurSqOy[0] ]) * (Py - masOY[ indCurSqOy[0] ]);
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[0] >= 0)) {
         buf_D = -1. * buf_D * (Hx - masOX[ indCurSqOx[1] ]) * (Hx - masOX[ indCurSqOx[1] ]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
+        bufInteg_D = integrate_second_type(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
     } else {
         buf_D = -1. * buf_D * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[1]);
+        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[1]);
     }
     buf_D = buf_D + bufInteg_D / 2.;
     integ = integ + buf_D * rho[0][1] / hx / hy;
@@ -138,10 +140,10 @@ double integUnderLeftTr_OneCell(
     buf_D = (Qy - masOY[ indCurSqOy[0] ]) * (Qy - masOY[ indCurSqOy[0] ]) - (Py - masOY[ indCurSqOy[0] ]) * (Py - masOY[ indCurSqOy[0] ]);
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[0] >= 0)) {
         buf_D = buf_D * (Hx - masOX[ indCurSqOx[0] ]) * (Hx - masOX[ indCurSqOx[0] ]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
+        bufInteg_D = integrate_second_type(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
     } else {
         buf_D = buf_D * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
-        bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[0]);
+        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[0]);
     }
     buf_D = buf_D - bufInteg_D / 2.;
     integ += buf_D * rho[1][1] / hx / hy;
@@ -225,30 +227,30 @@ double integUnderRectAng_OneCell(double Py,
     }
 
     if (indCurSqOx[1] >= 0 && indCurSqOy[1] >= 0) {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[1] ]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[1] ]);
     } else {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
     }
     buf_D = buf_D / hx / hy;
     integ = buf_D * rho[0][0]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
     if (indCurSqOx[0] >= 0 && indCurSqOy[1] >= 0) {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[1] ]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[1] ]);
     } else {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
     }
     buf_D = buf_D / hx / hy;
     integ = integ - buf_D * rho[1][0]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[0] ];
     if (indCurSqOx[1] >= 0 && indCurSqOy[0] >= 0) {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[0] ]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[0] ]);
     } else {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
     }
     buf_D = buf_D / hx / hy;
     integ = integ - buf_D * rho[0][1]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[1] ];
     if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[0] ]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[0] ]);
     } else {
-        buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
+        buf_D = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
     }
     buf_D = buf_D / hx / hy;
     return integ + buf_D * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
@@ -1452,7 +1454,7 @@ quad_type compute_coordinate_on_prev_layer(int cur_tl,
     double product = get_vector_product(alpha, beta, theta); // ?
     if (product < 0.) return pseudo;
 
-    // значит что точка удетела за левую границу
+    // значит что точка улетела за левую границу
     if (theta->x < 0 ||
             theta->y < 0 ||
             beta->x < 0 ||
@@ -1746,7 +1748,7 @@ double *solve(double b,
             density);
 
     *norm = get_norm_of_error(density, ox_length, oy_length, ox, oy,
-            time_step_count * tau);
+            time_step_count * TAU);
     //  printf("Norm L1 = %f\n", *norm);
     printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_counter);
 
