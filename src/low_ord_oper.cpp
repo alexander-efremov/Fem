@@ -63,11 +63,11 @@ double integrate_second_type(double py,
 }
 
 double integUnderLeftTr_OneCell(
-        double Py,
-        double Qy,
+        double py,
+        double qy,
         double a_SL,
         double b_SL,
-        double Hx,
+        double hx,
         int tl,
         int *indCurSqOx, //   -  Index of current square by Ox axis.
         int *indCurSqOy, //   -  Index of current square by Oy axis.        
@@ -110,49 +110,49 @@ double integUnderLeftTr_OneCell(
     }
 
     //   1.
-    tmp = (Qy - oy[ indCurSqOy[1] ]) * (Qy - oy[ indCurSqOy[1] ]) - (Py - oy[ indCurSqOy[1] ]) * (Py - oy[ indCurSqOy[1] ]);
+    tmp = (qy - oy[ indCurSqOy[1] ]) * (qy - oy[ indCurSqOy[1] ]) - (py - oy[ indCurSqOy[1] ]) * (py - oy[ indCurSqOy[1] ]);
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0)) {
-        tmp = tmp * (Hx - ox[ indCurSqOx[1] ]) * (Hx - ox[ indCurSqOx[1] ]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, oy[ indCurSqOy[1] ], a_SL, b_SL, ox[ indCurSqOx[1] ]);
+        tmp = tmp * (hx - ox[ indCurSqOx[1] ]) * (hx - ox[ indCurSqOx[1] ]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, oy[ indCurSqOy[1] ], a_SL, b_SL, ox[ indCurSqOx[1] ]);
     } else {
-        tmp = tmp * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[1]);
+        tmp = tmp * (hx - hx * indCurSqOx[1]) * (hx - hx * indCurSqOx[1]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[1]);
     }
     tmp -= bufInteg_D / 2.;
     result = tmp * rho[0][0] / hx / hy;
 
     //   2.
-    tmp = (Qy - oy[ indCurSqOy[1] ]) * (Qy - oy[ indCurSqOy[1] ]) - (Py - oy[ indCurSqOy[1] ]) * (Py - oy[ indCurSqOy[1] ]);
+    tmp = (qy - oy[ indCurSqOy[1] ]) * (qy - oy[ indCurSqOy[1] ]) - (py - oy[ indCurSqOy[1] ]) * (py - oy[ indCurSqOy[1] ]);
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[1] >= 0)) {
-        tmp = -1. * tmp * (Hx - ox[ indCurSqOx[0] ]) * (Hx - ox[ indCurSqOx[0] ]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, oy[ indCurSqOy[1] ], a_SL, b_SL, ox[ indCurSqOx[0] ]);
+        tmp = -1. * tmp * (hx - ox[ indCurSqOx[0] ]) * (hx - ox[ indCurSqOx[0] ]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, oy[ indCurSqOy[1] ], a_SL, b_SL, ox[ indCurSqOx[0] ]);
     } else {
-        tmp = -1. * tmp * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[0]);
+        tmp = -1. * tmp * (hx - hx * indCurSqOx[0]) * (hx - hx * indCurSqOx[0]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[0]);
     }
     tmp = tmp + bufInteg_D / 2.;
     result += tmp * rho[1][0] / hx / hy;
 
     //   3.
-    tmp = (Qy - oy[ indCurSqOy[0] ]) * (Qy - oy[ indCurSqOy[0] ]) - (Py - oy[ indCurSqOy[0] ]) * (Py - oy[ indCurSqOy[0] ]);
+    tmp = (qy - oy[ indCurSqOy[0] ]) * (qy - oy[ indCurSqOy[0] ]) - (py - oy[ indCurSqOy[0] ]) * (py - oy[ indCurSqOy[0] ]);
     if ((indCurSqOx[1] >= 0) && (indCurSqOy[0] >= 0)) {
-        tmp = -1. * tmp * (Hx - ox[ indCurSqOx[1] ]) * (Hx - ox[ indCurSqOx[1] ]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, oy[ indCurSqOy[0] ], a_SL, b_SL, ox[ indCurSqOx[1] ]);
+        tmp = -1. * tmp * (hx - ox[ indCurSqOx[1] ]) * (hx - ox[ indCurSqOx[1] ]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, oy[ indCurSqOy[0] ], a_SL, b_SL, ox[ indCurSqOx[1] ]);
     } else {
-        tmp = -1. * tmp * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[1]);
+        tmp = -1. * tmp * (hx - hx * indCurSqOx[1]) * (hx - hx * indCurSqOx[1]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[1]);
     }
     tmp = tmp + bufInteg_D / 2.;
     result += tmp * rho[0][1] / hx / hy;
 
     //   4.
-    tmp = (Qy - oy[ indCurSqOy[0] ]) * (Qy - oy[ indCurSqOy[0] ]) - (Py - oy[ indCurSqOy[0] ]) * (Py - oy[ indCurSqOy[0] ]);
+    tmp = (qy - oy[ indCurSqOy[0] ]) * (qy - oy[ indCurSqOy[0] ]) - (py - oy[ indCurSqOy[0] ]) * (py - oy[ indCurSqOy[0] ]);
     if ((indCurSqOx[0] >= 0) && (indCurSqOy[0] >= 0)) {
-        tmp = tmp * (Hx - ox[ indCurSqOx[0] ]) * (Hx - ox[ indCurSqOx[0] ]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, oy[ indCurSqOy[0] ], a_SL, b_SL, ox[ indCurSqOx[0] ]);
+        tmp = tmp * (hx - ox[ indCurSqOx[0] ]) * (hx - ox[ indCurSqOx[0] ]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, oy[ indCurSqOy[0] ], a_SL, b_SL, ox[ indCurSqOx[0] ]);
     } else {
-        tmp = tmp * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[0]);
+        tmp = tmp * (hx - hx * indCurSqOx[0]) * (hx - hx * indCurSqOx[0]) / 4.;
+        bufInteg_D = integrate_second_type(py, qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[0]);
     }
     tmp -= bufInteg_D / 2.;
     result += tmp * rho[1][1] / hx / hy;
@@ -160,11 +160,11 @@ double integUnderLeftTr_OneCell(
     return result;
 }
 
-double integUnderRightTr_OneCell(double Py,
-        double Qy,
+double integUnderRightTr_OneCell(double py,
+        double qy,
         double a_SL,
         double b_SL,
-        double Gx,
+        double gx,
         int tl,
         int *indCurSqOx, //   -  Index of current square by Ox axis.
         int *indCurSqOy, //   -  Index of current square by Oy axis.
@@ -172,8 +172,8 @@ double integUnderRightTr_OneCell(double Py,
         const double *oy,
         double *density) {
     return -1. * integUnderLeftTr_OneCell(
-            Py, Qy,
-            a_SL, b_SL, Gx,
+            py, qy,
+            a_SL, b_SL, gx,
             tl,
             indCurSqOx, //   -  Index of current square by Ox axis.
             indCurSqOy, //   -  Index of current square by Oy axis.            
@@ -181,10 +181,10 @@ double integUnderRightTr_OneCell(double Py,
             density);
 }
 
-double integUnderRectAng_OneCell(double Py,
-        double Qy,
-        double Gx,
-        double Hx,
+double integUnderRectAng_OneCell(double py,
+        double qy,
+        double gx,
+        double hx,
         int tl,
         int *indCurSqOx, //   -  Index of current square by Ox axis.
         int *indCurSqOy,
@@ -223,30 +223,30 @@ double integUnderRectAng_OneCell(double Py,
     }
 
     if (indCurSqOx[1] >= 0 && indCurSqOy[1] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[1] ]);
+        tmp = integrate_first_type(py, qy, gx, hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[1] ]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
+        tmp = integrate_first_type(py, qy, gx, hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
     }
     tmp = tmp / hx / hy;
     result = tmp * rho[0][0]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
     if (indCurSqOx[0] >= 0 && indCurSqOy[1] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[1] ]);
+        tmp = integrate_first_type(py, qy, gx, hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[1] ]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
+        tmp = integrate_first_type(py, qy, gx, hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
     }
     tmp = tmp / hx / hy;
     result = result - tmp * rho[1][0]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[0] ];
     if (indCurSqOx[1] >= 0 && indCurSqOy[0] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[0] ]);
+        tmp = integrate_first_type(py, qy, gx, hx, ox[ indCurSqOx[1] ], oy[ indCurSqOy[0] ]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
+        tmp = integrate_first_type(py, qy, gx, hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
     }
     tmp = tmp / hx / hy;
     result -= tmp * rho[0][1]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[1] ];
     if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[0] ]);
+        tmp = integrate_first_type(py, qy, gx, hx, ox[ indCurSqOx[0] ], oy[ indCurSqOy[0] ]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
+        tmp = integrate_first_type(py, qy, gx, hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
     }
     tmp = tmp / hx / hy;
     return result + tmp * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
@@ -432,7 +432,7 @@ double integrate_chanel_slant_left(
     int indCurSqOxToCh[2]; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
     double h = ox[1] - ox[0];
     double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
-    double Gx, Hx; //   -  Left and right boundary for each integration.
+    double gx, hx; //   -  Left and right boundary for each integration.
     double result = 0.;
     double tmp;
     int j;
@@ -489,23 +489,23 @@ double integrate_chanel_slant_left(
     //   B. Under rectangle. Need to be checking.
     if (wMvI == 1) {
         if (indCurSqOx[0] == indRB[0]) {
-            Hx = rb;
+            hx = rb;
         }
 
         if (indCurSqOx[0] < indRB[0]) {
             if (indCurSqOx[1] >= 0) {
-                Hx = ox[ indCurSqOx[1] ];
+                hx = ox[ indCurSqOx[1] ];
             }
 
             if (indCurSqOx[1] < 0) {
-                Hx = h * indCurSqOx[1];
+                hx = h * indCurSqOx[1];
             }
         }
 
         tmp = integUnderRectAng_OneCell(bv[1], //   -  double Py,
                 uv[1], //   -  double Qy,                
                 mv[0], //   -  double Gx,
-                Hx, //   -  double Hx,                
+                hx, //   -  double Hx,                
                 tl,
                 indCurSqOx, //   -  Index of current square by Ox axis.
                 indCurSqOy, //   -  Index of current square by Oy axis.                
@@ -525,27 +525,27 @@ double integrate_chanel_slant_left(
         //   If this is first cell we should integrate under triangle only.
 
         if (indCurSqOxToCh[1] > 0) {
-            Gx = ox[ indCurSqOxToCh[0] ];
-            Hx = ox[ indCurSqOxToCh[1] ];
+            gx = ox[ indCurSqOxToCh[0] ];
+            hx = ox[ indCurSqOxToCh[1] ];
         }
 
 
         if (indCurSqOxToCh[1] <= 0) {
-            Gx = h * indCurSqOxToCh[0];
-            Hx = h * indCurSqOxToCh[1];
+            gx = h * indCurSqOxToCh[0];
+            hx = h * indCurSqOxToCh[1];
         }
 
 
         if (j == indRB[0]) {
-            Hx = rb;
+            hx = rb;
         }
 
 
         tmp = integUnderRectAng_OneCell(bv[1], //   -  double Py,
                 uv[1], //   -  double Qy,
                 //
-                Gx, //   -  double Gx,
-                Hx, //   -  double Hx,
+                gx, //   -  double Gx,
+                hx, //   -  double Hx,
                 //
                 tl, //   -  Index of current time layer.
                 //
@@ -1108,50 +1108,50 @@ double integrate_right_triangle_upper_right(double *bv,
 }
 
 double integrate_bottom_triangle(int tl,
-        double *l, //   -  Left vertex of Bottom triangle.
-        double *r, //   -  Right vertex of Bottom triangle.
-        double *b, //   -  Bottom vertex of Bottom triangle.
+        double *l, //   -  Left vertex of Bottom triangle
+        double *r, //   -  Right vertex of Bottom triangle
+        double *m, //   -  Vertex of between L and R
         const double *ox,
         const double *oy,
         double *density) {
     double result = 0.;
-    if (b[0] == l[0]) {
-        result = integrate_right_triangle_bottom_right(b, r, tl, ox, oy, density);
-    } else if (b[0] == r[0]) {
-        result = integrate_right_triangle_bottom_left(b, l, tl, ox, oy, density);
-    } else if (b[0] < l[0]) {
-        result = integrate_right_triangle_bottom_right(b, r, tl, ox, oy, density);
-        result -= integrate_right_triangle_bottom_right(b, l, tl, ox, oy, density);
-    } else if (b[0] > l[0] && b[0] < r[0]) {
-        result = integrate_right_triangle_bottom_left(b, l, tl, ox, oy, density);
-        result += integrate_right_triangle_bottom_right(b, r, tl, ox, oy, density);
-    } else if (b[0] > r[0]) {
-        result = integrate_right_triangle_bottom_left(b, l, tl, ox, oy, density);
-        result -= integrate_right_triangle_bottom_left(b, r, tl, ox, oy, density);
+    if (m[0] == l[0]) {
+        result = integrate_right_triangle_bottom_right(m, r, tl, ox, oy, density);
+    } else if (m[0] == r[0]) {
+        result = integrate_right_triangle_bottom_left(m, l, tl, ox, oy, density);
+    } else if (m[0] < l[0]) {
+        result = integrate_right_triangle_bottom_right(m, r, tl, ox, oy, density);
+        result -= integrate_right_triangle_bottom_right(m, l, tl, ox, oy, density);
+    } else if (m[0] > l[0] && m[0] < r[0]) {
+        result = integrate_right_triangle_bottom_left(m, l, tl, ox, oy, density);
+        result += integrate_right_triangle_bottom_right(m, r, tl, ox, oy, density);
+    } else if (m[0] > r[0]) {
+        result = integrate_right_triangle_bottom_left(m, l, tl, ox, oy, density);
+        result -= integrate_right_triangle_bottom_left(m, r, tl, ox, oy, density);
     }
     return result;
 }
 
 double integrate_upper_triangle(int tl,
-        double *l, //   -  Left vertex of Upper triangle.
-        double *r, //   -  Right vertex of Upper triangle.
-        double *u, //   -  Upper vertex of Upper triangle.
+        double *l, //   -  Left vertex of Upper triangle
+        double *r, //   -  Right vertex of Upper triangle
+        double *m, //   -  Vertex of between L and R
         const double *ox, const double *oy,
         double *density) {
     double result = 0.;
-    if (u[0] == l[0]) {
-        result = integrate_right_triangle_upper_right(r, u, tl, ox, oy, density);
-    } else if (u[0] == r[0]) {
-        result = integrate_right_triangle_upper_left(l, u, tl, ox, oy, density);
-    } else if (u[0] < l[0]) {
-        result = integrate_right_triangle_upper_right(r, u, tl, ox, oy, density);
-        result -= integrate_right_triangle_upper_right(l, u, tl, ox, oy, density);
-    } else if (u[0] > l[0] && u[0] < r[0]) {
-        result = integrate_right_triangle_upper_left(l, u, tl, ox, oy, density);
-        result += integrate_right_triangle_upper_right(r, u, tl, ox, oy, density);
-    } else if (u[0] > r[0]) {
-        result = integrate_right_triangle_upper_left(l, u, tl, ox, oy, density);
-        result -= integrate_right_triangle_upper_left(r, u, tl, ox, oy, density);
+    if (m[0] == l[0]) {
+        result = integrate_right_triangle_upper_right(r, m, tl, ox, oy, density);
+    } else if (m[0] == r[0]) {
+        result = integrate_right_triangle_upper_left(l, m, tl, ox, oy, density);
+    } else if (m[0] < l[0]) {
+        result = integrate_right_triangle_upper_right(r, m, tl, ox, oy, density);
+        result -= integrate_right_triangle_upper_right(l, m, tl, ox, oy, density);
+    } else if (m[0] > l[0] && m[0] < r[0]) {
+        result = integrate_right_triangle_upper_left(l, m, tl, ox, oy, density);
+        result += integrate_right_triangle_upper_right(r, m, tl, ox, oy, density);
+    } else if (m[0] > r[0]) {
+        result = integrate_right_triangle_upper_left(l, m, tl, ox, oy, density);
+        result -= integrate_right_triangle_upper_left(r, m, tl, ox, oy, density);
     }
     return result;
 }
