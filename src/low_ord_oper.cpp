@@ -1172,21 +1172,14 @@ double integrate_uniform_triangle(int tl,
     //   слева или справа.
     //   есди средняя точка справа от точки пересечения
     //   обменяем местами  X координаты, чтобы использовать один код для расчета
-
     if (y.x >= ip.x) {
         double tx = y.x;
         y.x = ip.x;
         ip.x = tx;
     }
 
-    return integrate_bottom_triangle(tl,
-            y, ip, x,
-            ox, oy,
-            density)
-            + integrate_upper_triangle(tl,
-            y, ip, z,
-            ox, oy,
-            density);
+    return integrate_upper_triangle(tl, y, ip, z, ox, oy, density)
+            + integrate_bottom_triangle(tl, y, ip, x, ox, oy, density);
 }
 
 inline double func_u(double x, double y) {
