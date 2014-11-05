@@ -1155,7 +1155,7 @@ double integrate_upper_triangle(int tl,
     return result;
 }
 
-double wall_integrate_uniform_triangle(int tl,
+double integrate_uniform_triangle_wall(int tl,
         point_t *a,
         point_t *b,
         point_t *c,
@@ -1399,11 +1399,11 @@ double integrate(double curr_tl,
     double result = 0.;
     switch (type) {
         case wall:
-            result += wall_integrate_uniform_triangle(curr_tl,
+            result += integrate_uniform_triangle_wall(curr_tl,
                     &t_1_a, &t_1_b, &t_1_c,
                     ox, oy,
                     density);
-            result += wall_integrate_uniform_triangle(curr_tl,
+            result += integrate_uniform_triangle_wall(curr_tl,
                     &t_2_a, &t_2_b, &t_2_c,
                     ox, oy,
                     density);
