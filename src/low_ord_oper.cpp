@@ -71,9 +71,9 @@ double integUnderLeftTr_OneCell(
         int *indCurSqOy, //   -  Index of current square by Oy axis.
         //
         const double *ox,
-        int ox_length, 
-        const double *oy, 
-        int oy_length, 
+        int ox_length,
+        const double *oy,
+        int oy_length,
         double *density) {
     double hx = ox[1] - ox[0];
     double hy = oy[1] - oy[0];
@@ -185,7 +185,7 @@ double integUnderRightTr_OneCell(double Py,
             indCurSqOx, //   -  Index of current square by Ox axis.
             indCurSqOy, //   -  Index of current square by Oy axis.
             //
-            ox, ox_length, 
+            ox, ox_length,
             oy, oy_length,
             density);
 }
@@ -273,9 +273,9 @@ double integOfChan_SLRightSd(int tl,
         int *indCurSqOy, //   -  Index of current square by Oy axis.
         //
         const double *ox,
-        int ox_kength, 
-        const double *oy, 
-        int oy_length, 
+        int ox_kength,
+        const double *oy,
+        int oy_length,
         double *density) {
     double mv[2], rv[2]; //   -  Middle and right vertices.
     int wMvI; //   -  Where middle vertex is.
@@ -345,7 +345,7 @@ double integOfChan_SLRightSd(int tl,
                 indCurSqOy, //   -  Index of current square by Oy axis.
                 //
                 ox,
-                ox_kength, 
+                ox_kength,
                 oy,
                 density);
 
@@ -383,9 +383,9 @@ double integOfChan_SLRightSd(int tl,
                 indCurSqOx, //   -  Index of current square by Ox axis.
                 indCurSqOy, //   -  Index of current square by Oy axis.
                 //
-                ox, 
-                ox_kength, 
-                oy, 
+                ox,
+                ox_kength,
+                oy,
                 density);
 
         result += tmp;
@@ -433,7 +433,7 @@ double integOfChan_SLRightSd(int tl,
 }
 
 double integOfChan_SLLeftSd(
-        int tl, 
+        int tl,
         double *bv, int wTrPCI, //   -  Where travel point current (bottom vertex) is.
         double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
         //
@@ -443,10 +443,10 @@ double integOfChan_SLLeftSd(
         //
         int *indCurSqOy, //   -  Index of current square by Oy axis.
         //
-        const double *ox, 
-        int ox_length, 
-        const double *oy, 
-        int oy_length, 
+        const double *ox,
+        int ox_length,
+        const double *oy,
+        int oy_length,
         double *density) {
     double lv[2], mv[2]; //   -  Left and middle vertices.
     int wMvI; //   -  Where middle vertex is.
@@ -595,11 +595,11 @@ double integOfChan_SLLeftSd(
                 indCurSqOxToCh, //   -  Index of current square by Ox axis.
                 indCurSqOy, //   -  Index of current square by Oy axis.
                 //
-                ox, ox_length, oy, 
+                ox, ox_length, oy,
                 density);
 
         result += tmp;
-        
+
         indCurSqOxToCh[0] += 1;
         indCurSqOxToCh[1] = indCurSqOxToCh[0] + 1;
     }
@@ -607,13 +607,13 @@ double integOfChan_SLLeftSd(
     return result;
 }
 
-double integUnderRigAngTr_BottLeft(int tl, 
+double integrate_right_triangle_bottom_left(int tl,
         double *bv,
         double *uv,
-        const double *ox, 
-        int ox_length, 
+        const double *ox,
+        int ox_length,
         const double *oy,
-        int oy_length, 
+        int oy_length,
         double *density) {
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
@@ -748,7 +748,7 @@ double integUnderRigAngTr_BottLeft(int tl,
     return result;
 }
 
-double integUnderRigAngTr_BottRight(int tl, 
+double integrate_right_triangle_bottom_right(int tl,
         double *bv,
         double *uv,
         const double *ox,
@@ -847,10 +847,10 @@ double integUnderRigAngTr_BottRight(int tl,
                 //
                 indCurSqOy, //   -  Index of current square by Oy axis.
                 //
-                ox, ox_length, 
-                oy, oy_length, 
+                ox, ox_length,
+                oy, oy_length,
                 density);
-        result +=  tmp;
+        result += tmp;
         //   e. Updating.
         if (isTrDone == false) {
             //   We will compute more. We need to redefine some values.
@@ -882,9 +882,7 @@ double integUnderRigAngTr_BottRight(int tl,
     return result;
 }
 
-
-
-double integUnderRigAngTr_UppLeft(
+double integrate_right_triangle_up_left(
         int tl,
         double *bv,
         double *uv,
@@ -1026,7 +1024,7 @@ double integUnderRigAngTr_UppLeft(
     return integOfUppTr;
 }
 
-double integUnderRigAngTr_UppRight(int tl,
+double integrate_right_triangle_up_right(int tl,
         double *bv,
         double *uv,
         const double *ox,
@@ -1169,7 +1167,6 @@ double integUnderRigAngTr_UppRight(int tl,
     return result;
 }
 
-
 double integrate_bottom_triangle(int tl,
         double *l, //   -  Left vertex of Bottom triangle.
         double *r, //   -  Right vertex of Bottom triangle.
@@ -1180,18 +1177,20 @@ double integrate_bottom_triangle(int tl,
         int oy_length,
         double *density) {
     double result = 0.;
-    if (b[0] <= l[0]) {
-        result = integUnderRigAngTr_BottRight(tl, b, r, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_BottRight(tl, b, l, ox, ox_length, oy, oy_length, density);
-        return result;
-    } else if (b[0] > l[0] && b[0] < r[0]) {
-        result = integUnderRigAngTr_BottLeft(tl, b, l, ox, ox_length, oy, oy_length, density);
-        result += integUnderRigAngTr_BottRight(tl, b, r, ox, ox_length, oy, oy_length, density);
-        return result;
-    } else if (b[0] >= r[0]) {
-        result = integUnderRigAngTr_BottLeft(tl, b, l, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_BottLeft(tl, b, r, ox, ox_length, oy, oy_length, density);
-        return result;
+    if (b[0] == l[0]) {
+        result = integrate_right_triangle_bottom_right(tl, b, r, ox, ox_length, oy, oy_length, density);
+    } else if (b[0] == r[0]) {
+        result = integrate_right_triangle_bottom_left(tl, b, l, ox, ox_length, oy, oy_length, density);
+    } else if (b[0] < l[0]) {
+        result = integrate_right_triangle_bottom_right(tl, b, r, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_bottom_right(tl, b, l, ox, ox_length, oy, oy_length, density);        
+    }
+    else if (b[0] > l[0] && b[0] < r[0]) {
+        result = integrate_right_triangle_bottom_left(tl, b, l, ox, ox_length, oy, oy_length, density);
+        result += integrate_right_triangle_bottom_right(tl, b, r, ox, ox_length, oy, oy_length, density);        
+    } else if (b[0] > r[0]) {
+        result = integrate_right_triangle_bottom_left(tl, b, l, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_bottom_left(tl, b, r, ox, ox_length, oy, oy_length, density);        
     }
     return result;
 }
@@ -1200,21 +1199,22 @@ double integrate_upper_triangle(int tl,
         double *l, //   -  Left vertex of Upper triangle.
         double *r, //   -  Right vertex of Upper triangle.
         double *u, //   -  Upper vertex of Upper triangle.
-        const double *ox, int ox_length,  const double *oy, int oy_length,
+        const double *ox, int ox_length, const double *oy, int oy_length,
         double *density) {
     double result = 0.;
-    if (u[0] <= l[0]) {
-        result = integUnderRigAngTr_UppRight(tl, r, u, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_UppRight(tl, l, u, ox, ox_length, oy, oy_length, density);
-        return result;
+    if (u[0] == l[0]) {
+        result = integrate_right_triangle_up_right(tl, r, u, ox, ox_length, oy, oy_length, density);
+    } else if (u[0] == r[0]) {
+        result = integrate_right_triangle_up_left(tl, l, u, ox, ox_length, oy, oy_length, density);
+    } else if (u[0] < l[0]) {
+        result = integrate_right_triangle_up_right(tl, r, u, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_up_right(tl, l, u, ox, ox_length, oy, oy_length, density);        
     } else if (u[0] > l[0] && u[0] < r[0]) {
-        result = integUnderRigAngTr_UppLeft(tl, l, u, ox, ox_length, oy, oy_length, density);
-        result += integUnderRigAngTr_UppRight(tl, r, u, ox, ox_length, oy, oy_length, density);
-        return result;
-    } else if (u[0] >= r[0]) {
-        result = integUnderRigAngTr_UppLeft(tl, l, u, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_UppLeft(tl, r, u, ox, ox_length, oy, oy_length, density);
-        return result;
+        result = integrate_right_triangle_up_left(tl, l, u, ox, ox_length, oy, oy_length, density);
+        result += integrate_right_triangle_up_right(tl, r, u, ox, ox_length, oy, oy_length, density);        
+    } else if (u[0] > r[0]) {
+        result = integrate_right_triangle_up_left(tl, l, u, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_up_left(tl, r, u, ox, ox_length, oy, oy_length, density);        
     }
     return result;
 }
@@ -1285,13 +1285,8 @@ inline double u_function(double x, double y) {
     return B * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
-inline double v_function(
-        double lbDom,
-        double rbDom,
-        double bbDom,
-        double ubDom,
-        double t, double x, double y) {
-    return atan((x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom) * (y - bbDom));
+inline double v_function(double t, double x, double y) {
+    return atan((x - LB) * (x - RB) * (1. + t) / 10. * (y - UB) * (y - BB));
 }
 
 double f_function(
@@ -1323,7 +1318,7 @@ double f_function(
     //  printf("cpu u = %f\n", u);
     duDX = -B * y * (1. - y) / (1. + x * x);
     //  printf("cpu duDX = %f\n", duDX);
-    v = v_function(LB, RB, BB, UB, tl_on_tau, x, y);
+    v = v_function(tl_on_tau, x, y);
     //  printf("cpu v = %f\n", v);
     dvDY = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - BB + y - UB);
     //  printf("cpu dvDY 1 = %f\n", dvDY);
@@ -1383,22 +1378,22 @@ quad_type compute_coordinate_on_prev_layer(int cur_tl,
 
     // Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     u = u_function(alpha->x, alpha->y);
-    v = v_function(LB, RB, BB, UB, TAU*cur_tl, alpha->x, alpha->y);
+    v = v_function(TAU*cur_tl, alpha->x, alpha->y);
     alpha->x -= TAU * u;
     alpha->y -= TAU * v;
 
     u = u_function(beta->x, beta->y);
-    v = v_function(LB, RB, BB, UB, TAU*cur_tl, beta->x, beta->y);
+    v = v_function(TAU*cur_tl, beta->x, beta->y);
     beta->x -= TAU * u;
     beta->y -= TAU * v;
 
     u = u_function(gamma->x, gamma->y);
-    v = v_function(LB, RB, BB, UB, TAU*cur_tl, gamma->x, gamma->y);
+    v = v_function(TAU*cur_tl, gamma->x, gamma->y);
     gamma->x -= TAU * u;
     gamma->y -= TAU * v;
 
     u = u_function(theta->x, theta->y);
-    v = v_function(LB, RB, BB, UB, TAU*cur_tl, theta->x, theta->y);
+    v = v_function(TAU*cur_tl, theta->x, theta->y);
     theta->x -= TAU * u;
     theta->y -= TAU * v;
 
