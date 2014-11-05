@@ -61,7 +61,6 @@ double integrate_second_type(double py,
     return integ - tmp / (12 * a * a);
 }
 
-
 double integrate_rectangle_one_cell(double Py,
         double Qy,
         double Gx,
@@ -1173,6 +1172,7 @@ double integrate_uniform_triangle(int tl,
         const double *ox,
         const double *oy,
         double *density) {
+    //point_t bv[2], mv[2], uv[2], ip[2]; //   -  Bottom, middle and upper vertices + intersection point
     double bv[2], mv[2], uv[2], ip[2]; //   -  Bottom, middle and upper vertices + intersection point
 
     bv[0] = x->x;
@@ -1347,13 +1347,13 @@ quad_type get_quadrangle_type(int curr_tl,
         const double *ox,
         int iy,
         const double *oy,
-        point_t *t_1_a, //   -  First vertex of first triangle.
-        point_t *t_1_b, //   -  Second vertex of first triangle.
-        point_t *t_1_c, //   -  Third vertex of first triangle.
+        point_t &t_1_a, //   -  First vertex of first triangle.
+        point_t &t_1_b, //   -  Second vertex of first triangle.
+        point_t &t_1_c, //   -  Third vertex of first triangle.
         //
-        point_t *t_2_a, //   -  First vertex of second triangle.
-        point_t *t_2_b, //   -  Second vertex of second triangle.
-        point_t *t_2_c) //   -  Third vertex of second triangle.
+        point_t &t_2_a, //   -  First vertex of second triangle.
+        point_t &t_2_b, //   -  Second vertex of second triangle.
+        point_t &t_2_c) //   -  Third vertex of second triangle.
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
@@ -1363,20 +1363,20 @@ quad_type get_quadrangle_type(int curr_tl,
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
     // It's convex.
 
-    ptcpy(t_1_a, &alpha);
-    ptcpy(t_1_b, &beta);
-    ptcpy(t_1_c, &gamma);
-    ptcpy(t_2_a, &alpha);
-    ptcpy(t_2_b, &theta);
-    ptcpy(t_2_c, &gamma);
+    t_1_a = alpha;
+    t_1_b = beta;
+    t_1_c = gamma;
+    t_2_a = alpha;
+    t_2_b = theta;
+    t_2_c = gamma;
 
     return type;
 }
 
 double integrate(double curr_tl,
         int ix,
-        const double *ox,
         int iy,
+        const double *ox,        
         const double *oy,
         double *density) {
     point_t t_1_a, t_1_b, t_1_c, t_2_a, t_2_b, t_2_c;
@@ -1384,8 +1384,8 @@ double integrate(double curr_tl,
     quad_type type = get_quadrangle_type(curr_tl,
             ix, ox,
             iy, oy,
-            &t_1_a, &t_1_b, &t_1_c,
-            &t_2_a, &t_2_b, &t_2_c);
+            t_1_a, t_1_b, t_1_c,
+            t_2_a, t_2_b, t_2_c);
 
     if (type != normal && type != wall) {
         return -1.;
@@ -1462,7 +1462,7 @@ double solve(const double *ox, const double *oy, double *density) {
             for (int ix = 1; ix < OX_LEN; ix++) {
                 int index = (OX_LEN + 1) * iy + ix;
 
-                double value = integrate(it, ix, ox, iy, oy, prev_density);
+                double value = integrate(it, ix, iy, ox, oy, prev_density);
 
                 double h = (ox[ix + 1] - ox[ix - 1]) / 2.;
                 value /= h;
@@ -1500,6 +1500,9 @@ double *compute_density(double b,
     OY_LEN = oy_length;
     TIME_STEP_CNT = time_step_count;
     XY_LEN = (ox_length + 1)*(oy_length + 1);
+
+    //  point_t *t = new point_t(19,0);
+    //  printf("%f \n", (*t)[0]);
 
     double *density = new double [ XY_LEN ];
     double *ox = new double [ OX_LEN + 1 ];
