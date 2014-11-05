@@ -1676,7 +1676,7 @@ double* compute_density(double b,
 	}
 
 	print_params(B, LB, RB, BB, UB, TAU, time_step_count, OX_LEN, OY_LEN);
-
+	 
 	solve(ox, oy, density);
 
 	*norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy,
