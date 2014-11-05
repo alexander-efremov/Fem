@@ -11,32 +11,29 @@ static double UB;
 static double BB;
 static double LB;
 static double RB;
-
+static double TAU;
 
 double _itemOfInteg_1SpecType(double Py,
-                              double Qy,
-                              double Gx,
-                              double Hx,
-                              double a,
-                              double b)
-{
+        double Qy,
+        double Gx,
+        double Hx,
+        double a,
+        double b) {
     double integ = (Hx - a) * (Hx - a) - (Gx - a) * (Gx - a);
     integ *= (Qy - b) * (Qy - b) - (Py - b) * (Py - b);
     return integ / 4;
 }
 
-double analytical_solution(double t, double x, double y)
-{
+double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
 }
 
 double _itemOfInteg_2SpecType(double Py,
-                              double Qy,
-                              double alpha,
-                              double a,
-                              double b,
-                              double betta)
-{
+        double Qy,
+        double alpha,
+        double a,
+        double b,
+        double betta) {
     double tmp, integ;
     tmp = (Qy - alpha) * (a * Qy + b - betta) * (a * Qy + b - betta) * (a * Qy + b - betta);
     tmp = tmp - (Py - alpha) * (a * Py + b - betta) * (a * Py + b - betta) * (a * Py + b - betta);
@@ -47,38 +44,34 @@ double _itemOfInteg_2SpecType(double Py,
 }
 
 double integUnderLeftTr_OneCell(
-                                double Py,
-                                double Qy,
-                                //
-                                double a_SL,
-                                double b_SL,
-                                double Hx,
-                                //
-                                double tau,
-                                int iCurrTL, //   -  Index of current time layer.
-                                //
-                                int *indCurSqOx, //   -  Index of current square by Ox axis.
-                                int *indCurSqOy, //   -  Index of current square by Oy axis.
-                                //
-                                const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                int numOfOXSt, //   -  Number of OX steps.
-                                //
-                                const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                int numOfOYSt, //   -  Number of OY steps.
-                                //
-                                double *rhoInPrevTL_asV)
-{
+        double Py,
+        double Qy,
+        //
+        double a_SL,
+        double b_SL,
+        double Hx,
+
+        int iCurrTL, //   -  Index of current time layer.
+        //
+        int *indCurSqOx, //   -  Index of current square by Ox axis.
+        int *indCurSqOy, //   -  Index of current square by Oy axis.
+        //
+        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+        int numOfOXSt, //   -  Number of OX steps.
+        //
+        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+        int numOfOYSt, //   -  Number of OY steps.
+        //
+        double *rhoInPrevTL_asV) {
     double hx = masOX[1] - masOX[0];
     double hy = masOY[1] - masOY[0];
     double integ = 0;
     double buf_D, bufInteg_D;
     double rho[2][2];
-    double t = tau * (iCurrTL - 1.);
+    double t = TAU * (iCurrTL - 1.);
     double x, y;
-    if (indCurSqOx[0] >= 0 && indCurSqOx[1] <= numOfOXSt)
-    {
-        if (indCurSqOy[0] >= 0 && indCurSqOy[1] <= numOfOYSt)
-        {
+    if (indCurSqOx[0] >= 0 && indCurSqOx[1] <= numOfOXSt) {
+        if (indCurSqOy[0] >= 0 && indCurSqOy[1] <= numOfOYSt) {
             rho[0][0] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[0] + indCurSqOx[0] ];
             rho[0][1] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[1] + indCurSqOx[0] ];
             rho[1][0] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[0] + indCurSqOx[1] ];
@@ -88,8 +81,7 @@ double integUnderLeftTr_OneCell(
 
     // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
     // норма должна уменьшиться
-    if (indCurSqOx[0] < 0 || indCurSqOx[1] > numOfOXSt || indCurSqOy[0] < 0 || indCurSqOy[1] > numOfOYSt)
-    {
+    if (indCurSqOx[0] < 0 || indCurSqOx[1] > numOfOXSt || indCurSqOy[0] < 0 || indCurSqOy[1] > numOfOYSt) {
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
         rho[0][0] = analytical_solution(t, x, y);
@@ -108,13 +100,10 @@ double integUnderLeftTr_OneCell(
 
     //   1.
     buf_D = (Qy - masOY[ indCurSqOy[1] ]) * (Qy - masOY[ indCurSqOy[1] ]) - (Py - masOY[ indCurSqOy[1] ]) * (Py - masOY[ indCurSqOy[1] ]);
-    if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0))
-    {
+    if ((indCurSqOx[1] >= 0) && (indCurSqOy[1] >= 0)) {
         buf_D = buf_D * (Hx - masOX[ indCurSqOx[1] ]) * (Hx - masOX[ indCurSqOx[1] ]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
-    }
-    else
-    {
+    } else {
         buf_D = buf_D * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[1]);
     }
@@ -123,13 +112,10 @@ double integUnderLeftTr_OneCell(
 
     //   2.
     buf_D = (Qy - masOY[ indCurSqOy[1] ]) * (Qy - masOY[ indCurSqOy[1] ]) - (Py - masOY[ indCurSqOy[1] ]) * (Py - masOY[ indCurSqOy[1] ]);
-    if ((indCurSqOx[0] >= 0) && (indCurSqOy[1] >= 0))
-    {
+    if ((indCurSqOx[0] >= 0) && (indCurSqOy[1] >= 0)) {
         buf_D = -1. * buf_D * (Hx - masOX[ indCurSqOx[0] ]) * (Hx - masOX[ indCurSqOx[0] ]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[1] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
-    }
-    else
-    {
+    } else {
         buf_D = -1. * buf_D * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[1], a_SL, b_SL, hx * indCurSqOx[0]);
     }
@@ -138,13 +124,10 @@ double integUnderLeftTr_OneCell(
 
     //   3.
     buf_D = (Qy - masOY[ indCurSqOy[0] ]) * (Qy - masOY[ indCurSqOy[0] ]) - (Py - masOY[ indCurSqOy[0] ]) * (Py - masOY[ indCurSqOy[0] ]);
-    if ((indCurSqOx[1] >= 0) && (indCurSqOy[0] >= 0))
-    {
+    if ((indCurSqOx[1] >= 0) && (indCurSqOy[0] >= 0)) {
         buf_D = -1. * buf_D * (Hx - masOX[ indCurSqOx[1] ]) * (Hx - masOX[ indCurSqOx[1] ]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[1] ]);
-    }
-    else
-    {
+    } else {
         buf_D = -1. * buf_D * (Hx - hx * indCurSqOx[1]) * (Hx - hx * indCurSqOx[1]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[1]);
     }
@@ -153,13 +136,10 @@ double integUnderLeftTr_OneCell(
 
     //   4.
     buf_D = (Qy - masOY[ indCurSqOy[0] ]) * (Qy - masOY[ indCurSqOy[0] ]) - (Py - masOY[ indCurSqOy[0] ]) * (Py - masOY[ indCurSqOy[0] ]);
-    if ((indCurSqOx[0] >= 0) && (indCurSqOy[0] >= 0))
-    {
+    if ((indCurSqOx[0] >= 0) && (indCurSqOy[0] >= 0)) {
         buf_D = buf_D * (Hx - masOX[ indCurSqOx[0] ]) * (Hx - masOX[ indCurSqOx[0] ]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, masOY[ indCurSqOy[0] ], a_SL, b_SL, masOX[ indCurSqOx[0] ]);
-    }
-    else
-    {
+    } else {
         buf_D = buf_D * (Hx - hx * indCurSqOx[0]) * (Hx - hx * indCurSqOx[0]) / 4.;
         bufInteg_D = _itemOfInteg_2SpecType(Py, Qy, hy * indCurSqOy[0], a_SL, b_SL, hx * indCurSqOx[0]);
     }
@@ -170,67 +150,62 @@ double integUnderLeftTr_OneCell(
 }
 
 double integUnderRightTr_OneCell(double Py,
-                                 double Qy,
-                                 double a_SL,
-                                 double b_SL,
-                                 double Gx,
-                                 double tau,
-                                 int tl,
-                                 int *indCurSqOx, //   -  Index of current square by Ox axis.
-                                 int *indCurSqOy, //   -  Index of current square by Oy axis.
-                                 const double *ox, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                 int numOfOXSt,
-                                 const double *oy, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                 int numOfOYSt,
-                                 double *prev_density)
-{
+        double Qy,
+        double a_SL,
+        double b_SL,
+        double Gx,
+
+        int tl,
+        int *indCurSqOx, //   -  Index of current square by Ox axis.
+        int *indCurSqOy, //   -  Index of current square by Oy axis.
+        const double *ox, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+        int numOfOXSt,
+        const double *oy, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+        int numOfOYSt,
+        double *prev_density) {
     return -1. * integUnderLeftTr_OneCell(
-                                          Py, Qy,
-                                          //
-                                          a_SL, b_SL,
-                                          Gx, //   -  double Hx,
-                                          //
-                                          tau, tl, //   -  Index of current time layer.
-                                          //
-                                          indCurSqOx, //   -  Index of current square by Ox axis.
-                                          indCurSqOy, //   -  Index of current square by Oy axis.
-                                          //
-                                          ox, numOfOXSt, //   -  Massive of OX steps. Dimension = numOfOXSt +1. Number of OX steps.
-                                          //
-                                          oy, numOfOYSt, //   -  Massive of OY steps. Dimension = numOfOYSt +1. Number of OY steps.
-                                          //
-                                          prev_density);
+            Py, Qy,
+            //
+            a_SL, b_SL,
+            Gx, //   -  double Hx,
+            //
+            tl, //   -  Index of current time layer.
+            //
+            indCurSqOx, //   -  Index of current square by Ox axis.
+            indCurSqOy, //   -  Index of current square by Oy axis.
+            //
+            ox, numOfOXSt, //   -  Massive of OX steps. Dimension = numOfOXSt +1. Number of OX steps.
+            //
+            oy, numOfOYSt, //   -  Massive of OY steps. Dimension = numOfOYSt +1. Number of OY steps.
+            //
+            prev_density);
 }
 
 double integUnderRectAng_OneCell(double Py,
-                                 double Qy,
-                                 double Gx,
-                                 double Hx,
-                                 double tau,
-                                 int iCurrTL,
-                                 int *indCurSqOx, //   -  Index of current square by Ox axis.
-                                 int *indCurSqOy,
-                                 const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                 int numOfOXSt,
-                                 const double *masOY,
-                                 double *rhoInPrevTL_asV)
-{
+        double Qy,
+        double Gx,
+        double Hx,
+
+        int iCurrTL,
+        int *indCurSqOx, //   -  Index of current square by Ox axis.
+        int *indCurSqOy,
+        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+        int numOfOXSt,
+        const double *masOY,
+        double *rhoInPrevTL_asV) {
     double hx = masOX[1] - masOX[0];
     double hy = masOY[1] - masOY[0];
     double integ = 0;
     double buf_D;
     double rho[2][2];
-    double t = tau * (iCurrTL - 1.);
+    double t = TAU * (iCurrTL - 1.);
     double x, y;
-    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0)
-    {
+    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
         rho[0][0] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[0] + indCurSqOx[0] ];
         rho[0][1] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[1] + indCurSqOx[0] ];
         rho[1][0] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[0] + indCurSqOx[1] ];
         rho[1][1] = rhoInPrevTL_asV[ (numOfOXSt + 1) * indCurSqOy[1] + indCurSqOx[1] ];
-    }
-    else
-    {
+    } else {
         // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
         x = indCurSqOx[0] * hx;
         y = indCurSqOy[0] * hy;
@@ -249,67 +224,53 @@ double integUnderRectAng_OneCell(double Py,
 
     }
 
-    if (indCurSqOx[1] >= 0 && indCurSqOy[1] >= 0)
-    {
+    if (indCurSqOx[1] >= 0 && indCurSqOy[1] >= 0) {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[1] ]);
-    }
-    else
-    {
+    } else {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[1]);
     }
     buf_D = buf_D / hx / hy;
     integ = buf_D * rho[0][0]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
-    if (indCurSqOx[0] >= 0 && indCurSqOy[1] >= 0)
-    {
+    if (indCurSqOx[0] >= 0 && indCurSqOy[1] >= 0) {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[1] ]);
-    }
-    else
-    {
+    } else {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[1]);
     }
     buf_D = buf_D / hx / hy;
     integ = integ - buf_D * rho[1][0]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[0] ];
-    if (indCurSqOx[1] >= 0 && indCurSqOy[0] >= 0)
-    {
+    if (indCurSqOx[1] >= 0 && indCurSqOy[0] >= 0) {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[1] ], masOY[ indCurSqOy[0] ]);
-    }
-    else
-    {
+    } else {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[1], hy * indCurSqOy[0]);
     }
     buf_D = buf_D / hx / hy;
     integ = integ - buf_D * rho[0][1]; //   rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[1] ];
-    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0)
-    {
+    if (indCurSqOx[0] >= 0 && indCurSqOy[0] >= 0) {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, masOX[ indCurSqOx[0] ], masOY[ indCurSqOy[0] ]);
-    }
-    else
-    {
+    } else {
         buf_D = _itemOfInteg_1SpecType(Py, Qy, Gx, Hx, hx * indCurSqOx[0], hy * indCurSqOy[0]);
     }
     buf_D = buf_D / hx / hy;
     return integ + buf_D * rho[1][1]; //   rhoInPrevTL[ indCurSqOx[1] ][ indCurSqOy[1] ];
 }
 
-double integOfChan_SLRightSd(double tau,
-                             int iCurrTL,
-                             double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
-                             double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
-                             //
-                             int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
-                             //
-                             double lb, int *indLB, //   -  Left boundary by Ox. Index by OX axis where lb is.
-                             //
-                             int *indCurSqOy, //   -  Index of current square by Oy axis.
-                             //
-                             const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                             int numOfOXSt, //   -  Number of OX steps.
-                             //
-                             const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                             int numOfOYSt, //   -  Number of OY steps.
-                             //
-                             double *rhoInPrevTL_asV)
-{
+double integOfChan_SLRightSd(int iCurrTL,
+        double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
+        double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
+        //
+        int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
+        //
+        double lb, int *indLB, //   -  Left boundary by Ox. Index by OX axis where lb is.
+        //
+        int *indCurSqOy, //   -  Index of current square by Oy axis.
+        //
+        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+        int numOfOXSt, //   -  Number of OX steps.
+        //
+        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+        int numOfOYSt, //   -  Number of OY steps.
+        //
+        double *rhoInPrevTL_asV) {
     double mv[2], rv[2]; //   -  Middle and right vertices.
     int wMvI; //   -  Where middle vertex is.
     int indCurSqOxToCh[2]; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
@@ -321,8 +282,7 @@ double integOfChan_SLRightSd(double tau,
 
     //   Let's compute helpful values.
 
-    if (uv[0] <= bv[0])
-    {
+    if (uv[0] <= bv[0]) {
         mv[0] = uv[0];
         mv[1] = uv[1];
         wMvI = wTrPNI;
@@ -330,8 +290,7 @@ double integOfChan_SLRightSd(double tau,
         rv[1] = bv[1];
     }
 
-    if (uv[0] > bv[0])
-    {
+    if (uv[0] > bv[0]) {
         mv[0] = bv[0];
         mv[1] = bv[1];
         wMvI = wTrPCI;
@@ -339,8 +298,7 @@ double integOfChan_SLRightSd(double tau,
         rv[1] = uv[1];
     }
 
-    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE)
-    {
+    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE) {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
         //   buf_D  =  (uv[1] - bv[1])  *  ((uv[0] + bv[0]) /2.  -  lb) * rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
         return fabs(uv[1] - bv[1]); //   fabs(uv[1] - bv[1]);
@@ -353,45 +311,41 @@ double integOfChan_SLRightSd(double tau,
     indCurSqOxToCh[0] = indLB[0];
     indCurSqOxToCh[1] = indCurSqOxToCh[0] + 1;
 
-    for (int j = indLB[0]; j < indCurSqOx[0]; j++)
-    {
+    for (int j = indLB[0]; j < indCurSqOx[0]; j++) {
         //   If this is first cell we should integrate under rectangle only.
-        if (indCurSqOxToCh[0] >= 0)
-        {
+        if (indCurSqOxToCh[0] >= 0) {
             Gx = masOX[ indCurSqOxToCh[0] ];
             Hx = masOX[ indCurSqOxToCh[1] ];
         }
 
 
-        if (indCurSqOxToCh[0] < 0)
-        {
+        if (indCurSqOxToCh[0] < 0) {
             Gx = h * indCurSqOxToCh[0];
             Hx = h * indCurSqOxToCh[1];
         }
 
-        if (j == indLB[0])
-        {
+        if (j == indLB[0]) {
             Gx = lb;
         }
 
         buf_D = integUnderRectAng_OneCell(
-                                          bv[1], //   -  double Py,
-                                          uv[1], //   -  double Qy,
-                                          //
-                                          Gx, //   -  double Gx,
-                                          Hx, //   -  double Hx,
-                                          //
-                                          tau, iCurrTL, //   -  Index of current time layer.
-                                          //
-                                          indCurSqOxToCh, //   -  Index of current square by Ox axis.
-                                          indCurSqOy, //   -  Index of current square by Oy axis.
-                                          //
-                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                          numOfOXSt, //   -  Number of OX steps.
-                                          //
-                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                bv[1], //   -  double Py,
+                uv[1], //   -  double Qy,
+                //
+                Gx, //   -  double Gx,
+                Hx, //   -  double Hx,
+                //
+                iCurrTL, //   -  Index of current time layer.
+                //
+                indCurSqOxToCh, //   -  Index of current square by Ox axis.
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
 
-                                          rhoInPrevTL_asV);
+                rhoInPrevTL_asV);
 
         integ += buf_D;
 
@@ -402,43 +356,38 @@ double integOfChan_SLRightSd(double tau,
     //   Integration. Second step: under [ indCurSqOx[0]; indCurSqOx[1] ] square.
 
     //   A. Under rectangle.
-    if (wMvI == 1)
-    {
-        if (indCurSqOx[0] == indLB[0])
-        {
+    if (wMvI == 1) {
+        if (indCurSqOx[0] == indLB[0]) {
             Gx = lb;
         }
 
-        if (indCurSqOx[0] > indLB[0])
-        {
-            if (indCurSqOx[0] >= 0)
-            {
+        if (indCurSqOx[0] > indLB[0]) {
+            if (indCurSqOx[0] >= 0) {
                 Gx = masOX[ indCurSqOx[0] ];
             }
 
-            if (indCurSqOx[0] < 0)
-            {
+            if (indCurSqOx[0] < 0) {
                 Gx = h * indCurSqOx[0];
             }
         }
 
         buf_D = integUnderRectAng_OneCell(bv[1], //   -  double Py,
-                                          uv[1], //   -  double Qy,
-                                          //
-                                          Gx, //   -  double Gx,
-                                          mv[0], //   -  double Hx,
-                                          //
-                                          tau, iCurrTL, //   -  Index of current time layer.
-                                          //
-                                          indCurSqOx, //   -  Index of current square by Ox axis.
-                                          indCurSqOy, //   -  Index of current square by Oy axis.
-                                          //
-                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                          numOfOXSt, //   -  Number of OX steps.
-                                          //
-                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                uv[1], //   -  double Qy,
+                //
+                Gx, //   -  double Gx,
+                mv[0], //   -  double Hx,
+                //
+                iCurrTL, //   -  Index of current time layer.
+                //
+                indCurSqOx, //   -  Index of current square by Ox axis.
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
 
-                                          rhoInPrevTL_asV);
+                rhoInPrevTL_asV);
 
         integ += buf_D;
 
@@ -446,8 +395,7 @@ double integOfChan_SLRightSd(double tau,
 
     //   B. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > MIN_VALUE)
-    {
+    if (fabs(uv[1] - bv[1]) > MIN_VALUE) {
         //   integ += fabs(uv[1] - bv[1]) * (rv[0] - mv[0]) /2.;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv[0] - bv[0]) / (uv[1] - bv[1]);
@@ -456,28 +404,27 @@ double integOfChan_SLRightSd(double tau,
 
         //   Integration under one cell triangle.
 
-        if (fabs(a_SL) > MIN_VALUE)
-        {
+        if (fabs(a_SL) > MIN_VALUE) {
             buf_D = integUnderRightTr_OneCell(
-                                              bv[1], //   -  double Py,
-                                              uv[1], //   -  double Qy,
-                                              //
-                                              a_SL,
-                                              b_SL,
-                                              mv[0], //   -  double Gx,
-                                              //
-                                              tau, iCurrTL, //   -  Index of current time layer.
-                                              //
-                                              indCurSqOx, //   -  Index of current square by Ox axis.
-                                              indCurSqOy, //   -  Index of current square by Oy axis.
-                                              //
-                                              masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                              numOfOXSt, //   -  Number of OX steps.
-                                              //
-                                              masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                              numOfOYSt, //   -  Number of OY steps.
-                                              //
-                                              rhoInPrevTL_asV);
+                    bv[1], //   -  double Py,
+                    uv[1], //   -  double Qy,
+                    //
+                    a_SL,
+                    b_SL,
+                    mv[0], //   -  double Gx,
+                    //
+                    iCurrTL, //   -  Index of current time layer.
+                    //
+                    indCurSqOx, //   -  Index of current square by Ox axis.
+                    indCurSqOy, //   -  Index of current square by Oy axis.
+                    //
+                    masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                    numOfOXSt, //   -  Number of OX steps.
+                    //
+                    masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                    numOfOYSt, //   -  Number of OY steps.
+                    //
+                    rhoInPrevTL_asV);
 
             integ += buf_D;
         }
@@ -486,43 +433,39 @@ double integOfChan_SLRightSd(double tau,
     return integ;
 }
 
-double init_bound(double x, double y, double t, bound_side side)
-{
-    switch (side)
-    {
-    case up:
-        return analytical_solution(t, x, y);
-    case bottom:
-        return analytical_solution(t, x, y);
-    case left:
-        return analytical_solution(t, x, y);
-    case right:
-        return analytical_solution(t, x, y);
+double init_bound(double x, double y, double t, bound_side side) {
+    switch (side) {
+        case up:
+            return analytical_solution(t, x, y);
+        case bottom:
+            return analytical_solution(t, x, y);
+        case left:
+            return analytical_solution(t, x, y);
+        case right:
+            return analytical_solution(t, x, y);
     }
     return 0;
 }
 
 double integOfChan_SLLeftSd(
-                            double tau,
-                            int iCurrTL, //   -  Index of current time layer.
-                            //
-                            double *bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
-                            double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
-                            //
-                            int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
-                            //
-                            double rb, int *indRB, //   -  Right boundary by Ox. Index by OX axis where rb is.
-                            //
-                            int *indCurSqOy, //   -  Index of current square by Oy axis.
-                            //
-                            const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                            int numOfOXSt, //   -  Number of OX steps.
-                            //
-                            const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                            int numOfOYSt, //   -  Number of OY steps.
-                            //
-                            double *rhoInPrevTL_asV)
-{
+        int iCurrTL, //   -  Index of current time layer.
+        //
+        double *bv, int wTrPCI, //   -  Where travel point current (bottom vertex) is.
+        double *uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
+        //
+        int *indCurSqOx, //   -  Index by OX axis where bv and uv are.
+        //
+        double rb, int *indRB, //   -  Right boundary by Ox. Index by OX axis where rb is.
+        //
+        int *indCurSqOy, //   -  Index of current square by Oy axis.
+        //
+        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+        int numOfOXSt, //   -  Number of OX steps.
+        //
+        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+        int numOfOYSt, //   -  Number of OY steps.
+        //
+        double *rhoInPrevTL_asV) {
     double lv[2], mv[2]; //   -  Left and middle vertices.
     int wMvI; //   -  Where middle vertex is.
     int indCurSqOxToCh[2]; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
@@ -535,8 +478,7 @@ double integOfChan_SLLeftSd(
 
     //   Let's compute helpful values.
 
-    if (uv[0] <= bv[0])
-    {
+    if (uv[0] <= bv[0]) {
         lv[0] = uv[0];
         lv[1] = uv[1];
         mv[0] = bv[0];
@@ -544,8 +486,7 @@ double integOfChan_SLLeftSd(
         wMvI = wTrPCI;
     }
 
-    if (uv[0] > bv[0])
-    {
+    if (uv[0] > bv[0]) {
         lv[0] = bv[0];
         lv[1] = bv[1];
         mv[0] = uv[0];
@@ -553,8 +494,7 @@ double integOfChan_SLLeftSd(
         wMvI = wTrPNI;
     }
 
-    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE)
-    {
+    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE) {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
         //   buf_D  =  (uv[1] - bv[1])  *  (rb  - (uv[0] + bv[0]) /2.) * rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
         return fabs(uv[1] - bv[1]); //   fabs(uv[1] - bv[1]);
@@ -564,35 +504,33 @@ double integOfChan_SLLeftSd(
 
     //   A. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > MIN_VALUE)
-    {
+    if (fabs(uv[1] - bv[1]) > MIN_VALUE) {
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv[0] - bv[0]) / (uv[1] - bv[1]);
         b_SL = bv[0] - a_SL * bv[1];
 
         //   Integration under one cell triangle.
-        if (fabs(a_SL) > MIN_VALUE)
-        {
+        if (fabs(a_SL) > MIN_VALUE) {
             buf_D = integUnderLeftTr_OneCell(
-                                             bv[1], //   -  double Py,
-                                             uv[1], //   -  double Qy,
-                                             //
-                                             a_SL,
-                                             b_SL,
-                                             mv[0], //   -  double Hx,
-                                             //
-                                             tau, iCurrTL, //   -  Index of current time layer.
-                                             //
-                                             indCurSqOx, //   -  Index of current square by Ox axis.
-                                             indCurSqOy, //   -  Index of current square by Oy axis.
-                                             //
-                                             masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                             numOfOXSt, //   -  Number of OX steps.
-                                             //
-                                             masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                             numOfOYSt, //   -  Number of OY steps.
-                                             //
-                                             rhoInPrevTL_asV);
+                    bv[1], //   -  double Py,
+                    uv[1], //   -  double Qy,
+                    //
+                    a_SL,
+                    b_SL,
+                    mv[0], //   -  double Hx,
+                    //
+                    iCurrTL, //   -  Index of current time layer.
+                    //
+                    indCurSqOx, //   -  Index of current square by Ox axis.
+                    indCurSqOy, //   -  Index of current square by Oy axis.
+                    //
+                    masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                    numOfOXSt, //   -  Number of OX steps.
+                    //
+                    masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                    numOfOYSt, //   -  Number of OY steps.
+                    //
+                    rhoInPrevTL_asV);
 
 
             integ += buf_D;
@@ -602,43 +540,38 @@ double integOfChan_SLLeftSd(
 
     //   B. Under rectangle. Need to be cheking.
 
-    if (wMvI == 1)
-    {
-        if (indCurSqOx[0] == indRB[0])
-        {
+    if (wMvI == 1) {
+        if (indCurSqOx[0] == indRB[0]) {
             Hx = rb;
         }
 
-        if (indCurSqOx[0] < indRB[0])
-        {
-            if (indCurSqOx[1] >= 0)
-            {
+        if (indCurSqOx[0] < indRB[0]) {
+            if (indCurSqOx[1] >= 0) {
                 Hx = masOX[ indCurSqOx[1] ];
             }
 
-            if (indCurSqOx[1] < 0)
-            {
+            if (indCurSqOx[1] < 0) {
                 Hx = h * indCurSqOx[1];
             }
         }
 
         buf_D = integUnderRectAng_OneCell(bv[1], //   -  double Py,
-                                          uv[1], //   -  double Qy,
-                                          //
-                                          mv[0], //   -  double Gx,
-                                          Hx, //   -  double Hx,
-                                          //
-                                          tau, iCurrTL, //   -  Index of current time layer.
-                                          //
-                                          indCurSqOx, //   -  Index of current square by Ox axis.
-                                          indCurSqOy, //   -  Index of current square by Oy axis.
-                                          //
-                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                          numOfOXSt, //   -  Number of OX steps.
-                                          //
-                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                uv[1], //   -  double Qy,
+                //
+                mv[0], //   -  double Gx,
+                Hx, //   -  double Hx,
+                //
+                iCurrTL, //   -  Index of current time layer.
+                //
+                indCurSqOx, //   -  Index of current square by Ox axis.
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
 
-                                          rhoInPrevTL_asV);
+                rhoInPrevTL_asV);
 
         integ += buf_D;
     }
@@ -649,47 +582,43 @@ double integOfChan_SLLeftSd(
     indCurSqOxToCh[0] = indCurSqOx[0] + 1;
     indCurSqOxToCh[1] = indCurSqOxToCh[0] + 1;
 
-    for (j = indCurSqOx[0] + 1; j < indRB[0] + 1; j++)
-    {
+    for (j = indCurSqOx[0] + 1; j < indRB[0] + 1; j++) {
         //   If this is first cell we should integrate under triangle only.
 
-        if (indCurSqOxToCh[1] > 0)
-        {
+        if (indCurSqOxToCh[1] > 0) {
             Gx = masOX[ indCurSqOxToCh[0] ];
             Hx = masOX[ indCurSqOxToCh[1] ];
         }
 
 
-        if (indCurSqOxToCh[1] <= 0)
-        {
+        if (indCurSqOxToCh[1] <= 0) {
             Gx = h * indCurSqOxToCh[0];
             Hx = h * indCurSqOxToCh[1];
         }
 
 
-        if (j == indRB[0])
-        {
+        if (j == indRB[0]) {
             Hx = rb;
         }
 
 
         buf_D = integUnderRectAng_OneCell(bv[1], //   -  double Py,
-                                          uv[1], //   -  double Qy,
-                                          //
-                                          Gx, //   -  double Gx,
-                                          Hx, //   -  double Hx,
-                                          //
-                                          tau, iCurrTL, //   -  Index of current time layer.
-                                          //
-                                          indCurSqOxToCh, //   -  Index of current square by Ox axis.
-                                          indCurSqOy, //   -  Index of current square by Oy axis.
-                                          //
-                                          masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                          numOfOXSt, //   -  Number of OX steps.
-                                          //
-                                          masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                uv[1], //   -  double Qy,
+                //
+                Gx, //   -  double Gx,
+                Hx, //   -  double Hx,
+                //
+                iCurrTL, //   -  Index of current time layer.
+                //
+                indCurSqOxToCh, //   -  Index of current square by Ox axis.
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
 
-                                          rhoInPrevTL_asV);
+                rhoInPrevTL_asV);
 
         integ += buf_D;
 
@@ -702,20 +631,18 @@ double integOfChan_SLLeftSd(
 }
 
 double integUnderRigAngTr_BottLeft(
-                                   double tau,
-                                   int iCurrTL, //   -  Index of current time layer.
-                                   //
-                                   double *bv,
-                                   double *uv,
-                                   //
-                                   const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                   int numOfOXSt, //   -  Number of OX steps.
-                                   //
-                                   const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                   int numOfOYSt, //   -  Number of OY steps.
-                                   //
-                                   double *rhoInPrevTL_asV)
-{
+        int iCurrTL, //   -  Index of current time layer.
+        //
+        double *bv,
+        double *uv,
+        //
+        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+        int numOfOXSt, //   -  Number of OX steps.
+        //
+        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+        int numOfOYSt, //   -  Number of OY steps.
+        //
+        double *rhoInPrevTL_asV) {
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
     double trPN[2]; //   -  Travel point next;
@@ -732,82 +659,66 @@ double integUnderRigAngTr_BottLeft(
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < MIN_VALUE)
-    {
+    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) {
         //   This triangle has very small width. I guess further computation isn't correct.
         return fabs(bv[0] - uv[0]);
     }
     ang = (uv[1] - bv[1]) / (bv[0] - uv[0]);
-    if (fabs(ang) < MIN_VALUE)
-    {
+    if (fabs(ang) < MIN_VALUE) {
         //   This triangle has very small height. I guess further computation isn't correct.
         return fabs(ang);
     }
     indCurSqOx[0] = (int) ((trPC[0] - MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx[1].
-    if ((trPC[0] - MIN_VALUE_1) <= 0)
-    {
+    if ((trPC[0] - MIN_VALUE_1) <= 0) {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indRB[0] = indCurSqOx[0];
     indRB[1] = indRB[0] + 1;
     indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx[0] and indCurSqOx[1].
-    if ((trPC[1] + MIN_VALUE_1) <= 0)
-    {
+    if ((trPC[1] + MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    if (indCurSqOx[0] >= 0)
-    {
+    if (indCurSqOx[0] >= 0) {
         distOx = trPC[0] - masOX[ indCurSqOx[0] ];
     }
-    if (indCurSqOx[0] < 0)
-    {
+    if (indCurSqOx[0] < 0) {
         distOx = fabs(trPC[0] - hx * indCurSqOx[0]);
     }
-    if (indCurSqOy[1] >= 0)
-    {
+    if (indCurSqOy[1] >= 0) {
         distOy = masOY[ indCurSqOy[1] ] - trPC[1];
     }
-    if (indCurSqOy[1] < 0)
-    {
+    if (indCurSqOy[1] < 0) {
         distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
     }
-    do
-    {
+    do {
         //   a. First case.
-        if ((distOy / distOx) <= ang)
-        {
+        if ((distOy / distOx) <= ang) {
             //   Across with straight line parallel Ox axis.
             wTrPNI = 1;
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 trPN[1] = masOY[ indCurSqOy[1] ];
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 trPN[1] = hy * indCurSqOy[1];
             }
             trPN[0] = bv[0] - (trPN[1] - bv[1]) / ang;
         }
         //   b. Second case.
-        if ((distOy / distOx) > ang)
-        {
+        if ((distOy / distOx) > ang) {
             //   Across with straight line parallel Oy axis.
             wTrPNI = 2;
-            if (indCurSqOx[0] >= 0)
-            {
+            if (indCurSqOx[0] >= 0) {
                 trPN[0] = masOX[ indCurSqOx[0] ];
             }
-            if (indCurSqOx[0] < 0)
-            {
+            if (indCurSqOx[0] < 0) {
                 trPN[0] = hx * indCurSqOx[0];
             }
             trPN[1] = bv[1] - ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] < (uv[0] + MIN_VALUE_1))
-        {
+        if (trPN[0] < (uv[0] + MIN_VALUE_1)) {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
             isTrDone = true;
@@ -815,79 +726,69 @@ double integUnderRigAngTr_BottLeft(
         }
         //   d. Integration.
         buf_D = integOfChan_SLLeftSd(
-                                     tau, iCurrTL, //   -  Index of current time layer.
-                                     //
-                                     trPC, wTrPCI, //   -  double *bv,
-                                     trPN, wTrPNI, //   -  double *uv,
-                                     //
-                                     indCurSqOx, //   -  Indices where trPC and trPN are.
-                                     //
-                                     bv[0], indRB, //   -  double rb  =  Right boundary by Ox.
-                                     //
-                                     indCurSqOy, //   -  Index of current square by Oy axis.
-                                     //
-                                     masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                     numOfOXSt, //   -  Number of OX steps.
-                                     //
-                                     masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                     numOfOYSt, //   -  Number of OY steps.
-                                     //
-                                     rhoInPrevTL_asV);
+                iCurrTL, //   -  Index of current time layer.
+                //
+                trPC, wTrPCI, //   -  double *bv,
+                trPN, wTrPNI, //   -  double *uv,
+                //
+                indCurSqOx, //   -  Indices where trPC and trPN are.
+                //
+                bv[0], indRB, //   -  double rb  =  Right boundary by Ox.
+                //
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                numOfOYSt, //   -  Number of OY steps.
+                //
+                rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr + buf_D;
         //   e. Updating.
-        if (isTrDone == false)
-        {
+        if (isTrDone == false) {
             //   We will compute more. We need to redefine some values.
             wTrPCI = wTrPNI;
             trPC[0] = trPN[0];
             trPC[1] = trPN[1];
-            if (wTrPNI == 1)
-            {
+            if (wTrPNI == 1) {
                 indCurSqOy[0] += 1;
                 indCurSqOy[1] += 1;
             }
-            if (wTrPNI == 2)
-            {
+            if (wTrPNI == 2) {
                 indCurSqOx[0] -= 1;
                 indCurSqOx[1] -= 1;
             }
-            if (indCurSqOx[0] >= 0)
-            {
+            if (indCurSqOx[0] >= 0) {
                 distOx = trPC[0] - masOX[ indCurSqOx[0] ];
             }
-            if (indCurSqOx[0] < 0)
-            {
+            if (indCurSqOx[0] < 0) {
                 distOx = fabs(trPC[0] - hx * indCurSqOx[0]);
             }
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 distOy = masOY[ indCurSqOy[1] ] - trPC[1];
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
             }
         }
-    }
-    while (!isTrDone);
+    } while (!isTrDone);
     return integOfBottTr;
 }
 
 double integUnderRigAngTr_BottRight(
-                                    double tau,
-                                    int iCurrTL, //   -  Index of current time layer.
-                                    //
-                                    double *bv,
-                                    double *uv,
-                                    //
-                                    const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                    int numOfOXSt, //   -  Number of OX steps.
-                                    //
-                                    const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                    int numOfOYSt, //   -  Number of OY steps.
-                                    //
-                                    double *rhoInPrevTL_asV)
-{
+        int iCurrTL, //   -  Index of current time layer.
+        //
+        double *bv,
+        double *uv,
+        //
+        const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+        int numOfOXSt, //   -  Number of OX steps.
+        //
+        const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+        int numOfOYSt, //   -  Number of OY steps.
+        //
+        double *rhoInPrevTL_asV) {
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
     double trPN[2]; //   -  Travel point next;
@@ -918,63 +819,50 @@ double integUnderRigAngTr_BottRight(
     indLB[0] = indCurSqOx[0];
     indLB[1] = indLB[0] + 1;
     indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
-    if ((trPC[1] + MIN_VALUE_1) <= 0)
-    {
+    if ((trPC[1] + MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
 
-    if (indCurSqOx[1] >= 0)
-    {
+    if (indCurSqOx[1] >= 0) {
         distOx = fabs(masOX[ indCurSqOx[1] ] - trPC[0]);
     }
-    if (indCurSqOx[1] < 0)
-    {
+    if (indCurSqOx[1] < 0) {
         distOx = fabs(hx * indCurSqOx[1] - trPC[0]);
     }
-    if (indCurSqOy[1] >= 0)
-    {
+    if (indCurSqOy[1] >= 0) {
         distOy = fabs(masOY[ indCurSqOy[1] ] - trPC[1]);
     }
-    if (indCurSqOy[1] < 0)
-    {
+    if (indCurSqOy[1] < 0) {
         distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
     }
-    do
-    {
+    do {
         //   a. First case.
-        if ((distOy / distOx) <= ang)
-        {
+        if ((distOy / distOx) <= ang) {
             //   Across with straight line parallel Ox axis.
             wTrPNI = 1;
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 trPN[1] = masOY[ indCurSqOy[1] ];
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 trPN[1] = hy * indCurSqOy[1];
             }
             trPN[0] = bv[0] + (trPN[1] - bv[1]) / ang;
         }
         //   b. Second case.
-        if ((distOy / distOx) > ang)
-        {
+        if ((distOy / distOx) > ang) {
             //   Across with straight line parallel Oy axis.
             wTrPNI = 2;
-            if (indCurSqOx[1] >= 0)
-            {
+            if (indCurSqOx[1] >= 0) {
                 trPN[0] = masOX[ indCurSqOx[1] ];
             }
-            if (indCurSqOx[1] < 0)
-            {
+            if (indCurSqOx[1] < 0) {
                 trPN[0] = hx * indCurSqOx[1];
             }
             trPN[1] = bv[1] + ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] > (uv[0] - MIN_VALUE_1))
-        {
+        if (trPN[0] > (uv[0] - MIN_VALUE_1)) {
             //   -  Without "fabs"!!!
             trPN[0] = uv[0];
             trPN[1] = uv[1];
@@ -983,107 +871,94 @@ double integUnderRigAngTr_BottRight(
         }
         //   d. Integration.
         buf_D = integOfChan_SLRightSd(
-                                      tau, iCurrTL, //   -  Index of current time layer.
-                                      //
-                                      trPC, wTrPCI, //   -  double *bv,
-                                      trPN, wTrPNI, //   -  double *uv,
-                                      //
-                                      indCurSqOx, //   -  Indices where trPC and trPN are.
-                                      //
-                                      bv[0], indLB, //   -  double lb  =  Left boundary by Ox.
-                                      //
-                                      indCurSqOy, //   -  Index of current square by Oy axis.
-                                      //
-                                      masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                      numOfOXSt, //   -  Number of OX steps.
-                                      //
-                                      masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                      numOfOYSt, //   -  Number of OY steps.
-                                      //
-                                      rhoInPrevTL_asV);
+                iCurrTL, //   -  Index of current time layer.
+                //
+                trPC, wTrPCI, //   -  double *bv,
+                trPN, wTrPNI, //   -  double *uv,
+                //
+                indCurSqOx, //   -  Indices where trPC and trPN are.
+                //
+                bv[0], indLB, //   -  double lb  =  Left boundary by Ox.
+                //
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                numOfOYSt, //   -  Number of OY steps.
+                //
+                rhoInPrevTL_asV);
         integOfBottTr = integOfBottTr + buf_D;
         //   e. Updating.
-        if (isTrDone == false)
-        {
+        if (isTrDone == false) {
             //   We will compute more. We need to redefine some values.
             wTrPCI = wTrPNI;
             trPC[0] = trPN[0];
             trPC[1] = trPN[1];
-            if (wTrPNI == 1)
-            {
+            if (wTrPNI == 1) {
                 indCurSqOy[0] += 1;
                 indCurSqOy[1] += 1;
             }
-            if (wTrPNI == 2)
-            {
+            if (wTrPNI == 2) {
                 indCurSqOx[0] += 1;
                 indCurSqOx[1] += 1;
             }
-            if (indCurSqOx[1] >= 0)
-            {
+            if (indCurSqOx[1] >= 0) {
                 distOx = fabs(masOX[ indCurSqOx[1] ] - trPC[0]);
             }
-            if (indCurSqOx[1] < 0)
-            {
+            if (indCurSqOx[1] < 0) {
                 distOx = fabs(hx * indCurSqOx[1] - trPC[0]);
             }
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 distOy = fabs(masOY[ indCurSqOy[1] ] - trPC[1]);
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
             }
         }
-    }
-    while (!isTrDone);
+    } while (!isTrDone);
     return integOfBottTr;
 }
 
-double integ_under_bott_triangle(double tau,
-                                 int curr_tl,
-                                 double *lv, //   -  Left vertex of Bottom triangle.
-                                 double *rv, //   -  Right vertex of Bottom triangle.
-                                 double *bv, //   -  Bottom vertex of Bottom triangle.
-                                 const double *ox,
-                                 int ox_length,
-                                 const double *oy,
-                                 int oy_length,
-                                 double *prev_density)
-{
+double integ_under_bott_triangle(
+        int curr_tl,
+        double *lv, //   -  Left vertex of Bottom triangle.
+        double *rv, //   -  Right vertex of Bottom triangle.
+        double *bv, //   -  Bottom vertex of Bottom triangle.
+        const double *ox,
+        int ox_length,
+        const double *oy,
+        int oy_length,
+        double *prev_density) {
     double result = 0.;
-    if (bv[0] <= lv[0])
-    {
-        result = integUnderRigAngTr_BottRight(tau, curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
-        result -= integUnderRigAngTr_BottRight(tau, curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
+    if (bv[0] <= lv[0]) {
+        result = integUnderRigAngTr_BottRight(curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
+        result -= integUnderRigAngTr_BottRight(curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
-    if (bv[0] > lv[0] && bv[0] < rv[0])
-    {
-        result = integUnderRigAngTr_BottLeft(tau, curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
-        result += integUnderRigAngTr_BottRight(tau, curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
+    if (bv[0] > lv[0] && bv[0] < rv[0]) {
+        result = integUnderRigAngTr_BottLeft(curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
+        result += integUnderRigAngTr_BottRight(curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
-    if (bv[0] >= rv[0])
-    {
-        result = integUnderRigAngTr_BottLeft(tau, curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
-        result -= integUnderRigAngTr_BottLeft(tau, curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
+    if (bv[0] >= rv[0]) {
+        result = integUnderRigAngTr_BottLeft(curr_tl, bv, lv, ox, ox_length, oy, oy_length, prev_density);
+        result -= integUnderRigAngTr_BottLeft(curr_tl, bv, rv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
     return result;
 }
 
-double integUnderRigAngTr_UppLeft(double tau,
-                                  int iCurrTL,
-                                  double *bv,
-                                  double *uv,
-                                  const double *masOX,
-                                  int numOfOXSt,
-                                  const double *masOY,
-                                  int numOfOYSt,
-                                  double *rhoInPrevTL_asV)
-{
+double integUnderRigAngTr_UppLeft(
+        int iCurrTL,
+        double *bv,
+        double *uv,
+        const double *masOX,
+        int numOfOXSt,
+        const double *masOY,
+        int numOfOYSt,
+        double *rhoInPrevTL_asV) {
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
     double trPN[2]; //   -  Travel point next;
@@ -1107,74 +982,59 @@ double integUnderRigAngTr_UppLeft(double tau,
 
     //   The follow equations are quite important.
     indCurSqOx[0] = (int) ((trPC[0] + MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be in the right side.
-    if ((trPC[0] + MIN_VALUE_1) <= 0)
-    {
+    if ((trPC[0] + MIN_VALUE_1) <= 0) {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper square.
-    if ((trPC[1] + MIN_VALUE_1) <= 0)
-    {
+    if ((trPC[1] + MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1;
     indRB[0] = (int) ((uv[0] - MIN_VALUE_1) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
-    if ((uv[0] - MIN_VALUE_1) <= 0)
-    {
+    if ((uv[0] - MIN_VALUE_1) <= 0) {
         indRB[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indRB[1] = indRB[0] + 1;
-    if (indCurSqOx[1] >= 0)
-    {
+    if (indCurSqOx[1] >= 0) {
         distOx = masOX[ indCurSqOx[1] ] - trPC[0];
     }
-    if (indCurSqOx[1] < 0)
-    {
+    if (indCurSqOx[1] < 0) {
         distOx = fabs(hx * indCurSqOx[1] - trPC[0]);
     }
-    if (indCurSqOy[1] >= 0)
-    {
+    if (indCurSqOy[1] >= 0) {
         distOy = masOY[ indCurSqOy[1] ] - trPC[1];
     }
-    if (indCurSqOy[1] < 0)
-    {
+    if (indCurSqOy[1] < 0) {
         distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
     }
-    do
-    {
+    do {
         //   a. First case.
-        if ((distOy / distOx) <= ang)
-        {
+        if ((distOy / distOx) <= ang) {
             //   Across with straight line parallel Ox axis.
             wTrPNI = 1;
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 trPN[1] = masOY[ indCurSqOy[1] ];
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 trPN[1] = hy * indCurSqOy[1];
             }
             trPN[0] = bv[0] + (trPN[1] - bv[1]) / ang;
         }
         //   b. Second case.
-        if ((distOy / distOx) > ang)
-        {
+        if ((distOy / distOx) > ang) {
             //   Across with straight line parallel Oy axis.
             wTrPNI = 2;
-            if (indCurSqOx[1] >= 0)
-            {
+            if (indCurSqOx[1] >= 0) {
                 trPN[0] = masOX[ indCurSqOx[1] ];
             }
-            if (indCurSqOx[1] < 0)
-            {
+            if (indCurSqOx[1] < 0) {
                 trPN[0] = hx * indCurSqOx[1];
             }
             trPN[1] = bv[1] + ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] > (uv[0] - MIN_VALUE_1))
-        {
+        if (trPN[0] > (uv[0] - MIN_VALUE_1)) {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
             isTrDone = true;
@@ -1182,74 +1042,64 @@ double integUnderRigAngTr_UppLeft(double tau,
         }
         //   d. Integration.
         buf_D = integOfChan_SLLeftSd(
-                                     tau, iCurrTL, //   -  Index of current time layer.
-                                     //
-                                     trPC, wTrPCI, //   -  double *bv,
-                                     trPN, wTrPNI, //   -  double *uv,
-                                     //
-                                     indCurSqOx, //   -  Indices where trPC and trPN are.
-                                     //
-                                     uv[0], indRB, //   -  double rb  =  Right boundary by Ox.
-                                     //
-                                     indCurSqOy, //   -  Index of current square by Oy axis.
-                                     //
-                                     masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                     numOfOXSt, //   -  Number of OX steps.
-                                     //
-                                     masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                     numOfOYSt, //   -  Number of OY steps.
-                                     //
-                                     rhoInPrevTL_asV);
+                iCurrTL, //   -  Index of current time layer.
+                //
+                trPC, wTrPCI, //   -  double *bv,
+                trPN, wTrPNI, //   -  double *uv,
+                //
+                indCurSqOx, //   -  Indices where trPC and trPN are.
+                //
+                uv[0], indRB, //   -  double rb  =  Right boundary by Ox.
+                //
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                numOfOYSt, //   -  Number of OY steps.
+                //
+                rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr + buf_D;
         //   e. Updating.
-        if (isTrDone == false)
-        {
+        if (isTrDone == false) {
             //   We will compute more. We need to redefine some values.
             wTrPCI = wTrPNI;
             trPC[0] = trPN[0];
             trPC[1] = trPN[1];
-            if (wTrPNI == 1)
-            {
+            if (wTrPNI == 1) {
                 indCurSqOy[0] += 1;
                 indCurSqOy[1] += 1;
             }
-            if (wTrPNI == 2)
-            {
+            if (wTrPNI == 2) {
                 indCurSqOx[0] += 1;
                 indCurSqOx[1] += 1;
             }
-            if (indCurSqOx[1] >= 0)
-            {
+            if (indCurSqOx[1] >= 0) {
                 distOx = fabs(masOX[ indCurSqOx[1] ] - trPC[0]);
             }
-            if (indCurSqOx[1] < 0)
-            {
+            if (indCurSqOx[1] < 0) {
                 distOx = fabs(hx * indCurSqOx[1] - trPC[0]);
             }
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 distOy = fabs(masOY[ indCurSqOy[1] ] - trPC[1]);
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
             }
         }
-    }
-    while (!isTrDone);
+    } while (!isTrDone);
     return integOfUppTr;
 }
 
-double integUnderRigAngTr_UppRight(double tau,
-                                   int iCurrTL,
-                                   double *bv,
-                                   double *uv,
-                                   const double *masOX,
-                                   int numOfOXSt,
-                                   const double *masOY,
-                                   int numOfOYSt,
-                                   double *rhoInPrevTL_asV)
-{
+double integUnderRigAngTr_UppRight(int iCurrTL,
+        double *bv,
+        double *uv,
+        const double *masOX,
+        int numOfOXSt,
+        const double *masOY,
+        int numOfOYSt,
+        double *rhoInPrevTL_asV) {
     double trPC[2]; //   -  Travel point current;
     int wTrPCI = 0; //   -  Where travel point current is?
     double trPN[2]; //   -  Travel point next;
@@ -1266,211 +1116,176 @@ double integUnderRigAngTr_UppRight(double tau,
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < MIN_VALUE)
-    {
+    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) {
         //   This triangle has very small width. I guess further computation isn't correct.
         return fabs(bv[0] - uv[0]);
     }
     ang = (uv[1] - bv[1]) / (bv[0] - uv[0]);
-    if (fabs(ang) < MIN_VALUE)
-    {
+    if (fabs(ang) < MIN_VALUE) {
         //   This triangle has very small height. I guess further computation isn't correct.
         return fabs(ang);
     }
     indCurSqOx[0] = (int) ((trPC[0] - MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side.
-    if ((trPC[0] - MIN_VALUE_1) <= 0)
-    {
+    if ((trPC[0] - MIN_VALUE_1) <= 0) {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indLB[0] = (int) ((uv[0] + MIN_VALUE_1) / hx);
-    if ((uv[0] + MIN_VALUE_1) <= 0)
-    {
+    if ((uv[0] + MIN_VALUE_1) <= 0) {
         indLB[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indLB[1] = indLB[0] + 1;
     indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
-    if ((trPC[1] + MIN_VALUE_1) <= 0)
-    {
+    if ((trPC[1] + MIN_VALUE_1) <= 0) {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    if (indCurSqOx[0] >= 0)
-    {
+    if (indCurSqOx[0] >= 0) {
         distOx = fabs(trPC[0] - masOX[ indCurSqOx[0] ]);
     }
-    if (indCurSqOx[0] < 0)
-    {
+    if (indCurSqOx[0] < 0) {
         distOx = fabs(trPC[0] - hx * indCurSqOx[0]);
     }
-    if (indCurSqOy[1] >= 0)
-    {
+    if (indCurSqOy[1] >= 0) {
         distOy = fabs(masOY[ indCurSqOy[1] ] - trPC[1]);
     }
-    if (indCurSqOy[1] < 0)
-    {
+    if (indCurSqOy[1] < 0) {
         distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
     }
-    do
-    {
+    do {
         //   a. First case.
-        if ((distOy / distOx) <= ang)
-        {
+        if ((distOy / distOx) <= ang) {
             //   Across with straight line parallel Ox axis.
             wTrPNI = 1;
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 trPN[1] = masOY[ indCurSqOy[1] ];
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 trPN[1] = hy * indCurSqOy[1];
             }
             trPN[0] = bv[0] - (trPN[1] - bv[1]) / ang;
         }
         //   b. Second case.
-        if ((distOy / distOx) > ang)
-        {
+        if ((distOy / distOx) > ang) {
             //   Across with straight line parallel Oy axis.
             wTrPNI = 2;
-            if (indCurSqOx[0] >= 0)
-            {
+            if (indCurSqOx[0] >= 0) {
                 trPN[0] = masOX[ indCurSqOx[0] ];
             }
-            if (indCurSqOx[0] < 0)
-            {
+            if (indCurSqOx[0] < 0) {
                 trPN[0] = hx * indCurSqOx[0];
             }
             trPN[1] = bv[1] - ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] < (uv[0] + MIN_VALUE_1))
-        {
+        if (trPN[0] < (uv[0] + MIN_VALUE_1)) {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
             isTrDone = true;
             wTrPNI = 0;
         }
         //   d. Integration.
-        buf_D = integOfChan_SLRightSd(
-                                      tau, iCurrTL, //   -  Index of current time layer.
-                                      //
-                                      trPC, wTrPCI, //   -  double *bv,
-                                      trPN, wTrPNI, //   -  double *uv,
-                                      //
-                                      indCurSqOx, //   -  Indices where trPC and trPN are.
-                                      //
-                                      uv[0], indLB, //   -  double lb  =  Left boundary by Ox.
-                                      //
-                                      indCurSqOy, //   -  Index of current square by Oy axis.
-                                      //
-                                      masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
-                                      numOfOXSt, //   -  Number of OX steps.
-                                      //
-                                      masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
-                                      numOfOYSt, //   -  Number of OY steps.
-                                      //
-                                      rhoInPrevTL_asV);
+        buf_D = integOfChan_SLRightSd(iCurrTL, //   -  Index of current time layer.
+                //
+                trPC, wTrPCI, //   -  double *bv,
+                trPN, wTrPNI, //   -  double *uv,
+                //
+                indCurSqOx, //   -  Indices where trPC and trPN are.
+                //
+                uv[0], indLB, //   -  double lb  =  Left boundary by Ox.
+                //
+                indCurSqOy, //   -  Index of current square by Oy axis.
+                //
+                masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                numOfOXSt, //   -  Number of OX steps.
+                //
+                masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                numOfOYSt, //   -  Number of OY steps.
+                //
+                rhoInPrevTL_asV);
         integOfUppTr = integOfUppTr + buf_D;
         //   e. Updating.
-        if (isTrDone == false)
-        {
+        if (isTrDone == false) {
             //   We will compute more. We need to redefine some values.
             wTrPCI = wTrPNI;
             trPC[0] = trPN[0];
             trPC[1] = trPN[1];
-            if (wTrPNI == 1)
-            {
+            if (wTrPNI == 1) {
                 indCurSqOy[0] += 1;
                 indCurSqOy[1] += 1;
             }
-            if (wTrPNI == 2)
-            {
+            if (wTrPNI == 2) {
                 indCurSqOx[0] -= 1;
                 indCurSqOx[1] -= 1;
             }
-            if (indCurSqOx[0] >= 0)
-            {
+            if (indCurSqOx[0] >= 0) {
                 distOx = fabs(trPC[0] - masOX[ indCurSqOx[0] ]);
             }
-            if (indCurSqOx[0] < 0)
-            {
+            if (indCurSqOx[0] < 0) {
                 distOx = fabs(trPC[0] - hx * indCurSqOx[0]);
             }
-            if (indCurSqOy[1] >= 0)
-            {
+            if (indCurSqOy[1] >= 0) {
                 distOy = fabs(masOY[ indCurSqOy[1] ] - trPC[1]);
             }
-            if (indCurSqOy[1] < 0)
-            {
+            if (indCurSqOy[1] < 0) {
                 distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
             }
         }
-    }
-    while (!isTrDone);
+    } while (!isTrDone);
     return integOfUppTr;
 }
 
-double integ_under_upper_triangle(double tau,
-                                  int curr_tl,
-                                  double *lv, //   -  Left vertex of Upper triangle.
-                                  double *rv, //   -  Right vertex of Upper triangle.
-                                  double *uv, //   -  Upper vertex of Upper triangle.
-                                  const double *ox,
-                                  int ox_length,
-                                  const double *oy,
-                                  int oy_length,
-                                  double *prev_density)
-{
+double integ_under_upper_triangle(int curr_tl,
+        double *lv, //   -  Left vertex of Upper triangle.
+        double *rv, //   -  Right vertex of Upper triangle.
+        double *uv, //   -  Upper vertex of Upper triangle.
+        const double *ox,
+        int ox_length,
+        const double *oy,
+        int oy_length,
+        double *prev_density) {
     double result = 0.;
-    if (uv[0] <= lv[0])
-    {
-        result = integUnderRigAngTr_UppRight(tau, curr_tl, rv, uv, ox, ox_length, oy, oy_length, prev_density);
-        result -= integUnderRigAngTr_UppRight(tau, curr_tl, lv, uv, ox, ox_length, oy, oy_length, prev_density);
+    if (uv[0] <= lv[0]) {
+        result = integUnderRigAngTr_UppRight(curr_tl, rv, uv, ox, ox_length, oy, oy_length, prev_density);
+        result -= integUnderRigAngTr_UppRight(curr_tl, lv, uv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
-    if (uv[0] > lv[0] && uv[0] < rv[0])
-    {
-        result = integUnderRigAngTr_UppLeft(tau, curr_tl, lv, uv, ox, ox_length, oy, oy_length, prev_density);
-        result += integUnderRigAngTr_UppRight(tau, curr_tl, rv, uv, ox, ox_length, oy, oy_length, prev_density);
+    if (uv[0] > lv[0] && uv[0] < rv[0]) {
+        result = integUnderRigAngTr_UppLeft(curr_tl, lv, uv, ox, ox_length, oy, oy_length, prev_density);
+        result += integUnderRigAngTr_UppRight(curr_tl, rv, uv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
-    if (uv[0] >= rv[0])
-    {
-        result = integUnderRigAngTr_UppLeft(tau, curr_tl, lv, uv, ox, ox_length, oy, oy_length, prev_density);
-        result -= integUnderRigAngTr_UppLeft(tau, curr_tl, rv, uv, ox, ox_length, oy, oy_length, prev_density);
+    if (uv[0] >= rv[0]) {
+        result = integUnderRigAngTr_UppLeft(curr_tl, lv, uv, ox, ox_length, oy, oy_length, prev_density);
+        result -= integUnderRigAngTr_UppLeft(curr_tl, rv, uv, ox, ox_length, oy, oy_length, prev_density);
         return result;
     }
     return result;
 }
 
-double wall_integ_under_uniform_triangle(double tau,
-                                         int curr_tl,
-                                         point_t *a,
-                                         point_t *b,
-                                         point_t *c,
-                                         const double *ox,
-                                         int ox_length,
-                                         const double *oy,
-                                         int oy_length,
-                                         double *prev_density)
-{
+double wall_integ_under_uniform_triangle(int curr_tl,
+        point_t *a,
+        point_t *b,
+        point_t *c,
+        const double *ox,
+        int ox_length,
+        const double *oy,
+        int oy_length,
+        double *prev_density) {
     return 0;
 }
 
-double integ_under_uniform_triangle(double tau,
-                                    int tl,
-                                    point_t *x,
-                                    point_t *y,
-                                    point_t *z,
-                                    const double *ox,
-                                    int ox_length,
-                                    const double *oy,
-                                    int oy_length,
-                                    double *prev_density)
-{    
+double integ_under_uniform_triangle(int tl,
+        point_t *x,
+        point_t *y,
+        point_t *z,
+        const double *ox,
+        int ox_length,
+        const double *oy,
+        int oy_length,
+        double *prev_density) {
     double bv[2], mv[2], uv[2], ip[2]; //   -  Bottom, middle and upper vertices + intersection point
-    
+
     bv[0] = x->x;
     bv[1] = x->y;
     mv[0] = y->x;
@@ -1498,67 +1313,63 @@ double integ_under_uniform_triangle(double tau,
         ip[0] = tx;
     }
 
-    return integ_under_bott_triangle(tau, tl,
-                                     mv, ip, bv,
-                                     ox, ox_length,
-                                     oy, oy_length,
-                                     prev_density)
-            + integ_under_upper_triangle(tau, tl,
-                                         mv, ip, uv,
-                                         ox, ox_length,
-                                         oy, oy_length,
-                                         prev_density);
+    return integ_under_bott_triangle(tl,
+            mv, ip, bv,
+            ox, ox_length,
+            oy, oy_length,
+            prev_density)
+            + integ_under_upper_triangle(tl,
+            mv, ip, uv,
+            ox, ox_length,
+            oy, oy_length,
+            prev_density);
 }
 
-inline double u_function(double x, double y)
-{
+inline double u_function(double x, double y) {
     return B * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
 inline double v_function(
-                         double lbDom,
-                         double rbDom,
-                         double bbDom,
-                         double ubDom,
-                         double t, double x, double y)
-{
+        double lbDom,
+        double rbDom,
+        double bbDom,
+        double ubDom,
+        double t, double x, double y) {
     return atan((x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom) * (y - bbDom));
 }
 
-double f_function(double tau,
-                  int iCurrTL,
-                  int iOfOXN,
-                  const double *masOX,
-                  int iOfOYN, 
-                  const double *masOY)
-{
-    //printf("\ncpu f function \n");
-    double t = tau * iCurrTL;
+double f_function(
+        double tl_on_tau,
+        int iOfOXN,
+        const double *masOX,
+        int iOfOYN,
+        const double *masOY) {
+    //printf("\ncpu f function \n");  
     //printf("cpu t = %f\n", t);
     double x = masOX[ iOfOXN ];
     //printf("cpu x = %f\n", x);
     double y = masOY[ iOfOYN ];
     //printf("cpu y = %f\n", y);
-    double arg_v = (x - LB) * (x - RB) * (1. + t) / 10. * (y - UB) * (y - BB);
+    double arg_v = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - UB) * (y - BB);
     //printf("cpu arg_v = %f\n", arg_v);
     double rho, dRhoDT, dRhoDX, dRhoDY;
     double u, duDX;
     double v, dvDY;
-    rho = analytical_solution(t, x, y);
+    rho = analytical_solution(tl_on_tau, x, y);
     //  printf("cpu rho = %f\n", rho);
-    dRhoDT = x * y * cos(t * x * y);
+    dRhoDT = x * y * cos(tl_on_tau * x * y);
     //  printf("cpu dRhoDT = %f\n", dRhoDT);
-    dRhoDX = t * y * cos(t * x * y);
+    dRhoDX = tl_on_tau * y * cos(tl_on_tau * x * y);
     //  printf("cpu dRhoDX = %f\n", dRhoDX);
-    dRhoDY = t * x * cos(t * x * y);
+    dRhoDY = tl_on_tau * x * cos(tl_on_tau * x * y);
     //  printf("cpu dRhoDY = %f\n", dRhoDY);
     u = u_function(x, y);
     //  printf("cpu u = %f\n", u);
     duDX = -B * y * (1. - y) / (1. + x * x);
     //  printf("cpu duDX = %f\n", duDX);
-    v = v_function(LB, RB, BB, UB, t, x, y);
+    v = v_function(LB, RB, BB, UB, tl_on_tau, x, y);
     //  printf("cpu v = %f\n", v);
-    dvDY = (x - LB) * (x - RB) * (1. + t) / 10. * (y - BB + y - UB);
+    dvDY = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - BB + y - UB);
     //  printf("cpu dvDY 1 = %f\n", dvDY);
     dvDY = dvDY / (1. + arg_v * arg_v);
     //  printf("cpu dvDY 2 = %f\n", dvDY);
@@ -1567,34 +1378,27 @@ double f_function(double tau,
     return res;
 }
 
-quad_type compute_coordinate_on_prev_layer(double tau,
-                                           int cur_tl,
-                                           int i_ox,
-                                           const double *masOX,
-                                           int ox_length,
-                                           int i_oy,
-                                           const double *masOY,
-                                           int oy_length,
-                                           point_t *alpha, point_t *beta, point_t *gamma, point_t *theta)
-{
+quad_type compute_coordinate_on_prev_layer(int cur_tl,
+        int i_ox,
+        const double *masOX,
+        int ox_length,
+        int i_oy,
+        const double *masOY,
+        int oy_length,
+        point_t *alpha, point_t *beta, point_t *gamma, point_t *theta) {
     //   1. First of all let's compute coordinates of square vertexes.
     //  OX:
-    if (i_ox == 0)
-    {
+    if (i_ox == 0) {
         alpha->x = masOX[ i_ox ];
         beta->x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
         gamma->x = (masOX[i_ox] + masOX[i_ox + 1]) / 2.;
         theta->x = masOX[ i_ox ];
-    }
-    else if (i_ox == ox_length)
-    {
+    } else if (i_ox == ox_length) {
         alpha->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
         beta->x = masOX[ i_ox ];
         gamma->x = masOX[ i_ox ];
         theta->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
-    }
-    else
-    {
+    } else {
         alpha->x = (masOX[i_ox - 1] + masOX[i_ox]) / 2.;
         beta->x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
         gamma->x = (masOX[i_ox + 1] + masOX[i_ox]) / 2.;
@@ -1602,22 +1406,17 @@ quad_type compute_coordinate_on_prev_layer(double tau,
     }
 
     //  OY:
-    if (i_oy == 0)
-    {
+    if (i_oy == 0) {
         alpha->y = masOY[ i_oy ];
         beta->y = masOY[ i_oy ];
         gamma->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
         theta->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
-    }
-    else if (i_oy == oy_length)
-    {
+    } else if (i_oy == oy_length) {
         alpha->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         beta->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         gamma->y = masOY[ i_oy ];
         theta->y = masOY[ i_oy ];
-    }
-    else
-    {
+    } else {
         alpha->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         beta->y = (masOY[i_oy] + masOY[ i_oy - 1]) / 2.;
         gamma->y = (masOY[i_oy] + masOY[ i_oy + 1]) / 2.;
@@ -1628,24 +1427,24 @@ quad_type compute_coordinate_on_prev_layer(double tau,
 
     // Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     u = u_function(alpha->x, alpha->y);
-    v = v_function(LB, RB, BB, UB, tau*cur_tl, alpha->x, alpha->y);
-    alpha->x -= tau * u;
-    alpha->y -= tau * v;
+    v = v_function(LB, RB, BB, UB, TAU*cur_tl, alpha->x, alpha->y);
+    alpha->x -= TAU * u;
+    alpha->y -= TAU * v;
 
     u = u_function(beta->x, beta->y);
-    v = v_function(LB, RB, BB, UB, tau*cur_tl, beta->x, beta->y);
-    beta->x -= tau * u;
-    beta->y -= tau * v;
+    v = v_function(LB, RB, BB, UB, TAU*cur_tl, beta->x, beta->y);
+    beta->x -= TAU * u;
+    beta->y -= TAU * v;
 
     u = u_function(gamma->x, gamma->y);
-    v = v_function(LB, RB, BB, UB, tau*cur_tl, gamma->x, gamma->y);
-    gamma->x -= tau * u;
-    gamma->y -= tau * v;
+    v = v_function(LB, RB, BB, UB, TAU*cur_tl, gamma->x, gamma->y);
+    gamma->x -= TAU * u;
+    gamma->y -= TAU * v;
 
     u = u_function(theta->x, theta->y);
-    v = v_function(LB, RB, BB, UB, tau*cur_tl, theta->x, theta->y);
-    theta->x -= tau * u;
-    theta->y -= tau * v;
+    v = v_function(LB, RB, BB, UB, TAU*cur_tl, theta->x, theta->y);
+    theta->x -= TAU * u;
+    theta->y -= TAU * v;
 
     point_t intersection = get_intersection_point(alpha, beta, gamma, theta);
     if ((beta->y - intersection.y) * (theta->y - intersection.y) > 0.) return pseudo; // ??
@@ -1661,8 +1460,7 @@ quad_type compute_coordinate_on_prev_layer(double tau,
             gamma->x < 0 ||
             gamma->y < 0 ||
             alpha->x < 0 ||
-            alpha->y < 0)
-    {
+            alpha->y < 0) {
         return normal;
         //return wall;
     }
@@ -1672,27 +1470,26 @@ quad_type compute_coordinate_on_prev_layer(double tau,
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
-quad_type get_quadrangle_type(double tau,
-                              int curr_tl,
-                              int i_ox,
-                              const double *ox,
-                              int ox_length,
-                              int i_oy,
-                              const double *oy,
-                              int oy_length,
-                              point_t *t_1_a, //   -  First vertex of first triangle.
-                              point_t *t_1_b, //   -  Second vertex of first triangle.
-                              point_t *t_1_c, //   -  Third vertex of first triangle.
-                              //
-                              point_t *t_2_a, //   -  First vertex of second triangle.
-                              point_t *t_2_b, //   -  Second vertex of second triangle.
-                              point_t *t_2_c) //   -  Third vertex of second triangle.
+quad_type get_quadrangle_type(int curr_tl,
+        int i_ox,
+        const double *ox,
+        int ox_length,
+        int i_oy,
+        const double *oy,
+        int oy_length,
+        point_t *t_1_a, //   -  First vertex of first triangle.
+        point_t *t_1_b, //   -  Second vertex of first triangle.
+        point_t *t_1_c, //   -  Third vertex of first triangle.
+        //
+        point_t *t_2_a, //   -  First vertex of second triangle.
+        point_t *t_2_b, //   -  Second vertex of second triangle.
+        point_t *t_2_c) //   -  Third vertex of second triangle.
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
-    quad_type type = compute_coordinate_on_prev_layer(tau, curr_tl,
-                                                      i_ox, ox, ox_length,
-                                                      i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
+    quad_type type = compute_coordinate_on_prev_layer(curr_tl,
+            i_ox, ox, ox_length,
+            i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
 
     // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
     // It's convex.
@@ -1707,26 +1504,23 @@ quad_type get_quadrangle_type(double tau,
     return type;
 }
 
-double compute_value(double tau,
-                     double curr_tl,
-                     int i_ox,
-                     const double *ox,
-                     int ox_length,
-                     int i_oy,
-                     const double *oy,
-                     int oy_length,
-                     double *prev_density)
-{
+double compute_value(double curr_tl,
+        int i_ox,
+        const double *ox,
+        int ox_length,
+        int i_oy,
+        const double *oy,
+        int oy_length,
+        double *prev_density) {
     point_t t_1_a, t_1_b, t_1_c, t_2_a, t_2_b, t_2_c;
 
-    quad_type type = get_quadrangle_type(tau, curr_tl,
-                                         i_ox, ox, ox_length,
-                                         i_oy, oy, oy_length,
-                                         &t_1_a, &t_1_b, &t_1_c,
-                                         &t_2_a, &t_2_b, &t_2_c);
+    quad_type type = get_quadrangle_type(curr_tl,
+            i_ox, ox, ox_length,
+            i_oy, oy, oy_length,
+            &t_1_a, &t_1_b, &t_1_c,
+            &t_2_a, &t_2_b, &t_2_c);
 
-    if (type != normal && type != wall)
-    {
+    if (type != normal && type != wall) {
         return -1.;
     }
 
@@ -1738,49 +1532,47 @@ double compute_value(double tau,
 
     // check the type of triangle to select appropriate computation method
     double result = 0.;
-    switch (type)
-    {
-    case wall:
-        result += wall_integ_under_uniform_triangle(tau, curr_tl,
-                                                    &t_1_a, &t_1_b, &t_1_c,
-                                                    ox, ox_length,
-                                                    oy, oy_length,
-                                                    prev_density);
-        result += wall_integ_under_uniform_triangle(tau, curr_tl,
-                                                    &t_2_a, &t_2_b, &t_2_c,
-                                                    ox, ox_length,
-                                                    oy, oy_length,
-                                                    prev_density);
-        return result;
-    case normal:
-        result += integ_under_uniform_triangle(tau, curr_tl,
-                                               &t_1_a, &t_1_b, &t_1_c,
-                                               ox, ox_length,
-                                               oy, oy_length,
-                                               prev_density);
-        result += integ_under_uniform_triangle(tau, curr_tl,
-                                               &t_2_a, &t_2_b, &t_2_c,
-                                               ox, ox_length,
-                                               oy, oy_length,
-                                               prev_density);
-        return result;
-    case concave:
-    case convex:
-    case pseudo:
-        return 0.;
+    switch (type) {
+        case wall:
+            result += wall_integ_under_uniform_triangle(curr_tl,
+                    &t_1_a, &t_1_b, &t_1_c,
+                    ox, ox_length,
+                    oy, oy_length,
+                    prev_density);
+            result += wall_integ_under_uniform_triangle(curr_tl,
+                    &t_2_a, &t_2_b, &t_2_c,
+                    ox, ox_length,
+                    oy, oy_length,
+                    prev_density);
+            return result;
+        case normal:
+            result += integ_under_uniform_triangle(curr_tl,
+                    &t_1_a, &t_1_b, &t_1_c,
+                    ox, ox_length,
+                    oy, oy_length,
+                    prev_density);
+            result += integ_under_uniform_triangle(curr_tl,
+                    &t_2_a, &t_2_b, &t_2_c,
+                    ox, ox_length,
+                    oy, oy_length,
+                    prev_density);
+            return result;
+        case concave:
+        case convex:
+        case pseudo:
+            return 0.;
     }
 }
 
 void print_params(double b,
-                  double lb,
-                  double rb,
-                  double bb,
-                  double ub,
-                  double tau,
-                  int tl_count,
-                  int ox_length,
-                  int oy_length)
-{
+        double lb,
+        double rb,
+        double bb,
+        double ub,
+        double tau,
+        int tl_count,
+        int ox_length,
+        int oy_length) {
     printf("b = %f\n", b);
     printf("lbDom = %f\n", lb);
     printf("rbDom = %f\n", rb);
@@ -1793,22 +1585,20 @@ void print_params(double b,
 }
 
 void print_params(int index, int needed_index,
-                  double b,
-                  double lb,
-                  double rb,
-                  double bb,
-                  double ub,
-                  double tau,
-                  int tl,
-                  int tl_count,
-                  int ox_length,
-                  int oy_length,
-                  int cur_x,
-                  int cur_y,
-                  double value)
-{
-    if (index == needed_index)
-    {
+        double b,
+        double lb,
+        double rb,
+        double bb,
+        double ub,
+        double tau,
+        int tl,
+        int tl_count,
+        int ox_length,
+        int oy_length,
+        int cur_x,
+        int cur_y,
+        double value) {
+    if (index == needed_index) {
         printf("index = %d\n", index);
         printf("b = %f\n", b);
         printf("lbDom = %f\n", lb);
@@ -1827,16 +1617,13 @@ void print_params(int index, int needed_index,
 }
 
 double get_norm_of_error(double* density, int x_length, int y_length, double* ox,
-                         double* oy,
-                         double ts_count_mul_steps)
-{
+        double* oy,
+        double ts_count_mul_steps) {
     double result = 0.;
-    for (int k = 1; k < y_length; ++k)
-    {
-        for (int j = 1; j < x_length; ++j)
-        {
+    for (int k = 1; k < y_length; ++k) {
+        for (int j = 1; j < x_length; ++j) {
             result += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
-                           - density[ (x_length + 1) * k + j ]);
+                    - density[ (x_length + 1) * k + j ]);
         }
     }
     double hx = ox[1] - ox[0];
@@ -1844,47 +1631,38 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
     return hx * hy * result;
 }
 
-double solve(double tau,
-             int time_step_count,
-             double *ox,
-             int ox_length,
-             double *oy,
-             int oy_length,
-             double *density)
-{
+double solve(int time_step_count,
+        double *ox,
+        int ox_length,
+        double *oy,
+        int oy_length,
+        double *density) {
     double *prev_density = new double [ (ox_length + 1) * (oy_length + 1) ];
-    for (int i_oy = 0; i_oy < oy_length + 1; i_oy++)
-    {
-        for (int i_ox = 0; i_ox < ox_length + 1; i_ox++)
-        {
+    for (int i_oy = 0; i_oy < oy_length + 1; i_oy++) {
+        for (int i_ox = 0; i_ox < ox_length + 1; i_ox++) {
             prev_density[ (ox_length + 1) * i_oy + i_ox ] = analytical_solution(0., ox[i_ox], oy[i_oy]);
         }
     }
 
-    for (int i_tl = 1; i_tl < time_step_count + 1; i_tl++)
-    {
-        for (int i = 0; i <= ox_length; i++)
-        {
-            density[ i ] = init_bound(ox[ i ], BB, tau * i_tl, bottom);
-            density[ (ox_length + 1) * oy_length + i ] = init_bound(ox[ i ], UB, tau * i_tl, up);
+    for (int i_tl = 1; i_tl < time_step_count + 1; i_tl++) {
+        for (int i = 0; i <= ox_length; i++) {
+            density[ i ] = init_bound(ox[ i ], BB, TAU * i_tl, bottom);
+            density[ (ox_length + 1) * oy_length + i ] = init_bound(ox[ i ], UB, TAU * i_tl, up);
         }
 
-        for (int i = 0; i <= oy_length; i++)
-        {
-            density[ (ox_length + 1) * i ] = init_bound(LB, oy[ i ], tau * i_tl, left);
-            density[ (ox_length + 1) * i + ox_length ] = init_bound(RB, oy[ i ], tau * i_tl, right);
+        for (int i = 0; i <= oy_length; i++) {
+            density[ (ox_length + 1) * i ] = init_bound(LB, oy[ i ], TAU * i_tl, left);
+            density[ (ox_length + 1) * i + ox_length ] = init_bound(RB, oy[ i ], TAU * i_tl, right);
         }
 
-        for (int i_oy = 1; i_oy < oy_length; i_oy++)
-        {
-            for (int i_ox = 1; i_ox < ox_length; i_ox++)
-            {
+        for (int i_oy = 1; i_oy < oy_length; i_oy++) {
+            for (int i_ox = 1; i_ox < ox_length; i_ox++) {
                 int index = (ox_length + 1) * i_oy + i_ox;
 
-                double value = compute_value(tau, i_tl,
-                                             i_ox, ox, ox_length,
-                                             i_oy, oy, oy_length,
-                                             prev_density);
+                double value = compute_value(i_tl,
+                        i_ox, ox, ox_length,
+                        i_oy, oy, oy_length,
+                        prev_density);
                 /*print_params(index, 12,
                              PAR_B,
                              lb,
@@ -1905,13 +1683,13 @@ double solve(double tau,
                 h = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
                 value /= h;
 
-                double rp = f_function(tau,
-                                       i_tl,
-                                       i_ox,
-                                       ox,
-                                       i_oy,
-                                       oy);
-                density[ index ] = value + tau * rp;
+                double rp = f_function(
+                        TAU*i_tl,
+                        i_ox,
+                        ox,
+                        i_oy,
+                        oy);
+                density[ index ] = value + TAU * rp;
             }
         }
         memcpy(prev_density, density, (ox_length + 1) * (oy_length + 1) * sizeof (double));
@@ -1922,56 +1700,53 @@ double solve(double tau,
 }
 
 double *solve(double b,
-              double lb,
-              double rb,
-              double bb,
-              double ub,
-              double time_step,
-              int time_step_count,
-              int ox_length,
-              int oy_length,
-              double* norm)
-{
+        double lb,
+        double rb,
+        double bb,
+        double ub,
+        double tau,
+        int time_step_count,
+        int ox_length,
+        int oy_length,
+        double* norm) {
     B = b;
     UB = ub;
     BB = bb;
     LB = lb;
     RB = rb;
-    
+    TAU = tau;
+
     double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
     double *ox = new double [ ox_length + 1 ];
     double *oy = new double [ oy_length + 1 ];
 
-    for (int i = 0; i <= ox_length; i++)
-    {
+    for (int i = 0; i <= ox_length; i++) {
         ox[i] = lb + i * (rb - lb) / ox_length;
     }
 
-    for (int i = 0; i <= oy_length; i++)
-    {
+    for (int i = 0; i <= oy_length; i++) {
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
-    
-    print_params(B,
-                 LB,
-                 RB,
-                 BB,
-                 UB,
-                 time_step,
-                 time_step_count,
-                 ox_length,
-                 oy_length);
 
-    solve(time_step,
-          time_step_count,
-          ox,
-          ox_length,
-          oy,
-          oy_length,
-          density);
+    print_params(B,
+            LB,
+            RB,
+            BB,
+            UB,
+            TAU,
+            time_step_count,
+            ox_length,
+            oy_length);
+
+    solve(time_step_count,
+            ox,
+            ox_length,
+            oy,
+            oy_length,
+            density);
 
     *norm = get_norm_of_error(density, ox_length, oy_length, ox, oy,
-                              time_step_count * time_step);
+            time_step_count * tau);
     //  printf("Norm L1 = %f\n", *norm);
     printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, wall_counter);
 
