@@ -2,8 +2,16 @@
 #include "point.h"
 
 static const double C_pi = 3.14159265358979323846264338327;
+static const double MIN_VALUE = 1.e-12;
+static const double MIN_VALUE_1 = 1.e-14;
 static int wall_counter = 0;
-static double PAR_B;
+
+static double B;
+static double UB;
+static double BB;
+static double LB;
+static double RB;
+
 
 double _itemOfInteg_1SpecType(double Py,
                               double Qy,
@@ -331,7 +339,7 @@ double integOfChan_SLRightSd(double tau,
         rv[1] = uv[1];
     }
 
-    if ((fabs(uv[1] - bv[1])) <= 1.e-12)
+    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE)
     {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
         //   buf_D  =  (uv[1] - bv[1])  *  ((uv[0] + bv[0]) /2.  -  lb) * rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
@@ -438,7 +446,7 @@ double integOfChan_SLRightSd(double tau,
 
     //   B. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > 1.e-12)
+    if (fabs(uv[1] - bv[1]) > MIN_VALUE)
     {
         //   integ += fabs(uv[1] - bv[1]) * (rv[0] - mv[0]) /2.;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
@@ -448,7 +456,7 @@ double integOfChan_SLRightSd(double tau,
 
         //   Integration under one cell triangle.
 
-        if (fabs(a_SL) > 1.e-12)
+        if (fabs(a_SL) > MIN_VALUE)
         {
             buf_D = integUnderRightTr_OneCell(
                                               bv[1], //   -  double Py,
@@ -545,7 +553,7 @@ double integOfChan_SLLeftSd(
         wMvI = wTrPNI;
     }
 
-    if ((fabs(uv[1] - bv[1])) <= 1.e-12)
+    if ((fabs(uv[1] - bv[1])) <= MIN_VALUE)
     {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
         //   buf_D  =  (uv[1] - bv[1])  *  (rb  - (uv[0] + bv[0]) /2.) * rhoInPrevTL[ indCurSqOx[0] ][ indCurSqOy[0] ];
@@ -556,14 +564,14 @@ double integOfChan_SLLeftSd(
 
     //   A. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > 1.e-12)
+    if (fabs(uv[1] - bv[1]) > MIN_VALUE)
     {
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv[0] - bv[0]) / (uv[1] - bv[1]);
         b_SL = bv[0] - a_SL * bv[1];
 
         //   Integration under one cell triangle.
-        if (fabs(a_SL) > 1.e-12)
+        if (fabs(a_SL) > MIN_VALUE)
         {
             buf_D = integUnderLeftTr_OneCell(
                                              bv[1], //   -  double Py,
@@ -724,27 +732,27 @@ double integUnderRigAngTr_BottLeft(
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < 1.e-12)
+    if ((fabs(bv[0] - uv[0])) < MIN_VALUE)
     {
         //   This triangle has very small width. I guess further computation isn't correct.
         return fabs(bv[0] - uv[0]);
     }
     ang = (uv[1] - bv[1]) / (bv[0] - uv[0]);
-    if (fabs(ang) < 1.e-12)
+    if (fabs(ang) < MIN_VALUE)
     {
         //   This triangle has very small height. I guess further computation isn't correct.
         return fabs(ang);
     }
-    indCurSqOx[0] = (int) ((trPC[0] - 1.e-14) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx[1].
-    if ((trPC[0] - 1.e-14) <= 0)
+    indCurSqOx[0] = (int) ((trPC[0] - MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx[1].
+    if ((trPC[0] - MIN_VALUE_1) <= 0)
     {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indRB[0] = indCurSqOx[0];
     indRB[1] = indRB[0] + 1;
-    indCurSqOy[0] = (int) ((trPC[1] + 1.e-14) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx[0] and indCurSqOx[1].
-    if ((trPC[1] + 1.e-14) <= 0)
+    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx[0] and indCurSqOx[1].
+    if ((trPC[1] + MIN_VALUE_1) <= 0)
     {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
@@ -798,7 +806,7 @@ double integUnderRigAngTr_BottLeft(
             trPN[1] = bv[1] - ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] < (uv[0] + 1.e-14))
+        if (trPN[0] < (uv[0] + MIN_VALUE_1))
         {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
@@ -897,20 +905,20 @@ double integUnderRigAngTr_BottRight(
 
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < 1.e-12) return fabs(bv[0] - uv[0]);
+    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) return fabs(bv[0] - uv[0]);
 
     ang = (uv[1] - bv[1]) / (uv[0] - bv[0]);
-    if (fabs(ang) < 1.e-12) return fabs(ang);
+    if (fabs(ang) < MIN_VALUE) return fabs(ang);
 
-    indCurSqOx[0] = (int) ((trPC[0] + 1.e-14) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the right side.
+    indCurSqOx[0] = (int) ((trPC[0] + MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the right side.
 
-    if ((trPC[0] + 1.e-14) <= 0) indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" is negative.
+    if ((trPC[0] + MIN_VALUE_1) <= 0) indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" is negative.
 
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
     indLB[0] = indCurSqOx[0];
     indLB[1] = indLB[0] + 1;
-    indCurSqOy[0] = (int) ((trPC[1] + 1.e-14) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
-    if ((trPC[1] + 1.e-14) <= 0)
+    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
+    if ((trPC[1] + MIN_VALUE_1) <= 0)
     {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
@@ -965,7 +973,7 @@ double integUnderRigAngTr_BottRight(
             trPN[1] = bv[1] + ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] > (uv[0] - 1.e-14))
+        if (trPN[0] > (uv[0] - MIN_VALUE_1))
         {
             //   -  Without "fabs"!!!
             trPN[0] = uv[0];
@@ -1092,26 +1100,26 @@ double integUnderRigAngTr_UppLeft(double tau,
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < 1.e-12) return fabs(bv[0] - uv[0]);
+    if ((fabs(bv[0] - uv[0])) < MIN_VALUE) return fabs(bv[0] - uv[0]);
 
     ang = (uv[1] - bv[1]) / (uv[0] - bv[0]);
-    if (fabs(ang) < 1.e-12) return fabs(ang);
+    if (fabs(ang) < MIN_VALUE) return fabs(ang);
 
     //   The follow equations are quite important.
-    indCurSqOx[0] = (int) ((trPC[0] + 1.e-14) / hx); //   -  If trPC[0] is in grid edge I want it will be in the right side.
-    if ((trPC[0] + 1.e-14) <= 0)
+    indCurSqOx[0] = (int) ((trPC[0] + MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be in the right side.
+    if ((trPC[0] + MIN_VALUE_1) <= 0)
     {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    indCurSqOy[0] = (int) ((trPC[1] + 1.e-14) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper square.
-    if ((trPC[1] + 1.e-14) <= 0)
+    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper square.
+    if ((trPC[1] + MIN_VALUE_1) <= 0)
     {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOy[1] = indCurSqOy[0] + 1;
-    indRB[0] = (int) ((uv[0] - 1.e-14) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
-    if ((uv[0] - 1.e-14) <= 0)
+    indRB[0] = (int) ((uv[0] - MIN_VALUE_1) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
+    if ((uv[0] - MIN_VALUE_1) <= 0)
     {
         indRB[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
@@ -1165,7 +1173,7 @@ double integUnderRigAngTr_UppLeft(double tau,
             trPN[1] = bv[1] + ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] > (uv[0] - 1.e-14))
+        if (trPN[0] > (uv[0] - MIN_VALUE_1))
         {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
@@ -1258,31 +1266,31 @@ double integUnderRigAngTr_UppRight(double tau,
     //   Initial data.
     trPC[0] = bv[0];
     trPC[1] = bv[1];
-    if ((fabs(bv[0] - uv[0])) < 1.e-12)
+    if ((fabs(bv[0] - uv[0])) < MIN_VALUE)
     {
         //   This triangle has very small width. I guess further computation isn't correct.
         return fabs(bv[0] - uv[0]);
     }
     ang = (uv[1] - bv[1]) / (bv[0] - uv[0]);
-    if (fabs(ang) < 1.e-12)
+    if (fabs(ang) < MIN_VALUE)
     {
         //   This triangle has very small height. I guess further computation isn't correct.
         return fabs(ang);
     }
-    indCurSqOx[0] = (int) ((trPC[0] - 1.e-14) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side.
-    if ((trPC[0] - 1.e-14) <= 0)
+    indCurSqOx[0] = (int) ((trPC[0] - MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side.
+    if ((trPC[0] - MIN_VALUE_1) <= 0)
     {
         indCurSqOx[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indCurSqOx[1] = indCurSqOx[0] + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    indLB[0] = (int) ((uv[0] + 1.e-14) / hx);
-    if ((uv[0] + 1.e-14) <= 0)
+    indLB[0] = (int) ((uv[0] + MIN_VALUE_1) / hx);
+    if ((uv[0] + MIN_VALUE_1) <= 0)
     {
         indLB[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
     indLB[1] = indLB[0] + 1;
-    indCurSqOy[0] = (int) ((trPC[1] + 1.e-14) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
-    if ((trPC[1] + 1.e-14) <= 0)
+    indCurSqOy[0] = (int) ((trPC[1] + MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be in the upper side.
+    if ((trPC[1] + MIN_VALUE_1) <= 0)
     {
         indCurSqOy[0] -= 1; //   -  The case when "trPC[0]" ia negative.
     }
@@ -1336,7 +1344,7 @@ double integUnderRigAngTr_UppRight(double tau,
             trPN[1] = bv[1] - ang * (trPN[0] - bv[0]);
         }
         //   c. Cheking.
-        if (trPN[0] < (uv[0] + 1.e-14))
+        if (trPN[0] < (uv[0] + MIN_VALUE_1))
         {
             trPN[0] = uv[0];
             trPN[1] = uv[1];
@@ -1460,8 +1468,7 @@ double integ_under_uniform_triangle(double tau,
                                     const double *oy,
                                     int oy_length,
                                     double *prev_density)
-{
-    const double MIN_VALUE = 1.e-12;
+{    
     double bv[2], mv[2], uv[2], ip[2]; //   -  Bottom, middle and upper vertices + intersection point
     
     bv[0] = x->x;
@@ -1505,7 +1512,7 @@ double integ_under_uniform_triangle(double tau,
 
 inline double u_function(double x, double y)
 {
-    return PAR_B * y * (1. - y) * (C_pi / 2. + atan(-x));
+    return B * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
 inline double v_function(
@@ -1518,21 +1525,12 @@ inline double v_function(
     return atan((x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom) * (y - bbDom));
 }
 
-double f_function(
-                  double lbDom, //   -  Left and right boundaries of rectangular domain.
-                  double rbDom,
-                  //
-                  double bbDom, //   -  Bottom and upper boundaries of rectangular domain.
-                  double ubDom,
-                  //
-                  double tau,
-                  int iCurrTL, //   -  Index of current time layer.
-                  //
-                  int iOfOXN, //   -  Index of current OX node.
-                  const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt
-
-                  int iOfOYN, //   -  Index of current OY node.
-                  const double *masOY) //   -  Number of OY steps (segments).
+double f_function(double tau,
+                  int iCurrTL,
+                  int iOfOXN,
+                  const double *masOX,
+                  int iOfOYN, 
+                  const double *masOY)
 {
     //printf("\ncpu f function \n");
     double t = tau * iCurrTL;
@@ -1541,7 +1539,7 @@ double f_function(
     //printf("cpu x = %f\n", x);
     double y = masOY[ iOfOYN ];
     //printf("cpu y = %f\n", y);
-    double arg_v = (x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - ubDom) * (y - bbDom);
+    double arg_v = (x - LB) * (x - RB) * (1. + t) / 10. * (y - UB) * (y - BB);
     //printf("cpu arg_v = %f\n", arg_v);
     double rho, dRhoDT, dRhoDX, dRhoDY;
     double u, duDX;
@@ -1556,11 +1554,11 @@ double f_function(
     //  printf("cpu dRhoDY = %f\n", dRhoDY);
     u = u_function(x, y);
     //  printf("cpu u = %f\n", u);
-    duDX = -PAR_B * y * (1. - y) / (1. + x * x);
+    duDX = -B * y * (1. - y) / (1. + x * x);
     //  printf("cpu duDX = %f\n", duDX);
-    v = v_function(lbDom, rbDom, bbDom, ubDom, t, x, y);
+    v = v_function(LB, RB, BB, UB, t, x, y);
     //  printf("cpu v = %f\n", v);
-    dvDY = (x - lbDom) * (x - rbDom) * (1. + t) / 10. * (y - bbDom + y - ubDom);
+    dvDY = (x - LB) * (x - RB) * (1. + t) / 10. * (y - BB + y - UB);
     //  printf("cpu dvDY 1 = %f\n", dvDY);
     dvDY = dvDY / (1. + arg_v * arg_v);
     //  printf("cpu dvDY 2 = %f\n", dvDY);
@@ -1569,11 +1567,7 @@ double f_function(
     return res;
 }
 
-quad_type compute_coordinate_on_prev_layer(double lb,
-                                           double rb,
-                                           double bb,
-                                           double ub,
-                                           double tau,
+quad_type compute_coordinate_on_prev_layer(double tau,
                                            int cur_tl,
                                            int i_ox,
                                            const double *masOX,
@@ -1634,22 +1628,22 @@ quad_type compute_coordinate_on_prev_layer(double lb,
 
     // Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     u = u_function(alpha->x, alpha->y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, alpha->x, alpha->y);
+    v = v_function(LB, RB, BB, UB, tau*cur_tl, alpha->x, alpha->y);
     alpha->x -= tau * u;
     alpha->y -= tau * v;
 
     u = u_function(beta->x, beta->y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, beta->x, beta->y);
+    v = v_function(LB, RB, BB, UB, tau*cur_tl, beta->x, beta->y);
     beta->x -= tau * u;
     beta->y -= tau * v;
 
     u = u_function(gamma->x, gamma->y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, gamma->x, gamma->y);
+    v = v_function(LB, RB, BB, UB, tau*cur_tl, gamma->x, gamma->y);
     gamma->x -= tau * u;
     gamma->y -= tau * v;
 
     u = u_function(theta->x, theta->y);
-    v = v_function(lb, rb, bb, ub, tau*cur_tl, theta->x, theta->y);
+    v = v_function(LB, RB, BB, UB, tau*cur_tl, theta->x, theta->y);
     theta->x -= tau * u;
     theta->y -= tau * v;
 
@@ -1678,11 +1672,7 @@ quad_type compute_coordinate_on_prev_layer(double lb,
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
-quad_type get_quadrangle_type(double lb,
-                              double rb,
-                              double bb,
-                              double ub,
-                              double tau,
+quad_type get_quadrangle_type(double tau,
                               int curr_tl,
                               int i_ox,
                               const double *ox,
@@ -1700,9 +1690,7 @@ quad_type get_quadrangle_type(double lb,
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
-    quad_type type = compute_coordinate_on_prev_layer(lb, rb,
-                                                      bb, ub,
-                                                      tau, curr_tl,
+    quad_type type = compute_coordinate_on_prev_layer(tau, curr_tl,
                                                       i_ox, ox, ox_length,
                                                       i_oy, oy, oy_length, &alpha, &beta, &gamma, &theta);
 
@@ -1719,11 +1707,7 @@ quad_type get_quadrangle_type(double lb,
     return type;
 }
 
-double compute_value(double lb,
-                     double rb,
-                     double bb,
-                     double ub,
-                     double tau,
+double compute_value(double tau,
                      double curr_tl,
                      int i_ox,
                      const double *ox,
@@ -1735,7 +1719,7 @@ double compute_value(double lb,
 {
     point_t t_1_a, t_1_b, t_1_c, t_2_a, t_2_b, t_2_c;
 
-    quad_type type = get_quadrangle_type(lb, rb, bb, ub, tau, curr_tl,
+    quad_type type = get_quadrangle_type(tau, curr_tl,
                                          i_ox, ox, ox_length,
                                          i_oy, oy, oy_length,
                                          &t_1_a, &t_1_b, &t_1_c,
@@ -1860,11 +1844,7 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
     return hx * hy * result;
 }
 
-double solve(double lb,
-             double rb,
-             double bb,
-             double ub,
-             double tau,
+double solve(double tau,
              int time_step_count,
              double *ox,
              int ox_length,
@@ -1885,14 +1865,14 @@ double solve(double lb,
     {
         for (int i = 0; i <= ox_length; i++)
         {
-            density[ i ] = init_bound(ox[ i ], bb, tau * i_tl, bottom);
-            density[ (ox_length + 1) * oy_length + i ] = init_bound(ox[ i ], ub, tau * i_tl, up);
+            density[ i ] = init_bound(ox[ i ], BB, tau * i_tl, bottom);
+            density[ (ox_length + 1) * oy_length + i ] = init_bound(ox[ i ], UB, tau * i_tl, up);
         }
 
         for (int i = 0; i <= oy_length; i++)
         {
-            density[ (ox_length + 1) * i ] = init_bound(lb, oy[ i ], tau * i_tl, left);
-            density[ (ox_length + 1) * i + ox_length ] = init_bound(rb, oy[ i ], tau * i_tl, right);
+            density[ (ox_length + 1) * i ] = init_bound(LB, oy[ i ], tau * i_tl, left);
+            density[ (ox_length + 1) * i + ox_length ] = init_bound(RB, oy[ i ], tau * i_tl, right);
         }
 
         for (int i_oy = 1; i_oy < oy_length; i_oy++)
@@ -1901,14 +1881,12 @@ double solve(double lb,
             {
                 int index = (ox_length + 1) * i_oy + i_ox;
 
-                double value = compute_value(lb, rb,
-                                             bb, ub,
-                                             tau, i_tl,
+                double value = compute_value(tau, i_tl,
                                              i_ox, ox, ox_length,
                                              i_oy, oy, oy_length,
                                              prev_density);
                 /*print_params(index, 12,
-                             b,
+                             PAR_B,
                              lb,
                              rb,
                              bb,
@@ -1927,11 +1905,7 @@ double solve(double lb,
                 h = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
                 value /= h;
 
-                double rp = f_function(lb,
-                                       rb,
-                                       bb,
-                                       ub,
-                                       tau,
+                double rp = f_function(tau,
                                        i_tl,
                                        i_ox,
                                        ox,
@@ -1958,6 +1932,12 @@ double *solve(double b,
               int oy_length,
               double* norm)
 {
+    B = b;
+    UB = ub;
+    BB = bb;
+    LB = lb;
+    RB = rb;
+    
     double *density = new double [ (ox_length + 1) * (oy_length + 1) ];
     double *ox = new double [ ox_length + 1 ];
     double *oy = new double [ oy_length + 1 ];
@@ -1971,22 +1951,18 @@ double *solve(double b,
     {
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
-
-    PAR_B = b;
     
-    print_params(PAR_B,
-                 lb,
-                 rb,
-                 bb,
-                 ub,
+    print_params(B,
+                 LB,
+                 RB,
+                 BB,
+                 UB,
                  time_step,
                  time_step_count,
                  ox_length,
                  oy_length);
 
-    solve(lb, rb,
-          bb, ub,
-          time_step,
+    solve(time_step,
           time_step_count,
           ox,
           ox_length,
