@@ -1170,59 +1170,56 @@ double integUnderRigAngTr_UppRight(int tl,
 }
 
 
-double integ_under_bott_triangle(int tl,
-        double *lv, //   -  Left vertex of Bottom triangle.
-        double *rv, //   -  Right vertex of Bottom triangle.
-        double *bv, //   -  Bottom vertex of Bottom triangle.
+double integrate_bottom_triangle(int tl,
+        double *l, //   -  Left vertex of Bottom triangle.
+        double *r, //   -  Right vertex of Bottom triangle.
+        double *b, //   -  Bottom vertex of Bottom triangle.
         const double *ox,
         int ox_length,
         const double *oy,
         int oy_length,
         double *density) {
     double result = 0.;
-    if (bv[0] <= lv[0]) {
-        result = integUnderRigAngTr_BottRight(tl, bv, rv, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_BottRight(tl, bv, lv, ox, ox_length, oy, oy_length, density);
+    if (b[0] <= l[0]) {
+        result = integUnderRigAngTr_BottRight(tl, b, r, ox, ox_length, oy, oy_length, density);
+        result -= integUnderRigAngTr_BottRight(tl, b, l, ox, ox_length, oy, oy_length, density);
         return result;
-    } else if (bv[0] > lv[0] && bv[0] < rv[0]) {
-        result = integUnderRigAngTr_BottLeft(tl, bv, lv, ox, ox_length, oy, oy_length, density);
-        result += integUnderRigAngTr_BottRight(tl, bv, rv, ox, ox_length, oy, oy_length, density);
+    } else if (b[0] > l[0] && b[0] < r[0]) {
+        result = integUnderRigAngTr_BottLeft(tl, b, l, ox, ox_length, oy, oy_length, density);
+        result += integUnderRigAngTr_BottRight(tl, b, r, ox, ox_length, oy, oy_length, density);
         return result;
-    } else if (bv[0] >= rv[0]) {
-        result = integUnderRigAngTr_BottLeft(tl, bv, lv, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_BottLeft(tl, bv, rv, ox, ox_length, oy, oy_length, density);
+    } else if (b[0] >= r[0]) {
+        result = integUnderRigAngTr_BottLeft(tl, b, l, ox, ox_length, oy, oy_length, density);
+        result -= integUnderRigAngTr_BottLeft(tl, b, r, ox, ox_length, oy, oy_length, density);
         return result;
     }
     return result;
 }
 
-double integ_under_upper_triangle(int tl,
-        double *lv, //   -  Left vertex of Upper triangle.
-        double *rv, //   -  Right vertex of Upper triangle.
-        double *uv, //   -  Upper vertex of Upper triangle.
-        const double *ox,
-        int ox_length,
-        const double *oy,
-        int oy_length,
+double integrate_upper_triangle(int tl,
+        double *l, //   -  Left vertex of Upper triangle.
+        double *r, //   -  Right vertex of Upper triangle.
+        double *u, //   -  Upper vertex of Upper triangle.
+        const double *ox, int ox_length,  const double *oy, int oy_length,
         double *density) {
     double result = 0.;
-    if (uv[0] <= lv[0]) {
-        result = integUnderRigAngTr_UppRight(tl, rv, uv, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_UppRight(tl, lv, uv, ox, ox_length, oy, oy_length, density);
+    if (u[0] <= l[0]) {
+        result = integUnderRigAngTr_UppRight(tl, r, u, ox, ox_length, oy, oy_length, density);
+        result -= integUnderRigAngTr_UppRight(tl, l, u, ox, ox_length, oy, oy_length, density);
         return result;
-    } else if (uv[0] > lv[0] && uv[0] < rv[0]) {
-        result = integUnderRigAngTr_UppLeft(tl, lv, uv, ox, ox_length, oy, oy_length, density);
-        result += integUnderRigAngTr_UppRight(tl, rv, uv, ox, ox_length, oy, oy_length, density);
+    } else if (u[0] > l[0] && u[0] < r[0]) {
+        result = integUnderRigAngTr_UppLeft(tl, l, u, ox, ox_length, oy, oy_length, density);
+        result += integUnderRigAngTr_UppRight(tl, r, u, ox, ox_length, oy, oy_length, density);
         return result;
-    } else if (uv[0] >= rv[0]) {
-        result = integUnderRigAngTr_UppLeft(tl, lv, uv, ox, ox_length, oy, oy_length, density);
-        result -= integUnderRigAngTr_UppLeft(tl, rv, uv, ox, ox_length, oy, oy_length, density);
+    } else if (u[0] >= r[0]) {
+        result = integUnderRigAngTr_UppLeft(tl, l, u, ox, ox_length, oy, oy_length, density);
+        result -= integUnderRigAngTr_UppLeft(tl, r, u, ox, ox_length, oy, oy_length, density);
         return result;
     }
     return result;
 }
 
-double wall_integ_under_uniform_triangle(int curr_tl,
+double wall_integrate_uniform_triangle(int tl,
         point_t *a,
         point_t *b,
         point_t *c,
@@ -1234,7 +1231,7 @@ double wall_integ_under_uniform_triangle(int curr_tl,
     return 0;
 }
 
-double integ_under_uniform_triangle(int tl,
+double integrate_uniform_triangle(int tl,
         point_t *x,
         point_t *y,
         point_t *z,
@@ -1272,12 +1269,12 @@ double integ_under_uniform_triangle(int tl,
         ip[0] = tx;
     }
 
-    return integ_under_bott_triangle(tl,
+    return integrate_bottom_triangle(tl,
             mv, ip, bv,
             ox, ox_length,
             oy, oy_length,
             density)
-            + integ_under_upper_triangle(tl,
+            + integrate_upper_triangle(tl,
             mv, ip, uv,
             ox, ox_length,
             oy, oy_length,
@@ -1493,24 +1490,24 @@ double compute_value(double curr_tl,
     double result = 0.;
     switch (type) {
         case wall:
-            result += wall_integ_under_uniform_triangle(curr_tl,
+            result += wall_integrate_uniform_triangle(curr_tl,
                     &t_1_a, &t_1_b, &t_1_c,
                     ox, ox_length,
                     oy, oy_length,
                     density);
-            result += wall_integ_under_uniform_triangle(curr_tl,
+            result += wall_integrate_uniform_triangle(curr_tl,
                     &t_2_a, &t_2_b, &t_2_c,
                     ox, ox_length,
                     oy, oy_length,
                     density);
             return result;
         case normal:
-            result += integ_under_uniform_triangle(curr_tl,
+            result += integrate_uniform_triangle(curr_tl,
                     &t_1_a, &t_1_b, &t_1_c,
                     ox, ox_length,
                     oy, oy_length,
                     density);
-            result += integ_under_uniform_triangle(curr_tl,
+            result += integrate_uniform_triangle(curr_tl,
                     &t_2_a, &t_2_b, &t_2_c,
                     ox, ox_length,
                     oy, oy_length,
