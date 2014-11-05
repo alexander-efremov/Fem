@@ -601,6 +601,8 @@ double integrate_right_triangle_bottom_left(
     if (indCurSqOy[1] < 0) {
         distOy = fabs(hy * indCurSqOy[1] - trPC[1]);
     }
+    
+    
     do {
         //   a. First case.
         if ((distOy / distOx) <= ang) {
