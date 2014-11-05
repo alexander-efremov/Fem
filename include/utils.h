@@ -2,7 +2,7 @@
 #define	UTILS_H
 
 
-void print_params(double b,
+inline void print_params(double b,
         double lb,
         double rb,
         double bb,
@@ -22,7 +22,7 @@ void print_params(double b,
     printf("oy length = %d\n", oy_length + 1);
 }
 
-void print_params(int index, int needed_index,
+inline void print_params(int index, int needed_index,
         double b,
         double lb,
         double rb,
@@ -54,7 +54,7 @@ void print_params(int index, int needed_index,
     }
 }
 
-void print_matrix_to_file(int n, int m, double *data, char* filename) {
+inline void print_matrix_to_file(int n, int m, double *data, char* filename) {
     FILE *f = fopen(filename, "w");
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
@@ -66,7 +66,7 @@ void print_matrix_to_file(int n, int m, double *data, char* filename) {
     fclose(f);
 }
 
-void print_matrix(double *a, int n, int m, int precision = 8) {
+inline void print_matrix(double *a, int n, int m, int precision = 8) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
             int k = i * n + j;
