@@ -9,11 +9,11 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=MinGW-Windows
 CND_ARTIFACT_DIR_Debug=dist/Debug/MinGW-Windows
-CND_ARTIFACT_NAME_Debug=fem
-CND_ARTIFACT_PATH_Debug=dist/Debug/MinGW-Windows/fem
+CND_ARTIFACT_NAME_Debug=libfem.a
+CND_ARTIFACT_PATH_Debug=dist/Debug/MinGW-Windows/libfem.a
 CND_PACKAGE_DIR_Debug=dist/Debug/MinGW-Windows/package
-CND_PACKAGE_NAME_Debug=fem.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/MinGW-Windows/package/fem.tar
+CND_PACKAGE_NAME_Debug=Fem.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/MinGW-Windows/package/Fem.tar
 # Release configuration
 CND_PLATFORM_Release=MinGW-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/MinGW-Windows

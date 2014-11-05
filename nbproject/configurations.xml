@@ -9,15 +9,10 @@
       <itemPath>include/timer.h</itemPath>
       <itemPath>include/utils.h</itemPath>
     </logicalFolder>
-    <logicalFolder name="ResourceFiles"
-                   displayName="Resource Files"
-                   projectFiles="true">
-    </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>src/low_ord_oper.cpp</itemPath>
-      <itemPath>src/main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -36,7 +31,7 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="1">
+    <conf name="Debug" type="3">
       <toolsSet>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
@@ -48,6 +43,8 @@
             <pElem>include</pElem>
           </incDir>
         </ccTool>
+        <archiverTool>
+        </archiverTool>
       </compileType>
       <folder path="TestFiles/f1">
         <cTool>
@@ -117,8 +114,6 @@
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
@@ -168,8 +163,6 @@
       <item path="include/utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/low_ord_oper.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
