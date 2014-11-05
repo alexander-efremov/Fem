@@ -3,6 +3,7 @@
 
 static const double C_pi = 3.14159265358979323846264338327;
 static int wall_counter = 0;
+static double PAR_B;
 
 double _itemOfInteg_1SpecType(double Py,
                               double Qy,
@@ -23,9 +24,7 @@ double analytical_solution(double t, double x, double y)
 
 double _itemOfInteg_2SpecType(double Py,
                               double Qy,
-                              //
                               double alpha,
-                              //
                               double a,
                               double b,
                               double betta)
@@ -168,14 +167,14 @@ double integUnderRightTr_OneCell(double Py,
                                  double b_SL,
                                  double Gx,
                                  double tau,
-                                 int iCurrTL,
+                                 int tl,
                                  int *indCurSqOx, //   -  Index of current square by Ox axis.
                                  int *indCurSqOy, //   -  Index of current square by Oy axis.
-                                 const double *masOX, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
+                                 const double *ox, //   -  Massive of OX steps. Dimension = numOfOXSt +1.
                                  int numOfOXSt,
-                                 const double *masOY, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
+                                 const double *oy, //   -  Massive of OY steps. Dimension = numOfOYSt +1.
                                  int numOfOYSt,
-                                 double *rhoInPrevTL_asV)
+                                 double *prev_density)
 {
     return -1. * integUnderLeftTr_OneCell(
                                           Py, Qy,
@@ -183,16 +182,16 @@ double integUnderRightTr_OneCell(double Py,
                                           a_SL, b_SL,
                                           Gx, //   -  double Hx,
                                           //
-                                          tau, iCurrTL, //   -  Index of current time layer.
+                                          tau, tl, //   -  Index of current time layer.
                                           //
                                           indCurSqOx, //   -  Index of current square by Ox axis.
                                           indCurSqOy, //   -  Index of current square by Oy axis.
                                           //
-                                          masOX, numOfOXSt, //   -  Massive of OX steps. Dimension = numOfOXSt +1. Number of OX steps.
+                                          ox, numOfOXSt, //   -  Massive of OX steps. Dimension = numOfOXSt +1. Number of OX steps.
                                           //
-                                          masOY, numOfOYSt, //   -  Massive of OY steps. Dimension = numOfOYSt +1. Number of OY steps.
+                                          oy, numOfOYSt, //   -  Massive of OY steps. Dimension = numOfOYSt +1. Number of OY steps.
                                           //
-                                          rhoInPrevTL_asV);
+                                          prev_density);
 }
 
 double integUnderRectAng_OneCell(double Py,
@@ -1504,9 +1503,9 @@ double integ_under_uniform_triangle(double tau,
                                          prev_density);
 }
 
-inline double u_function(double par_b, double x, double y)
+inline double u_function(double x, double y)
 {
-    return par_b * y * (1. - y) * (C_pi / 2. + atan(-x));
+    return PAR_B * y * (1. - y) * (C_pi / 2. + atan(-x));
 }
 
 inline double v_function(
@@ -1520,8 +1519,6 @@ inline double v_function(
 }
 
 double f_function(
-                  double par_b, //   -  Item of second parameter from "u_funcion".
-                  //
                   double lbDom, //   -  Left and right boundaries of rectangular domain.
                   double rbDom,
                   //
@@ -1557,9 +1554,9 @@ double f_function(
     //  printf("cpu dRhoDX = %f\n", dRhoDX);
     dRhoDY = t * x * cos(t * x * y);
     //  printf("cpu dRhoDY = %f\n", dRhoDY);
-    u = u_function(par_b, x, y);
+    u = u_function(x, y);
     //  printf("cpu u = %f\n", u);
-    duDX = -par_b * y * (1. - y) / (1. + x * x);
+    duDX = -PAR_B * y * (1. - y) / (1. + x * x);
     //  printf("cpu duDX = %f\n", duDX);
     v = v_function(lbDom, rbDom, bbDom, ubDom, t, x, y);
     //  printf("cpu v = %f\n", v);
@@ -1572,8 +1569,7 @@ double f_function(
     return res;
 }
 
-quad_type compute_coordinate_on_prev_layer(double par_b,
-                                           double lb,
+quad_type compute_coordinate_on_prev_layer(double lb,
                                            double rb,
                                            double bb,
                                            double ub,
@@ -1637,22 +1633,22 @@ quad_type compute_coordinate_on_prev_layer(double par_b,
     double u, v;
 
     // Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
-    u = u_function(par_b, alpha->x, alpha->y);
+    u = u_function(alpha->x, alpha->y);
     v = v_function(lb, rb, bb, ub, tau*cur_tl, alpha->x, alpha->y);
     alpha->x -= tau * u;
     alpha->y -= tau * v;
 
-    u = u_function(par_b, beta->x, beta->y);
+    u = u_function(beta->x, beta->y);
     v = v_function(lb, rb, bb, ub, tau*cur_tl, beta->x, beta->y);
     beta->x -= tau * u;
     beta->y -= tau * v;
 
-    u = u_function(par_b, gamma->x, gamma->y);
+    u = u_function(gamma->x, gamma->y);
     v = v_function(lb, rb, bb, ub, tau*cur_tl, gamma->x, gamma->y);
     gamma->x -= tau * u;
     gamma->y -= tau * v;
 
-    u = u_function(par_b, theta->x, theta->y);
+    u = u_function(theta->x, theta->y);
     v = v_function(lb, rb, bb, ub, tau*cur_tl, theta->x, theta->y);
     theta->x -= tau * u;
     theta->y -= tau * v;
@@ -1682,8 +1678,7 @@ quad_type compute_coordinate_on_prev_layer(double par_b,
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
-quad_type get_quadrangle_type(double b,
-                              double lb,
+quad_type get_quadrangle_type(double lb,
                               double rb,
                               double bb,
                               double ub,
@@ -1705,8 +1700,7 @@ quad_type get_quadrangle_type(double b,
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
 
-    quad_type type = compute_coordinate_on_prev_layer(b,
-                                                      lb, rb,
+    quad_type type = compute_coordinate_on_prev_layer(lb, rb,
                                                       bb, ub,
                                                       tau, curr_tl,
                                                       i_ox, ox, ox_length,
@@ -1725,8 +1719,7 @@ quad_type get_quadrangle_type(double b,
     return type;
 }
 
-double compute_value(double b,
-                     double lb,
+double compute_value(double lb,
                      double rb,
                      double bb,
                      double ub,
@@ -1742,7 +1735,7 @@ double compute_value(double b,
 {
     point_t t_1_a, t_1_b, t_1_c, t_2_a, t_2_b, t_2_c;
 
-    quad_type type = get_quadrangle_type(b, lb, rb, bb, ub, tau, curr_tl,
+    quad_type type = get_quadrangle_type(lb, rb, bb, ub, tau, curr_tl,
                                          i_ox, ox, ox_length,
                                          i_oy, oy, oy_length,
                                          &t_1_a, &t_1_b, &t_1_c,
@@ -1867,8 +1860,7 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
     return hx * hy * result;
 }
 
-double solve(double b,
-             double lb,
+double solve(double lb,
              double rb,
              double bb,
              double ub,
@@ -1909,8 +1901,7 @@ double solve(double b,
             {
                 int index = (ox_length + 1) * i_oy + i_ox;
 
-                double value = compute_value(b,
-                                             lb, rb,
+                double value = compute_value(lb, rb,
                                              bb, ub,
                                              tau, i_tl,
                                              i_ox, ox, ox_length,
@@ -1936,8 +1927,7 @@ double solve(double b,
                 h = (oy[i_oy + 1] - oy[i_oy - 1]) / 2.;
                 value /= h;
 
-                double rp = f_function(b,
-                                       lb,
+                double rp = f_function(lb,
                                        rb,
                                        bb,
                                        ub,
@@ -1982,7 +1972,9 @@ double *solve(double b,
         oy[i] = bb + i * (ub - bb) / oy_length;
     }
 
-    print_params(b,
+    PAR_B = b;
+    
+    print_params(PAR_B,
                  lb,
                  rb,
                  bb,
@@ -1992,8 +1984,7 @@ double *solve(double b,
                  ox_length,
                  oy_length);
 
-    solve(b,
-          lb, rb,
+    solve(lb, rb,
           bb, ub,
           time_step,
           time_step_count,
