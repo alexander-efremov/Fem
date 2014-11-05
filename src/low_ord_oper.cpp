@@ -1396,9 +1396,6 @@ double* compute_density(double b,
     TIME_STEP_CNT = time_step_count;
     XY_LEN = (ox_length + 1) * (oy_length + 1);
 
-    //  point_t *t = new point_t(19,0);
-    //  printf("%f \n", (*t)[0]);
-
     double* density = new double [ XY_LEN ];
     double* ox = new double [ OX_LEN + 1 ];
     double* oy = new double [ OY_LEN + 1 ];
