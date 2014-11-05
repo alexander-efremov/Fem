@@ -723,7 +723,7 @@ double integrate_right_triangle_bottom_right(
     double tmp;
 
     trPC = bv;
-    
+
     indCurSqOx[0] = (int) ((trPC.x + _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be between in the right side.
 
     if (trPC.x + _MIN_VALUE_1 <= 0)
@@ -776,7 +776,7 @@ double integrate_right_triangle_bottom_right(
             trPN.y = bv[1] + ang * (trPN.x - bv[0]);
         }
         //   c. Checking.
-        if (trPN.x > (uv[0] - _MIN_VALUE_1)) {            
+        if (trPN.x > (uv[0] - _MIN_VALUE_1)) {
             trPN = uv;
             isTrDone = true;
             wTrPNI = 0;
@@ -910,7 +910,7 @@ double integrate_right_triangle_upper_left(
         }
         //   c. Cheking.
         if (trPN.x > (uv[0] - _MIN_VALUE_1)) {
-           trPN = uv;
+            trPN = uv;
             isTrDone = true;
             wTrPNI = 0;
         }
@@ -1045,7 +1045,7 @@ double integrate_right_triangle_upper_right(
         }
         //   c. Checking.
         if (trPN.x < (uv[0] + _MIN_VALUE_1)) {
-            trPN = uv;            
+            trPN = uv;
             isTrDone = true;
             wTrPNI = 0;
         }
@@ -1230,7 +1230,7 @@ double func_f(
 }
 
 quad_type get_coordinates_on_prev_layer(int cur_tl, int ix, int iy,
-        const double *ox,        
+        const double *ox,
         const double *oy,
         point_t &alpha, point_t &beta, point_t &gamma, point_t &theta) {
     //   1. First of all let's compute coordinates of square vertexes.
