@@ -607,9 +607,10 @@ double integOfChan_SLLeftSd(
     return result;
 }
 
-double integrate_right_triangle_bottom_left(int tl,
+double integrate_right_triangle_bottom_left(
         double *bv,
         double *uv,
+        int tl,
         const double *ox,
         int ox_length,
         const double *oy,
@@ -748,9 +749,9 @@ double integrate_right_triangle_bottom_left(int tl,
     return result;
 }
 
-double integrate_right_triangle_bottom_right(int tl,
-        double *bv,
+double integrate_right_triangle_bottom_right(double *bv,
         double *uv,
+        int tl,
         const double *ox,
         int ox_length,
         const double *oy,
@@ -882,10 +883,9 @@ double integrate_right_triangle_bottom_right(int tl,
     return result;
 }
 
-double integrate_right_triangle_up_left(
-        int tl,
-        double *bv,
+double integrate_right_triangle_up_left(double *bv,
         double *uv,
+        int tl,
         const double *ox,
         int ox_length,
         const double *oy,
@@ -1024,9 +1024,9 @@ double integrate_right_triangle_up_left(
     return integOfUppTr;
 }
 
-double integrate_right_triangle_up_right(int tl,
-        double *bv,
+double integrate_right_triangle_up_right(double *bv,
         double *uv,
+        int tl,
         const double *ox,
         int ox_length,
         const double *oy,
@@ -1178,19 +1178,18 @@ double integrate_bottom_triangle(int tl,
         double *density) {
     double result = 0.;
     if (b[0] == l[0]) {
-        result = integrate_right_triangle_bottom_right(tl, b, r, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_bottom_right(b, r, tl, ox, ox_length, oy, oy_length, density);
     } else if (b[0] == r[0]) {
-        result = integrate_right_triangle_bottom_left(tl, b, l, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_bottom_left(b, l, tl, ox, ox_length, oy, oy_length, density);
     } else if (b[0] < l[0]) {
-        result = integrate_right_triangle_bottom_right(tl, b, r, ox, ox_length, oy, oy_length, density);
-        result -= integrate_right_triangle_bottom_right(tl, b, l, ox, ox_length, oy, oy_length, density);        
-    }
-    else if (b[0] > l[0] && b[0] < r[0]) {
-        result = integrate_right_triangle_bottom_left(tl, b, l, ox, ox_length, oy, oy_length, density);
-        result += integrate_right_triangle_bottom_right(tl, b, r, ox, ox_length, oy, oy_length, density);        
+        result = integrate_right_triangle_bottom_right(b, r, tl, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_bottom_right(b, l, tl, ox, ox_length, oy, oy_length, density);
+    } else if (b[0] > l[0] && b[0] < r[0]) {
+        result = integrate_right_triangle_bottom_left(b, l, tl, ox, ox_length, oy, oy_length, density);
+        result += integrate_right_triangle_bottom_right(b, r, tl, ox, ox_length, oy, oy_length, density);
     } else if (b[0] > r[0]) {
-        result = integrate_right_triangle_bottom_left(tl, b, l, ox, ox_length, oy, oy_length, density);
-        result -= integrate_right_triangle_bottom_left(tl, b, r, ox, ox_length, oy, oy_length, density);        
+        result = integrate_right_triangle_bottom_left(b, l, tl, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_bottom_left(b, r, tl, ox, ox_length, oy, oy_length, density);
     }
     return result;
 }
@@ -1203,18 +1202,18 @@ double integrate_upper_triangle(int tl,
         double *density) {
     double result = 0.;
     if (u[0] == l[0]) {
-        result = integrate_right_triangle_up_right(tl, r, u, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_up_right(r, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] == r[0]) {
-        result = integrate_right_triangle_up_left(tl, l, u, ox, ox_length, oy, oy_length, density);
+        result = integrate_right_triangle_up_left(l, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] < l[0]) {
-        result = integrate_right_triangle_up_right(tl, r, u, ox, ox_length, oy, oy_length, density);
-        result -= integrate_right_triangle_up_right(tl, l, u, ox, ox_length, oy, oy_length, density);        
+        result = integrate_right_triangle_up_right(r, u, tl, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_up_right(l, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] > l[0] && u[0] < r[0]) {
-        result = integrate_right_triangle_up_left(tl, l, u, ox, ox_length, oy, oy_length, density);
-        result += integrate_right_triangle_up_right(tl, r, u, ox, ox_length, oy, oy_length, density);        
+        result = integrate_right_triangle_up_left(l, u, tl, ox, ox_length, oy, oy_length, density);
+        result += integrate_right_triangle_up_right(r, u, tl, ox, ox_length, oy, oy_length, density);
     } else if (u[0] > r[0]) {
-        result = integrate_right_triangle_up_left(tl, l, u, ox, ox_length, oy, oy_length, density);
-        result -= integrate_right_triangle_up_left(tl, r, u, ox, ox_length, oy, oy_length, density);        
+        result = integrate_right_triangle_up_left(l, u, tl, ox, ox_length, oy, oy_length, density);
+        result -= integrate_right_triangle_up_left(r, u, tl, ox, ox_length, oy, oy_length, density);
     }
     return result;
 }
