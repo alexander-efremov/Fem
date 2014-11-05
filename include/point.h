@@ -2,7 +2,6 @@
 #ifndef MISC_H
 #define	MISC_H
 
-
 struct point_t {
     double x;
     double y;
@@ -43,12 +42,12 @@ struct point_t {
 
 void sort_by_y(point_t& x, point_t& y, point_t& z) {
     if (x.y < y.y) {
-        if (z.y < x.y) 
+        if (z.y < x.y)
             std::swap(x, z);
     } else {
-        if (y.y < z.y) 
+        if (y.y < z.y)
             std::swap(x, y);
-        else 
+        else
             std::swap(x, z);
     }
     if (z.y < y.y) std::swap(y, z);
@@ -89,17 +88,6 @@ double get_vector_product(point_t *alpha, point_t *beta, point_t *theta) {
     alpha_to_theta.y = theta->y - alpha->y;
     return alpha_to_beta.x * alpha_to_theta.y - alpha_to_beta.y * alpha_to_theta.x;
 }
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
-
-
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* MISC_H */
 
