@@ -5,7 +5,7 @@
 #include <string.h>
 #include <algorithm>
 
-enum bound_side {
+enum bound {
     up,
     bottom,
     left,

@@ -564,8 +564,8 @@ double integrate_chanel_slant_left(
 }
 
 double integrate_right_triangle_bottom_left(
-        double *bv,
-        double *uv,
+        point_t &bv,
+        point_t &uv,
         int tl,
         const double *ox,
         const double *oy,
@@ -699,8 +699,9 @@ double integrate_right_triangle_bottom_left(
     return result;
 }
 
-double integrate_right_triangle_bottom_right(double *bv,
-        double *uv,
+double integrate_right_triangle_bottom_right(
+        point_t &bv,
+        point_t &uv,
         int tl,
         const double *ox,
         const double *oy,
@@ -835,8 +836,9 @@ double integrate_right_triangle_bottom_right(double *bv,
     return result;
 }
 
-double integrate_right_triangle_upper_left(double *bv,
-        double *uv,
+double integrate_right_triangle_upper_left(
+        point_t &bv,
+        point_t &uv,
         int tl,
         const double *ox,
         const double *oy,
@@ -969,8 +971,9 @@ double integrate_right_triangle_upper_left(double *bv,
     return integOfUppTr;
 }
 
-double integrate_right_triangle_upper_right(double *bv,
-        double *uv,
+double integrate_right_triangle_upper_right(
+        point_t &bv,
+        point_t &uv,
         int tl,
         const double *ox,
         const double *oy,
@@ -1107,24 +1110,24 @@ double integrate_right_triangle_upper_right(double *bv,
 }
 
 double integrate_bottom_triangle(int tl,
-        double *l, //   -  Left vertex of Bottom triangle
-        double *r, //   -  Right vertex of Bottom triangle
-        double *m, //   -  Vertex of between L and R
+        point_t &l, //   -  Left vertex of Bottom triangle
+        point_t &r, //   -  Right vertex of Bottom triangle
+        point_t &m, //   -  Vertex of between L and R
         const double *ox,
         const double *oy,
         double *density) {
     double result = 0.;
-    if (m[0] == l[0]) {
+    if (m.x == l.x) {
         result = integrate_right_triangle_bottom_right(m, r, tl, ox, oy, density);
-    } else if (m[0] == r[0]) {
+    } else if (m.x == r.x) {
         result = integrate_right_triangle_bottom_left(m, l, tl, ox, oy, density);
-    } else if (m[0] < l[0]) {
+    } else if (m.x < l.x) {
         result = integrate_right_triangle_bottom_right(m, r, tl, ox, oy, density);
         result -= integrate_right_triangle_bottom_right(m, l, tl, ox, oy, density);
-    } else if (m[0] > l[0] && m[0] < r[0]) {
+    } else if (m.x > l.x && m.x < r.x) {
         result = integrate_right_triangle_bottom_left(m, l, tl, ox, oy, density);
         result += integrate_right_triangle_bottom_right(m, r, tl, ox, oy, density);
-    } else if (m[0] > r[0]) {
+    } else if (m.x > r.x) {
         result = integrate_right_triangle_bottom_left(m, l, tl, ox, oy, density);
         result -= integrate_right_triangle_bottom_left(m, r, tl, ox, oy, density);
     }
@@ -1132,23 +1135,23 @@ double integrate_bottom_triangle(int tl,
 }
 
 double integrate_upper_triangle(int tl,
-        double *l, //   -  Left vertex of Upper triangle
-        double *r, //   -  Right vertex of Upper triangle
-        double *m, //   -  Vertex of between L and R
+        point_t &l, //   -  Left vertex of Upper triangle
+        point_t &r, //   -  Right vertex of Upper triangle
+        point_t &m, //   -  Vertex of between L and R
         const double *ox, const double *oy,
         double *density) {
     double result = 0.;
-    if (m[0] == l[0]) {
+    if (m.x == l.x) {
         result = integrate_right_triangle_upper_right(r, m, tl, ox, oy, density);
-    } else if (m[0] == r[0]) {
+    } else if (m.x == r.x) {
         result = integrate_right_triangle_upper_left(l, m, tl, ox, oy, density);
-    } else if (m[0] < l[0]) {
+    } else if (m.x < l.x) {
         result = integrate_right_triangle_upper_right(r, m, tl, ox, oy, density);
         result -= integrate_right_triangle_upper_right(l, m, tl, ox, oy, density);
-    } else if (m[0] > l[0] && m[0] < r[0]) {
+    } else if (m.x > l.x && m.x < r.x) {
         result = integrate_right_triangle_upper_left(l, m, tl, ox, oy, density);
         result += integrate_right_triangle_upper_right(r, m, tl, ox, oy, density);
-    } else if (m[0] > r[0]) {
+    } else if (m.x > r.x) {
         result = integrate_right_triangle_upper_left(l, m, tl, ox, oy, density);
         result -= integrate_right_triangle_upper_left(r, m, tl, ox, oy, density);
     }
@@ -1156,9 +1159,9 @@ double integrate_upper_triangle(int tl,
 }
 
 double integrate_uniform_triangle_wall(int tl,
-        point_t *a,
-        point_t *b,
-        point_t *c,
+        const point_t &a,
+        const point_t &b,
+        const point_t &c,
         const double *ox,
         const double *oy,
         double *density) {
@@ -1166,48 +1169,36 @@ double integrate_uniform_triangle_wall(int tl,
 }
 
 double integrate_uniform_triangle(int tl,
-        point_t *x,
-        point_t *y,
-        point_t *z,
+        point_t &x,
+        point_t &y,
+        point_t &z,
         const double *ox,
         const double *oy,
         double *density) {
-    //point_t bv[2], mv[2], uv[2], ip[2]; //   -  Bottom, middle and upper vertices + intersection point
-    double bv[2], mv[2], uv[2], ip[2]; //   -  Bottom, middle and upper vertices + intersection point
-
-    bv[0] = x->x;
-    bv[1] = x->y;
-    mv[0] = y->x;
-    mv[1] = y->y;
-    uv[0] = z->x;
-    uv[1] = z->y;
-
-    //   2. I want to compute intersection point.
-    //   2.a Let's compute line coefficients between "bv" and "uv" vertices.
     //   a * x  +  b * y  = c.
-    double a = z->y - x->y;
+    double a = z.y - x.y;
     if (fabs(a) < _MIN_VALUE) return _MIN_VALUE;
-    double b = x->x - z->x;
-    double c = b * x->y + a * x->x;
-    ip[0] = (c - b * mv[1]) / a;
-    ip[1] = mv[1];
+    double b = x.x - z.x;
+    double c = b * x.y + a * x.x;
+    point_t ip((c - b * y.y) / a, y.y);
 
     //   Возможны 2 случая расположения точки перечеения относительно средней
     //   слева или справа.
+    //   есди средняя точка справа от точки пересечения
+    //   обменяем местами  X координаты, чтобы использовать один код для расчета
 
-    if (mv[0] >= ip[0]) // средняя точка справа от точки пересечения
-    { // обменяем местами  X координаты, чтобы использовать один код для расчета
-        double tx = mv[0];
-        mv[0] = ip[0];
-        ip[0] = tx;
+    if (y.x >= ip.x) {
+        double tx = y.x;
+        y.x = ip.x;
+        ip.x = tx;
     }
 
     return integrate_bottom_triangle(tl,
-            mv, ip, bv,
+            y, ip, x,
             ox, oy,
             density)
             + integrate_upper_triangle(tl,
-            mv, ip, uv,
+            y, ip, z,
             ox, oy,
             density);
 }
@@ -1257,82 +1248,82 @@ quad_type get_coordinates_on_prev_layer(int cur_tl,
         const double *ox,
         int iy,
         const double *oy,
-        point_t *alpha, point_t *beta, point_t *gamma, point_t *theta) {
+        point_t &alpha, point_t &beta, point_t &gamma, point_t &theta) {
     //   1. First of all let's compute coordinates of square vertexes.
     //  OX:
     if (ix == 0) {
-        alpha->x = ox[ ix ];
-        beta->x = (ox[ix] + ox[ix + 1]) / 2.;
-        gamma->x = (ox[ix] + ox[ix + 1]) / 2.;
-        theta->x = ox[ ix ];
+        alpha.x = ox[ ix ];
+        beta.x = (ox[ix] + ox[ix + 1]) / 2.;
+        gamma.x = (ox[ix] + ox[ix + 1]) / 2.;
+        theta.x = ox[ ix ];
     } else if (ix == OX_LEN) {
-        alpha->x = (ox[ix - 1] + ox[ix]) / 2.;
-        beta->x = ox[ ix ];
-        gamma->x = ox[ ix ];
-        theta->x = (ox[ix - 1] + ox[ix]) / 2.;
+        alpha.x = (ox[ix - 1] + ox[ix]) / 2.;
+        beta.x = ox[ ix ];
+        gamma.x = ox[ ix ];
+        theta.x = (ox[ix - 1] + ox[ix]) / 2.;
     } else {
-        alpha->x = (ox[ix - 1] + ox[ix]) / 2.;
-        beta->x = (ox[ix + 1] + ox[ix]) / 2.;
-        gamma->x = (ox[ix + 1] + ox[ix]) / 2.;
-        theta->x = (ox[ix - 1] + ox[ix]) / 2.;
+        alpha.x = (ox[ix - 1] + ox[ix]) / 2.;
+        beta.x = (ox[ix + 1] + ox[ix]) / 2.;
+        gamma.x = (ox[ix + 1] + ox[ix]) / 2.;
+        theta.x = (ox[ix - 1] + ox[ix]) / 2.;
     }
 
     //  OY:
     if (iy == 0) {
-        alpha->y = oy[ iy ];
-        beta->y = oy[ iy ];
-        gamma->y = (oy[iy] + oy[ iy + 1]) / 2.;
-        theta->y = (oy[iy] + oy[ iy + 1]) / 2.;
+        alpha.y = oy[ iy ];
+        beta.y = oy[ iy ];
+        gamma.y = (oy[iy] + oy[ iy + 1]) / 2.;
+        theta.y = (oy[iy] + oy[ iy + 1]) / 2.;
     } else if (iy == OY_LEN) {
-        alpha->y = (oy[iy] + oy[ iy - 1]) / 2.;
-        beta->y = (oy[iy] + oy[ iy - 1]) / 2.;
-        gamma->y = oy[ iy ];
-        theta->y = oy[ iy ];
+        alpha.y = (oy[iy] + oy[ iy - 1]) / 2.;
+        beta.y = (oy[iy] + oy[ iy - 1]) / 2.;
+        gamma.y = oy[ iy ];
+        theta.y = oy[ iy ];
     } else {
-        alpha->y = (oy[iy] + oy[ iy - 1]) / 2.;
-        beta->y = (oy[iy] + oy[ iy - 1]) / 2.;
-        gamma->y = (oy[iy] + oy[ iy + 1]) / 2.;
-        theta->y = (oy[iy] + oy[ iy + 1]) / 2.;
+        alpha.y = (oy[iy] + oy[ iy - 1]) / 2.;
+        beta.y = (oy[iy] + oy[ iy - 1]) / 2.;
+        gamma.y = (oy[iy] + oy[ iy + 1]) / 2.;
+        theta.y = (oy[iy] + oy[ iy + 1]) / 2.;
     }
 
     double u, v;
 
     // Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
-    u = func_u(alpha->x, alpha->y);
-    v = func_v(TAU*cur_tl, alpha->x, alpha->y);
-    alpha->x -= TAU * u;
-    alpha->y -= TAU * v;
+    u = func_u(alpha.x, alpha.y);
+    v = func_v(TAU*cur_tl, alpha.x, alpha.y);
+    alpha.x -= TAU * u;
+    alpha.y -= TAU * v;
 
-    u = func_u(beta->x, beta->y);
-    v = func_v(TAU*cur_tl, beta->x, beta->y);
-    beta->x -= TAU * u;
-    beta->y -= TAU * v;
+    u = func_u(beta.x, beta.y);
+    v = func_v(TAU*cur_tl, beta.x, beta.y);
+    beta.x -= TAU * u;
+    beta.y -= TAU * v;
 
-    u = func_u(gamma->x, gamma->y);
-    v = func_v(TAU*cur_tl, gamma->x, gamma->y);
-    gamma->x -= TAU * u;
-    gamma->y -= TAU * v;
+    u = func_u(gamma.x, gamma.y);
+    v = func_v(TAU*cur_tl, gamma.x, gamma.y);
+    gamma.x -= TAU * u;
+    gamma.y -= TAU * v;
 
-    u = func_u(theta->x, theta->y);
-    v = func_v(TAU*cur_tl, theta->x, theta->y);
-    theta->x -= TAU * u;
-    theta->y -= TAU * v;
+    u = func_u(theta.x, theta.y);
+    v = func_v(TAU*cur_tl, theta.x, theta.y);
+    theta.x -= TAU * u;
+    theta.y -= TAU * v;
 
     point_t intersection = get_intersection_point(alpha, beta, gamma, theta);
-    if ((beta->y - intersection.y) * (theta->y - intersection.y) > 0.) return pseudo; // ??
-    if ((alpha->x - intersection.x) * (gamma->x - intersection.x) > 0.) return pseudo; // ??
+    if ((beta.y - intersection.y) * (theta.y - intersection.y) > 0.) return pseudo; // ??
+    if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0.) return pseudo; // ??
     double product = get_vector_product(alpha, beta, theta); // ?
     if (product < 0.) return pseudo;
 
     // значит что точка улетела за левую границу
-    if (theta->x < 0 ||
-            theta->y < 0 ||
-            beta->x < 0 ||
-            beta->y < 0 ||
-            gamma->x < 0 ||
-            gamma->y < 0 ||
-            alpha->x < 0 ||
-            alpha->y < 0) {
+    if (theta.x < 0 ||
+            theta.y < 0 ||
+            beta.x < 0 ||
+            beta.y < 0 ||
+            gamma.x < 0 ||
+            gamma.y < 0 ||
+            alpha.x < 0 ||
+            alpha.y < 0) {
         return normal;
         //return wall;
     }
@@ -1342,80 +1333,54 @@ quad_type get_coordinates_on_prev_layer(int cur_tl,
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
-quad_type get_quadrangle_type(int curr_tl,
-        int ix,
+quad_type get_quadrangle_type(int tl, int ix, int iy,
         const double *ox,
-        int iy,
         const double *oy,
-        point_t &t_1_a, //   -  First vertex of first triangle.
-        point_t &t_1_b, //   -  Second vertex of first triangle.
-        point_t &t_1_c, //   -  Third vertex of first triangle.
-        //
-        point_t &t_2_a, //   -  First vertex of second triangle.
-        point_t &t_2_b, //   -  Second vertex of second triangle.
-        point_t &t_2_c) //   -  Third vertex of second triangle.
+        point_t &a, //   -  First vertex of first triangle.
+        point_t &b, //   -  Second vertex of first triangle.
+        point_t &c, //   -  Third vertex of first triangle.
+        point_t &k, //   -  First vertex of second triangle.
+        point_t &m, //   -  Second vertex of second triangle.
+        point_t &n) //   -  Third vertex of second triangle.
 {
     point_t alpha, beta, gamma, theta; // coordinates on previous time layer
-
-    quad_type type = get_coordinates_on_prev_layer(curr_tl,
-            ix, ox, iy, oy, &alpha, &beta, &gamma, &theta);
-
-    // Convex quadrangle DO HAS WRITE anticlockwise vertices sequence order. 
-    // It's convex.
-
-    t_1_a = alpha;
-    t_1_b = beta;
-    t_1_c = gamma;
-    t_2_a = alpha;
-    t_2_b = theta;
-    t_2_c = gamma;
-
+    quad_type type = get_coordinates_on_prev_layer(tl, ix, ox, iy, oy, alpha, beta, gamma, theta);
+    a = alpha;
+    b = beta;
+    c = gamma;
+    k = alpha;
+    m = theta;
+    n = gamma;
     return type;
 }
 
-double integrate(double curr_tl,
-        int ix,
-        int iy,
-        const double *ox,        
+double integrate(double tl, int ix, int iy,
+        const double *ox,
         const double *oy,
         double *density) {
-    point_t t_1_a, t_1_b, t_1_c, t_2_a, t_2_b, t_2_c;
-
-    quad_type type = get_quadrangle_type(curr_tl,
-            ix, ox,
-            iy, oy,
-            t_1_a, t_1_b, t_1_c,
-            t_2_a, t_2_b, t_2_c);
-
+    point_t a1, b1, c1, a2, b2, c2;
+    quad_type type = get_quadrangle_type(tl, ix, iy, ox, oy, a1, b1, c1, a2, b2, c2);
     if (type != normal && type != wall) {
         return -1.;
     }
 
     // чтобы правилно отработала процедура интегрирования
     // точки должны идти в порядке возрастания y координаты
-    sort_by_y(t_1_a, t_1_b, t_1_c);
-    sort_by_y(t_2_a, t_2_b, t_2_c);
+    sort_by_y(a1, b1, c1);
+    sort_by_y(a2, b2, c2);
 
     // check the type of triangle to select appropriate computation method
     double result = 0.;
     switch (type) {
         case wall:
-            result += integrate_uniform_triangle_wall(curr_tl,
-                    &t_1_a, &t_1_b, &t_1_c,
-                    ox, oy,
+            result += integrate_uniform_triangle_wall(tl, a1, b1, c1, ox, oy,
                     density);
-            result += integrate_uniform_triangle_wall(curr_tl,
-                    &t_2_a, &t_2_b, &t_2_c,
-                    ox, oy,
+            result += integrate_uniform_triangle_wall(tl, a2, b2, c2, ox, oy,
                     density);
             return result;
         case normal:
-            result += integrate_uniform_triangle(curr_tl,
-                    &t_1_a, &t_1_b, &t_1_c,
-                    ox, oy, density);
-            result += integrate_uniform_triangle(curr_tl,
-                    &t_2_a, &t_2_b, &t_2_c,
-                    ox, oy, density);
+            result += integrate_uniform_triangle(tl, a1, b1, c1, ox, oy, density);
+            result += integrate_uniform_triangle(tl, a2, b2, c2, ox, oy, density);
             return result;
         case concave:
         case convex:
