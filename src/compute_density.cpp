@@ -274,56 +274,41 @@ double integrate_triangle_right_one_cell(const dp_t &bv, const dp_t &uv,
     return -1 * integrate_triangle_left_one_cell(bv, uv, gx, tl, sx, sy, ox, oy, density);
 }
 
-double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
-        const dp_t& uv, int wTrPNI, const ip_t &sx, double lb, const ip_t &ilb,
+double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv, 
+        short curr_i, short next_i, const ip_t &sx, double b, const ip_t &sb,
         const ip_t &sy, const double* ox, const double* oy, double* density) {
-    dp_t mv, rv; //   -  Middle and right vertices.
-    int wMvI = 0; //   -  Where middle vertex is.
-    ip_t indCurSqOxToCh; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
-    double result = 0, a_sl, b_sl, gx = 0, hx = 0; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.//   -  Left boundary for each integration.
+    if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
 
+    double result = 0, gx = 0, hx = 0;
+    dp_t mv, rv;
+    short m_i = 0;
     if (uv.x <= bv.x) {
         mv = uv;
-        wMvI = wTrPNI;
+        m_i = next_i;
         rv = bv;
     } else {
         mv = bv;
-        wMvI = wTrPCI;
+        m_i = curr_i;
         rv = uv;
     }
 
-    if ((fabs(uv.y - bv.y)) <= _MINF) return fabs(uv.y - bv.y);
+    ip_t ch_pos(sb.x, sb.x + 1);
+    for (int j = sb.x; j < sx.x; j++) {
+        gx = ch_pos.x >= 0 ? ox[ch_pos.x] : HX * ch_pos.x;
+        hx = ch_pos.x >= 0 ? ox[ch_pos.y] : HX * ch_pos.y;
+        if (j == sb.x) gx = b;
 
-    //   First step: from "lb" to "masOX[ indCurSqOx.x ]" by iteration.
-    indCurSqOxToCh.x = ilb.x;
-    indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
-
-    for (int j = ilb.x; j < sx.x; j++) {
-        //   If this is first cell we should integrate under rectangle only.
-        if (indCurSqOxToCh.x >= 0) {
-            gx = ox[indCurSqOxToCh.x];
-            hx = ox[indCurSqOxToCh.y];
-        }
-        if (indCurSqOxToCh.x < 0) {
-            gx = HX * indCurSqOxToCh.x;
-            hx = HX * indCurSqOxToCh.y;
-        }
-        if (j == ilb.x) gx = lb;
-
-        result += integrate_rectangle_one_cell(bv.y,
-                uv.y, gx, hx,
-                tl, indCurSqOxToCh, //   -  Index of current square by Ox axis.
-                sy, //   -  Index of current square by Oy axis.                
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, ch_pos, sy,
                 ox, oy, density);
-        indCurSqOxToCh.x += 1;
-        indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
+        ch_pos.x += 1;
+        ch_pos.y = ch_pos.x + 1;
     }
 
     //   Integration. Second step: under [ indCurSqOx.x; sx.y ] square.
     //   A. Under rectangle.
-    if (wMvI == 1) {
-        if (sx.x == ilb.x) gx = lb;
-        if (sx.x > ilb.x) {
+    if (m_i == 1) {
+        if (sx.x == sb.x) gx = b;
+        if (sx.x > sb.x) {
             gx = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
         }
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv.x, tl, sx, sy,
@@ -344,14 +329,14 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
 // BOTTOMLEFTTR
 
 double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
-        int curr_i, int next_i, const ip_t &sx, const ip_t &sy,
-        double rb, const ip_t &irb,
+        short curr_i, short next_i, const ip_t &sx, const ip_t &sy,
+        double b, const ip_t &ib,
         const double* ox, const double* oy, double* density) {
     if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
 
     dp_t lv, mv; //   -  Left and middle vertices.
     short m_i = 0; //   -  Where middle vertex is.        
-    double result = 0, a_sl, b_sl, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
+    double result = 0, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
 
     // зачем то определили среднюю точку
     if (uv.x <= bv.x) {
@@ -365,30 +350,26 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
     }
 
     //   Integration. First step: under [ sx.x; sx.y ] square.        
-    result += integrate_triangle_left_one_cell(bv, uv, mv[0], tl, sx, sy, ox, oy, density);
+    // case A: triangle
+    result += integrate_triangle_left_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
 
-    //   B. Under rectangle. Need to be checking.
-    if (m_i == 1) {
-        if (sx.x == irb.x) {
-            hx = rb;
-        } else if (sx.x < irb.x) {
-            hx = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
-        }
-        result += integrate_rectangle_one_cell(bv.y, uv.y, mv[0], hx, tl, sx, sy,
+    // case B: не полный прямоугольник
+    if (m_i == 1) { // это значит, что прямоугольник занимает не всю ячейку  
+        hx = sx.x == ib.x ? b : (sx.y >= 0 ? ox[sx.y] : HX * sx.y);
+        gx = mv.x;
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, sx, sy,
                 ox, oy, density);
     }
 
-    //   Second step: from "masOX[ sx.y ]" to "rb" by iteration.
-    ip_t sox_ch(sx.x + 1, sx.x + 2); //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.    
-
-    for (int j = sx.x + 1; j < irb.x + 1; j++) {
-        //   If this is first cell we should integrate under triangle only.
-        gx = sox_ch.y <= 0 ? HX * sox_ch.x : ox[sox_ch.x];
-        hx = sox_ch.y <= 0 ? HX * sox_ch.y : hx = ox[sox_ch.y];
-        if (j == irb.x) hx = rb;
-        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, sox_ch, sy, ox, oy, density);
-        sox_ch.x += 1;
-        sox_ch.y = sox_ch.x + 1;
+    //   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
+    ip_t ch_pos(sx.x + 1, sx.x + 2); //   - координаты канала
+    for (int j = sx.x + 1; j < ib.x + 1; j++) {
+        hx = ch_pos.y <= 0 ? HX * ch_pos.y : hx = ox[ch_pos.y];
+        if (j == ib.x) hx = b;
+        gx = ch_pos.y <= 0 ? HX * ch_pos.x : ox[ch_pos.x];
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, ch_pos, sy, ox, oy, density);
+        ch_pos.x += 1;
+        ch_pos.y = ch_pos.x + 1;
     }
     return result;
 }
@@ -490,14 +471,12 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
         if (next.x > (uv.x - _MINF)) {
             next = uv;
             next_i = 0;
-            result += integrate_chanel_slant_right(tl, curr, curr_i,
-                    next, next_i,
+            result += integrate_chanel_slant_right(tl, curr, next, curr_i, next_i,
                     sx, bv.x, ib,
                     sy, ox, oy, density);
             break;
         }
-        result += integrate_chanel_slant_right(tl, curr, curr_i,
-                next, next_i,
+        result += integrate_chanel_slant_right(tl, curr, next, curr_i, next_i,
                 sx, bv.x, ib,
                 sy, ox, oy, density);
 
@@ -604,11 +583,11 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
         if (next.x < uv.x + _MINF) {
             next_i = 0;
             next = uv;
-            result += integrate_chanel_slant_right(tl, curr, curr_i, next, next_i,
+            result += integrate_chanel_slant_right(tl, curr, next, curr_i, next_i,
                     sx, uv.x, ib, sy, ox, oy, density);
             break;
         }
-        result += integrate_chanel_slant_right(tl, curr, curr_i, next, next_i,
+        result += integrate_chanel_slant_right(tl, curr, next, curr_i,  next_i, 
                 sx, uv.x, ib, sy, ox, oy, density);
         switch (next_i) {
             case 1:
