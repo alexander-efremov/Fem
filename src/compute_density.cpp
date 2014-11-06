@@ -240,7 +240,6 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
                     mv[0], tl, sx, sy, ox, oy, density);
         }
     }
-
     return result;
 }
 
@@ -301,7 +300,6 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, int curr_i,
         sox_ch.x += 1;
         sox_ch.y = sox_ch.x + 1;
     }
-
     return result;
 }
 
@@ -331,9 +329,9 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
     dp_t curr = bv, next;
     while (true) {
         //TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
-        double dx = sx.x >= 0 ? curr.x - ox[sx.x] : fabs(curr.x - HX * sx.x); // Distance to nearest Ox and Oy straight lines.
-        double dy = sx.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
-        if (dy / dx <= k) { //   Intersection with straight line parallel Ox axis.        
+        double slope = sx.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
+        slope /= sx.x >= 0 ? curr.x - ox[sx.x] : fabs(curr.x - HX * sx.x);
+        if (slope <= k) { //   Intersection with straight line parallel Ox axis.        
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = curr.x - (next.y - curr.y) / k;
@@ -386,13 +384,13 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
-        double dx = sx.y >= 0 ? fabs(ox[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
-        double dy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
-        if (dy / dx <= k) {//   Across with straight line parallel Ox axis.            
+        double slope = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
+        slope /= sx.y >= 0 ? fabs(ox[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
+        if (slope <= k) {//   Intersection with straight line parallel Ox axis.            
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = bv.x + (next.y - bv.y) / k;
-        } else {//   Across with straight line parallel Oy axis.
+        } else {//   Intersection with straight line parallel Oy axis.
             next_i = 2;
             next.x = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
             next.y = bv.y + k * (next.x - bv.x);
@@ -500,9 +498,9 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
-        double dx = sx.x >= 0 ? fabs(curr.x - ox[sx.x]) : fabs(curr.x - HX * sx.x);
-        double dy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
-        if (dy / dx <= k) { //   Intersection with straight line parallel Ox axis.
+        double slope = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);        
+        slope /= sx.x >= 0 ? fabs(curr.x - ox[sx.x]) : fabs(curr.x - HX * sx.x);
+        if (slope <= k) { //   Intersection with straight line parallel Ox axis.
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = bv.x - (next.y - bv.y) / k;
@@ -520,7 +518,6 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
         }
         result += integrate_chanel_slant_right(tl, curr, curr_i, next, next_i,
                 sx, uv.x, ib, sy, ox, oy, density);
-
         switch (next_i) {
             case 1:
                 sy += 1;
