@@ -65,6 +65,30 @@ struct ip_t {
     ip_t operator+(const ip_t& p) const {
         return ip_t(p.x + x, p.y + y);
     }
+    
+    ip_t& operator+=(int a) {
+        x += a;
+        y += a;
+        return *this;
+    }
+    
+    ip_t& operator-=(int a) {
+        x -= a;
+        y -= a;
+        return *this;
+    }
+    
+    ip_t& operator-(int a) {
+        x -= a;
+        y -= a;
+        return *this;
+    }
+    
+    ip_t& operator+(int a) {
+        x += a;
+        y += a;
+        return *this;
+    }
 
     bool operator==(const ip_t& p) const {
         return (x == p.x && y == p.y);
@@ -92,7 +116,7 @@ inline void sort_by_y(dp_t& x, dp_t& y, dp_t& z) {
     if (z.y < y.y) std::swap(y, z);
 }
 
-inline bool is_valid(dp_t &bv, dp_t &uv, double &value) {
+inline bool is_valid(const dp_t &bv, const dp_t &uv, double &value) {
     if (fabs(bv.x - uv.x) < MIN_VALUE) {
         return false;
     }
