@@ -3,7 +3,7 @@
 
 static const double MIN_VALUE = 1.e-12;
 
-struct point_t {
+struct dp_t {
     double x;
     double y;
 
@@ -11,11 +11,11 @@ struct point_t {
         return (i == 0) ? x : y;
     }
 
-    point_t(double x = 0, double y = 0)
+    dp_t(double x = 0, double y = 0)
     : x(x), y(y) {
     }
 
-    point_t& operator=(const point_t& p) {
+    dp_t& operator=(const dp_t& p) {
         if (this != &p) {
             x = p.x;
             y = p.y;
@@ -24,24 +24,62 @@ struct point_t {
         return *this;
     }
 
-    point_t operator+(const point_t& p) const {
-        return point_t(p.x + x, p.y + y);
+    dp_t operator+(const dp_t& p) const {
+        return dp_t(p.x + x, p.y + y);
     }
 
-    bool operator==(const point_t& p) const {
+    bool operator==(const dp_t& p) const {
         return (x == p.x && y == p.y);
     }
 
-    int operator<(const point_t& p) {
+    int operator<(const dp_t& p) {
         return ((x < p.x) || ((x == p.x) && (y < p.y)));
     }
 
-    int operator>(const point_t& p) {
+    int operator>(const dp_t& p) {
         return ((x > p.x) || ((x == p.x) && (y > p.y)));
     }
 };
 
-inline void sort_by_y(point_t& x, point_t& y, point_t& z) {
+struct ip_t {
+    int x;
+    int y;
+
+    double operator[](int i) {
+        return (i == 0) ? x : y;
+    }
+
+    ip_t(int x = 0, int y = 0)
+    : x(x), y(y) {
+    }
+
+    ip_t& operator=(const ip_t& p) {
+        if (this != &p) {
+            x = p.x;
+            y = p.y;
+        }
+
+        return *this;
+    }
+
+    ip_t operator+(const ip_t& p) const {
+        return ip_t(p.x + x, p.y + y);
+    }
+
+    bool operator==(const ip_t& p) const {
+        return (x == p.x && y == p.y);
+    }
+
+    int operator<(const ip_t& p) {
+        return ((x < p.x) || ((x == p.x) && (y < p.y)));
+    }
+
+    int operator>(const ip_t& p) {
+        return ((x > p.x) || ((x == p.x) && (y > p.y)));
+    }
+};
+
+inline void sort_by_y(dp_t& x, dp_t& y, dp_t& z) {
     if (x.y < y.y) {
         if (z.y < x.y)
             std::swap(x, z);
@@ -54,7 +92,7 @@ inline void sort_by_y(point_t& x, point_t& y, point_t& z) {
     if (z.y < y.y) std::swap(y, z);
 }
 
-inline bool is_valid(point_t &bv, point_t &uv, double &value) {
+inline bool is_valid(dp_t &bv, dp_t &uv, double &value) {
     if (fabs(bv.x - uv.x) < MIN_VALUE) {
         return false;
     }
@@ -65,10 +103,10 @@ inline bool is_valid(point_t &bv, point_t &uv, double &value) {
     return true;
 }
 
-inline point_t get_intersection_point(const point_t& alpha, const point_t& beta, const point_t& gamma, const point_t& theta) {
-    point_t result;
-    point_t alpha_to_gamma;
-    point_t beta_to_theta;
+inline dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta) {
+    dp_t result;
+    dp_t alpha_to_gamma;
+    dp_t beta_to_theta;
     double a_1LC, b_1LC, c_1LC;
     double a_2LC, b_2LC, c_2LC;
     alpha_to_gamma.x = gamma.x - alpha.x;
@@ -86,9 +124,9 @@ inline point_t get_intersection_point(const point_t& alpha, const point_t& beta,
     return result;
 }
 
-inline double get_vector_product(const point_t& alpha, const point_t beta, const point_t theta) {
-    point_t alpha_to_beta;
-    point_t alpha_to_theta;
+inline double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta) {
+    dp_t alpha_to_beta;
+    dp_t alpha_to_theta;
     alpha_to_beta.x = beta.x - alpha.x;
     alpha_to_beta.y = beta.y - alpha.y;
     alpha_to_theta.x = theta.x - alpha.x;
