@@ -5,7 +5,7 @@
 static int TMP_WALL_CNT = 0;
 static const double _PI = 3.14159265358979323846264338327;
 static const double _MIN_VALUE = 1.e-12;
-static const double _MIN_VALUE_1 = 1.e-14;
+
 static double B;
 static double UB;
 static double BB;
@@ -492,11 +492,11 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
 
     //   -  Index of current square by Ox and Oy axes. 
     ip_t sx, sy;
-    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / HX);
-    if (bv.x - _MIN_VALUE_1 <= 0) sx.x -= 1;
+    sx.x = static_cast<int> ((bv.x - _MIN_VALUE) / HX);
+    if (bv.x - _MIN_VALUE <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / HY);
-    if (bv.y + _MIN_VALUE_1 <= 0) sy.x -= 1;
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / HY);
+    if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
     ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
@@ -517,7 +517,7 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
             next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
             next.y = curr.y - k * (next.x - curr.x);
         }
-        if (next.x < (uv.x + _MIN_VALUE_1)) {
+        if (next.x < (uv.x + _MIN_VALUE)) {
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
@@ -548,11 +548,11 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
     if (!is_valid(bv, uv, k)) return k;
     ip_t sx, sy;
 
-    sx.x = static_cast<int> ((bv.x + _MIN_VALUE_1) / HX);
-    if (bv.x + _MIN_VALUE_1 <= 0) sx.x -= 1;
+    sx.x = static_cast<int> ((bv.x + _MIN_VALUE) / HX);
+    if (bv.x + _MIN_VALUE <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / HY);
-    if (bv.y + _MIN_VALUE_1 <= 0) sy.x -= 1;
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / HY);
+    if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
     ip_t ib(sx.x, ib.x + 1);
@@ -572,7 +572,7 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
             next.x = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
             next.y = bv.y + k * (next.x - bv.x);
         }
-        if (next.x > (uv.x - _MIN_VALUE_1)) {
+        if (next.x > (uv.x - _MIN_VALUE)) {
             next = uv;
             next_i = 0;
             result += integrate_chanel_slant_right(tl, curr, curr_i,
@@ -602,106 +602,56 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
 
 double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int tl,
         const double* ox, const double* oy, double* density) {
-    double ang = 0.;
-    if (!is_valid(bv, uv, ang)) return ang;
+    double k = 0.;
+    if (!is_valid(bv, uv, k)) return k;
+   
+    ip_t sx, sy, ib;
+    sx.x = static_cast<int> ((bv.x + _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
+    if (bv.x + _MIN_VALUE <= 0) sx.x -= 1;
+    sx.y = sx.x + 1;
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
+    if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
+    sy.y = sy.x + 1;
+    ib.x = static_cast<int> ((uv.x - _MIN_VALUE) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+    if (uv.x - _MIN_VALUE <= 0) ib.x -= 1;
+    ib.y = ib.x + 1;
 
-    dp_t trPC, trPN;
-    double distOx = 0, distOy = 0, result = 0.;
-    ip_t sox, soy, indRB;
-    int wTrPCI = 0, wTrPNI = 0;
-    bool isDone = false;
+    int curr_i = 0, next_i = 0;
+    dp_t curr = bv, next;
+    double result = 0.;
+    while (true) {
+        double dox = sx.y >= 0 ? ox[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
+        double doy = sy.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
+        if (doy / dox <= k) { //   intersection with straight line parallel Ox axis.
+            next_i = 1;
+            next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
+            next.x = bv.x + (next.y - bv.y) / k;
+        } else {//   intersection with straight line parallel Oy axis.            
+            next_i = 2;
+            next.x = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
+            next.y = bv.y + k * (next.x - bv.x);
+        }
+        if (next.x > (uv.x - _MIN_VALUE)) {
+            next_i = 0;
+            next = uv;
+            result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
+                    sx, sy, uv.x, ib, ox, oy, density);
+            break;
+        }
+        result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
+                sx, sy, uv.x, ib, ox, oy, density);
 
-    trPC = bv;
-
-
-    //   The follow equations are quite important.
-    sox.x = static_cast<int> ((trPC.x + _MIN_VALUE_1) / HX); //   -  If trPC.x is in grid edge I want it will be in the right side.
-    if (trPC.x + _MIN_VALUE_1 <= 0) {
-        sox.x -= 1; //   -  The case when "trPC.x" ia negative.
-    }
-    sox.y = sox.x + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    soy.x = static_cast<int> ((trPC.y + _MIN_VALUE_1) / HY); //   -  If trPC.y is in grid edge I want it will be in the upper square.
-    if (trPC.y + _MIN_VALUE_1 <= 0) {
-        soy.x -= 1; //   -  The case when "trPC.x" ia negative.
-    }
-    soy.y = soy.x + 1;
-    indRB.x = static_cast<int> ((uv.x - _MIN_VALUE_1) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
-    if (uv.x - _MIN_VALUE_1 <= 0) {
-        indRB.x -= 1; //   -  The case when "trPC.x" is negative.
-    }
-    indRB.y = indRB.x + 1;
-    if (sox.y >= 0) {
-        distOx = ox[sox.y] - trPC.x;
-    }
-    if (sox.y < 0) {
-        distOx = fabs(HX * sox.y - trPC.x);
-    }
-    if (soy.y >= 0) {
-        distOy = oy[soy.y] - trPC.y;
-    }
-    if (soy.y < 0) {
-        distOy = fabs(HY * soy.y - trPC.y);
-    }
-    do {
-        //   a. First case.
-        if ((distOy / distOx) <= ang) {
-            //   Across with straight line parallel Ox axis.
-            wTrPNI = 1;
-            if (soy.y >= 0) {
-                trPN.y = oy[soy.y];
-            }
-            if (soy.y < 0) {
-                trPN.y = HY * soy.y;
-            }
-            trPN.x = bv.x + (trPN.y - bv.y) / ang;
+        switch (next_i) {
+            case 1:
+                sy += 1;
+                break;
+            case 2:
+                sx += 1;
+                break;
         }
-        //   b. Second case.
-        if ((distOy / distOx) > ang) {
-            //   Across with straight line parallel Oy axis.
-            wTrPNI = 2;
-            if (sox.y >= 0) {
-                trPN.x = ox[sox.y];
-            }
-            if (sox.y < 0) {
-                trPN.x = HX * sox.y;
-            }
-            trPN.y = bv.y + ang * (trPN.x - bv.x);
-        }
-        //   c. Checking.
-        if (trPN.x > (uv.x - _MIN_VALUE_1)) {
-            trPN = uv;
-            isDone = true;
-            wTrPNI = 0;
-        }
-        //   d. Integration.
-        result += integrate_chanel_slant_left(tl, trPC, wTrPCI, trPN, wTrPNI, 
-                sox, soy, uv.x, indRB, ox, oy, density);
-        if (isDone == false) {
-            //   We will compute more. We need to redefine some values.
-            wTrPCI = wTrPNI;
-            trPC = trPN;
-            if (wTrPNI == 1) {
-                soy.x += 1;
-                soy.y += 1;
-            }
-            if (wTrPNI == 2) {
-                sox.x += 1;
-                sox.y += 1;
-            }
-            if (sox.y >= 0) {
-                distOx = fabs(ox[sox.y] - trPC.x);
-            }
-            if (sox.y < 0) {
-                distOx = fabs(HX * sox.y - trPC.x);
-            }
-            if (soy.y >= 0) {
-                distOy = fabs(oy[soy.y] - trPC.y);
-            }
-            if (soy.y < 0) {
-                distOy = fabs(HY * soy.y - trPC.y);
-            }
-        }
-    } while (!isDone);
+        curr_i = next_i;
+        curr = next;
+    }
     return result;
 }
 
@@ -722,18 +672,18 @@ double integrate_right_triangle_upper_right(
     bool isDone = false;
 
 
-    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / hx); //   -  If bv.x is in grid edge I want it will be between in the left side.
-    if ((bv.x - _MIN_VALUE_1) <= 0) {
+    sx.x = static_cast<int> ((bv.x - _MIN_VALUE) / hx); //   -  If bv.x is in grid edge I want it will be between in the left side.
+    if ((bv.x - _MIN_VALUE) <= 0) {
         sx.x -= 1; //   -  The case when "bv.x" is negative.
     }
     sx.y = sx.x + 1; //   -  It's important only in rare case then bv is in grid edge.
-    indLB.x = static_cast<int> ((uv.x + _MIN_VALUE_1) / hx);
-    if ((uv.x + _MIN_VALUE_1) <= 0) {
+    indLB.x = static_cast<int> ((uv.x + _MIN_VALUE) / hx);
+    if ((uv.x + _MIN_VALUE) <= 0) {
         indLB.x -= 1; //   -  The case when "bv.x" is negative.
     }
     indLB.y = indLB.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / hy); //   -  If bv.y is in grid edge I want it will be in the upper side.
-    if ((bv.y + _MIN_VALUE_1) <= 0) {
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / hy); //   -  If bv.y is in grid edge I want it will be in the upper side.
+    if ((bv.y + _MIN_VALUE) <= 0) {
         sy.x -= 1; //   -  The case when "bv.x" is negative.
     }
     sy.y = sy.x + 1; //   -  It's important only in rare case then bv is in grid edge.
@@ -778,7 +728,7 @@ double integrate_right_triangle_upper_right(
             trPN.y = bv.y - ang * (trPN.x - bv.x);
         }
         //   c. Checking.
-        if (trPN.x < (uv.x + _MIN_VALUE_1)) {
+        if (trPN.x < (uv.x + _MIN_VALUE)) {
             trPN = uv;
             isDone = true;
             wTrPNI = 0;
