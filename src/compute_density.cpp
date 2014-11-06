@@ -213,22 +213,11 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv,
         m_i = curr_i;
         rv = uv;
     }
-
-    ip_t ch_pos(sb.x, sb.x + 1);
-    for (int j = sb.x; j < sx.x; j++) {
-        if (j == sb.x) gx = b;
-        else gx = ch_pos.x >= 0 ? ox[ch_pos.x] : HX * ch_pos.x;
-        
-        hx = ch_pos.x >= 0 ? ox[ch_pos.y] : HX * ch_pos.y;        
-
-        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, ch_pos, sy,
-                ox, oy, density);
-        ch_pos.x += 1;
-        ch_pos.y = ch_pos.x + 1;
-    }
-
-    //   Integration. Second step: under [ indCurSqOx.x; sx.y ] square.
+    
     //   A. Under rectangle.
+    result += -1 * integrate_triangle_left_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
+    
+    // case B: не полный прямоугольник    
     if (m_i == 1) {
         if (sx.x == sb.x) gx = b;
         if (sx.x > sb.x) {
@@ -236,8 +225,21 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv,
         }
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv.x, tl, sx, sy,
                 ox, oy, density);
+    }    
+    
+    //   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
+    ip_t ch_pos(sb.x, sb.x + 1);
+    for (int j = sb.x; j < sx.x; j++) {
+        if (j == sb.x) gx = b;
+        else gx = ch_pos.x >= 0 ? ox[ch_pos.x] : HX * ch_pos.x;        
+        hx = ch_pos.x >= 0 ? ox[ch_pos.y] : HX * ch_pos.y;
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, ch_pos, sy,
+                ox, oy, density);
+        ch_pos.x += 1;
+        ch_pos.y = ch_pos.x + 1;
     }
-    result += -1 * integrate_triangle_left_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
+
+   
     return result;
 }
 
@@ -270,7 +272,6 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
         m_i = next_i;
     }
 
-    //   Integration. First step: under [ sx.x; sx.y ] square.        
     // case A: triangle
     result += integrate_triangle_left_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
 
