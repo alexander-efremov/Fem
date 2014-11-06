@@ -5,14 +5,6 @@
 #include <string.h>
 #include <algorithm>
 
-enum bound
-{
-	up,
-	bottom,
-	left,
-	right
-};
-
 enum quad_type
 {
 	wall,
@@ -98,6 +90,6 @@ extern double* compute_density(
 	int time_step_count,
 	int ox_length,
 	int oy_length,
-	double* norm);
+	double &norm);
 
 #endif

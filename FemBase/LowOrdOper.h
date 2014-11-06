@@ -71,4 +71,4 @@ extern double* solByEqualVolWithVarStepPlusPrint1(
         int numOfOYSt, //   -  Number of OY steps.
        
         int numOfGrStepLayer,
-        double* norm);
+        double &norm);

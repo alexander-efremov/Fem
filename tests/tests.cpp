@@ -11,14 +11,14 @@ protected:
 	{
 		return compute_density(p->b, p->lb, p->rb, p->bb,
 		                       p->ub, p->tau, p->t_count, p->x_size,
-		                       p->y_size, &p->norm);
+		                       p->y_size, p->norm);
 	}
 
 	double* get_model_result(ComputeParameters* p, int lvl)
 	{
 		return solByEqualVolWithVarStepPlusPrint1(p->a, p->b, p->lb, p->rb, p->bb,
 		                                          p->ub, p->tau, p->t_count, p->x_size,
-		                                          p->y_size, lvl, &p->norm);
+		                                          p->y_size, lvl, p->norm);
 	}
 };
 

@@ -828,18 +828,15 @@ double integrate(double tl, int ix, int iy,
 }
 
 double get_norm_of_error(double* density, int x_length, int y_length, double* ox,
-        double* oy,
-        double ts_count_mul_steps) {
-    double result = 0.;
+        double* oy, double ts_count_mul_steps) {
+    double r = 0;
     for (int k = 1; k < y_length; ++k) {
         for (int j = 1; j < x_length; ++j) {
-            result += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
+            r += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
                     - density[(x_length + 1) * k + j]);
         }
-    }
-    double hx = ox[1] - ox[0];
-    double hy = oy[1] - oy[0];
-    return hx * hy * result;
+    }    
+    return HX * HY * r;
 }
 
 double solve(const double* ox, const double* oy, double* density) {
@@ -850,7 +847,7 @@ double solve(const double* ox, const double* oy, double* density) {
         }
     }
 
-    for (int it = 1; it < TIME_STEP_CNT + 1; it++) {
+    for (int it = 1; it <= TIME_STEP_CNT; it++) {
         for (int i = 0; i <= OX_LEN; i++) {
             density[i] = init_side(ox[i], BB, TAU * it);
             density[(OX_LEN + 1) * OY_LEN + i] = init_side(ox[i], UB, TAU * it);
@@ -861,11 +858,10 @@ double solve(const double* ox, const double* oy, double* density) {
             density[(OX_LEN + 1) * i + OX_LEN] = init_side(RB, oy[i], TAU * it);
         }
 
-        for (int iy = 1; iy < OY_LEN; iy++) {
-            for (int ix = 1; ix < OX_LEN; ix++) {                
-                double value = integrate(it, ix, iy, ox, oy, prev_density) / HX / HY;
-                double rp = func_f(TAU * it, ox[ix], oy[iy]);                
-                density[(OX_LEN + 1) * iy + ix] = value + TAU * rp;
+        for (int i = 1; i < OY_LEN; i++) {
+            for (int j = 1; j < OX_LEN; j++) {                
+                density[(OX_LEN + 1) * i + j] = integrate(it, j, i, ox, oy, prev_density) / HX / HY;
+                density[(OX_LEN + 1) * i + j] += TAU * func_f(TAU * it, ox[j], oy[i]);                                 
             }
         }
         memcpy(prev_density, density, (OX_LEN + 1) * (OY_LEN + 1) * sizeof (double));
@@ -875,16 +871,9 @@ double solve(const double* ox, const double* oy, double* density) {
     return 0;
 }
 
-double* compute_density(double b,
-        double lb,
-        double rb,
-        double bb,
-        double ub,
-        double tau,
-        int time_step_count,
-        int ox_length,
-        int oy_length,
-        double* norm) {
+double* compute_density(double b, double lb, double rb, double bb, double ub,
+        double tau, int time_step_count, int ox_length, int oy_length,
+        double &norm) {
     B = b;
     UB = ub;
     BB = bb;
@@ -915,7 +904,7 @@ double* compute_density(double b,
 
     solve(ox, oy, density);
 
-    *norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy,
+    norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy,
             time_step_count * TAU);
     //  printf("Norm L1 = %f\n", *norm);
     printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, TMP_WALL_CNT);

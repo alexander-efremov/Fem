@@ -411,7 +411,7 @@ double* solByEqualVolWithVarStepPlusPrint1(
                                            int numOfOXSt, //   -  Number of OX steps.
 
                                            int numOfOYSt,
-                                           int numOfGrStepLayer, double* norm) //   -  How many computations with different grid steps we want to make.
+                                           int numOfGrStepLayer, double &norm) //   -  How many computations with different grid steps we want to make.
 {
     int indByNumOfGridSteps; //   -  Index by computation with different grid step.
 
@@ -524,19 +524,12 @@ double* solByEqualVolWithVarStepPlusPrint1(
             rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ] = anSol - rhoInCurrTL_asV[ (varNumOfOXSt + 1) * k + j ];
         }
     }
-    *norm = norm_at_L_1(
+    norm = norm_at_L_1(
                         varMasOX, //   -  Massive of OX grid nodes. Dimension = dimOX.
                         varNumOfOXSt + 1,
                         varMasOY, //   -  Massive of OY grid nodes. Dimension = dimOY.
                         varNumOfOYSt + 1,
                         rhoInCurrTL_asV);
-
-
-
-
-
-
-
     delete varMasOX;
     delete varMasOY;
     delete rhoInCurrTL_asV;
@@ -565,7 +558,7 @@ double* solByEqualVolWithVarStepPlusPrint(
                                           bool isTimeStShBeChan, //   -  Is time step shoulb be change?
                                           bool isGridStShBeChan, //   -  Is grid step shoulb be change?
                                           //
-                                          int numOfGrStepLayer, double* norm) //   -  How many computations with different grid steps we want to make.
+                                          int numOfGrStepLayer, double *norm) //   -  How many computations with different grid steps we want to make.
 {
     int indByNumOfGridSteps; //   -  Index by computation with different grid step.
 
