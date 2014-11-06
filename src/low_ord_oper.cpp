@@ -562,8 +562,8 @@ double integrate_chanel_slant_left(
 }
 
 double integrate_right_triangle_bottom_left(
-        dp_t& bv,
-        dp_t& uv,
+        const dp_t& bv,
+        const dp_t& uv,
         int tl,
         const double* ox,
         const double* oy,
@@ -684,8 +684,8 @@ double integrate_right_triangle_bottom_left(
 }
 
 double integrate_right_triangle_bottom_right(
-        dp_t& bv,
-        dp_t& uv,
+        const dp_t& bv,
+        const dp_t& uv,
         int tl,
         const double* ox,
         const double* oy,
@@ -805,8 +805,8 @@ double integrate_right_triangle_bottom_right(
 }
 
 double integrate_right_triangle_upper_left(
-        dp_t& bv,
-        dp_t& uv,
+        const dp_t& bv,
+        const dp_t& uv,
         int tl,
         const double* ox,
         const double* oy,
@@ -929,8 +929,8 @@ double integrate_right_triangle_upper_left(
 }
 
 double integrate_right_triangle_upper_right(
-        dp_t& bv,
-        dp_t& uv,
+        const dp_t& bv,
+        const dp_t& uv,
         int tl,
         const double* ox,
         const double* oy,
@@ -940,37 +940,37 @@ double integrate_right_triangle_upper_right(
 
     dp_t trPC, trPN;
     double distOx = 0, distOy = 0, result = 0., tmp, hx = ox[1] - ox[0], hy = oy[1] - oy[0];
-    ip_t indCurSqOx, indCurSqOy, indLB;
+    ip_t sx, sy, indLB;
     int wTrPCI = 0, wTrPNI = 0;
     bool isDone = false;
 
 
-    indCurSqOx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / hx); //   -  If bv.x is in grid edge I want it will be between in the left side.
+    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / hx); //   -  If bv.x is in grid edge I want it will be between in the left side.
     if ((bv.x - _MIN_VALUE_1) <= 0) {
-        indCurSqOx.x -= 1; //   -  The case when "bv.x" is negative.
+        sx.x -= 1; //   -  The case when "bv.x" is negative.
     }
-    indCurSqOx.y = indCurSqOx.x + 1; //   -  It's important only in rare case then bv is in grid edge.
+    sx.y = sx.x + 1; //   -  It's important only in rare case then bv is in grid edge.
     indLB.x = static_cast<int> ((uv[0] + _MIN_VALUE_1) / hx);
     if ((uv[0] + _MIN_VALUE_1) <= 0) {
         indLB.x -= 1; //   -  The case when "bv.x" is negative.
     }
     indLB.y = indLB.x + 1;
-    indCurSqOy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / hy); //   -  If bv.y is in grid edge I want it will be in the upper side.
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / hy); //   -  If bv.y is in grid edge I want it will be in the upper side.
     if ((bv.y + _MIN_VALUE_1) <= 0) {
-        indCurSqOy.x -= 1; //   -  The case when "bv.x" is negative.
+        sy.x -= 1; //   -  The case when "bv.x" is negative.
     }
-    indCurSqOy.y = indCurSqOy.x + 1; //   -  It's important only in rare case then bv is in grid edge.
-    if (indCurSqOx.x >= 0) {
-        distOx = fabs(bv.x - ox[indCurSqOx.x]);
+    sy.y = sy.x + 1; //   -  It's important only in rare case then bv is in grid edge.
+    if (sx.x >= 0) {
+        distOx = fabs(bv.x - ox[sx.x]);
     }
-    if (indCurSqOx.x < 0) {
-        distOx = fabs(bv.x - hx * indCurSqOx.x);
+    if (sx.x < 0) {
+        distOx = fabs(bv.x - hx * sx.x);
     }
-    if (indCurSqOy.y >= 0) {
-        distOy = fabs(oy[indCurSqOy.y] - bv.y);
+    if (sy.y >= 0) {
+        distOy = fabs(oy[sy.y] - bv.y);
     }
-    if (indCurSqOy.y < 0) {
-        distOy = fabs(hy * indCurSqOy.y - bv.y);
+    if (sy.y < 0) {
+        distOy = fabs(hy * sy.y - bv.y);
     }
 
     trPC = bv;
@@ -980,11 +980,11 @@ double integrate_right_triangle_upper_right(
         if ((distOy / distOx) <= ang) {
             //   Across with straight line parallel Ox axis.
             wTrPNI = 1;
-            if (indCurSqOy.y >= 0) {
-                trPN.y = oy[indCurSqOy.y];
+            if (sy.y >= 0) {
+                trPN.y = oy[sy.y];
             }
-            if (indCurSqOy.y < 0) {
-                trPN.y = hy * indCurSqOy.y;
+            if (sy.y < 0) {
+                trPN.y = hy * sy.y;
             }
             trPN.x = bv[0] - (trPN.y - bv[1]) / ang;
         }
@@ -992,11 +992,11 @@ double integrate_right_triangle_upper_right(
         if ((distOy / distOx) > ang) {
             //   Across with straight line parallel Oy axis.
             wTrPNI = 2;
-            if (indCurSqOx.x >= 0) {
-                trPN.x = ox[indCurSqOx.x];
+            if (sx.x >= 0) {
+                trPN.x = ox[sx.x];
             }
-            if (indCurSqOx.x < 0) {
-                trPN.x = hx * indCurSqOx.x;
+            if (sx.x < 0) {
+                trPN.x = hx * sx.x;
             }
             trPN.y = bv.y - ang * (trPN.x - bv[0]);
         }
@@ -1012,11 +1012,11 @@ double integrate_right_triangle_upper_right(
                 trPC, wTrPCI, //   -  double *bv,
                 trPN, wTrPNI, //   -  double *uv,
                 //
-                indCurSqOx, //   -  Indices where trPC and trPN are.
+                sx, //   -  Indices where trPC and trPN are.
                 //
                 uv.x, indLB, //   -  double lb  =  Left boundary by Ox.
                 //
-                indCurSqOy, //   -  Index of current square by Oy axis.
+                sy, //   -  Index of current square by Oy axis.
                 //
                 ox,
                 oy,
@@ -1028,24 +1028,24 @@ double integrate_right_triangle_upper_right(
             wTrPCI = wTrPNI;
             trPC = trPN;
             if (wTrPNI == 1) {
-                indCurSqOy.x += 1;
-                indCurSqOy.y += 1;
+                sy.x += 1;
+                sy.y += 1;
             }
             if (wTrPNI == 2) {
-                indCurSqOx.x -= 1;
-                indCurSqOx.y -= 1;
+                sx.x -= 1;
+                sx.y -= 1;
             }
-            if (indCurSqOx.x >= 0) {
-                distOx = fabs(trPC.x - ox[indCurSqOx.x]);
+            if (sx.x >= 0) {
+                distOx = fabs(trPC.x - ox[sx.x]);
             }
-            if (indCurSqOx.x < 0) {
-                distOx = fabs(trPC.x - hx * indCurSqOx.x);
+            if (sx.x < 0) {
+                distOx = fabs(trPC.x - hx * sx.x);
             }
-            if (indCurSqOy.y >= 0) {
-                distOy = fabs(oy[indCurSqOy.y] - trPC.y);
+            if (sy.y >= 0) {
+                distOy = fabs(oy[sy.y] - trPC.y);
             }
-            if (indCurSqOy.y < 0) {
-                distOy = fabs(hy * indCurSqOy.y - trPC.y);
+            if (sy.y < 0) {
+                distOy = fabs(hy * sy.y - trPC.y);
             }
         }
     } while (!isDone);
