@@ -484,11 +484,12 @@ double integrate_chanel_slant_left(int tl,
 // определим целочисленные индексы квадратов в которых лежат верхняя и нижняя точки треугольника
 // sx = (x,y) координаты квадрата в которой лежит нижняя точка
 // sy = (x,y) координаты квадрата в которой лежит верхняя точка
+// в случае успешной проверки, k = будет  угловой коэфициент прямой
 
 double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int tl,
         const double* ox, const double* oy, double* density) {
-    double k = 0.; // в случае успешной проверки, тут будет угловой коэфициент прямой
-    if (!is_valid(bv, uv, k)) return k;
+    double k = 0.;
+    if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     //   -  Index of current square by Ox and Oy axes. 
     ip_t sx, sy;
@@ -502,7 +503,7 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
     ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
 
     double result = 0.;
-    int curr_i = 0, next_i = 0;
+    short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
         //TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
@@ -545,7 +546,7 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
 double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int tl,
         const double* ox, const double* oy, double* density) {
     double k = 0.;
-    if (!is_valid(bv, uv, k)) return k;
+    if (!try_get_slope_ratio(bv, uv, k)) return k;
     ip_t sx, sy;
 
     sx.x = static_cast<int> ((bv.x + _MIN_VALUE) / HX);
@@ -558,7 +559,7 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
     ip_t ib(sx.x, ib.x + 1);
 
     double result = 0.;
-    int curr_i = 0, next_i = 0;
+    short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
         double dox = sx.y >= 0 ? fabs(ox[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
@@ -603,7 +604,7 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
 double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int tl,
         const double* ox, const double* oy, double* density) {
     double k = 0.;
-    if (!is_valid(bv, uv, k)) return k;
+    if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy, ib;
     sx.x = static_cast<int> ((bv.x + _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
@@ -616,7 +617,7 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
     if (uv.x - _MIN_VALUE <= 0) ib.x -= 1;
     ib.y = ib.x + 1;
 
-    int curr_i = 0, next_i = 0;
+    short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     double result = 0.;
     while (true) {
@@ -658,10 +659,9 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
 double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int tl,
         const double* ox, const double* oy, double* density) {
     double k = 0.;
-    if (!is_valid(bv, uv, k)) return k;
+    if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy, ib;
-    int curr_i = 0, next_i = 0;
 
     sx.x = static_cast<int> ((bv.x - _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
     if (bv.x - _MIN_VALUE <= 0) sx.x -= 1;
@@ -675,27 +675,18 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
     sy.y = sy.x + 1;
 
     double result = 0.;
+    short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
         double distOx = sx.x >= 0 ? fabs(curr.x - ox[sx.x]) : fabs(curr.x - HX * sx.x);
         double distOy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
         if (distOy / distOx <= k) { //   Intersection with straight line parallel Ox axis.
             next_i = 1;
-            if (sy.y >= 0) {
-                next.y = oy[sy.y];
-            }
-            if (sy.y < 0) {
-               next.y = HY * sy.y;
-            }
+            next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = bv.x - (next.y - bv.y) / k;
         } else { //   Intersection with straight line parallel Oy axis.
             next_i = 2;
-            if (sx.x >= 0) {
-                next.x = ox[sx.x];
-            }
-            if (sx.x < 0) {
-               next.x = HX * sx.x;
-            }
+            next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
             next.y = bv.y - k * (next.x - bv.x);
         }
         if (next.x < uv.x + _MIN_VALUE) {
@@ -715,7 +706,7 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
             case 2:
                 sx -= 1;
                 break;
-        }       
+        }
         curr_i = next_i;
         curr = next;
     }

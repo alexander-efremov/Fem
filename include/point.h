@@ -42,14 +42,14 @@ struct dp_t {
 };
 
 struct ip_t {
-    int x;
-    int y;
+    short x;
+    short y;
 
-    double operator[](int i) {
+    double operator[](short i) {
         return (i == 0) ? x : y;
     }
 
-    ip_t(int x = 0, int y = 0)
+    ip_t(short x = 0, short y = 0)
     : x(x), y(y) {
     }
 
@@ -66,25 +66,25 @@ struct ip_t {
         return ip_t(p.x + x, p.y + y);
     }
     
-    ip_t& operator+=(int a) {
+    ip_t& operator+=(short a) {
         x += a;
         y += a;
         return *this;
     }
     
-    ip_t& operator-=(int a) {
+    ip_t& operator-=(short a) {
         x -= a;
         y -= a;
         return *this;
     }
     
-    ip_t& operator-(int a) {
+    ip_t& operator-(short a) {
         x -= a;
         y -= a;
         return *this;
     }
     
-    ip_t& operator+(int a) {
+    ip_t& operator+(short a) {
         x += a;
         y += a;
         return *this;
@@ -94,11 +94,11 @@ struct ip_t {
         return (x == p.x && y == p.y);
     }
 
-    int operator<(const ip_t& p) {
+    short operator<(const ip_t& p) {
         return ((x < p.x) || ((x == p.x) && (y < p.y)));
     }
 
-    int operator>(const ip_t& p) {
+    short operator>(const ip_t& p) {
         return ((x > p.x) || ((x == p.x) && (y > p.y)));
     }
 };
@@ -116,7 +116,7 @@ inline void sort_by_y(dp_t& x, dp_t& y, dp_t& z) {
     if (z.y < y.y) std::swap(y, z);
 }
 
-inline bool is_valid(const dp_t &bv, const dp_t &uv, double &value) {
+inline bool try_get_slope_ratio(const dp_t &bv, const dp_t &uv, double &value) {
     if (fabs(bv.x - uv.x) < MIN_VALUE) {
         return false;
     }
