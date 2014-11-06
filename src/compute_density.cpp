@@ -27,27 +27,27 @@ double init_side(double x, double y, double t) {
 }
 
 inline double func_u(double x, double y) {
-    return B * y * (1. - y) * (_PI / 2 + atan(-x));
+    return B * y * (1 - y) * (_PI / 2 + atan(-x));
 }
 
 inline double func_v(double t, double x, double y) {
-    return atan((x - LB) * (x - RB) * (1. + t) / 10. * (y - UB) * (y - BB));
+    return atan((x - LB) * (x - RB) * (1 + t) / 10. * (y - UB) * (y - BB));
 }
 
 double func_f(
         double tl_on_tau,
         double x,
         double y) {
-    double arg_v = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - UB) * (y - BB);
+    double arg_v = (x - LB) * (x - RB) * (1 + tl_on_tau) / 10. * (y - UB) * (y - BB);
     double rho = analytical_solution(tl_on_tau, x, y);
     double drho_dt = x * y * cos(tl_on_tau * x * y);
     double drho_dx = tl_on_tau * y * cos(tl_on_tau * x * y);
     double dtho_dy = tl_on_tau * x * cos(tl_on_tau * x * y);
     double u = func_u(x, y);
     double v = func_v(tl_on_tau, x, y);
-    double du_dx = -B * y * (1. - y) / (1. + x * x);
-    double dv_dx = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - BB + y - UB);
-    dv_dx /= (1. + arg_v * arg_v);
+    double du_dx = -B * y * (1 - y) / (1 + x * x);
+    double dv_dx = (x - LB) * (x - RB) * (1 + tl_on_tau) / 10. * (y - BB + y - UB);
+    dv_dx /= (1 + arg_v * arg_v);
     double res = drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
     // print_f_params()...
     return res;
@@ -141,7 +141,7 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
         TMP_WALL_CNT++;
     }
 
-    //   1.
+    //   1
     tmp = (qy - oy[sy.y]) * (qy - oy[sy.y]) - (py - oy[sy.y]) * (py - oy[sy.y]);
     if (sx.y >= 0 && sy.y >= 0) {
         tmp *= (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
@@ -631,7 +631,7 @@ quad_type get_coordinates_on_prev_layer(int cur_tl, int ix, int iy,
         const double* ox,
         const double* oy,
         dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta) {
-    //   1. First of all let's compute coordinates of square vertexes.
+    //   1 First of all let's compute coordinates of square vertexes.
     //  OX:
     if (ix == 0) {
         alpha.x = ox[ix];
