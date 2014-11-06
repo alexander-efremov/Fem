@@ -422,7 +422,7 @@ double integrate_chanel_slant_left(
     double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
     double gx = 0, hx = 0; //   -  Left and right boundary for each integration.
     double result = 0.;
-    double tmp;
+    
     int j;
 
     //   Let's compute helpful values.
@@ -454,7 +454,7 @@ double integrate_chanel_slant_left(
 
         //   Integration under one cell triangle.
         if (fabs(a_SL) > _MIN_VALUE) {
-            tmp = integrate_triangle_left_one_cell(
+            result += integrate_triangle_left_one_cell(
                     bv.y, //   -  double Py
                     uv.y, //   -  double Qy                    
                     a_SL, b_SL, mv[0], //   -  double Hx,                   
@@ -464,7 +464,6 @@ double integrate_chanel_slant_left(
                     ox,
                     oy,
                     density);
-            result += tmp;
         }
     }
 
@@ -484,7 +483,7 @@ double integrate_chanel_slant_left(
             }
         }
 
-        tmp = integrate_rectangle_one_cell(bv.y, //   -  double Py,
+        result += integrate_rectangle_one_cell(bv.y, //   -  double Py,
                 uv.y, //   -  double Qy,                
                 mv[0], //   -  double Gx,
                 hx, //   -  double Hx,                
@@ -493,8 +492,6 @@ double integrate_chanel_slant_left(
                 soy, //   -  Index of current square by Oy axis.                
                 ox, oy,
                 density);
-
-        result += tmp;
     }
 
     //   Second step: from "masOX[ sx.y ]" to "rb" by iteration.
@@ -523,7 +520,7 @@ double integrate_chanel_slant_left(
         }
 
 
-        tmp = integrate_rectangle_one_cell(bv.y, //   -  double Py,
+        result += integrate_rectangle_one_cell(bv.y, //   -  double Py,
                 uv.y, //   -  double Qy,
                 //
                 gx, //   -  double Gx,
@@ -536,8 +533,6 @@ double integrate_chanel_slant_left(
                 //
                 ox, oy,
                 density);
-
-        result += tmp;
 
         sox_ch.x += 1;
         sox_ch.y = sox_ch.x + 1;
@@ -556,7 +551,7 @@ double integrate_right_triangle_bottom_left(
     double ang = 0.;
     if (!is_valid(bv, uv, ang)) return ang;
 
-    dp_t trPC, trPN;
+    dp_t curr, next;
     ip_t sx, sy; //   -  Index of current square by Ox and Oy axes. 
     double result = 0., hx = ox[1] - ox[0], hy = oy[1] - oy[0];
     int wTrPCI = 0, wTrPNI = 0;
@@ -574,27 +569,27 @@ double integrate_right_triangle_bottom_left(
 
     ip_t irb(sx.x, sx.x + 1); //   -  Index of right boundary.   
 
-    trPC = bv;
+    curr = bv;
     while (!isDone) {
         //TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
-        double distOx = sx.x >= 0 ? bv.x - ox[sx.x] : fabs(bv.x - hx * sx.x); // Distance to nearest Ox and Oy straight lines.
-        double distOy = sx.y >= 0 ? oy[sy.y] - bv.y : fabs(hy * sy.y - bv.y);
+        double distOx = sx.x >= 0 ? curr.x - ox[sx.x] : fabs(curr.x - hx * sx.x); // Distance to nearest Ox and Oy straight lines.
+        double distOy = sx.y >= 0 ? oy[sy.y] - curr.y : fabs(hy * sy.y - curr.y);
         if (distOy / distOx <= ang) { //   Intersection with straight line parallel Ox axis.        
             wTrPNI = 1;
-            trPN.y = sy.y >= 0 ? oy[sy.y] : hy * sy.y;
-            trPN.x = bv.x - (trPN.y - bv.y) / ang;
+            next.y = sy.y >= 0 ? oy[sy.y] : hy * sy.y;
+            next.x = bv.x - (next.y - bv.y) / ang;
         } else { //   Intersection with straight line parallel Oy axis.            
             wTrPNI = 2;
-            trPN.x = sx.x >= 0 ? ox[sx.x] : hx * sx.x;
-            trPN.y = bv.y - ang * (trPN.x - bv.x);
+            next.x = sx.x >= 0 ? ox[sx.x] : hx * sx.x;
+            next.y = bv.y - ang * (next.x - bv.x);
         }
-        if (trPN.x < (uv.x + _MIN_VALUE_1)) {
+        if (next.x < (uv.x + _MIN_VALUE_1)) {
             wTrPNI = 0;
-            trPN = uv;
+            next = uv;
             isDone = true;
         }
 
-        result += integrate_chanel_slant_left(tl, trPC, wTrPCI, trPN, wTrPNI,
+        result += integrate_chanel_slant_left(tl, curr, wTrPCI, next, wTrPNI,
                 sx, sy,
                 bv.x,
                 irb,
@@ -611,7 +606,7 @@ double integrate_right_triangle_bottom_left(
                 break;
         }
         wTrPCI = wTrPNI;
-        trPC = trPN;
+        curr = next;
     }
     return result;
 }
