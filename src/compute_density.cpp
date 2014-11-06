@@ -191,15 +191,15 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
     return result;
 }
 
-double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double hx, int tl, 
+double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double hx, int tl,
         const ip_t &sx, const ip_t &sy,
         const double* ox, const double* oy, double* density) {
-    
-    if (fabs(bv.y - uv.y) <= _MINF) return 0;    
+
+    if (fabs(bv.y - uv.y) <= _MINF) return 0;
     double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
     if (fabs(a_sl) <= _MINF) return 0;
-    double b_sl = uv.x - a_sl * uv.y;            
-    
+    double b_sl = uv.x - a_sl * uv.y;
+
     double result, tmp, tmp_integral;
     double rho[2][2];
 
@@ -329,9 +329,9 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv.x, tl, sx, sy,
                 ox, oy, density);
     }
-     
+
     result += integrate_triangle_right_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
-        
+
     return result;
 }
 
@@ -343,12 +343,12 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
 //
 // BOTTOMLEFTTR
 
-double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv, 
+double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
         int curr_i, int next_i, const ip_t &sx, const ip_t &sy,
         double rb, const ip_t &irb,
         const double* ox, const double* oy, double* density) {
     if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
-    
+
     dp_t lv, mv; //   -  Left and middle vertices.
     short m_i = 0; //   -  Where middle vertex is.        
     double result = 0, a_sl, b_sl, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
@@ -357,15 +357,15 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
     if (uv.x <= bv.x) {
         lv = uv;
         mv = bv;
-        m_i = curr_i;        
+        m_i = curr_i;
     } else {
         lv = bv;
         mv = uv;
-        m_i = next_i;        
+        m_i = next_i;
     }
 
     //   Integration. First step: under [ sx.x; sx.y ] square.        
-    result += integrate_triangle_left_one_cell(bv, uv, mv[0], tl, sx, sy, ox, oy, density);    
+    result += integrate_triangle_left_one_cell(bv, uv, mv[0], tl, sx, sy, ox, oy, density);
 
     //   B. Under rectangle. Need to be checking.
     if (m_i == 1) {
@@ -430,7 +430,7 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
             next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
             next.y = curr.y - k * (next.x - curr.x);
         }
-        if (next.x < (uv.x + _MINF)) { 
+        if (next.x < (uv.x + _MINF)) {
             // сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
             // и в случае когда прошлись по всем точкам...
             next_i = 0;
