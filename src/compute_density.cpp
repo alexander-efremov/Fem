@@ -123,7 +123,6 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double hx, int tl,
         const ip_t &sx, const ip_t &sy,
         const double* ox, const double* oy, double* density) {
-
     if (fabs(bv.y - uv.y) <= _MINF) return 0;
     double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
     if (fabs(a_sl) <= _MINF) return 0;
