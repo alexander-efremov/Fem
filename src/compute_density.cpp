@@ -172,21 +172,14 @@ double integrate_triangle_right_one_cell(double py, double qy, double a_sl,
             tl, sx, sy, ox, oy, density);
 }
 
-double integrate_chanel_slant_right(int tl,
-        const dp_t& bv, int wTrPCI,
-        const dp_t& uv, int wTrPNI,
-        const ip_t &sx,
-        double lb, const ip_t &indLB,
-        const ip_t &sy,
-        const double* ox, const double* oy, double* density) {
+double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
+        const dp_t& uv, int wTrPNI, const ip_t &sx, double lb, const ip_t &ilb,
+        const ip_t &sy, const double* ox, const double* oy, double* density) {
     dp_t mv, rv; //   -  Middle and right vertices.
     int wMvI = 0; //   -  Where middle vertex is.
     ip_t indCurSqOxToCh; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
-    double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
-    double Gx = 0, Hx = 0; //   -  Left boundary for each integration.
-    double result = 0;
+    double result = 0, a_sl, b_sl, gx = 0, hx = 0; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.//   -  Left boundary for each integration.
 
-    //   Let's compute helpful values.
     if (uv.x <= bv.x) {
         mv = uv;
         wMvI = wTrPNI;
@@ -197,29 +190,26 @@ double integrate_chanel_slant_right(int tl,
         rv = uv;
     }
 
-    if ((fabs(uv.y - bv.y)) <= _MINF) {
-        return fabs(uv.y - bv.y); //   fabs(uv.y - bv.y);
-    }
+    if ((fabs(uv.y - bv.y)) <= _MINF) return fabs(uv.y - bv.y);     
 
     //   First step: from "lb" to "masOX[ indCurSqOx.x ]" by iteration.
-
-    indCurSqOxToCh.x = indLB.x;
+    indCurSqOxToCh.x = ilb.x;
     indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
 
-    for (int j = indLB.x; j < sx.x; j++) {
+    for (int j = ilb.x; j < sx.x; j++) {
         //   If this is first cell we should integrate under rectangle only.
         if (indCurSqOxToCh.x >= 0) {
-            Gx = ox[indCurSqOxToCh.x];
-            Hx = ox[indCurSqOxToCh.y];
+            gx = ox[indCurSqOxToCh.x];
+            hx = ox[indCurSqOxToCh.y];
         }
         if (indCurSqOxToCh.x < 0) {
-            Gx = HX * indCurSqOxToCh.x;
-            Hx = HX * indCurSqOxToCh.y;
+            gx = HX * indCurSqOxToCh.x;
+            hx = HX * indCurSqOxToCh.y;
         }
-        if (j == indLB.x) Gx = lb;
+        if (j == ilb.x) gx = lb;
 
         result += integrate_rectangle_one_cell(bv.y,
-                uv.y, Gx, Hx,
+                uv.y, gx, hx,
                 tl, indCurSqOxToCh, //   -  Index of current square by Ox axis.
                 sy, //   -  Index of current square by Oy axis.                
                 ox, oy, density);
@@ -230,11 +220,11 @@ double integrate_chanel_slant_right(int tl,
     //   Integration. Second step: under [ indCurSqOx.x; sx.y ] square.
     //   A. Under rectangle.
     if (wMvI == 1) {
-        if (sx.x == indLB.x) Gx = lb;
-        if (sx.x > indLB.x) {
-            Gx = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
+        if (sx.x == ilb.x) gx = lb;
+        if (sx.x > ilb.x) {
+            gx = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
         }
-        result += integrate_rectangle_one_cell(bv.y, uv.y, Gx, mv[0], tl, sx, sy,
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv[0], tl, sx, sy,
                 ox, oy, density);
     }
 
@@ -242,12 +232,12 @@ double integrate_chanel_slant_right(int tl,
     if (fabs(uv.y - bv.y) > _MINF) {
         //   integ += fabs(uv.y - bv.y) * (rv[0] - mv[0]) /2.;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
-        a_SL = (uv.x - bv.x) / (uv.y - bv.y);
-        b_SL = bv.x - a_SL * bv.y;
+        a_sl = (uv.x - bv.x) / (uv.y - bv.y);
+        b_sl = bv.x - a_sl * bv.y;
 
         //   Integration under one cell triangle.
-        if (fabs(a_SL) > _MINF) {
-            result += integrate_triangle_right_one_cell(bv.y, uv.y, a_SL, b_SL,
+        if (fabs(a_sl) > _MINF) {
+            result += integrate_triangle_right_one_cell(bv.y, uv.y, a_sl, b_sl,
                     mv[0], tl, sx, sy, ox, oy, density);
         }
     }
@@ -259,12 +249,10 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, int curr_i,
         const dp_t& uv, int next_i, const ip_t &sx, const ip_t &sy,
         double rb, const ip_t &irb,
         const double* ox, const double* oy, double* density) {
-
     if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
-
     dp_t lv, mv; //   -  Left and middle vertices.
     int wMvI = 0; //   -  Where middle vertex is.        
-    double result = 0, a_SL, b_SL, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
+    double result = 0, a_sl, b_sl, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
 
     //   Let's compute helpful values.
     if (uv.x <= bv.x) {
@@ -281,11 +269,11 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, int curr_i,
     //   A. Under triangle.
     if (fabs(uv.y - bv.y) > _MINF) {
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
-        a_SL = (uv.x - bv.x) / (uv.y - bv.y);
-        b_SL = bv.x - a_SL * bv.y;
+        a_sl = (uv.x - bv.x) / (uv.y - bv.y);
+        b_sl = bv.x - a_sl * bv.y;
         //   Integration under one cell triangle.
-        if (fabs(a_SL) > _MINF) {
-            result += integrate_triangle_left_one_cell(bv.y, uv.y, a_SL, b_SL, mv[0],
+        if (fabs(a_sl) > _MINF) {
+            result += integrate_triangle_left_one_cell(bv.y, uv.y, a_sl, b_sl, mv[0],
                     tl, sx, sy, ox, oy, density);
         }
     }
@@ -399,9 +387,9 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
-        double dox = sx.y >= 0 ? fabs(ox[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
-        double doy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
-        if (doy / dox <= k) {//   Across with straight line parallel Ox axis.            
+        double dx = sx.y >= 0 ? fabs(ox[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
+        double dy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
+        if (dy / dx <= k) {//   Across with straight line parallel Ox axis.            
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = bv.x + (next.y - bv.y) / k;
@@ -458,9 +446,9 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
-        double dox = sx.y >= 0 ? ox[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
-        double doy = sy.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
-        if (doy / dox <= k) { //   intersection with straight line parallel Ox axis.
+        double dx = sx.y >= 0 ? ox[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
+        double dx = sy.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
+        if (dx / dx <= k) { //   intersection with straight line parallel Ox axis.
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = bv.x + (next.y - bv.y) / k;
@@ -513,9 +501,9 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
-        double distOx = sx.x >= 0 ? fabs(curr.x - ox[sx.x]) : fabs(curr.x - HX * sx.x);
-        double distOy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
-        if (distOy / distOx <= k) { //   Intersection with straight line parallel Ox axis.
+        double dx = sx.x >= 0 ? fabs(curr.x - ox[sx.x]) : fabs(curr.x - HX * sx.x);
+        double dy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
+        if (dy / dx <= k) { //   Intersection with straight line parallel Ox axis.
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = bv.x - (next.y - bv.y) / k;
