@@ -16,6 +16,8 @@ static int OX_LEN;
 static int OY_LEN;
 static int XY_LEN;
 static int TIME_STEP_CNT;
+static double HX;
+static double HY;
 
 double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
@@ -403,137 +405,75 @@ double integrate_chanel_slant_right(int tl,
     return result;
 }
 
-double integrate_chanel_slant_left(
-        int tl,
-        const dp_t& bv, int wTrPCI, //   -  Where travel point current (bottom vertex) is.
-        const dp_t& uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
+double integrate_chanel_slant_left(int tl,
+        const dp_t& bv, int curr_i, //   -  Where travel point current (bottom vertex) is.
+        const dp_t& uv, int next_i, //   -  Where travel point next (upper vertex) is.
         //
         const ip_t &sox, //   -  Index by OX axis where bv and uv are.
         const ip_t &soy, //   -  Index of current square by Oy axis.
         //
-        double rb, const ip_t &indRB, //   -  Right boundary by Ox. Index by OX axis where rb is.        
+        double rb, const ip_t &irb, //   -  Right boundary by Ox. Index by OX axis where rb is.        
         const double* ox,
         const double* oy,
         double* density) {
+    
+     if (fabs(uv.y - bv.y) <= _MIN_VALUE) return fabs(uv.y - bv.y);         
+    
+    
     dp_t lv, mv; //   -  Left and middle vertices.
-    int wMvI = 0; //   -  Where middle vertex is.
-    ip_t sox_ch; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
-    double h = ox[1] - ox[0];
+    int wMvI = 0; //   -  Where middle vertex is.    
     double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
     double gx = 0, hx = 0; //   -  Left and right boundary for each integration.
     double result = 0.;
-    
-    int j;
 
     //   Let's compute helpful values.
-
     if (uv.x <= bv.x) {
         lv = uv;
         mv = bv;
-        wMvI = wTrPCI;
+        wMvI = curr_i;
     } else {
         lv = bv;
         mv = uv;
-        wMvI = wTrPNI;
-    }
-
-    if ((fabs(uv.y - bv.y)) <= _MIN_VALUE) {
-        //   Computation is impossible. Too smale values. Let's return some approximate value.
-        //   buf_D  =  (uv.y - bv.y)  *  (rb  - (uv.x + bv.x) /2.) * rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.x ];
-        return fabs(uv.y - bv.y); //   fabs(uv.y - bv.y);
+        wMvI = next_i;
     }
 
     //   Integration. First step: under [ indCurSqOx.x; sx.y ] square.
-
     //   A. Under triangle.
-
     if (fabs(uv.y - bv.y) > _MIN_VALUE) {
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv.x - bv.x) / (uv.y - bv.y);
         b_SL = bv.x - a_SL * bv.y;
-
         //   Integration under one cell triangle.
         if (fabs(a_SL) > _MIN_VALUE) {
-            result += integrate_triangle_left_one_cell(
-                    bv.y, //   -  double Py
-                    uv.y, //   -  double Qy                    
-                    a_SL, b_SL, mv[0], //   -  double Hx,                   
-                    tl,
-                    sox, //   -  Index of current square by Ox axis.
-                    soy, //   -  Index of current square by Oy axis.                   
-                    ox,
-                    oy,
-                    density);
+            result += integrate_triangle_left_one_cell(bv.y, uv.y, a_SL, b_SL, mv[0],                  
+                    tl, sox, soy, ox, oy, density);
         }
     }
 
     //   B. Under rectangle. Need to be checking.
     if (wMvI == 1) {
-        if (sox.x == indRB.x) {
+        if (sox.x == irb.x) {
             hx = rb;
+        } else if (sox.x < irb.x) {
+            hx = sox.y >= 0 ? ox[sox.y] : HX * sox.y;            
         }
-
-        if (sox.x < indRB.x) {
-            if (sox.y >= 0) {
-                hx = ox[sox.y];
-            }
-
-            if (sox.y < 0) {
-                hx = h * sox.y;
-            }
-        }
-
-        result += integrate_rectangle_one_cell(bv.y, //   -  double Py,
-                uv.y, //   -  double Qy,                
-                mv[0], //   -  double Gx,
-                hx, //   -  double Hx,                
-                tl,
-                sox, //   -  Index of current square by Ox axis.
-                soy, //   -  Index of current square by Oy axis.                
-                ox, oy,
-                density);
+        result += integrate_rectangle_one_cell(bv.y, uv.y, mv[0], hx, tl,
+                sox, soy,
+                ox, oy, density);
     }
 
     //   Second step: from "masOX[ sx.y ]" to "rb" by iteration.
-
-
-    sox_ch.x = sox.x + 1;
-    sox_ch.y = sox_ch.x + 1;
-
-    for (j = sox.x + 1; j < indRB.x + 1; j++) {
+    ip_t sox_ch(sox.x + 1, sox.x + 2); //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.    
+    
+    for (int j = sox.x + 1; j < irb.x + 1; j++) {
         //   If this is first cell we should integrate under triangle only.
-
-        if (sox_ch.y > 0) {
-            gx = ox[sox_ch.x];
-            hx = ox[sox_ch.y];
-        }
-
-
-        if (sox_ch.y <= 0) {
-            gx = h * sox_ch.x;
-            hx = h * sox_ch.y;
-        }
-
-
-        if (j == indRB.x) {
-            hx = rb;
-        }
-
-
-        result += integrate_rectangle_one_cell(bv.y, //   -  double Py,
-                uv.y, //   -  double Qy,
-                //
-                gx, //   -  double Gx,
-                hx, //   -  double Hx,
-                //
-                tl, //   -  Index of current time layer.
-                //
-                sox_ch, //   -  Index of current square by Ox axis.
-                soy, //   -  Index of current square by Oy axis.
-                //
+        gx = sox_ch.y <= 0 ? HX * sox_ch.x : ox[sox_ch.x];
+        hx = sox_ch.y <= 0 ? HX * sox_ch.y : hx = ox[sox_ch.y];        
+        if (j == irb.x) hx = rb;
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, 
+                sox_ch, soy,
                 ox, oy,
                 density);
-
         sox_ch.x += 1;
         sox_ch.y = sox_ch.x + 1;
     }
@@ -541,71 +481,64 @@ double integrate_chanel_slant_left(
     return result;
 }
 
-double integrate_right_triangle_bottom_left(
-        const dp_t& bv,
-        const dp_t& uv,
-        int tl,
-        const double* ox,
-        const double* oy,
-        double* density) {
-    double ang = 0.;
-    if (!is_valid(bv, uv, ang)) return ang;
-
-    dp_t curr, next;
+double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int tl, 
+        const double* ox, const double* oy, double* density) {
+    double k = 0.; // в случае успешной проверки, тут будет угловой коэфициент прямой
+    if (!is_valid(bv, uv, k)) return k;
+   
     ip_t sx, sy; //   -  Index of current square by Ox and Oy axes. 
-    double result = 0., hx = ox[1] - ox[0], hy = oy[1] - oy[0];
-    int wTrPCI = 0, wTrPNI = 0;
-    bool isDone = false;
-
     // определим целочисленные индексы квадратов в которых лежат верхняя и нижняя точки треугольника
     // sx = (x,y) координаты квадрата в которой лежит нижняя точка
     // sy = (x,y) координаты квадрата в которой лежит верхняя точка
-    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / hx);
+
+    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / HX);
     if (bv.x - _MIN_VALUE_1 <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / hy);
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / HY);
     if (bv.y + _MIN_VALUE_1 <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
     ip_t irb(sx.x, sx.x + 1); //   -  Index of right boundary.   
-
-    curr = bv;
-    while (!isDone) {
+   
+    double result = 0.;
+    int curr_i = 0, next_i = 0;
+    dp_t curr = bv, next;
+    while (true) {
         //TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
-        double distOx = sx.x >= 0 ? curr.x - ox[sx.x] : fabs(curr.x - hx * sx.x); // Distance to nearest Ox and Oy straight lines.
-        double distOy = sx.y >= 0 ? oy[sy.y] - curr.y : fabs(hy * sy.y - curr.y);
-        if (distOy / distOx <= ang) { //   Intersection with straight line parallel Ox axis.        
-            wTrPNI = 1;
-            next.y = sy.y >= 0 ? oy[sy.y] : hy * sy.y;
-            next.x = bv.x - (next.y - bv.y) / ang;
+        double dx = sx.x >= 0 ? curr.x - ox[sx.x] : fabs(curr.x - HX * sx.x); // Distance to nearest Ox and Oy straight lines.
+        double dy = sx.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
+        if (dy / dx <= k) { //   Intersection with straight line parallel Ox axis.        
+            next_i = 1;
+            next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
+            next.x = bv.x - (next.y - bv.y) / k;
         } else { //   Intersection with straight line parallel Oy axis.            
-            wTrPNI = 2;
-            next.x = sx.x >= 0 ? ox[sx.x] : hx * sx.x;
-            next.y = bv.y - ang * (next.x - bv.x);
+            next_i = 2;
+            next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
+            next.y = bv.y - k * (next.x - bv.x);
         }
         if (next.x < (uv.x + _MIN_VALUE_1)) {
-            wTrPNI = 0;
+            next_i = 0;
             next = uv;
-            isDone = true;
+            result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
+                sx, sy, bv.x,
+                irb, ox, oy, density);
+            break;
         }
 
-        result += integrate_chanel_slant_left(tl, curr, wTrPCI, next, wTrPNI,
-                sx, sy,
-                bv.x,
+        result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
+                sx, sy, bv.x,
                 irb,
                 ox, oy, density);
-
-        if (isDone) break;
-
-        switch (wTrPNI) {
+        
+        switch (next_i) {
             case 1:
-                sy += 1;                
+                sy += 1;
                 break;
             case 2:
                 sx -= 1;
                 break;
         }
-        wTrPCI = wTrPNI;
+        curr_i = next_i;
         curr = next;
     }
     return result;
@@ -1337,6 +1270,9 @@ double* compute_density(double b,
     for (int i = 0; i <= OY_LEN; i++) {
         oy[i] = bb + i * (ub - bb) / OY_LEN;
     }
+    
+    HX = oy[1] - oy[0];
+    HY = oy[1] - oy[0];
 
     print_params(B, LB, RB, BB, UB, TAU, time_step_count, OX_LEN, OY_LEN);
 

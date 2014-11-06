@@ -120,7 +120,7 @@ inline bool is_valid(const dp_t &bv, const dp_t &uv, double &value) {
     if (fabs(bv.x - uv.x) < MIN_VALUE) {
         return false;
     }
-    value = fabs((uv.y - bv.y) / (bv.x - uv.x));
+    value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // угловой коэффициент прямой
     if (value < MIN_VALUE) {
         return false;
     }
