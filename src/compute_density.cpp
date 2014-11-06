@@ -165,7 +165,7 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
     tmp += tmp_integral / 2;
     result += tmp * rho[1][0] / HX / HY;
 
-    //   3.
+    //   3
     tmp = (qy - oy[sy.x]) * (qy - oy[sy.x]) - (py - oy[sy.x]) * (py - oy[sy.x]);
     if (sx.y >= 0 && sy.x >= 0) {
         tmp *= -1 * (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
@@ -177,7 +177,7 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
     tmp += tmp_integral / 2;
     result += tmp * rho[0][1] / HX / HY;
 
-    //   4.
+    //   4
     tmp = (qy - oy[sy.x]) * (qy - oy[sy.x]) - (py - oy[sy.x]) * (py - oy[sy.x]);
     if (sx.x >= 0 && sy.x >= 0) {
         tmp *= (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
@@ -191,11 +191,87 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
     return result;
 }
 
-double integrate_triangle_right_one_cell(double py, double qy, double a_sl,
-        double b_sl, double gx, int tl, const ip_t &sx, const ip_t &sy,
+double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double hx, int tl, 
+        const ip_t &sx, const ip_t &sy,
         const double* ox, const double* oy, double* density) {
-    return -1 * integrate_triangle_left_one_cell(py, qy, a_sl, b_sl, gx,
-            tl, sx, sy, ox, oy, density);
+    
+    if (fabs(bv.y - uv.y) <= _MINF) return 0;    
+    double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
+    if (fabs(a_sl) <= _MINF) return 0;
+    double b_sl = uv.x - a_sl * uv.y;            
+    
+    double result, tmp, tmp_integral;
+    double rho[2][2];
+
+    if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN) {
+        rho[0][0] = density[(OX_LEN + 1) * sy.x + sx.x];
+        rho[0][1] = density[(OX_LEN + 1) * sy.y + sx.x];
+        rho[1][0] = density[(OX_LEN + 1) * sy.x + sx.y];
+        rho[1][1] = density[(OX_LEN + 1) * sy.y + sx.y];
+    } else {
+        // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
+        // норма должна уменьшиться
+        rho[0][0] = analytical_solution(TAU * (tl - 1), sx.x * HX, sy.x * HY);
+        rho[0][1] = analytical_solution(TAU * (tl - 1), sx.x * HX, sy.y * HY);
+        rho[1][0] = analytical_solution(TAU * (tl - 1), sx.y * HX, sy.x * HY);
+        rho[1][1] = analytical_solution(TAU * (tl - 1), sx.y * HX, sy.y * HY);
+        TMP_WALL_CNT++;
+    }
+
+    //   1
+    tmp = (uv.y - oy[sy.y]) * (uv.y - oy[sy.y]) - (bv.y - oy[sy.y]) * (bv.y - oy[sy.y]);
+    if (sx.y >= 0 && sy.y >= 0) {
+        tmp *= (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.y], a_sl, b_sl, ox[sx.y]);
+    } else {
+        tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
+    }
+    tmp -= tmp_integral / 2;
+    result = tmp * rho[0][0] / HX / HY;
+
+    //   2
+    tmp = (uv.y - oy[sy.y]) * (uv.y - oy[sy.y]) - (bv.y - oy[sy.y]) * (bv.y - oy[sy.y]);
+    if (sx.x >= 0 && sy.y >= 0) {
+        tmp *= -1 * (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.y], a_sl, b_sl, ox[sx.x]);
+    } else {
+        tmp *= -1 * (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
+    }
+    tmp += tmp_integral / 2;
+    result += tmp * rho[1][0] / HX / HY;
+
+    //   3
+    tmp = (uv.y - oy[sy.x]) * (uv.y - oy[sy.x]) - (bv.y - oy[sy.x]) * (bv.y - oy[sy.x]);
+    if (sx.y >= 0 && sy.x >= 0) {
+        tmp *= -1 * (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.x], a_sl, b_sl, ox[sx.y]);
+    } else {
+        tmp *= -1 * (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
+    }
+    tmp += tmp_integral / 2;
+    result += tmp * rho[0][1] / HX / HY;
+
+    //   4
+    tmp = (uv.y - oy[sy.x]) * (uv.y - oy[sy.x]) - (bv.y - oy[sy.x]) * (bv.y - oy[sy.x]);
+    if (sx.x >= 0 && sy.x >= 0) {
+        tmp *= (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.x], a_sl, b_sl, ox[sx.x]);
+    } else {
+        tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
+        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
+    }
+    tmp -= tmp_integral / 2;
+    result += tmp * rho[1][1] / HX / HY;
+    return result;
+}
+
+double integrate_triangle_right_one_cell(const dp_t &bv, const dp_t &uv,
+        double gx, int tl, const ip_t &sx, const ip_t &sy,
+        const double* ox, const double* oy, double* density) {
+    return -1 * integrate_triangle_left_one_cell(bv, uv, gx, tl, sx, sy, ox, oy, density);
 }
 
 double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
@@ -250,24 +326,22 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
         if (sx.x > ilb.x) {
             gx = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
         }
-        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv[0], tl, sx, sy,
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv.x, tl, sx, sy,
                 ox, oy, density);
     }
-
-    //   B. Under triangle.
-    if (fabs(uv.y - bv.y) > _MINF) {
-        //   Coefficients of slant line: x = a_SL *y  +  b_SL.
-        a_sl = (uv.x - bv.x) / (uv.y - bv.y);
-        b_sl = bv.x - a_sl * bv.y;
-
-        //   Integration under one cell triangle.
-        if (fabs(a_sl) > _MINF) {
-            result += integrate_triangle_right_one_cell(bv.y, uv.y, a_sl, b_sl,
-                    mv[0], tl, sx, sy, ox, oy, density);
-        }
-    }
+     
+    result += integrate_triangle_right_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
+        
     return result;
 }
+
+// используется для upper left и для bottom left треугольника
+// т.е. случай
+// UPPERLEFTTR
+//
+//                  CENTRE
+//
+// BOTTOMLEFTTR
 
 double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv, 
         int curr_i, int next_i, const ip_t &sx, const ip_t &sy,
@@ -279,28 +353,19 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
     short m_i = 0; //   -  Where middle vertex is.        
     double result = 0, a_sl, b_sl, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
 
+    // зачем то определили среднюю точку
     if (uv.x <= bv.x) {
         lv = uv;
         mv = bv;
-        m_i = curr_i;
+        m_i = curr_i;        
     } else {
         lv = bv;
         mv = uv;
-        m_i = next_i;
+        m_i = next_i;        
     }
 
-    //   Integration. First step: under [ indCurSqOx.x; sx.y ] square.
-    //   A. Under triangle.
-    if (fabs(uv.y - bv.y) > _MINF) {
-        //   Coefficients of slant line: x = a_SL *y  +  b_SL.
-        a_sl = (uv.x - bv.x) / (uv.y - bv.y);
-        b_sl = bv.x - a_sl * bv.y;
-        //   Integration under one cell triangle.
-        if (fabs(a_sl) > _MINF) {
-            result += integrate_triangle_left_one_cell(bv.y, uv.y, a_sl, b_sl, mv[0],
-                    tl, sx, sy, ox, oy, density);
-        }
-    }
+    //   Integration. First step: under [ sx.x; sx.y ] square.        
+    result += integrate_triangle_left_one_cell(bv, uv, mv[0], tl, sx, sy, ox, oy, density);    
 
     //   B. Under rectangle. Need to be checking.
     if (m_i == 1) {
@@ -365,7 +430,9 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
             next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
             next.y = curr.y - k * (next.x - curr.x);
         }
-        if (next.x < (uv.x + _MINF)) {
+        if (next.x < (uv.x + _MINF)) { 
+            // сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
+            // и в случае когда прошлись по всем точкам...
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_left(tl, curr, next, curr_i, next_i,
