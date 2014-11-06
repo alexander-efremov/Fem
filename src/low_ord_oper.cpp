@@ -492,7 +492,7 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
 
     //   -  Index of current square by Ox and Oy axes. 
     ip_t sx, sy;
-    ip_t sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / HX);
+    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / HX);
     if (bv.x - _MIN_VALUE_1 <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
     sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / HY);
@@ -606,7 +606,7 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
     if (!is_valid(bv, uv, ang)) return ang;
 
     dp_t trPC, trPN;
-    double distOx = 0, distOy = 0, result = 0., hx = ox[1] - ox[0], hy = oy[1] - oy[0];
+    double distOx = 0, distOy = 0, result = 0.;
     ip_t sox, soy, indRB;
     int wTrPCI = 0, wTrPNI = 0;
     bool isDone = false;
@@ -615,32 +615,32 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
 
 
     //   The follow equations are quite important.
-    sox.x = static_cast<int> ((trPC.x + _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be in the right side.
-    if ((trPC.x + _MIN_VALUE_1) <= 0) {
+    sox.x = static_cast<int> ((trPC.x + _MIN_VALUE_1) / HX); //   -  If trPC.x is in grid edge I want it will be in the right side.
+    if (trPC.x + _MIN_VALUE_1 <= 0) {
         sox.x -= 1; //   -  The case when "trPC.x" ia negative.
     }
     sox.y = sox.x + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    soy.x = static_cast<int> ((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper square.
-    if ((trPC.y + _MIN_VALUE_1) <= 0) {
+    soy.x = static_cast<int> ((trPC.y + _MIN_VALUE_1) / HY); //   -  If trPC.y is in grid edge I want it will be in the upper square.
+    if (trPC.y + _MIN_VALUE_1 <= 0) {
         soy.x -= 1; //   -  The case when "trPC.x" ia negative.
     }
     soy.y = soy.x + 1;
-    indRB.x = static_cast<int> ((uv.x - _MIN_VALUE_1) / hy); //   -  If uv.x is in grid edge I want it will be in the left side.
-    if ((uv.x - _MIN_VALUE_1) <= 0) {
-        indRB.x -= 1; //   -  The case when "trPC.x" ia negative.
+    indRB.x = static_cast<int> ((uv.x - _MIN_VALUE_1) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+    if (uv.x - _MIN_VALUE_1 <= 0) {
+        indRB.x -= 1; //   -  The case when "trPC.x" is negative.
     }
     indRB.y = indRB.x + 1;
     if (sox.y >= 0) {
         distOx = ox[sox.y] - trPC.x;
     }
     if (sox.y < 0) {
-        distOx = fabs(hx * sox.y - trPC.x);
+        distOx = fabs(HX * sox.y - trPC.x);
     }
     if (soy.y >= 0) {
         distOy = oy[soy.y] - trPC.y;
     }
     if (soy.y < 0) {
-        distOy = fabs(hy * soy.y - trPC.y);
+        distOy = fabs(HY * soy.y - trPC.y);
     }
     do {
         //   a. First case.
@@ -651,7 +651,7 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
                 trPN.y = oy[soy.y];
             }
             if (soy.y < 0) {
-                trPN.y = hy * soy.y;
+                trPN.y = HY * soy.y;
             }
             trPN.x = bv.x + (trPN.y - bv.y) / ang;
         }
@@ -663,7 +663,7 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
                 trPN.x = ox[sox.y];
             }
             if (sox.y < 0) {
-                trPN.x = hx * sox.y;
+                trPN.x = HX * sox.y;
             }
             trPN.y = bv.y + ang * (trPN.x - bv.x);
         }
@@ -674,18 +674,8 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
             wTrPNI = 0;
         }
         //   d. Integration.
-        result += integrate_chanel_slant_left(tl,
-                trPC, wTrPCI, //   -  double *bv,
-                trPN, wTrPNI, //   -  double *uv,
-                //
-                sox, //   -  Indices where trPC and trPN are.
-                soy, //   -  Index of current square by Oy axis.
-                //
-                uv.x, indRB,
-                ox,
-                oy,
-                density);
-        //   e. Updating.
+        result += integrate_chanel_slant_left(tl, trPC, wTrPCI, trPN, wTrPNI, 
+                sox, soy, uv.x, indRB, ox, oy, density);
         if (isDone == false) {
             //   We will compute more. We need to redefine some values.
             wTrPCI = wTrPNI;
@@ -702,13 +692,13 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
                 distOx = fabs(ox[sox.y] - trPC.x);
             }
             if (sox.y < 0) {
-                distOx = fabs(hx * sox.y - trPC.x);
+                distOx = fabs(HX * sox.y - trPC.x);
             }
             if (soy.y >= 0) {
                 distOy = fabs(oy[soy.y] - trPC.y);
             }
             if (soy.y < 0) {
-                distOy = fabs(hy * soy.y - trPC.y);
+                distOy = fabs(HY * soy.y - trPC.y);
             }
         }
     } while (!isDone);
