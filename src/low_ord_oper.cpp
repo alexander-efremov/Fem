@@ -251,8 +251,8 @@ double integrate_triangle_right_one_cell(double py,
 }
 
 double integrate_chanel_slant_right(int tl,
-        dp_t& bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
-        dp_t& uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
+        const dp_t& bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
+        const dp_t& uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
         //
         const ip_t &indCurSqOx, //   -  Index by OX axis where bv and uv are.
         //
@@ -263,7 +263,7 @@ double integrate_chanel_slant_right(int tl,
         const double* ox,
         const double* oy,
         double* density) {
-    double mv[2], rv[2]; //   -  Middle and right vertices.
+    dp_t mv, rv; //   -  Middle and right vertices.
     int wMvI = 0; //   -  Where middle vertex is.
     ip_t indCurSqOxToCh; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
     double h = ox[1] - ox[0];
@@ -273,32 +273,26 @@ double integrate_chanel_slant_right(int tl,
     double tmp;
 
     //   Let's compute helpful values.
-
-    if (uv[0] <= bv[0]) {
-        mv[0] = uv[0];
-        mv[1] = uv[1];
+    if (uv.x <= bv.x) {
+        mv = uv;     
         wMvI = wTrPNI;
-        rv[0] = bv[0];
-        rv[1] = bv[1];
-    }
-
-    if (uv[0] > bv[0]) {
-        mv[0] = bv[0];
-        mv[1] = bv[1];
+        rv = bv;        
+    } else 
+    {
+        mv = bv;
         wMvI = wTrPCI;
-        rv[0] = uv[0];
-        rv[1] = uv[1];
+        rv = uv;
     }
 
-    if ((fabs(uv[1] - bv[1])) <= _MIN_VALUE) {
+    if ((fabs(uv.y - bv.y)) <= _MIN_VALUE) {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
-        //   buf_D  =  (uv[1] - bv[1])  *  ((uv[0] + bv[0]) /2.  -  lb) * rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.x ];
-        return fabs(uv[1] - bv[1]); //   fabs(uv[1] - bv[1]);
+        //   buf_D  =  (uv.y - bv.y)  *  ((uv.x + bv.x) /2.  -  lb) * rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.x ];
+        return fabs(uv.y - bv.y); //   fabs(uv.y - bv.y);
     }
 
 
     //   First step: from "lb" to "masOX[ indCurSqOx.x ]" by iteration.
-    //   integ  += fabs( mv[0] - lb) * fabs(uv[1] - bv[1]);
+    //   integ  += fabs( mv[0] - lb) * fabs(uv.y - bv.y);
 
     indCurSqOxToCh.x = indLB.x;
     indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
@@ -321,8 +315,8 @@ double integrate_chanel_slant_right(int tl,
         }
 
         tmp = integrate_rectangle_one_cell(
-                bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,
+                bv.y, //   -  double Py,
+                uv.y, //   -  double Qy,
                 Gx, //   -  double Gx,
                 Hx, //   -  double Hx,
                 //
@@ -358,8 +352,8 @@ double integrate_chanel_slant_right(int tl,
             }
         }
 
-        tmp = integrate_rectangle_one_cell(bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,
+        tmp = integrate_rectangle_one_cell(bv.y, //   -  double Py,
+                uv.y, //   -  double Qy,
                 //
                 Gx, //   -  double Gx,
                 mv[0], //   -  double Hx,
@@ -377,11 +371,11 @@ double integrate_chanel_slant_right(int tl,
 
     //   B. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > _MIN_VALUE) {
-        //   integ += fabs(uv[1] - bv[1]) * (rv[0] - mv[0]) /2.;
+    if (fabs(uv.y - bv.y) > _MIN_VALUE) {
+        //   integ += fabs(uv.y - bv.y) * (rv[0] - mv[0]) /2.;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
-        a_SL = (uv[0] - bv[0]) / (uv[1] - bv[1]);
-        b_SL = bv[0] - a_SL * bv[1];
+        a_SL = (uv.x - bv.x) / (uv.y - bv.y);
+        b_SL = bv.x - a_SL * bv.y;
 
 
         //   Integration under one cell triangle.
@@ -412,8 +406,8 @@ double integrate_chanel_slant_right(int tl,
 
 double integrate_chanel_slant_left(
         int tl,
-        dp_t& bv, int wTrPCI, //   -  Where travel point current (bottom vertex) is.
-        dp_t& uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
+        const dp_t& bv, int wTrPCI, //   -  Where travel point current (bottom vertex) is.
+        const dp_t& uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
         //
         const ip_t &sox, //   -  Index by OX axis where bv and uv are.
         //
@@ -424,7 +418,7 @@ double integrate_chanel_slant_left(
         const double* ox,
         const double* oy,
         double* density) {
-    double lv[2], mv[2]; //   -  Left and middle vertices.
+    dp_t lv, mv; //   -  Left and middle vertices.
     int wMvI = 0; //   -  Where middle vertex is.
     ip_t sox_ch; //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.
     double h = ox[1] - ox[0];
@@ -436,42 +430,36 @@ double integrate_chanel_slant_left(
 
     //   Let's compute helpful values.
 
-    if (uv[0] <= bv[0]) {
-        lv[0] = uv[0];
-        lv[1] = uv[1];
-        mv[0] = bv[0];
-        mv[1] = bv[1];
+    if (uv.x <= bv.x) {
+        lv = uv;
+        mv = bv;
         wMvI = wTrPCI;
-    }
-
-    if (uv[0] > bv[0]) {
-        lv[0] = bv[0];
-        lv[1] = bv[1];
-        mv[0] = uv[0];
-        mv[1] = uv[1];
+    }else {
+        lv = bv;
+        mv = uv;        
         wMvI = wTrPNI;
     }
 
-    if ((fabs(uv[1] - bv[1])) <= _MIN_VALUE) {
+    if ((fabs(uv.y - bv.y)) <= _MIN_VALUE) {
         //   Computation is impossible. Too smale values. Let's return some approximate value.
-        //   buf_D  =  (uv[1] - bv[1])  *  (rb  - (uv[0] + bv[0]) /2.) * rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.x ];
-        return fabs(uv[1] - bv[1]); //   fabs(uv[1] - bv[1]);
+        //   buf_D  =  (uv.y - bv.y)  *  (rb  - (uv.x + bv.x) /2.) * rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.x ];
+        return fabs(uv.y - bv.y); //   fabs(uv.y - bv.y);
     }
 
     //   Integration. First step: under [ indCurSqOx.x; indCurSqOx.y ] square.
 
     //   A. Under triangle.
 
-    if (fabs(uv[1] - bv[1]) > _MIN_VALUE) {
+    if (fabs(uv.y - bv.y) > _MIN_VALUE) {
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
-        a_SL = (uv[0] - bv[0]) / (uv[1] - bv[1]);
-        b_SL = bv[0] - a_SL * bv[1];
+        a_SL = (uv.x - bv.x) / (uv.y - bv.y);
+        b_SL = bv.x - a_SL * bv.y;
 
         //   Integration under one cell triangle.
         if (fabs(a_SL) > _MIN_VALUE) {
             tmp = integrate_triangle_left_one_cell(
-                    bv[1], //   -  double Py
-                    uv[1], //   -  double Qy                    
+                    bv.y, //   -  double Py
+                    uv.y, //   -  double Qy                    
                     a_SL, b_SL, mv[0], //   -  double Hx,                   
                     tl,
                     sox, //   -  Index of current square by Ox axis.
@@ -499,8 +487,8 @@ double integrate_chanel_slant_left(
             }
         }
 
-        tmp = integrate_rectangle_one_cell(bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,                
+        tmp = integrate_rectangle_one_cell(bv.y, //   -  double Py,
+                uv.y, //   -  double Qy,                
                 mv[0], //   -  double Gx,
                 hx, //   -  double Hx,                
                 tl,
@@ -538,8 +526,8 @@ double integrate_chanel_slant_left(
         }
 
 
-        tmp = integrate_rectangle_one_cell(bv[1], //   -  double Py,
-                uv[1], //   -  double Qy,
+        tmp = integrate_rectangle_one_cell(bv.y, //   -  double Py,
+                uv.y, //   -  double Qy,
                 //
                 gx, //   -  double Gx,
                 hx, //   -  double Hx,
@@ -738,7 +726,7 @@ double integrate_right_triangle_bottom_right(
             if (indCurSqOy.y < 0) {
                 trPN.y = hy * indCurSqOy.y;
             }
-            trPN.x = bv[0] + (trPN.y - bv[1]) / ang;
+            trPN.x = bv.x + (trPN.y - bv.y) / ang;
         }
         //   b. Second case.
         if ((distOy / distOx) > ang) {
@@ -750,10 +738,10 @@ double integrate_right_triangle_bottom_right(
             if (indCurSqOx.y < 0) {
                 trPN.x = hx * indCurSqOx.y;
             }
-            trPN.y = bv[1] + ang * (trPN.x - bv[0]);
+            trPN.y = bv.y + ang * (trPN.x - bv.x);
         }
         //   c. Checking.
-        if (trPN.x > (uv[0] - _MIN_VALUE_1)) {
+        if (trPN.x > (uv.x - _MIN_VALUE_1)) {
             trPN = uv;
             isDone = true;
             wTrPNI = 0;
@@ -834,8 +822,8 @@ double integrate_right_triangle_upper_left(
         indCurSqOy.x -= 1; //   -  The case when "trPC.x" ia negative.
     }
     indCurSqOy.y = indCurSqOy.x + 1;
-    indRB.x = static_cast<int> ((uv[0] - _MIN_VALUE_1) / hy); //   -  If uv[0] is in grid edge I want it will be in the left side.
-    if ((uv[0] - _MIN_VALUE_1) <= 0) {
+    indRB.x = static_cast<int> ((uv.x - _MIN_VALUE_1) / hy); //   -  If uv.x is in grid edge I want it will be in the left side.
+    if ((uv.x - _MIN_VALUE_1) <= 0) {
         indRB.x -= 1; //   -  The case when "trPC.x" ia negative.
     }
     indRB.y = indRB.x + 1;
@@ -862,7 +850,7 @@ double integrate_right_triangle_upper_left(
             if (indCurSqOy.y < 0) {
                 trPN.y = hy * indCurSqOy.y;
             }
-            trPN.x = bv[0] + (trPN.y - bv[1]) / ang;
+            trPN.x = bv.x + (trPN.y - bv.y) / ang;
         }
         //   b. Second case.
         if ((distOy / distOx) > ang) {
@@ -874,10 +862,10 @@ double integrate_right_triangle_upper_left(
             if (sox.y < 0) {
                 trPN.x = hx * sox.y;
             }
-            trPN.y = bv[1] + ang * (trPN.x - bv[0]);
+            trPN.y = bv.y + ang * (trPN.x - bv.x);
         }
         //   c. Cheking.
-        if (trPN.x > (uv[0] - _MIN_VALUE_1)) {
+        if (trPN.x > (uv.x - _MIN_VALUE_1)) {
             trPN = uv;
             isDone = true;
             wTrPNI = 0;
@@ -950,8 +938,8 @@ double integrate_right_triangle_upper_right(
         sx.x -= 1; //   -  The case when "bv.x" is negative.
     }
     sx.y = sx.x + 1; //   -  It's important only in rare case then bv is in grid edge.
-    indLB.x = static_cast<int> ((uv[0] + _MIN_VALUE_1) / hx);
-    if ((uv[0] + _MIN_VALUE_1) <= 0) {
+    indLB.x = static_cast<int> ((uv.x + _MIN_VALUE_1) / hx);
+    if ((uv.x + _MIN_VALUE_1) <= 0) {
         indLB.x -= 1; //   -  The case when "bv.x" is negative.
     }
     indLB.y = indLB.x + 1;
@@ -986,7 +974,7 @@ double integrate_right_triangle_upper_right(
             if (sy.y < 0) {
                 trPN.y = hy * sy.y;
             }
-            trPN.x = bv[0] - (trPN.y - bv[1]) / ang;
+            trPN.x = bv.x - (trPN.y - bv.y) / ang;
         }
         //   b. Second case.
         if ((distOy / distOx) > ang) {
@@ -998,10 +986,10 @@ double integrate_right_triangle_upper_right(
             if (sx.x < 0) {
                 trPN.x = hx * sx.x;
             }
-            trPN.y = bv.y - ang * (trPN.x - bv[0]);
+            trPN.y = bv.y - ang * (trPN.x - bv.x);
         }
         //   c. Checking.
-        if (trPN.x < (uv[0] + _MIN_VALUE_1)) {
+        if (trPN.x < (uv.x + _MIN_VALUE_1)) {
             trPN = uv;
             isDone = true;
             wTrPNI = 0;
