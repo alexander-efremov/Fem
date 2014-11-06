@@ -753,13 +753,8 @@ double integrate_upper_triangle(int tl, const dp_t& l, const dp_t& r, const dp_t
     return result;
 }
 
-double integrate_uniform_triangle_wall(int tl,
-        const dp_t& a,
-        const dp_t& b,
-        const dp_t& c,
-        const double* ox,
-        const double* oy,
-        double* density) {
+double integrate_uniform_triangle_wall(int tl, const dp_t& a, const dp_t& b, const dp_t& c,
+        const double* ox, const double* oy, double* density) {
     return 0;
 }
 
