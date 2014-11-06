@@ -47,8 +47,7 @@ double integrate_second_type(double py, double qy, double alpha, double a, doubl
 double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
         int tl, const ip_t &sx, const ip_t &sy,
         const double* ox, const double* oy, double* density) {
-    double result;
-    double tmp = 0.;
+    double result, tmp = 0;
     double rho[2][2];
     if (sx.x >= 0 && sy.x >= 0) {
         rho[0][0] = density[(OX_LEN + 1) * sy.x + sx.x];
@@ -124,7 +123,7 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
         tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
         tmp_integral = integrate_second_type(py, qy, HY * sy.y, a_sl, b_sl, HX * sx.y);
     }
-    tmp -= tmp_integral / 2.;
+    tmp -= tmp_integral / 2;
     result = tmp * rho[0][0] / HX / HY;
 
     //   2.
@@ -136,7 +135,7 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
         tmp *= -1. * (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
         tmp_integral = integrate_second_type(py, qy, HY * sy.y, a_sl, b_sl, HX * sx.x);
     }
-    tmp += tmp_integral / 2.;
+    tmp += tmp_integral / 2;
     result += tmp * rho[1][0] / HX / HY;
 
     //   3.
@@ -148,7 +147,7 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
         tmp *= -1. * (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
         tmp_integral = integrate_second_type(py, qy, HY * sy.x, a_sl, b_sl, HX * sx.y);
     }
-    tmp += tmp_integral / 2.;
+    tmp += tmp_integral / 2;
     result += tmp * rho[0][1] / HX / HY;
 
     //   4.
@@ -160,7 +159,7 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
         tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
         tmp_integral = integrate_second_type(py, qy, HY * sy.x, a_sl, b_sl, HX * sx.x);
     }
-    tmp -= tmp_integral / 2.;
+    tmp -= tmp_integral / 2;
     result += tmp * rho[1][1] / HX / HY;
     return result;
 }
@@ -190,7 +189,7 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
         rv = uv;
     }
 
-    if ((fabs(uv.y - bv.y)) <= _MINF) return fabs(uv.y - bv.y);     
+    if ((fabs(uv.y - bv.y)) <= _MINF) return fabs(uv.y - bv.y);
 
     //   First step: from "lb" to "masOX[ indCurSqOx.x ]" by iteration.
     indCurSqOxToCh.x = ilb.x;
