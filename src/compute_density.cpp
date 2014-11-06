@@ -53,14 +53,14 @@ double func_f(
     return res;
 }
 
-double integrate_first_type(double py, double qy, double gx, double hx, double a,
+double integrate_rectangle(double py, double qy, double gx, double hx, double a,
         double b) {
     double integ = (hx - a) * (hx - a) - (gx - a) * (gx - a);
     integ *= (qy - b) * (qy - b) - (py - b) * (py - b);
     return integ / 4;
 }
 
-double integrate_second_type(double py, double qy, double alpha, double a, double b,
+double integrate_triangle(double py, double qy, double alpha, double a, double b,
         double beta) {
     double tmp, integ;
     tmp = (qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta);
@@ -91,104 +91,33 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
     }
 
     if (sx.y >= 0 && sy.y >= 0) {
-        tmp = integrate_first_type(py, qy, gx, hx, ox[sx.y], oy[sy.y]);
+        tmp = integrate_rectangle(py, qy, gx, hx, ox[sx.y], oy[sy.y]);
     } else {
-        tmp = integrate_first_type(py, qy, gx, hx, HX * sx.y, HY * sy.y);
+        tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.y);
     }
     tmp = tmp / HX / HY;
-    result = tmp * rho[0][0]; //   rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.x ];
+    result = tmp * rho[0][0]; 
     if (sx.x >= 0 && sy.y >= 0) {
-        tmp = integrate_first_type(py, qy, gx, hx, ox[sx.x], oy[sy.y]);
+        tmp = integrate_rectangle(py, qy, gx, hx, ox[sx.x], oy[sy.y]);
     } else {
-        tmp = integrate_first_type(py, qy, gx, hx, HX * sx.x, HY * sy.y);
+        tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.y);
     }
     tmp = tmp / HX / HY;
-    result = result - tmp * rho[1][0]; //   rhoInPrevTL[ sx.y ][ indCurSqOy.x ];
+    result -= tmp * rho[1][0]; 
     if (sx.y >= 0 && sy.x >= 0) {
-        tmp = integrate_first_type(py, qy, gx, hx, ox[sx.y], oy[sy.x]);
+        tmp = integrate_rectangle(py, qy, gx, hx, ox[sx.y], oy[sy.x]);
     } else {
-        tmp = integrate_first_type(py, qy, gx, hx, HX * sx.y, HY * sy.x);
+        tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.x);
     }
     tmp = tmp / HX / HY;
-    result -= tmp * rho[0][1]; //   rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.y ];
+    result -= tmp * rho[0][1]; 
     if (sx.x >= 0 && sy.x >= 0) {
-        tmp = integrate_first_type(py, qy, gx, hx, ox[sx.x], oy[sy.x]);
+        tmp = integrate_rectangle(py, qy, gx, hx, ox[sx.x], oy[sy.x]);
     } else {
-        tmp = integrate_first_type(py, qy, gx, hx, HX * sx.x, HY * sy.x);
+        tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.x);
     }
     tmp = tmp / HX / HY;
-    return result + tmp * rho[1][1]; //   rhoInPrevTL[ sx.y ][ indCurSqOy.y ];
-}
-
-double integrate_triangle_left_one_cell(double py, double qy, double a_sl, double b_sl,
-        double hx, int tl, const ip_t &sx, const ip_t &sy,
-        const double* ox, const double* oy, double* density) {
-    double result, tmp, tmp_integral;
-    double rho[2][2];
-
-    if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN) {
-        rho[0][0] = density[(OX_LEN + 1) * sy.x + sx.x];
-        rho[0][1] = density[(OX_LEN + 1) * sy.y + sx.x];
-        rho[1][0] = density[(OX_LEN + 1) * sy.x + sx.y];
-        rho[1][1] = density[(OX_LEN + 1) * sy.y + sx.y];
-    } else {
-        // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
-        // норма должна уменьшиться
-        rho[0][0] = analytical_solution(TAU * (tl - 1), sx.x * HX, sy.x * HY);
-        rho[0][1] = analytical_solution(TAU * (tl - 1), sx.x * HX, sy.y * HY);
-        rho[1][0] = analytical_solution(TAU * (tl - 1), sx.y * HX, sy.x * HY);
-        rho[1][1] = analytical_solution(TAU * (tl - 1), sx.y * HX, sy.y * HY);
-        TMP_WALL_CNT++;
-    }
-
-    //   1
-    tmp = (qy - oy[sy.y]) * (qy - oy[sy.y]) - (py - oy[sy.y]) * (py - oy[sy.y]);
-    if (sx.y >= 0 && sy.y >= 0) {
-        tmp *= (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
-        tmp_integral = integrate_second_type(py, qy, oy[sy.y], a_sl, b_sl, ox[sx.y]);
-    } else {
-        tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
-        tmp_integral = integrate_second_type(py, qy, HY * sy.y, a_sl, b_sl, HX * sx.y);
-    }
-    tmp -= tmp_integral / 2;
-    result = tmp * rho[0][0] / HX / HY;
-
-    //   2
-    tmp = (qy - oy[sy.y]) * (qy - oy[sy.y]) - (py - oy[sy.y]) * (py - oy[sy.y]);
-    if (sx.x >= 0 && sy.y >= 0) {
-        tmp *= -1 * (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
-        tmp_integral = integrate_second_type(py, qy, oy[sy.y], a_sl, b_sl, ox[sx.x]);
-    } else {
-        tmp *= -1 * (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
-        tmp_integral = integrate_second_type(py, qy, HY * sy.y, a_sl, b_sl, HX * sx.x);
-    }
-    tmp += tmp_integral / 2;
-    result += tmp * rho[1][0] / HX / HY;
-
-    //   3
-    tmp = (qy - oy[sy.x]) * (qy - oy[sy.x]) - (py - oy[sy.x]) * (py - oy[sy.x]);
-    if (sx.y >= 0 && sy.x >= 0) {
-        tmp *= -1 * (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
-        tmp_integral = integrate_second_type(py, qy, oy[sy.x], a_sl, b_sl, ox[sx.y]);
-    } else {
-        tmp *= -1 * (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
-        tmp_integral = integrate_second_type(py, qy, HY * sy.x, a_sl, b_sl, HX * sx.y);
-    }
-    tmp += tmp_integral / 2;
-    result += tmp * rho[0][1] / HX / HY;
-
-    //   4
-    tmp = (qy - oy[sy.x]) * (qy - oy[sy.x]) - (py - oy[sy.x]) * (py - oy[sy.x]);
-    if (sx.x >= 0 && sy.x >= 0) {
-        tmp *= (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
-        tmp_integral = integrate_second_type(py, qy, oy[sy.x], a_sl, b_sl, ox[sx.x]);
-    } else {
-        tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
-        tmp_integral = integrate_second_type(py, qy, HY * sy.x, a_sl, b_sl, HX * sx.x);
-    }
-    tmp -= tmp_integral / 2;
-    result += tmp * rho[1][1] / HX / HY;
-    return result;
+    return result + tmp * rho[1][1]; 
 }
 
 double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double hx, int tl,
@@ -222,10 +151,10 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
     tmp = (uv.y - oy[sy.y]) * (uv.y - oy[sy.y]) - (bv.y - oy[sy.y]) * (bv.y - oy[sy.y]);
     if (sx.y >= 0 && sy.y >= 0) {
         tmp *= (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.y], a_sl, b_sl, ox[sx.y]);
+        tmp_integral = integrate_triangle(bv.y, uv.y, oy[sy.y], a_sl, b_sl, ox[sx.y]);
     } else {
         tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
+        tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
     }
     tmp -= tmp_integral / 2;
     result = tmp * rho[0][0] / HX / HY;
@@ -234,10 +163,10 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
     tmp = (uv.y - oy[sy.y]) * (uv.y - oy[sy.y]) - (bv.y - oy[sy.y]) * (bv.y - oy[sy.y]);
     if (sx.x >= 0 && sy.y >= 0) {
         tmp *= -1 * (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.y], a_sl, b_sl, ox[sx.x]);
+        tmp_integral = integrate_triangle(bv.y, uv.y, oy[sy.y], a_sl, b_sl, ox[sx.x]);
     } else {
         tmp *= -1 * (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
+        tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
     }
     tmp += tmp_integral / 2;
     result += tmp * rho[1][0] / HX / HY;
@@ -246,10 +175,10 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
     tmp = (uv.y - oy[sy.x]) * (uv.y - oy[sy.x]) - (bv.y - oy[sy.x]) * (bv.y - oy[sy.x]);
     if (sx.y >= 0 && sy.x >= 0) {
         tmp *= -1 * (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.x], a_sl, b_sl, ox[sx.y]);
+        tmp_integral = integrate_triangle(bv.y, uv.y, oy[sy.x], a_sl, b_sl, ox[sx.y]);
     } else {
         tmp *= -1 * (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
+        tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
     }
     tmp += tmp_integral / 2;
     result += tmp * rho[0][1] / HX / HY;
@@ -258,10 +187,10 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
     tmp = (uv.y - oy[sy.x]) * (uv.y - oy[sy.x]) - (bv.y - oy[sy.x]) * (bv.y - oy[sy.x]);
     if (sx.x >= 0 && sy.x >= 0) {
         tmp *= (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, oy[sy.x], a_sl, b_sl, ox[sx.x]);
+        tmp_integral = integrate_triangle(bv.y, uv.y, oy[sy.x], a_sl, b_sl, ox[sx.x]);
     } else {
         tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
-        tmp_integral = integrate_second_type(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
+        tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
     }
     tmp -= tmp_integral / 2;
     result += tmp * rho[1][1] / HX / HY;
@@ -294,9 +223,10 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv,
 
     ip_t ch_pos(sb.x, sb.x + 1);
     for (int j = sb.x; j < sx.x; j++) {
-        gx = ch_pos.x >= 0 ? ox[ch_pos.x] : HX * ch_pos.x;
-        hx = ch_pos.x >= 0 ? ox[ch_pos.y] : HX * ch_pos.y;
         if (j == sb.x) gx = b;
+        else gx = ch_pos.x >= 0 ? ox[ch_pos.x] : HX * ch_pos.x;
+        
+        hx = ch_pos.x >= 0 ? ox[ch_pos.y] : HX * ch_pos.y;        
 
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, ch_pos, sy,
                 ox, oy, density);
@@ -330,7 +260,7 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv,
 
 double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
         short curr_i, short next_i, const ip_t &sx, const ip_t &sy,
-        double b, const ip_t &ib,
+        double b, const ip_t &sb,
         const double* ox, const double* oy, double* density) {
     if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
 
@@ -355,7 +285,7 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
 
     // case B: не полный прямоугольник
     if (m_i == 1) { // это значит, что прямоугольник занимает не всю ячейку  
-        hx = sx.x == ib.x ? b : (sx.y >= 0 ? ox[sx.y] : HX * sx.y);
+        hx = sx.x == sb.x ? b : (sx.y >= 0 ? ox[sx.y] : HX * sx.y);
         gx = mv.x;
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, sx, sy,
                 ox, oy, density);
@@ -363,9 +293,9 @@ double integrate_chanel_slant_left(int tl, const dp_t& bv, const dp_t& uv,
 
     //   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
     ip_t ch_pos(sx.x + 1, sx.x + 2); //   - координаты канала
-    for (int j = sx.x + 1; j < ib.x + 1; j++) {
+    for (int j = sx.x + 1; j < sb.x + 1; j++) {
         hx = ch_pos.y <= 0 ? HX * ch_pos.y : hx = ox[ch_pos.y];
-        if (j == ib.x) hx = b;
+        if (j == sb.x) hx = b;
         gx = ch_pos.y <= 0 ? HX * ch_pos.x : ox[ch_pos.x];
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, ch_pos, sy, ox, oy, density);
         ch_pos.x += 1;
