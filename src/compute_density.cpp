@@ -126,13 +126,13 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
     tmp -= tmp_integral / 2;
     result = tmp * rho[0][0] / HX / HY;
 
-    //   2.
+    //   2
     tmp = (qy - oy[sy.y]) * (qy - oy[sy.y]) - (py - oy[sy.y]) * (py - oy[sy.y]);
     if (sx.x >= 0 && sy.y >= 0) {
-        tmp *= -1. * (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
+        tmp *= -1 * (hx - ox[sx.x]) * (hx - ox[sx.x]) / 4;
         tmp_integral = integrate_second_type(py, qy, oy[sy.y], a_sl, b_sl, ox[sx.x]);
     } else {
-        tmp *= -1. * (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
+        tmp *= -1 * (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
         tmp_integral = integrate_second_type(py, qy, HY * sy.y, a_sl, b_sl, HX * sx.x);
     }
     tmp += tmp_integral / 2;
@@ -141,10 +141,10 @@ double integrate_triangle_left_one_cell(double py, double qy, double a_sl, doubl
     //   3.
     tmp = (qy - oy[sy.x]) * (qy - oy[sy.x]) - (py - oy[sy.x]) * (py - oy[sy.x]);
     if (sx.y >= 0 && sy.x >= 0) {
-        tmp *= -1. * (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
+        tmp *= -1 * (hx - ox[sx.y]) * (hx - ox[sx.y]) / 4;
         tmp_integral = integrate_second_type(py, qy, oy[sy.x], a_sl, b_sl, ox[sx.y]);
     } else {
-        tmp *= -1. * (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
+        tmp *= -1 * (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
         tmp_integral = integrate_second_type(py, qy, HY * sy.x, a_sl, b_sl, HX * sx.y);
     }
     tmp += tmp_integral / 2;
@@ -229,7 +229,7 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, int wTrPCI,
 
     //   B. Under triangle.
     if (fabs(uv.y - bv.y) > _MINF) {
-        //   integ += fabs(uv.y - bv.y) * (rv[0] - mv[0]) /2.;
+        //   integ += fabs(uv.y - bv.y) * (rv[0] - mv[0]) /2;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_sl = (uv.x - bv.x) / (uv.y - bv.y);
         b_sl = bv.x - a_sl * bv.y;
@@ -445,9 +445,9 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
-        double dx = sx.y >= 0 ? ox[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
-        double dx = sy.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
-        if (dx / dx <= k) { //   intersection with straight line parallel Ox axis.
+        double slope = sy.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
+        slope /= sx.y >= 0 ? ox[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
+        if (slope <= k) { //   intersection with straight line parallel Ox axis.
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
             next.x = bv.x + (next.y - bv.y) / k;
@@ -604,7 +604,7 @@ double integrate_uniform_triangle(int tl, const dp_t& x, dp_t& y, const dp_t& z,
 }
 
 inline double func_u(double x, double y) {
-    return B * y * (1. - y) * (_PI / 2. + atan(-x));
+    return B * y * (1. - y) * (_PI / 2 + atan(-x));
 }
 
 inline double func_v(double t, double x, double y) {
@@ -651,37 +651,37 @@ quad_type get_coordinates_on_prev_layer(int cur_tl, int ix, int iy,
     //  OX:
     if (ix == 0) {
         alpha.x = ox[ix];
-        beta.x = (ox[ix] + ox[ix + 1]) / 2.;
-        gamma.x = (ox[ix] + ox[ix + 1]) / 2.;
+        beta.x = (ox[ix] + ox[ix + 1]) / 2;
+        gamma.x = (ox[ix] + ox[ix + 1]) / 2;
         theta.x = ox[ix];
     } else if (ix == OX_LEN) {
-        alpha.x = (ox[ix - 1] + ox[ix]) / 2.;
+        alpha.x = (ox[ix - 1] + ox[ix]) / 2;
         beta.x = ox[ix];
         gamma.x = ox[ix];
-        theta.x = (ox[ix - 1] + ox[ix]) / 2.;
+        theta.x = (ox[ix - 1] + ox[ix]) / 2;
     } else {
-        alpha.x = (ox[ix - 1] + ox[ix]) / 2.;
-        beta.x = (ox[ix + 1] + ox[ix]) / 2.;
-        gamma.x = (ox[ix + 1] + ox[ix]) / 2.;
-        theta.x = (ox[ix - 1] + ox[ix]) / 2.;
+        alpha.x = (ox[ix - 1] + ox[ix]) / 2;
+        beta.x = (ox[ix + 1] + ox[ix]) / 2;
+        gamma.x = (ox[ix + 1] + ox[ix]) / 2;
+        theta.x = (ox[ix - 1] + ox[ix]) / 2;
     }
 
     //  OY:
     if (iy == 0) {
         alpha.y = oy[iy];
         beta.y = oy[iy];
-        gamma.y = (oy[iy] + oy[iy + 1]) / 2.;
-        theta.y = (oy[iy] + oy[iy + 1]) / 2.;
+        gamma.y = (oy[iy] + oy[iy + 1]) / 2;
+        theta.y = (oy[iy] + oy[iy + 1]) / 2;
     } else if (iy == OY_LEN) {
-        alpha.y = (oy[iy] + oy[iy - 1]) / 2.;
-        beta.y = (oy[iy] + oy[iy - 1]) / 2.;
+        alpha.y = (oy[iy] + oy[iy - 1]) / 2;
+        beta.y = (oy[iy] + oy[iy - 1]) / 2;
         gamma.y = oy[iy];
         theta.y = oy[iy];
     } else {
-        alpha.y = (oy[iy] + oy[iy - 1]) / 2.;
-        beta.y = (oy[iy] + oy[iy - 1]) / 2.;
-        gamma.y = (oy[iy] + oy[iy + 1]) / 2.;
-        theta.y = (oy[iy] + oy[iy + 1]) / 2.;
+        alpha.y = (oy[iy] + oy[iy - 1]) / 2;
+        beta.y = (oy[iy] + oy[iy - 1]) / 2;
+        gamma.y = (oy[iy] + oy[iy + 1]) / 2;
+        theta.y = (oy[iy] + oy[iy + 1]) / 2;
     }
 
     double u, v;
@@ -759,7 +759,7 @@ double integrate(double tl, int ix, int iy,
     dp_t a1, b1, c1, a2, b2, c2;
     quad_type type = get_quadrangle_type(tl, ix, iy, ox, oy, a1, b1, c1, a2, b2, c2);
     if (type != normal && type != wall) {
-        return -1.;
+        return -1;
     }
 
     // чтобы правилно отработала процедура интегрирования
