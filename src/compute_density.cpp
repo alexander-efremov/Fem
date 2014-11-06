@@ -196,12 +196,6 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
     return result;
 }
 
-double integrate_triangle_right_one_cell(const dp_t &bv, const dp_t &uv,
-        double gx, int tl, const ip_t &sx, const ip_t &sy,
-        const double* ox, const double* oy, double* density) {
-    return -1 * integrate_triangle_left_one_cell(bv, uv, gx, tl, sx, sy, ox, oy, density);
-}
-
 double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv, 
         short curr_i, short next_i, const ip_t &sx, double b, const ip_t &sb,
         const ip_t &sy, const double* ox, const double* oy, double* density) {
@@ -243,9 +237,7 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv,
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv.x, tl, sx, sy,
                 ox, oy, density);
     }
-
-    result += integrate_triangle_right_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
-
+    result += -1 * integrate_triangle_left_one_cell(bv, uv, mv.x, tl, sx, sy, ox, oy, density);
     return result;
 }
 
