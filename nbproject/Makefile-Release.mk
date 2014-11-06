@@ -35,7 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/src/low_ord_oper.o
+	${OBJECTDIR}/src/compute_density.o
 
 # Test Directory
 TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
@@ -68,10 +68,10 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/src/low_ord_oper.o: src/low_ord_oper.cpp 
+${OBJECTDIR}/src/compute_density.o: src/compute_density.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/compute_density.o src/compute_density.cpp
 
 # Subprojects
 .build-subprojects:
@@ -89,17 +89,17 @@ ${TESTDIR}/tests/tests.o: tests/tests.cpp
 	$(COMPILE.cc) -O2 -I. -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
 
 
-${OBJECTDIR}/src/low_ord_oper_nomain.o: ${OBJECTDIR}/src/low_ord_oper.o src/low_ord_oper.cpp 
+${OBJECTDIR}/src/compute_density_nomain.o: ${OBJECTDIR}/src/compute_density.o src/compute_density.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
-	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/low_ord_oper.o`; \
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/compute_density.o`; \
 	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
 	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/low_ord_oper_nomain.o src/low_ord_oper.cpp;\
+	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/compute_density_nomain.o src/compute_density.cpp;\
 	else  \
-	    ${CP} ${OBJECTDIR}/src/low_ord_oper.o ${OBJECTDIR}/src/low_ord_oper_nomain.o;\
+	    ${CP} ${OBJECTDIR}/src/compute_density.o ${OBJECTDIR}/src/compute_density_nomain.o;\
 	fi
 
 # Run Test Targets

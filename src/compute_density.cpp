@@ -26,6 +26,33 @@ double init_side(double x, double y, double t) {
     return analytical_solution(t, x, y);
 }
 
+inline double func_u(double x, double y) {
+    return B * y * (1. - y) * (_PI / 2 + atan(-x));
+}
+
+inline double func_v(double t, double x, double y) {
+    return atan((x - LB) * (x - RB) * (1. + t) / 10. * (y - UB) * (y - BB));
+}
+
+double func_f(
+        double tl_on_tau,
+        double x,
+        double y) {
+    double arg_v = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - UB) * (y - BB);
+    double rho = analytical_solution(tl_on_tau, x, y);
+    double drho_dt = x * y * cos(tl_on_tau * x * y);
+    double drho_dx = tl_on_tau * y * cos(tl_on_tau * x * y);
+    double dtho_dy = tl_on_tau * x * cos(tl_on_tau * x * y);
+    double u = func_u(x, y);
+    double v = func_v(tl_on_tau, x, y);
+    double du_dx = -B * y * (1. - y) / (1. + x * x);
+    double dv_dx = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - BB + y - UB);
+    dv_dx /= (1. + arg_v * arg_v);
+    double res = drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
+    // print_f_params()...
+    return res;
+}
+
 double integrate_first_type(double py, double qy, double gx, double hx, double a,
         double b) {
     double integ = (hx - a) * (hx - a) - (gx - a) * (gx - a);
@@ -498,7 +525,7 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
     while (true) {
-        double slope = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);        
+        double slope = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
         slope /= sx.x >= 0 ? fabs(curr.x - ox[sx.x]) : fabs(curr.x - HX * sx.x);
         if (slope <= k) { //   Intersection with straight line parallel Ox axis.
             next_i = 1;
@@ -598,46 +625,6 @@ double integrate_uniform_triangle(int tl, const dp_t& x, dp_t& y, const dp_t& z,
 
     return integrate_upper_triangle(tl, y, ip, z, ox, oy, density)
             + integrate_bottom_triangle(tl, y, ip, x, ox, oy, density);
-}
-
-inline double func_u(double x, double y) {
-    return B * y * (1. - y) * (_PI / 2 + atan(-x));
-}
-
-inline double func_v(double t, double x, double y) {
-    return atan((x - LB) * (x - RB) * (1. + t) / 10. * (y - UB) * (y - BB));
-}
-
-double func_f(
-        double tl_on_tau,
-        double x,
-        double y) {
-    double arg_v = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - UB) * (y - BB);
-    double rho = analytical_solution(tl_on_tau, x, y);
-    double dRhoDT = x * y * cos(tl_on_tau * x * y);
-    double dRhoDX = tl_on_tau * y * cos(tl_on_tau * x * y);
-    double dRhoDY = tl_on_tau * x * cos(tl_on_tau * x * y);
-    double u = func_u(x, y);
-    double v = func_v(tl_on_tau, x, y);
-    double duDX = -B * y * (1. - y) / (1. + x * x);
-    double dvDY = (x - LB) * (x - RB) * (1. + tl_on_tau) / 10. * (y - BB + y - UB);
-    dvDY /= (1. + arg_v * arg_v);
-    double res = dRhoDT + rho * duDX + u * dRhoDX + rho * dvDY + v * dRhoDY;
-
-    //  printf("x = %f\n", x);
-    //  printf("y = %f\n", y);
-    //  printf("arg_v = %f\n", arg_v);
-    //  printf("rho = %f\n", rho);
-    //  printf("dRhoDT = %f\n", dRhoDT);
-    //  printf("dRhoDX = %f\n", dRhoDX);
-    //  printf("dRhoDY = %f\n", dRhoDY);
-    //  printf("u = %f\n", u);
-    //  printf("duDX = %f\n", duDX);
-    //  printf("v = %f\n", v);
-    //  printf("dvDY = %f\n", dvDY);
-    //  printf("res = %f\n", res);
-
-    return res;
 }
 
 quad_type get_coordinates_on_prev_layer(int cur_tl, int ix, int iy,
