@@ -237,9 +237,7 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv,
                 ox, oy, density);
         ch_pos.x += 1;
         ch_pos.y = ch_pos.x + 1;
-    }
-
-   
+    }   
     return result;
 }
 
