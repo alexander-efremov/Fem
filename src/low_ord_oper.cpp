@@ -493,10 +493,10 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
 
     //   -  Index of current square by Ox and Oy axes. 
     ip_t sx, sy;
-    sx.x = static_cast<int> ((bv.x - _MIN_VALUE) / HX);
+    sx.x = static_cast<short> ((bv.x - _MIN_VALUE) / HX);
     if (bv.x - _MIN_VALUE <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / HY);
+    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY);
     if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
@@ -549,10 +549,10 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
     if (!try_get_slope_ratio(bv, uv, k)) return k;
     ip_t sx, sy;
 
-    sx.x = static_cast<int> ((bv.x + _MIN_VALUE) / HX);
+    sx.x = static_cast<short> ((bv.x + _MIN_VALUE) / HX);
     if (bv.x + _MIN_VALUE <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / HY);
+    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY);
     if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
@@ -607,13 +607,13 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
     if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy, ib;
-    sx.x = static_cast<int> ((bv.x + _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
+    sx.x = static_cast<short> ((bv.x + _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
     if (bv.x + _MIN_VALUE <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
+    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
     if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
-    ib.x = static_cast<int> ((uv.x - _MIN_VALUE) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+    ib.x = static_cast<short> ((uv.x - _MIN_VALUE) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
     if (uv.x - _MIN_VALUE <= 0) ib.x -= 1;
     ib.y = ib.x + 1;
 
@@ -663,14 +663,14 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
 
     ip_t sx, sy, ib;
 
-    sx.x = static_cast<int> ((bv.x - _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
+    sx.x = static_cast<short> ((bv.x - _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
     if (bv.x - _MIN_VALUE <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
 
-    ib.x = static_cast<int> ((uv.x + _MIN_VALUE) / HX);
+    ib.x = static_cast<short> ((uv.x + _MIN_VALUE) / HX);
     if (uv.x + _MIN_VALUE <= 0) ib.x -= 1;
     ib.y = ib.x + 1;
-    sy.x = static_cast<int> ((bv.y + _MIN_VALUE) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
+    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
     if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
@@ -713,13 +713,8 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
     return result;
 }
 
-double integrate_bottom_triangle(int tl,
-        dp_t& l, //   -  Left vertex of Bottom triangle
-        dp_t& r, //   -  Right vertex of Bottom triangle
-        dp_t& m, //   -  Vertex of between L and R
-        const double* ox,
-        const double* oy,
-        double* density) {
+double integrate_bottom_triangle(int tl, const dp_t& l, const dp_t& r, const dp_t& m,
+        const double* ox, const double* oy, double* density) {
     double result = 0.;
     if (m.x == l.x) {
         result = integrate_right_triangle_bottom_right(m, r, tl, ox, oy, density);
@@ -738,12 +733,8 @@ double integrate_bottom_triangle(int tl,
     return result;
 }
 
-double integrate_upper_triangle(int tl,
-        dp_t& l, //   -  Left vertex of Upper triangle
-        dp_t& r, //   -  Right vertex of Upper triangle
-        dp_t& m, //   -  Vertex of between L and R
-        const double* ox, const double* oy,
-        double* density) {
+double integrate_upper_triangle(int tl, const dp_t& l, const dp_t& r, const dp_t& m,
+        const double* ox, const double* oy, double* density) {
     double result = 0.;
     if (m.x == l.x) {
         result = integrate_right_triangle_upper_right(r, m, tl, ox, oy, density);
