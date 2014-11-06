@@ -114,7 +114,7 @@ double integrate_rectangle_one_cell(double Py,
         tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx.x, hy * indCurSqOy.y);
     }
     tmp = tmp / hx / hy;
-    result = result - tmp * rho[1][0]; //   rhoInPrevTL[ indCurSqOx.y ][ indCurSqOy.x ];
+    result = result - tmp * rho[1][0]; //   rhoInPrevTL[ sx.y ][ indCurSqOy.x ];
     if (indCurSqOx.y >= 0 && indCurSqOy.x >= 0) {
         tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[indCurSqOx.y], oy[indCurSqOy.x]);
     } else {
@@ -128,7 +128,7 @@ double integrate_rectangle_one_cell(double Py,
         tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx.x, hy * indCurSqOy.x);
     }
     tmp = tmp / hx / hy;
-    return result + tmp * rho[1][1]; //   rhoInPrevTL[ indCurSqOx.y ][ indCurSqOy.y ];
+    return result + tmp * rho[1][1]; //   rhoInPrevTL[ sx.y ][ indCurSqOy.y ];
 }
 
 double integrate_triangle_left_one_cell(
@@ -274,11 +274,10 @@ double integrate_chanel_slant_right(int tl,
 
     //   Let's compute helpful values.
     if (uv.x <= bv.x) {
-        mv = uv;     
+        mv = uv;
         wMvI = wTrPNI;
-        rv = bv;        
-    } else 
-    {
+        rv = bv;
+    } else {
         mv = bv;
         wMvI = wTrPCI;
         rv = uv;
@@ -334,7 +333,7 @@ double integrate_chanel_slant_right(int tl,
         indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
     }
 
-    //   Integration. Second step: under [ indCurSqOx.x; indCurSqOx.y ] square.
+    //   Integration. Second step: under [ indCurSqOx.x; sx.y ] square.
 
     //   A. Under rectangle.
     if (wMvI == 1) {
@@ -434,9 +433,9 @@ double integrate_chanel_slant_left(
         lv = uv;
         mv = bv;
         wMvI = wTrPCI;
-    }else {
+    } else {
         lv = bv;
-        mv = uv;        
+        mv = uv;
         wMvI = wTrPNI;
     }
 
@@ -446,7 +445,7 @@ double integrate_chanel_slant_left(
         return fabs(uv.y - bv.y); //   fabs(uv.y - bv.y);
     }
 
-    //   Integration. First step: under [ indCurSqOx.x; indCurSqOx.y ] square.
+    //   Integration. First step: under [ indCurSqOx.x; sx.y ] square.
 
     //   A. Under triangle.
 
@@ -500,7 +499,7 @@ double integrate_chanel_slant_left(
         result += tmp;
     }
 
-    //   Second step: from "masOX[ indCurSqOx.y ]" to "rb" by iteration.
+    //   Second step: from "masOX[ sx.y ]" to "rb" by iteration.
 
 
     sox_ch.x = sox.x + 1;
@@ -560,114 +559,75 @@ double integrate_right_triangle_bottom_left(
     if (!is_valid(bv, uv, ang)) return ang;
 
     dp_t trPC, trPN;
-    ip_t indCurSqOx, indCurSqOy, indRB;
-    double distOx = 0, distOy = 0, result = 0., tmp, hx = ox[1] - ox[0], hy = oy[1] - oy[0];    
+    ip_t sx, sy; //   -  Index of current square by Ox and Oy axes. 
+    double result = 0., hx = ox[1] - ox[0], hy = oy[1] - oy[0];
     int wTrPCI = 0, wTrPNI = 0;
     bool isDone = false;
-
+    
+    // определим целочисленные индексы квадратов в которых лежат верхняя и нижняя точки треугольника
+    // sx = (x,y) координаты квадрата в которой лежит нижняя точка
+    // sy = (x,y) координаты квадрата в которой лежит верхняя точка
+    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / hx);
+    if (bv.x - _MIN_VALUE_1 <= 0) sx.x -= 1;    
+    sx.y = sx.x + 1;    
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / hy);
+    if (bv.y + _MIN_VALUE_1 <= 0) sy.x -= 1;    
+    sy.y = sy.x + 1;
+    
+    ip_t irb(sx.x,sx.x + 1); //   -  Index of right boundary.   
+    
     trPC = bv;
-    indCurSqOx.x = static_cast<int> ((trPC[0] - _MIN_VALUE_1) / hx); //   -  If trPC[0] is in grid edge I want it will be between in the left side of indCurSqOx.y.
-    if ((trPC[0] - _MIN_VALUE_1) <= 0) {
-        indCurSqOx.x -= 1; //   -  The case when "trPC[0]" ia negative.
-    }
-    indCurSqOx.y = indCurSqOx.x + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    indRB.x = indCurSqOx.x;
-    indRB.y = indRB.x + 1;
-    indCurSqOy.x = static_cast<int> ((trPC[1] + _MIN_VALUE_1) / hy); //   -  If trPC[1] is in grid edge I want it will be between indCurSqOx.x and indCurSqOx.y.
-    if ((trPC[1] + _MIN_VALUE_1) <= 0) {
-        indCurSqOy.x -= 1; //   -  The case when "trPC[0]" ia negative.
-    }
-    indCurSqOy.y = indCurSqOy.x + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    if (indCurSqOx.x >= 0) {
-        distOx = trPC[0] - ox[indCurSqOx.x];
-    }
-    if (indCurSqOx.x < 0) {
-        distOx = fabs(trPC[0] - hx * indCurSqOx.x);
-    }
-    if (indCurSqOy.y >= 0) {
-        distOy = oy[indCurSqOy.y] - trPC[1];
-    }
-    if (indCurSqOy.y < 0) {
-        distOy = fabs(hy * indCurSqOy.y - trPC[1]);
-    }
-
-
-    do {
-        //   a. First case.
-        if ((distOy / distOx) <= ang) {
-            //   Across with straight line parallel Ox axis.
+    while(!isDone) {        
+        //TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верною...
+        double distOx = sx.x >= 0 ? bv.x - ox[sx.x] : fabs(bv.x - hx * sx.x); // Distance to nearest Ox and Oy straight lines.
+        double distOy = sx.y >= 0 ? oy[sy.y] - bv.y : fabs(hy * sy.y - bv.y);
+        if (distOy / distOx <= ang) {     //   Intersection with straight line parallel Ox axis.        
             wTrPNI = 1;
-            if (indCurSqOy.y >= 0) {
-                trPN.y = oy[indCurSqOy.y];
-            }
-            if (indCurSqOy.y < 0) {
-                trPN.y = hy * indCurSqOy.y;
-            }
+            trPN.y = sy.y >= 0 ? oy[sy.y] : hy * sy.y;
             trPN.x = bv.x - (trPN.y - bv.y) / ang;
-        }
-        //   b. Second case.
-        if ((distOy / distOx) > ang) {
-            //   Across with straight line parallel Oy axis.
+        } else { //   Intersection with straight line parallel Oy axis.            
             wTrPNI = 2;
-            if (indCurSqOx.x >= 0) {
-                trPN.x = ox[indCurSqOx.x];
-            }
-            if (indCurSqOx.x < 0) {
-                trPN.x = hx * indCurSqOx.x;
-            }
+            trPN.x = sx.x >= 0 ? ox[sx.x] : hx * sx.x;
             trPN.y = bv.y - ang * (trPN.x - bv.x);
-        }
-        //   c. Cheking.
+        }        
         if (trPN.x < (uv.x + _MIN_VALUE_1)) {
-            trPN.x = uv.x;
-            trPN.y = uv.y;
-            isDone = true;
             wTrPNI = 0;
+            trPN = uv;
+            isDone = true;            
         }
-        //   d. Integration.
-        tmp = integrate_chanel_slant_left(
+        
+        result += integrate_chanel_slant_left(
                 tl, //   -  Index of current time layer.
                 //
                 trPC, wTrPCI, //   -  double *bv,
                 trPN, wTrPNI, //   -  double *uv,
                 //
-                indCurSqOx, //   -  Indices where trPC and trPN are.
+                sx, //   -  Indices where trPC and trPN are.
                 //
-                bv.x, indRB, //   -  double rb  =  Right boundary by Ox.
+                bv.x, irb, //   -  double rb  =  Right boundary by Ox.
                 //
-                indCurSqOy, //   -  Index of current square by Oy axis.
+                sy, //   -  Index of current square by Oy axis.
                 //
                 ox,
                 oy,
                 density);
-        result += tmp;
-        //   e. Updating.
-        if (isDone == false) {
-            //   We will compute more. We need to redefine some values.
-            wTrPCI = wTrPNI;
-            trPC = trPN;
-            if (wTrPNI == 1) {
-                indCurSqOy.x += 1;
-                indCurSqOy.y += 1;
-            }
-            if (wTrPNI == 2) {
-                indCurSqOx.x -= 1;
-                indCurSqOx.y -= 1;
-            }
-            if (indCurSqOx.x >= 0) {
-                distOx = trPC.x - ox[indCurSqOx.x];
-            }
-            if (indCurSqOx.x < 0) {
-                distOx = fabs(trPC.x - hx * indCurSqOx.x);
-            }
-            if (indCurSqOy.y >= 0) {
-                distOy = oy[indCurSqOy.y] - trPC.y;
-            }
-            if (indCurSqOy.y < 0) {
-                distOy = fabs(hy * indCurSqOy.y - trPC.y);
-            }
-        }
-    } while (!isDone);
+        
+        if (isDone) break;
+                
+        switch(wTrPNI)
+        {
+            case 1:
+                sy.x += 1;
+                sy.y += 1;
+                break;
+            case 2:
+                sx.x -= 1;
+                sx.y -= 1;
+                break;
+        }        
+        wTrPCI = wTrPNI;
+        trPC = trPN;
+    }
     return result;
 }
 
@@ -864,7 +824,7 @@ double integrate_right_triangle_upper_left(
             }
             trPN.y = bv.y + ang * (trPN.x - bv.x);
         }
-        //   c. Cheking.
+        //   c. Checking.
         if (trPN.x > (uv.x - _MIN_VALUE_1)) {
             trPN = uv;
             isDone = true;
