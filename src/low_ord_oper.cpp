@@ -416,10 +416,10 @@ double integrate_chanel_slant_left(int tl,
         const double* ox,
         const double* oy,
         double* density) {
-    
-     if (fabs(uv.y - bv.y) <= _MIN_VALUE) return fabs(uv.y - bv.y);         
-    
-    
+
+    if (fabs(uv.y - bv.y) <= _MIN_VALUE) return fabs(uv.y - bv.y);
+
+
     dp_t lv, mv; //   -  Left and middle vertices.
     int wMvI = 0; //   -  Where middle vertex is.    
     double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
@@ -445,7 +445,7 @@ double integrate_chanel_slant_left(int tl,
         b_SL = bv.x - a_SL * bv.y;
         //   Integration under one cell triangle.
         if (fabs(a_SL) > _MIN_VALUE) {
-            result += integrate_triangle_left_one_cell(bv.y, uv.y, a_SL, b_SL, mv[0],                  
+            result += integrate_triangle_left_one_cell(bv.y, uv.y, a_SL, b_SL, mv[0],
                     tl, sox, soy, ox, oy, density);
         }
     }
@@ -455,7 +455,7 @@ double integrate_chanel_slant_left(int tl,
         if (sox.x == irb.x) {
             hx = rb;
         } else if (sox.x < irb.x) {
-            hx = sox.y >= 0 ? ox[sox.y] : HX * sox.y;            
+            hx = sox.y >= 0 ? ox[sox.y] : HX * sox.y;
         }
         result += integrate_rectangle_one_cell(bv.y, uv.y, mv[0], hx, tl,
                 sox, soy,
@@ -464,13 +464,13 @@ double integrate_chanel_slant_left(int tl,
 
     //   Second step: from "masOX[ sx.y ]" to "rb" by iteration.
     ip_t sox_ch(sox.x + 1, sox.x + 2); //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.    
-    
+
     for (int j = sox.x + 1; j < irb.x + 1; j++) {
         //   If this is first cell we should integrate under triangle only.
         gx = sox_ch.y <= 0 ? HX * sox_ch.x : ox[sox_ch.x];
-        hx = sox_ch.y <= 0 ? HX * sox_ch.y : hx = ox[sox_ch.y];        
+        hx = sox_ch.y <= 0 ? HX * sox_ch.y : hx = ox[sox_ch.y];
         if (j == irb.x) hx = rb;
-        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl, 
+        result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl,
                 sox_ch, soy,
                 ox, oy,
                 density);
@@ -481,25 +481,26 @@ double integrate_chanel_slant_left(int tl,
     return result;
 }
 
-double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int tl, 
+// определим целочисленные индексы квадратов в которых лежат верхняя и нижняя точки треугольника
+// sx = (x,y) координаты квадрата в которой лежит нижняя точка
+// sy = (x,y) координаты квадрата в которой лежит верхняя точка
+
+double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int tl,
         const double* ox, const double* oy, double* density) {
     double k = 0.; // в случае успешной проверки, тут будет угловой коэфициент прямой
     if (!is_valid(bv, uv, k)) return k;
-   
-    ip_t sx, sy; //   -  Index of current square by Ox and Oy axes. 
-    // определим целочисленные индексы квадратов в которых лежат верхняя и нижняя точки треугольника
-    // sx = (x,y) координаты квадрата в которой лежит нижняя точка
-    // sy = (x,y) координаты квадрата в которой лежит верхняя точка
 
-    sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / HX);
+    //   -  Index of current square by Ox and Oy axes. 
+    ip_t sx, sy;
+    ip_t sx.x = static_cast<int> ((bv.x - _MIN_VALUE_1) / HX);
     if (bv.x - _MIN_VALUE_1 <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
     sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / HY);
     if (bv.y + _MIN_VALUE_1 <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
-    ip_t irb(sx.x, sx.x + 1); //   -  Index of right boundary.   
-   
+    ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
+
     double result = 0.;
     int curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
@@ -510,26 +511,23 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
         if (dy / dx <= k) { //   Intersection with straight line parallel Ox axis.        
             next_i = 1;
             next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
-            next.x = bv.x - (next.y - bv.y) / k;
+            next.x = curr.x - (next.y - curr.y) / k;
         } else { //   Intersection with straight line parallel Oy axis.            
             next_i = 2;
             next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
-            next.y = bv.y - k * (next.x - bv.x);
+            next.y = curr.y - k * (next.x - curr.x);
         }
         if (next.x < (uv.x + _MIN_VALUE_1)) {
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
-                sx, sy, bv.x,
-                irb, ox, oy, density);
+                    sx, sy, bv.x, ib, ox, oy, density);
             break;
         }
 
         result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
-                sx, sy, bv.x,
-                irb,
-                ox, oy, density);
-        
+                sx, sy, bv.x, ib, ox, oy, density);
+
         switch (next_i) {
             case 1:
                 sy += 1;
@@ -544,134 +542,66 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
     return result;
 }
 
-double integrate_right_triangle_bottom_right(
-        const dp_t& bv,
-        const dp_t& uv,
-        int tl,
-        const double* ox,
-        const double* oy,
-        double* density) {
-    double ang = 0.;
-    if (!is_valid(bv, uv, ang)) return ang;
+double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int tl,
+        const double* ox, const double* oy, double* density) {
+    double k = 0.;
+    if (!is_valid(bv, uv, k)) return k;
+    ip_t sx, sy;
 
-    dp_t trPC, trPN;
-    double distOx = 0, distOy = 0, result = 0., tmp, hx = ox[1] - ox[0], hy = oy[1] - oy[0];
-    ip_t indCurSqOx, indCurSqOy, indLB;
-    int wTrPCI = 0, wTrPNI = 0;
-    bool isDone = false;
+    sx.x = static_cast<int> ((bv.x + _MIN_VALUE_1) / HX);
+    if (bv.x + _MIN_VALUE_1 <= 0) sx.x -= 1;
+    sx.y = sx.x + 1;
+    sy.x = static_cast<int> ((bv.y + _MIN_VALUE_1) / HY);
+    if (bv.y + _MIN_VALUE_1 <= 0) sy.x -= 1;
+    sy.y = sy.x + 1;
 
-    trPC = bv;
+    ip_t ib(sx.x, ib.x + 1);
 
-    indCurSqOx.x = static_cast<int> ((trPC.x + _MIN_VALUE_1) / hx); //   -  If trPC.x is in grid edge I want it will be between in the right side.
-
-    if (trPC.x + _MIN_VALUE_1 <= 0)
-        indCurSqOx.x -= 1; //   -  The case when "trPC.x" is negative.
-
-    indCurSqOx.y = indCurSqOx.x + 1; //   -  It's important only in rare case then trPC is in grid edge.
-    indLB.x = indCurSqOx.x;
-    indLB.y = indLB.x + 1;
-    indCurSqOy.x = static_cast<int> ((trPC.y + _MIN_VALUE_1) / hy); //   -  If trPC.y is in grid edge I want it will be in the upper side.
-    if ((trPC.y + _MIN_VALUE_1) <= 0) {
-        indCurSqOy.x -= 1; //   -  The case when "trPC.x" ia negative.
-    }
-    indCurSqOy.y = indCurSqOy.x + 1; //   -  It's important only in rare case then trPC is in grid edge.
-
-    if (indCurSqOx.y >= 0) {
-        distOx = fabs(ox[indCurSqOx.y] - trPC.x);
-    }
-    if (indCurSqOx.y < 0) {
-        distOx = fabs(hx * indCurSqOx.y - trPC.x);
-    }
-    if (indCurSqOy.y >= 0) {
-        distOy = fabs(oy[indCurSqOy.y] - trPC.y);
-    }
-    if (indCurSqOy.y < 0) {
-        distOy = fabs(hy * indCurSqOy.y - trPC.y);
-    }
-    do {
-        //   a. First case.
-        if ((distOy / distOx) <= ang) {
-            //   Across with straight line parallel Ox axis.
-            wTrPNI = 1;
-            if (indCurSqOy.y >= 0) {
-                trPN.y = oy[indCurSqOy.y];
-            }
-            if (indCurSqOy.y < 0) {
-                trPN.y = hy * indCurSqOy.y;
-            }
-            trPN.x = bv.x + (trPN.y - bv.y) / ang;
+    double result = 0.;
+    int curr_i = 0, next_i = 0;
+    dp_t curr = bv, next;
+    while (true) {
+        double dox = sx.y >= 0 ? fabs(ox[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
+        double doy = sy.y >= 0 ? fabs(oy[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
+        if (doy / dox <= k) {//   Across with straight line parallel Ox axis.            
+            next_i = 1;
+            next.y = sy.y >= 0 ? oy[sy.y] : HY * sy.y;
+            next.x = bv.x + (next.y - bv.y) / k;
+        } else {//   Across with straight line parallel Oy axis.
+            next_i = 2;
+            next.x = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
+            next.y = bv.y + k * (next.x - bv.x);
         }
-        //   b. Second case.
-        if ((distOy / distOx) > ang) {
-            //   Across with straight line parallel Oy axis.
-            wTrPNI = 2;
-            if (indCurSqOx.y >= 0) {
-                trPN.x = ox[indCurSqOx.y];
-            }
-            if (indCurSqOx.y < 0) {
-                trPN.x = hx * indCurSqOx.y;
-            }
-            trPN.y = bv.y + ang * (trPN.x - bv.x);
+        if (next.x > (uv.x - _MIN_VALUE_1)) {
+            next = uv;
+            next_i = 0;
+            result += integrate_chanel_slant_right(tl, curr, curr_i,
+                    next, next_i,
+                    sx, bv.x, ib,
+                    sy, ox, oy, density);
+            break;
         }
-        //   c. Checking.
-        if (trPN.x > (uv.x - _MIN_VALUE_1)) {
-            trPN = uv;
-            isDone = true;
-            wTrPNI = 0;
+        result += integrate_chanel_slant_right(tl, curr, curr_i,
+                next, next_i,
+                sx, bv.x, ib,
+                sy, ox, oy, density);
+
+        switch (next_i) {
+            case 1:
+                sy += 1;
+                break;
+            case 2:
+                sx += 1;
+                break;
         }
-        //   d. Integration.
-        tmp = integrate_chanel_slant_right(
-                tl,
-                trPC, wTrPCI, //   -  double *bv,
-                trPN, wTrPNI, //   -  double *uv,
-                //
-                indCurSqOx, //   -  Indices where trPC and trPN are.
-                //
-                bv.x, indLB, //   -  double lb  =  Left boundary by Ox.
-                //
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                ox,
-                oy,
-                density);
-        result += tmp;
-        //   e. Updating.
-        if (isDone == false) {
-            //   We will compute more. We need to redefine some values.
-            wTrPCI = wTrPNI;
-            trPC = trPN;
-            if (wTrPNI == 1) {
-                indCurSqOy.x += 1;
-                indCurSqOy.y += 1;
-            }
-            if (wTrPNI == 2) {
-                indCurSqOx.x += 1;
-                indCurSqOx.y += 1;
-            }
-            if (indCurSqOx.y >= 0) {
-                distOx = fabs(ox[indCurSqOx.y] - trPC.x);
-            }
-            if (indCurSqOx.y < 0) {
-                distOx = fabs(hx * indCurSqOx.y - trPC.x);
-            }
-            if (indCurSqOy.y >= 0) {
-                distOy = fabs(oy[indCurSqOy.y] - trPC.y);
-            }
-            if (indCurSqOy.y < 0) {
-                distOy = fabs(hy * indCurSqOy.y - trPC.y);
-            }
-        }
-    } while (!isDone);
+        curr_i = next_i;
+        curr = next;
+    }
     return result;
 }
 
-double integrate_right_triangle_upper_left(
-        const dp_t& bv,
-        const dp_t& uv,
-        int tl,
-        const double* ox,
-        const double* oy,
-        double* density) {
+double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int tl,
+        const double* ox, const double* oy, double* density) {
     double ang = 0.;
     if (!is_valid(bv, uv, ang)) return ang;
 
@@ -744,8 +674,7 @@ double integrate_right_triangle_upper_left(
             wTrPNI = 0;
         }
         //   d. Integration.
-        result += integrate_chanel_slant_left(
-                tl,
+        result += integrate_chanel_slant_left(tl,
                 trPC, wTrPCI, //   -  double *bv,
                 trPN, wTrPNI, //   -  double *uv,
                 //
@@ -1270,7 +1199,7 @@ double* compute_density(double b,
     for (int i = 0; i <= OY_LEN; i++) {
         oy[i] = bb + i * (ub - bb) / OY_LEN;
     }
-    
+
     HX = oy[1] - oy[0];
     HY = oy[1] - oy[0];
 
