@@ -5,7 +5,6 @@
 static int TMP_WALL_CNT = 0;
 static const double _PI = 3.14159265358979323846264338327;
 static const double _MIN_VALUE = 1.e-12;
-
 static double B;
 static double UB;
 static double BB;
@@ -23,18 +22,8 @@ double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
 }
 
-double init_side(double x, double y, double t, bound bound) {
-    switch (bound) {
-        case up:
-            return analytical_solution(t, x, y);
-        case bottom:
-            return analytical_solution(t, x, y);
-        case left:
-            return analytical_solution(t, x, y);
-        case right:
-            return analytical_solution(t, x, y);
-    }
-    return 0;
+double init_side(double x, double y, double t) {
+    return analytical_solution(t, x, y);
 }
 
 double integrate_first_type(double py, double qy, double gx, double hx, double a,
@@ -193,11 +182,11 @@ double integrate_chanel_slant_right(int tl,
         const dp_t& bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
         const dp_t& uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
         //
-        const ip_t &indCurSqOx, //   -  Index by OX axis where bv and uv are.
+        const ip_t &sx, //   -  Index by OX axis where bv and uv are.
         //
         double lb, const ip_t &indLB, //   -  Left boundary by Ox. Index by OX axis where lb is.
         //
-        const ip_t &indCurSqOy, //   -  Index of current square by Oy axis.        
+        const ip_t &sy, //   -  Index of current square by Oy axis.        
         const double* ox, const double* oy, double* density) {
     dp_t mv, rv; //   -  Middle and right vertices.
     int wMvI = 0; //   -  Where middle vertex is.
@@ -227,7 +216,7 @@ double integrate_chanel_slant_right(int tl,
     indCurSqOxToCh.x = indLB.x;
     indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
 
-    for (int j = indLB.x; j < indCurSqOx.x; j++) {
+    for (int j = indLB.x; j < sx.x; j++) {
         //   If this is first cell we should integrate under rectangle only.
         if (indCurSqOxToCh.x >= 0) {
             Gx = ox[indCurSqOxToCh.x];
@@ -242,7 +231,7 @@ double integrate_chanel_slant_right(int tl,
         result += integrate_rectangle_one_cell(bv.y,
                 uv.y, Gx, Hx,
                 tl, indCurSqOxToCh, //   -  Index of current square by Ox axis.
-                indCurSqOy, //   -  Index of current square by Oy axis.                
+                sy, //   -  Index of current square by Oy axis.                
                 ox, oy, density);
         indCurSqOxToCh.x += 1;
         indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
@@ -251,51 +240,25 @@ double integrate_chanel_slant_right(int tl,
     //   Integration. Second step: under [ indCurSqOx.x; sx.y ] square.
     //   A. Under rectangle.
     if (wMvI == 1) {
-        if (indCurSqOx.x == indLB.x) Gx = lb;
-        if (indCurSqOx.x > indLB.x) {
-            Gx = indCurSqOx.x >= 0 ? ox[indCurSqOx.x] : HX * indCurSqOx.x;
+        if (sx.x == indLB.x) Gx = lb;
+        if (sx.x > indLB.x) {
+            Gx = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
         }
-        
-        result += integrate_rectangle_one_cell(bv.y, //   -  double Py,
-                uv.y, //   -  double Qy,
-                //
-                Gx, //   -  double Gx,
-                mv[0], //   -  double Hx,
-                //
-                tl,
-                indCurSqOx, //   -  Index of current square by Ox axis.
-                indCurSqOy, //   -  Index of current square by Oy axis.
-                //
-                ox,
-                oy,
-                density);
+        result += integrate_rectangle_one_cell(bv.y, uv.y, Gx, mv[0], tl, sx, sy,
+                ox, oy, density);
     }
 
     //   B. Under triangle.
-
     if (fabs(uv.y - bv.y) > _MIN_VALUE) {
         //   integ += fabs(uv.y - bv.y) * (rv[0] - mv[0]) /2.;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv.x - bv.x) / (uv.y - bv.y);
         b_SL = bv.x - a_SL * bv.y;
 
-
         //   Integration under one cell triangle.
-
         if (fabs(a_SL) > _MIN_VALUE) {
-            result += integrate_triangle_right_one_cell(
-                    bv.y, //   -  double Py,
-                    uv.y, //   -  double Qy,
-                    //
-                    a_SL,
-                    b_SL,
-                    mv[0], //   -  double Gx,
-                    //
-                    tl,
-                    indCurSqOx, //   -  Index of current square by Ox axis.
-                    indCurSqOy, //   -  Index of current square by Oy axis.
-                    //
-                    ox, oy, density);
+            result += integrate_triangle_right_one_cell(bv.y, uv.y, a_SL, b_SL,
+                    mv[0], tl, sx, sy, ox, oy, density);
         }
     }
 
@@ -306,8 +269,8 @@ double integrate_chanel_slant_left(int tl,
         const dp_t& bv, int curr_i, //   -  Where travel point current (bottom vertex) is.
         const dp_t& uv, int next_i, //   -  Where travel point next (upper vertex) is.
         //
-        const ip_t &sox, //   -  Index by OX axis where bv and uv are.
-        const ip_t &soy, //   -  Index of current square by Oy axis.
+        const ip_t &sx, //   -  Index by OX axis where bv and uv are.
+        const ip_t &sy, //   -  Index of current square by Oy axis.
         //
         double rb, const ip_t &irb, //   -  Right boundary by Ox. Index by OX axis where rb is.        
         const double* ox,
@@ -315,7 +278,6 @@ double integrate_chanel_slant_left(int tl,
         double* density) {
 
     if (fabs(uv.y - bv.y) <= _MIN_VALUE) return fabs(uv.y - bv.y);
-
 
     dp_t lv, mv; //   -  Left and middle vertices.
     int wMvI = 0; //   -  Where middle vertex is.    
@@ -343,34 +305,31 @@ double integrate_chanel_slant_left(int tl,
         //   Integration under one cell triangle.
         if (fabs(a_SL) > _MIN_VALUE) {
             result += integrate_triangle_left_one_cell(bv.y, uv.y, a_SL, b_SL, mv[0],
-                    tl, sox, soy, ox, oy, density);
+                    tl, sx, sy, ox, oy, density);
         }
     }
 
     //   B. Under rectangle. Need to be checking.
     if (wMvI == 1) {
-        if (sox.x == irb.x) {
+        if (sx.x == irb.x) {
             hx = rb;
-        } else if (sox.x < irb.x) {
-            hx = sox.y >= 0 ? ox[sox.y] : HX * sox.y;
+        } else if (sx.x < irb.x) {
+            hx = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
         }
-        result += integrate_rectangle_one_cell(bv.y, uv.y, mv[0], hx, tl,
-                sox, soy,
+        result += integrate_rectangle_one_cell(bv.y, uv.y, mv[0], hx, tl, sx, sy,
                 ox, oy, density);
     }
 
     //   Second step: from "masOX[ sx.y ]" to "rb" by iteration.
-    ip_t sox_ch(sox.x + 1, sox.x + 2); //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.    
+    ip_t sox_ch(sx.x + 1, sx.x + 2); //   -  Indices of current square by Ox axis to be changed. Under which we want to integrate.    
 
-    for (int j = sox.x + 1; j < irb.x + 1; j++) {
+    for (int j = sx.x + 1; j < irb.x + 1; j++) {
         //   If this is first cell we should integrate under triangle only.
         gx = sox_ch.y <= 0 ? HX * sox_ch.x : ox[sox_ch.x];
         hx = sox_ch.y <= 0 ? HX * sox_ch.y : hx = ox[sox_ch.y];
         if (j == irb.x) hx = rb;
         result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, tl,
-                sox_ch, soy,
-                ox, oy,
-                density);
+                sox_ch, sy, ox, oy, density);
         sox_ch.x += 1;
         sox_ch.y = sox_ch.x + 1;
     }
@@ -893,28 +852,20 @@ double solve(const double* ox, const double* oy, double* density) {
 
     for (int it = 1; it < TIME_STEP_CNT + 1; it++) {
         for (int i = 0; i <= OX_LEN; i++) {
-            density[i] = init_side(ox[i], BB, TAU * it, bottom);
-            density[(OX_LEN + 1) * OY_LEN + i] = init_side(ox[i], UB, TAU * it, up);
+            density[i] = init_side(ox[i], BB, TAU * it);
+            density[(OX_LEN + 1) * OY_LEN + i] = init_side(ox[i], UB, TAU * it);
         }
 
         for (int i = 0; i <= OY_LEN; i++) {
-            density[(OX_LEN + 1) * i] = init_side(LB, oy[i], TAU * it, left);
-            density[(OX_LEN + 1) * i + OX_LEN] = init_side(RB, oy[i], TAU * it, right);
+            density[(OX_LEN + 1) * i] = init_side(LB, oy[i], TAU * it);
+            density[(OX_LEN + 1) * i + OX_LEN] = init_side(RB, oy[i], TAU * it);
         }
 
         for (int iy = 1; iy < OY_LEN; iy++) {
-            for (int ix = 1; ix < OX_LEN; ix++) {
-                int index = (OX_LEN + 1) * iy + ix;
-
-                double value = integrate(it, ix, iy, ox, oy, prev_density);
-
-                double h = (ox[ix + 1] - ox[ix - 1]) / 2.;
-                value /= h;
-                h = (oy[iy + 1] - oy[iy - 1]) / 2.;
-                value /= h;
-
-                double rp = func_f(TAU * it, ox[ix], oy[iy]);
-                density[index] = value + TAU * rp;
+            for (int ix = 1; ix < OX_LEN; ix++) {                
+                double value = integrate(it, ix, iy, ox, oy, prev_density) / HX / HY;
+                double rp = func_f(TAU * it, ox[ix], oy[iy]);                
+                density[(OX_LEN + 1) * iy + ix] = value + TAU * rp;
             }
         }
         memcpy(prev_density, density, (OX_LEN + 1) * (OY_LEN + 1) * sizeof (double));
