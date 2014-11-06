@@ -4,7 +4,7 @@
 
 static int TMP_WALL_CNT = 0;
 static const double _PI = 3.14159265358979323846264338327;
-static const double _MIN_VALUE = 1.e-12;
+static const double _MINF = 1.e-12;
 static double B;
 static double UB;
 static double BB;
@@ -45,12 +45,8 @@ double integrate_second_type(double py, double qy, double alpha, double a, doubl
 }
 
 double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
-        int tl,
-        const ip_t &sx, //   -  Index of current square by Ox axis.
-        const ip_t &sy,
-        const double* ox,
-        const double* oy,
-        double* density) {
+        int tl, const ip_t &sx, const ip_t &sy,
+        const double* ox, const double* oy, double* density) {
     double result;
     double tmp = 0.;
     double rho[2][2];
@@ -99,9 +95,7 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 }
 
 double integrate_triangle_left_one_cell(double py, double qy, double a_sl, double b_sl,
-        double hx, int tl,
-        const ip_t &sx, //   -  Index of current square by Ox axis.
-        const ip_t &sy, //   -  Index of current square by Oy axis.        
+        double hx, int tl, const ip_t &sx, const ip_t &sy,
         const double* ox, const double* oy, double* density) {
     double result, tmp, tmp_integral;
     double rho[2][2];
@@ -179,14 +173,11 @@ double integrate_triangle_right_one_cell(double py, double qy, double a_sl,
 }
 
 double integrate_chanel_slant_right(int tl,
-        const dp_t& bv, int wTrPCI, //   -  Where travel point current (botton vertex) is.
-        const dp_t& uv, int wTrPNI, //   -  Where travel point next (upper vertex) is.
-        //
-        const ip_t &sx, //   -  Index by OX axis where bv and uv are.
-        //
-        double lb, const ip_t &indLB, //   -  Left boundary by Ox. Index by OX axis where lb is.
-        //
-        const ip_t &sy, //   -  Index of current square by Oy axis.        
+        const dp_t& bv, int wTrPCI,
+        const dp_t& uv, int wTrPNI,
+        const ip_t &sx,
+        double lb, const ip_t &indLB,
+        const ip_t &sy,
         const double* ox, const double* oy, double* density) {
     dp_t mv, rv; //   -  Middle and right vertices.
     int wMvI = 0; //   -  Where middle vertex is.
@@ -206,12 +197,11 @@ double integrate_chanel_slant_right(int tl,
         rv = uv;
     }
 
-    if ((fabs(uv.y - bv.y)) <= _MIN_VALUE) {
+    if ((fabs(uv.y - bv.y)) <= _MINF) {
         return fabs(uv.y - bv.y); //   fabs(uv.y - bv.y);
     }
 
     //   First step: from "lb" to "masOX[ indCurSqOx.x ]" by iteration.
-    //   integ  += fabs( mv[0] - lb) * fabs(uv.y - bv.y);
 
     indCurSqOxToCh.x = indLB.x;
     indCurSqOxToCh.y = indCurSqOxToCh.x + 1;
@@ -249,14 +239,14 @@ double integrate_chanel_slant_right(int tl,
     }
 
     //   B. Under triangle.
-    if (fabs(uv.y - bv.y) > _MIN_VALUE) {
+    if (fabs(uv.y - bv.y) > _MINF) {
         //   integ += fabs(uv.y - bv.y) * (rv[0] - mv[0]) /2.;
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv.x - bv.x) / (uv.y - bv.y);
         b_SL = bv.x - a_SL * bv.y;
 
         //   Integration under one cell triangle.
-        if (fabs(a_SL) > _MIN_VALUE) {
+        if (fabs(a_SL) > _MINF) {
             result += integrate_triangle_right_one_cell(bv.y, uv.y, a_SL, b_SL,
                     mv[0], tl, sx, sy, ox, oy, density);
         }
@@ -265,25 +255,16 @@ double integrate_chanel_slant_right(int tl,
     return result;
 }
 
-double integrate_chanel_slant_left(int tl,
-        const dp_t& bv, int curr_i, //   -  Where travel point current (bottom vertex) is.
-        const dp_t& uv, int next_i, //   -  Where travel point next (upper vertex) is.
-        //
-        const ip_t &sx, //   -  Index by OX axis where bv and uv are.
-        const ip_t &sy, //   -  Index of current square by Oy axis.
-        //
-        double rb, const ip_t &irb, //   -  Right boundary by Ox. Index by OX axis where rb is.        
-        const double* ox,
-        const double* oy,
-        double* density) {
+double integrate_chanel_slant_left(int tl, const dp_t& bv, int curr_i,
+        const dp_t& uv, int next_i, const ip_t &sx, const ip_t &sy,
+        double rb, const ip_t &irb,
+        const double* ox, const double* oy, double* density) {
 
-    if (fabs(uv.y - bv.y) <= _MIN_VALUE) return fabs(uv.y - bv.y);
+    if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
 
     dp_t lv, mv; //   -  Left and middle vertices.
-    int wMvI = 0; //   -  Where middle vertex is.    
-    double a_SL, b_SL; //   -  Coefficients of slant line: x = a_SL *y  +  b_SL.
-    double gx = 0, hx = 0; //   -  Left and right boundary for each integration.
-    double result = 0.;
+    int wMvI = 0; //   -  Where middle vertex is.        
+    double result = 0, a_SL, b_SL, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
 
     //   Let's compute helpful values.
     if (uv.x <= bv.x) {
@@ -298,12 +279,12 @@ double integrate_chanel_slant_left(int tl,
 
     //   Integration. First step: under [ indCurSqOx.x; sx.y ] square.
     //   A. Under triangle.
-    if (fabs(uv.y - bv.y) > _MIN_VALUE) {
+    if (fabs(uv.y - bv.y) > _MINF) {
         //   Coefficients of slant line: x = a_SL *y  +  b_SL.
         a_SL = (uv.x - bv.x) / (uv.y - bv.y);
         b_SL = bv.x - a_SL * bv.y;
         //   Integration under one cell triangle.
-        if (fabs(a_SL) > _MIN_VALUE) {
+        if (fabs(a_SL) > _MINF) {
             result += integrate_triangle_left_one_cell(bv.y, uv.y, a_SL, b_SL, mv[0],
                     tl, sx, sy, ox, oy, density);
         }
@@ -349,11 +330,11 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
 
     //   -  Index of current square by Ox and Oy axes. 
     ip_t sx, sy;
-    sx.x = static_cast<short> ((bv.x - _MIN_VALUE) / HX);
-    if (bv.x - _MIN_VALUE <= 0) sx.x -= 1;
+    sx.x = static_cast<short> ((bv.x - _MINF) / HX);
+    if (bv.x - _MINF <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY);
-    if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + _MINF) / HY);
+    if (bv.y + _MINF <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
     ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
@@ -374,7 +355,7 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv, int 
             next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
             next.y = curr.y - k * (next.x - curr.x);
         }
-        if (next.x < (uv.x + _MIN_VALUE)) {
+        if (next.x < (uv.x + _MINF)) {
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
@@ -403,13 +384,13 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
         const double* ox, const double* oy, double* density) {
     double k = 0.;
     if (!try_get_slope_ratio(bv, uv, k)) return k;
-    ip_t sx, sy;
 
-    sx.x = static_cast<short> ((bv.x + _MIN_VALUE) / HX);
-    if (bv.x + _MIN_VALUE <= 0) sx.x -= 1;
+    ip_t sx, sy;
+    sx.x = static_cast<short> ((bv.x + _MINF) / HX);
+    if (bv.x + _MINF <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY);
-    if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + _MINF) / HY);
+    if (bv.y + _MINF <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
     ip_t ib(sx.x, ib.x + 1);
@@ -429,7 +410,7 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv, int
             next.x = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
             next.y = bv.y + k * (next.x - bv.x);
         }
-        if (next.x > (uv.x - _MIN_VALUE)) {
+        if (next.x > (uv.x - _MINF)) {
             next = uv;
             next_i = 0;
             result += integrate_chanel_slant_right(tl, curr, curr_i,
@@ -463,19 +444,19 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
     if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy, ib;
-    sx.x = static_cast<short> ((bv.x + _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
-    if (bv.x + _MIN_VALUE <= 0) sx.x -= 1;
+    sx.x = static_cast<short> ((bv.x + _MINF) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
+    if (bv.x + _MINF <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
-    if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + _MINF) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
+    if (bv.y + _MINF <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
-    ib.x = static_cast<short> ((uv.x - _MIN_VALUE) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
-    if (uv.x - _MIN_VALUE <= 0) ib.x -= 1;
+    ib.x = static_cast<short> ((uv.x - _MINF) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+    if (uv.x - _MINF <= 0) ib.x -= 1;
     ib.y = ib.x + 1;
 
+    double result = 0.;
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
-    double result = 0.;
     while (true) {
         double dox = sx.y >= 0 ? ox[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
         double doy = sy.y >= 0 ? oy[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
@@ -488,7 +469,7 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv, int t
             next.x = sx.y >= 0 ? ox[sx.y] : HX * sx.y;
             next.y = bv.y + k * (next.x - bv.x);
         }
-        if (next.x > (uv.x - _MIN_VALUE)) {
+        if (next.x > (uv.x - _MINF)) {
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_left(tl, curr, curr_i, next, next_i,
@@ -518,17 +499,15 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
     if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy, ib;
-
-    sx.x = static_cast<short> ((bv.x - _MIN_VALUE) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
-    if (bv.x - _MIN_VALUE <= 0) sx.x -= 1;
+    sx.x = static_cast<short> ((bv.x - _MINF) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
+    if (bv.x - _MINF <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-
-    ib.x = static_cast<short> ((uv.x + _MIN_VALUE) / HX);
-    if (uv.x + _MIN_VALUE <= 0) ib.x -= 1;
-    ib.y = ib.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MIN_VALUE) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
-    if (bv.y + _MIN_VALUE <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + _MINF) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
+    if (bv.y + _MINF <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
+    ib.x = static_cast<short> ((uv.x + _MINF) / HX);
+    if (uv.x + _MINF <= 0) ib.x -= 1;
+    ib.y = ib.x + 1;
 
     double result = 0.;
     short curr_i = 0, next_i = 0;
@@ -545,7 +524,7 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv, int 
             next.x = sx.x >= 0 ? ox[sx.x] : HX * sx.x;
             next.y = bv.y - k * (next.x - bv.x);
         }
-        if (next.x < uv.x + _MIN_VALUE) {
+        if (next.x < uv.x + _MINF) {
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_right(tl, curr, curr_i, next, next_i,
@@ -614,16 +593,11 @@ double integrate_uniform_triangle_wall(int tl, const dp_t& a, const dp_t& b, con
     return 0;
 }
 
-double integrate_uniform_triangle(int tl,
-        dp_t& x,
-        dp_t& y,
-        dp_t& z,
-        const double* ox,
-        const double* oy,
-        double* density) {
+double integrate_uniform_triangle(int tl, const dp_t& x, dp_t& y, const dp_t& z,
+        const double* ox, const double* oy, double* density) {
     //   a * x  +  b * y  = c.
     double a = z.y - x.y;
-    if (fabs(a) < _MIN_VALUE) return _MIN_VALUE;
+    if (fabs(a) < _MINF) return _MINF;
     double b = x.x - z.x;
     double c = b * x.y + a * x.x;
     dp_t ip((c - b * y.y) / a, y.y);
@@ -835,7 +809,7 @@ double get_norm_of_error(double* density, int x_length, int y_length, double* ox
             r += fabs(analytical_solution(ts_count_mul_steps, ox[j], oy[k])
                     - density[(x_length + 1) * k + j]);
         }
-    }    
+    }
     return HX * HY * r;
 }
 
@@ -859,9 +833,9 @@ double solve(const double* ox, const double* oy, double* density) {
         }
 
         for (int i = 1; i < OY_LEN; i++) {
-            for (int j = 1; j < OX_LEN; j++) {                
+            for (int j = 1; j < OX_LEN; j++) {
                 density[(OX_LEN + 1) * i + j] = integrate(it, j, i, ox, oy, prev_density) / HX / HY;
-                density[(OX_LEN + 1) * i + j] += TAU * func_f(TAU * it, ox[j], oy[i]);                                 
+                density[(OX_LEN + 1) * i + j] += TAU * func_f(TAU * it, ox[j], oy[i]);
             }
         }
         memcpy(prev_density, density, (OX_LEN + 1) * (OY_LEN + 1) * sizeof (double));
@@ -884,29 +858,17 @@ double* compute_density(double b, double lb, double rb, double bb, double ub,
     OY_LEN = oy_length;
     TIME_STEP_CNT = time_step_count;
     XY_LEN = (ox_length + 1) * (oy_length + 1);
-
     double* density = new double [ XY_LEN ];
     double* ox = new double [ OX_LEN + 1 ];
     double* oy = new double [ OY_LEN + 1 ];
-
-    for (int i = 0; i <= OX_LEN; i++) {
-        ox[i] = lb + i * (rb - lb) / OX_LEN;
-    }
-
-    for (int i = 0; i <= OY_LEN; i++) {
-        oy[i] = bb + i * (ub - bb) / OY_LEN;
-    }
-
+    for (int i = 0; i <= OX_LEN; i++) ox[i] = lb + i * (rb - lb) / OX_LEN;
+    for (int i = 0; i <= OY_LEN; i++) oy[i] = bb + i * (ub - bb) / OY_LEN;
     HX = oy[1] - oy[0];
     HY = oy[1] - oy[0];
 
-    print_params(B, LB, RB, BB, UB, TAU, time_step_count, OX_LEN, OY_LEN);
-
+    print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
     solve(ox, oy, density);
-
-    norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy,
-            time_step_count * TAU);
-    //  printf("Norm L1 = %f\n", *norm);
+    norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy, TIME_STEP_CNT * TAU);
     printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, TMP_WALL_CNT);
 
     delete[] ox;
