@@ -72,9 +72,7 @@ double integrate_rectangle_one_cell(double Py,
         const ip_t &indCurSqOy,
         const double* ox,
         const double* oy,
-        double* density) {
-    double hx = ox[1] - ox[0];
-    double hy = oy[1] - oy[0];
+        double* density) {    
     double result;
     double tmp;
     double rho[2][2];
@@ -87,17 +85,17 @@ double integrate_rectangle_one_cell(double Py,
         rho[1][1] = density[(OX_LEN + 1) * indCurSqOy.y + indCurSqOx.y];
     } else {
         // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
-        x = indCurSqOx.x * hx;
-        y = indCurSqOy.x * hy;
+        x = indCurSqOx.x * HX;
+        y = indCurSqOy.x * HY;
         rho[0][0] = analytical_solution(t, x, y);
-        x = indCurSqOx.x * hx;
-        y = indCurSqOy.y * hy;
+        x = indCurSqOx.x * HX;
+        y = indCurSqOy.y * HY;
         rho[0][1] = analytical_solution(t, x, y);
-        x = indCurSqOx.y * hx;
-        y = indCurSqOy.x * hy;
+        x = indCurSqOx.y * HX;
+        y = indCurSqOy.x * HY;
         rho[1][0] = analytical_solution(t, x, y);
-        x = indCurSqOx.y * hx;
-        y = indCurSqOy.y * hy;
+        x = indCurSqOx.y * HX;
+        y = indCurSqOy.y * HY;
         rho[1][1] = analytical_solution(t, x, y);
 
         TMP_WALL_CNT++;
@@ -106,30 +104,30 @@ double integrate_rectangle_one_cell(double Py,
     if (indCurSqOx.y >= 0 && indCurSqOy.y >= 0) {
         tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[indCurSqOx.y], oy[indCurSqOy.y]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx.y, hy * indCurSqOy.y);
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, HX * indCurSqOx.y, HY * indCurSqOy.y);
     }
-    tmp = tmp / hx / hy;
+    tmp = tmp / HX / HY;
     result = tmp * rho[0][0]; //   rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.x ];
     if (indCurSqOx.x >= 0 && indCurSqOy.y >= 0) {
         tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[indCurSqOx.x], oy[indCurSqOy.y]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx.x, hy * indCurSqOy.y);
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, HX * indCurSqOx.x, HY * indCurSqOy.y);
     }
-    tmp = tmp / hx / hy;
+    tmp = tmp / HX / HY;
     result = result - tmp * rho[1][0]; //   rhoInPrevTL[ sx.y ][ indCurSqOy.x ];
     if (indCurSqOx.y >= 0 && indCurSqOy.x >= 0) {
         tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[indCurSqOx.y], oy[indCurSqOy.x]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx.y, hy * indCurSqOy.x);
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, HX * indCurSqOx.y, HY * indCurSqOy.x);
     }
-    tmp = tmp / hx / hy;
+    tmp = tmp / HX / HY;
     result -= tmp * rho[0][1]; //   rhoInPrevTL[ indCurSqOx.x ][ indCurSqOy.y ];
     if (indCurSqOx.x >= 0 && indCurSqOy.x >= 0) {
         tmp = integrate_first_type(Py, Qy, Gx, Hx, ox[indCurSqOx.x], oy[indCurSqOy.x]);
     } else {
-        tmp = integrate_first_type(Py, Qy, Gx, Hx, hx * indCurSqOx.x, hy * indCurSqOy.x);
+        tmp = integrate_first_type(Py, Qy, Gx, Hx, HX * indCurSqOx.x, HY * indCurSqOy.x);
     }
-    tmp = tmp / hx / hy;
+    tmp = tmp / HX / HY;
     return result + tmp * rho[1][1]; //   rhoInPrevTL[ sx.y ][ indCurSqOy.y ];
 }
 
@@ -145,38 +143,23 @@ double integrate_triangle_left_one_cell(
         const double* ox,
         const double* oy,
         double* density) {
-    double hx = ox[1] - ox[0];
-    double hy = oy[1] - oy[0];
     double result;
     double tmp, bufInteg_D;
     double rho[2][2];
-    double t = TAU * (tl - 1.);
-    double x, y;
-    if (sox.x >= 0 && sox.y <= OX_LEN) {
-        if (soy.x >= 0 && soy.y <= OY_LEN) {
-            rho[0][0] = density[(OX_LEN + 1) * soy.x + sox.x];
-            rho[0][1] = density[(OX_LEN + 1) * soy.y + sox.x];
-            rho[1][0] = density[(OX_LEN + 1) * soy.x + sox.y];
-            rho[1][1] = density[(OX_LEN + 1) * soy.y + sox.y];
-        }
-    }
-
-    // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
-    // норма должна уменьшиться
-    if (sox.x < 0 || sox.y > OX_LEN || soy.x < 0 || soy.y > OY_LEN) {
-        x = sox.x * hx;
-        y = soy.x * hy;
-        rho[0][0] = analytical_solution(t, x, y);
-        x = sox.x * hx;
-        y = soy.y * hy;
-        rho[0][1] = analytical_solution(t, x, y);
-        x = sox.y * hx;
-        y = soy.x * hy;
-        rho[1][0] = analytical_solution(t, x, y);
-        x = sox.y * hx;
-        y = soy.y * hy;
-        rho[1][1] = analytical_solution(t, x, y);
-
+    
+    if (sox.x >= 0 && sox.y <= OX_LEN && soy.x >= 0 && soy.y <= OY_LEN) {        
+        rho[0][0] = density[(OX_LEN + 1) * soy.x + sox.x];
+        rho[0][1] = density[(OX_LEN + 1) * soy.y + sox.x];
+        rho[1][0] = density[(OX_LEN + 1) * soy.x + sox.y];
+        rho[1][1] = density[(OX_LEN + 1) * soy.y + sox.y];        
+    }    
+    else {
+        // TODO: убрать потому что это неверно (надо расчитывать граничные условия)
+        // норма должна уменьшиться
+        rho[0][0] = analytical_solution(TAU * (tl - 1), sox.x * HX, soy.x * HY);
+        rho[0][1] = analytical_solution(TAU * (tl - 1), sox.x * HX, soy.y * HY);
+        rho[1][0] = analytical_solution(TAU * (tl - 1), sox.y * HX, soy.x * HY);
+        rho[1][1] = analytical_solution(TAU * (tl - 1), sox.y * HX, soy.y * HY);
         TMP_WALL_CNT++;
     }
 
@@ -186,11 +169,11 @@ double integrate_triangle_left_one_cell(
         tmp = tmp * (Hx - ox[sox.y]) * (Hx - ox[sox.y]) / 4.;
         bufInteg_D = integrate_second_type(Py, Qy, oy[soy.y], a_SL, b_SL, ox[sox.y]);
     } else {
-        tmp = tmp * (Hx - hx * sox.y) * (Hx - hx * sox.y) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * soy.y, a_SL, b_SL, hx * sox.y);
+        tmp = tmp * (Hx - HX * sox.y) * (Hx - HX * sox.y) / 4.;
+        bufInteg_D = integrate_second_type(Py, Qy, HY * soy.y, a_SL, b_SL, HX * sox.y);
     }
     tmp -= bufInteg_D / 2.;
-    result = tmp * rho[0][0] / hx / hy;
+    result = tmp * rho[0][0] / HX / HY;
 
     //   2.
     tmp = (Qy - oy[soy.y]) * (Qy - oy[soy.y]) - (Py - oy[soy.y]) * (Py - oy[soy.y]);
@@ -198,11 +181,11 @@ double integrate_triangle_left_one_cell(
         tmp = -1. * tmp * (Hx - ox[sox.x]) * (Hx - ox[sox.x]) / 4.;
         bufInteg_D = integrate_second_type(Py, Qy, oy[soy.y], a_SL, b_SL, ox[sox.x]);
     } else {
-        tmp = -1. * tmp * (Hx - hx * sox.x) * (Hx - hx * sox.x) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * soy.y, a_SL, b_SL, hx * sox.x);
+        tmp = -1. * tmp * (Hx - HX * sox.x) * (Hx - HX * sox.x) / 4.;
+        bufInteg_D = integrate_second_type(Py, Qy, HY * soy.y, a_SL, b_SL, HX * sox.x);
     }
-    tmp = tmp + bufInteg_D / 2.;
-    result += tmp * rho[1][0] / hx / hy;
+    tmp += bufInteg_D / 2.;
+    result += tmp * rho[1][0] / HX / HY;
 
     //   3.
     tmp = (Qy - oy[soy.x]) * (Qy - oy[soy.x]) - (Py - oy[soy.x]) * (Py - oy[soy.x]);
@@ -210,11 +193,11 @@ double integrate_triangle_left_one_cell(
         tmp = -1. * tmp * (Hx - ox[sox.y]) * (Hx - ox[sox.y]) / 4.;
         bufInteg_D = integrate_second_type(Py, Qy, oy[soy.x], a_SL, b_SL, ox[sox.y]);
     } else {
-        tmp = -1. * tmp * (Hx - hx * sox.y) * (Hx - hx * sox.y) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * soy.x, a_SL, b_SL, hx * sox.y);
+        tmp = -1. * tmp * (Hx - HX * sox.y) * (Hx - HX * sox.y) / 4.;
+        bufInteg_D = integrate_second_type(Py, Qy, HY * soy.x, a_SL, b_SL, HX * sox.y);
     }
-    tmp = tmp + bufInteg_D / 2.;
-    result += tmp * rho[0][1] / hx / hy;
+    tmp += bufInteg_D / 2.;
+    result += tmp * rho[0][1] / HX / HY;
 
     //   4.
     tmp = (Qy - oy[soy.x]) * (Qy - oy[soy.x]) - (Py - oy[soy.x]) * (Py - oy[soy.x]);
@@ -222,11 +205,11 @@ double integrate_triangle_left_one_cell(
         tmp = tmp * (Hx - ox[sox.x]) * (Hx - ox[sox.x]) / 4.;
         bufInteg_D = integrate_second_type(Py, Qy, oy[soy.x], a_SL, b_SL, ox[sox.x]);
     } else {
-        tmp = tmp * (Hx - hx * sox.x) * (Hx - hx * sox.x) / 4.;
-        bufInteg_D = integrate_second_type(Py, Qy, hy * soy.x, a_SL, b_SL, hx * sox.x);
+        tmp = tmp * (Hx - HX * sox.x) * (Hx - HX * sox.x) / 4.;
+        bufInteg_D = integrate_second_type(Py, Qy, HY * soy.x, a_SL, b_SL, HX * sox.x);
     }
     tmp -= bufInteg_D / 2.;
-    result += tmp * rho[1][1] / hx / hy;
+    result += tmp * rho[1][1] / HX / HY;
 
     return result;
 }
