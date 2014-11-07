@@ -37,7 +37,7 @@ inline double func_v(double t, double x, double y) {
     return atan((x - LB) * (x - RB) * (1 + t) / 10. * (y - UB) * (y - BB));
 }
 
-double func_f(double tl_on_tau, double x, double y) {
+inline double func_f(double tl_on_tau, double x, double y) {
     double arg_v = (x - LB) * (x - RB) * (1 + tl_on_tau) / 10. * (y - UB) * (y - BB);
     double rho = analytical_solution(tl_on_tau, x, y);
     double drho_dt = x * y * cos(tl_on_tau * x * y);
@@ -556,7 +556,7 @@ double integrate_uniform_triangle(int tl, const dp_t& x, dp_t& y, const dp_t& z)
             + integrate_bottom_triangle(tl, y, ip, x);
 }
 
-quad_type get_coordinates_on_prev_layer(int cur_tl, int ix, int iy,
+quad_type get_coordinates_on_prev_layer(int tl, int ix, int iy,
         dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta) {
     //   1 First of all let's compute coordinates of square vertexes.
     //  OX:
@@ -599,22 +599,22 @@ quad_type get_coordinates_on_prev_layer(int cur_tl, int ix, int iy,
 
     // Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
     u = func_u(alpha.x, alpha.y);
-    v = func_v(TAU * cur_tl, alpha.x, alpha.y);
+    v = func_v(TAU * tl, alpha.x, alpha.y);
     alpha.x -= TAU * u;
     alpha.y -= TAU * v;
 
     u = func_u(beta.x, beta.y);
-    v = func_v(TAU * cur_tl, beta.x, beta.y);
+    v = func_v(TAU * tl, beta.x, beta.y);
     beta.x -= TAU * u;
     beta.y -= TAU * v;
 
     u = func_u(gamma.x, gamma.y);
-    v = func_v(TAU * cur_tl, gamma.x, gamma.y);
+    v = func_v(TAU * tl, gamma.x, gamma.y);
     gamma.x -= TAU * u;
     gamma.y -= TAU * v;
 
     u = func_u(theta.x, theta.y);
-    v = func_v(TAU * cur_tl, theta.x, theta.y);
+    v = func_v(TAU * tl, theta.x, theta.y);
     theta.x -= TAU * u;
     theta.y -= TAU * v;
 
