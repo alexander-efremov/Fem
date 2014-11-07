@@ -706,7 +706,7 @@ double get_norm_of_error(double* density, double ts_count_mul_steps) {
     return HX * HY * r;
 }
 
-double solve(double* density) {
+void solve(double* density) {
     PREV_DENSITY = new double [ XY_LEN ];
     for (int iy = 0; iy < OY_LEN + 1; iy++) {
         for (int ix = 0; ix < OX_LEN + 1; ix++) {
@@ -737,7 +737,6 @@ double solve(double* density) {
     }
 
     delete[] PREV_DENSITY;
-    return 0;
 }
 
 inline void init(double b, double lb, double rb, double bb, double ub,
