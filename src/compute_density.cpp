@@ -4,7 +4,7 @@
 
 static int TMP_WALL_CNT = 0;
 static const double _PI = 3.14159265358979323846264338327;
-static const double _MINF = 1.e-12;
+static const double _MINF = 1.e-14;
 static double B;
 static double UB;
 static double BB;
@@ -21,11 +21,11 @@ static double *OX;
 static double *OY;
 static double *PREV_DENSITY;
 
-double analytical_solution(double t, double x, double y) {
+inline double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
 }
 
-double init_side(double x, double y, double t) {
+inline double init_side(double x, double y, double t) {
     return analytical_solution(t, x, y);
 }
 
@@ -53,22 +53,15 @@ double func_f(double tl_on_tau, double x, double y) {
     return res;
 }
 
-double integrate_rectangle(double py, double qy, double gx, double hx, double a,
-        double b) {
-    double integ = (hx - a) * (hx - a) - (gx - a) * (gx - a);
-    integ *= (qy - b) * (qy - b) - (py - b) * (py - b);
-    return integ / 4;
+inline double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b) {
+    return ( (hx - a) * (hx - a) - (gx - a) * (gx - a)) * ((qy - b) * (qy - b) - (py - b) * (py - b)) / 4;
 }
 
-double integrate_triangle(double py, double qy, double alpha, double a, double b,
+inline double integrate_triangle(double py, double qy, double alpha, double a, double b,
         double beta) {
-    double tmp, integ;
-    tmp = (qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta);
-    tmp -= (py - alpha) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta);
-    integ = tmp / (3 * a);
-    tmp = (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta);
-    tmp -= (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta);
-    return integ - tmp / (12 * a * a);
+    return (((qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
+            - (py - alpha) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (3 * a)) - ((a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
+            - (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (12 * a * a);
 }
 
 double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
@@ -204,12 +197,12 @@ double integrate_chanel_slant_right(int tl, const dp_t& bv, const dp_t& uv,
     short m_i = 0;
     if (uv.x <= bv.x) {
         mv = uv;
-        m_i = next_i;
         rv = bv;
+        m_i = next_i;
     } else {
         mv = bv;
-        m_i = curr_i;
         rv = uv;
+        m_i = curr_i;
     }
 
     //   A. Under rectangle.
@@ -744,18 +737,40 @@ double solve(double* density) {
 
 inline void init(double b, double lb, double rb, double bb, double ub,
         double tau, int time_step_count, int ox_length, int oy_length) {
-    B = b; UB = ub; BB = bb; LB = lb; RB = rb; TAU = tau; TIME_STEP_CNT = time_step_count;
-    XY_LEN = (ox_length + 1) * (oy_length + 1); OX_LEN = ox_length; OY_LEN = oy_length;
-    OX = new double [ OX_LEN + 1 ]; OY = new double [ OY_LEN + 1 ];
+    B = b;
+    UB = ub;
+    BB = bb;
+    LB = lb;
+    RB = rb;
+    TAU = tau;
+    TIME_STEP_CNT = time_step_count;
+    XY_LEN = (ox_length + 1) * (oy_length + 1);
+    OX_LEN = ox_length;
+    OY_LEN = oy_length;
+    OX = new double [ OX_LEN + 1 ];
+    OY = new double [ OY_LEN + 1 ];
     for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
     for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
-    HX = OX[1] - OX[0]; HY = OY[1] - OY[0];
+    HX = OX[1] - OX[0];
+    HY = OY[1] - OY[0];
 }
 
 inline void clean() {
-    B = 0; UB = 0; BB = 0; LB = 0; RB = 0; TAU = 0;
-    OX_LEN = 0;  OY_LEN = 0; TIME_STEP_CNT = 0; TMP_WALL_CNT = 0;
-    XY_LEN = 0; HX = 0; HY = 0;  delete[] OX; delete[] OY;
+    B = 0;
+    UB = 0;
+    BB = 0;
+    LB = 0;
+    RB = 0;
+    TAU = 0;
+    OX_LEN = 0;
+    OY_LEN = 0;
+    TIME_STEP_CNT = 0;
+    TMP_WALL_CNT = 0;
+    XY_LEN = 0;
+    HX = 0;
+    HY = 0;
+    delete[] OX;
+    delete[] OY;
 }
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
