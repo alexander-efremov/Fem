@@ -11,8 +11,12 @@ struct dp_t {
 		return (i == 0) ? x : y;
 	}
 
-	dp_t(double x = 0, double y = 0)
+	dp_t(double x, double)
 		: x(x), y(y) {
+	}
+
+	dp_t()
+		: x(0), y(0) {
 	}
 
 	dp_t& operator=(const dp_t& p) {
@@ -42,14 +46,18 @@ struct dp_t {
 };
 
 struct ip_t {
-	short x;
-	short y;
+	int x;
+	int y;
 
-	double operator[](short i) {
+	double operator[](int i) {
 		return (i == 0) ? x : y;
 	}
 
-	ip_t(short x = 0, short y = 0)
+	ip_t()
+		: x(0), y(0) {
+	}
+
+	ip_t(int x, int y)
 		: x(x), y(y) {
 	}
 
@@ -66,25 +74,25 @@ struct ip_t {
 		return ip_t(p.x + x, p.y + y);
 	}
 
-	ip_t& operator+=(short a) {
+	ip_t& operator+=(int a) {
 		x += a;
 		y += a;
 		return *this;
 	}
 
-	ip_t& operator-=(short a) {
+	ip_t& operator-=(int a) {
 		x -= a;
 		y -= a;
 		return *this;
 	}
 
-	ip_t& operator-(short a) {
+	ip_t& operator-(int a) {
 		x -= a;
 		y -= a;
 		return *this;
 	}
 
-	ip_t& operator+(short a) {
+	ip_t& operator+(int a) {
 		x += a;
 		y += a;
 		return *this;
@@ -94,11 +102,11 @@ struct ip_t {
 		return (x == p.x && y == p.y);
 	}
 
-	short operator<(const ip_t& p) {
+	int operator<(const ip_t& p) {
 		return ((x < p.x) || ((x == p.x) && (y < p.y)));
 	}
 
-	short operator>(const ip_t& p) {
+	int operator>(const ip_t& p) {
 		return ((x > p.x) || ((x == p.x) && (y > p.y)));
 	}
 };
