@@ -394,7 +394,7 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 
 	// case B: не полный прямоугольник
 	if (is_rect_truncated)
-	{ // это значит, что прямоугольник занимает не всю ячейку  
+	{ 
 		hx = sx.x == sb.x ? b : (sx.y >= 0 ? OX[sx.y] : HX * sx.y);
 		gx = mv.x;
 		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, sx, sy);
@@ -404,9 +404,11 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 	ip_t ch_pos(sx.x + 1, sx.x + 2); //   - координаты канала
 	for (int j = sx.x + 1; j < sb.x + 1; j++)
 	{
-		hx = ch_pos.y <= 0 ? HX * ch_pos.y : hx = OX[ch_pos.y];
+		// TODO: РАСПРОСИТЬ САШУ ПРО ЭТОТ МОМЕНТ!!!!!!!!!!!
+		// ПОЧЕМУ ТАКОЕ ПАРАМЕТРЫ?
+		hx = ch_pos.y <= 0 ? HY * ch_pos.y : OY[ch_pos.y];
 		if (j == sb.x) hx = b;
-		gx = ch_pos.y <= 0 ? HX * ch_pos.x : OX[ch_pos.x];
+		gx = ch_pos.x <= 0 ? HX * ch_pos.x : OX[ch_pos.x];
 		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, ch_pos, sy);
 		ch_pos.x += 1;
 		ch_pos.y = ch_pos.x + 1;
@@ -461,10 +463,10 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 			// и в случае когда прошлись по всем точкам...
 			next_i = 0;
 			next = uv;
-			result += integrate_chanel_slant_left(curr, next, (uv.x <= bv.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
+			result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
 			break;
 		}
-		result += integrate_chanel_slant_left(curr, next, (uv.x <= bv.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
+		result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
 		switch (next_i)
 		{
 		case 1:
@@ -517,10 +519,10 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 		{
 			next = uv;
 			next_i = 0;
-			result += integrate_chanel_slant_right(curr, next, (uv.x <= bv.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
+			result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
 			break;
 		}
-		result += integrate_chanel_slant_right(curr, next, (uv.x <= bv.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
+		result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
 		switch (next_i)
 		{
 		case 1:
@@ -575,10 +577,10 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 		{
 			next_i = 0;
 			next = uv;
-			result += integrate_chanel_slant_left(curr, next, (uv.x <= bv.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
+			result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
 			break;
 		}
-		result += integrate_chanel_slant_left(curr, next, (uv.x <= bv.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
+		result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
 
 		switch (next_i)
 		{
@@ -634,10 +636,10 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 		{
 			next_i = 0;
 			next = uv;
-			result += integrate_chanel_slant_right(curr, next, (uv.x <= bv.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
+			result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
 			break;
 		}
-		result += integrate_chanel_slant_right(curr, next, (uv.x <= bv.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
+		result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
 		switch (next_i)
 		{
 		case 1:
