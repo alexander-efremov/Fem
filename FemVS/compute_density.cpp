@@ -209,45 +209,26 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	}
 
 	if (sx.y >= 0 && sy.y >= 0)
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.y]);
-	}
 	else
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.y);
-	}
-	tmp = tmp * INVERTED_HX_HY;
 	result = tmp * rho[0][0];
 	if (sx.x >= 0 && sy.y >= 0)
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.y]);
-	}
 	else
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.y);
-	}
-	tmp = tmp * INVERTED_HX_HY;
 	result -= tmp * rho[1][0];
 	if (sx.y >= 0 && sy.x >= 0)
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.x]);
-	}
 	else
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.x);
-	}
-	tmp = tmp * INVERTED_HX_HY;
 	result -= tmp * rho[0][1];
 	if (sx.x >= 0 && sy.x >= 0)
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.x]);
-	}
 	else
-	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.x);
-	}
-	tmp = tmp * INVERTED_HX_HY;
-	return result + tmp * rho[1][1];
+	result += tmp * rho[1][1];	
+	return result * INVERTED_HX_HY;
 }
 
 static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx,
@@ -516,10 +497,8 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 			next.y = bv.y + k * (next.x - bv.x);
 		}
 		if (next.x > (uv.x - FLT_MIN))
-		{
-			next = uv;
-			next_i = 0;
-			result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
+		{			
+			result += integrate_chanel_slant_right(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
 			break;
 		}
 		result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
@@ -575,9 +554,7 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 		}
 		if (next.x > (uv.x - FLT_MIN))
 		{
-			next_i = 0;
-			next = uv;
-			result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
+			result += integrate_chanel_slant_left(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 			break;
 		}
 		result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
