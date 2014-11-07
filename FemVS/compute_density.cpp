@@ -123,13 +123,7 @@ inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, c
 
 inline static double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta)
 {
-	dp_t alpha_to_beta;
-	dp_t alpha_to_theta;
-	alpha_to_beta.x = beta.x - alpha.x;
-	alpha_to_beta.y = beta.y - alpha.y;
-	alpha_to_theta.x = theta.x - alpha.x;
-	alpha_to_theta.y = theta.y - alpha.y;
-	return alpha_to_beta.x * alpha_to_theta.y - alpha_to_beta.y * alpha_to_theta.x;
+	return (beta.x - alpha.x) * (beta.y - alpha.y) - (theta.x - alpha.x) * (theta.y - alpha.y);
 }
 
 inline static double analytical_solution(double t, double x, double y)
