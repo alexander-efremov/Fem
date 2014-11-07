@@ -1,8 +1,6 @@
 #ifndef MISC_H
 #define	MISC_H
 
-static const double MIN_VALUE = 1.e-12;
-
 struct dp_t {
 	double x;
 	double y;

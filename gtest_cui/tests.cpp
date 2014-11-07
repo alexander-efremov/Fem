@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "common.h"
 #include "test_utils.h"
-//#include "LowOrdOper.h"
+#include "LowOrdOper.h"
 
 class cpu : public testing::Test
 {
@@ -24,8 +24,8 @@ protected:
 
 TEST_F(cpu, test_to_model)
 {
-	const int first = 0;
-	const int last = 2;
+	const int first = 3;
+	const int last = 4;
 	double norm_test = 0;
 	double norm_model = 0;
 	ComputeParameters* p = new ComputeParameters();
