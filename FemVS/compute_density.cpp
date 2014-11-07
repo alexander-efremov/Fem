@@ -308,17 +308,17 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv) {
 
 	//   -  Index of current square by Ox and Oy axes. 
 	ip_t sx, sy;
-	sx.x = static_cast<short> ((bv.x - FLT_MIN) / HX);
+	sx.x = static_cast<int> ((bv.x - FLT_MIN) / HX);
 	if (bv.x - FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY);
+	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY);
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
 
 	ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
 
 	double result = 0;
-	short curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i = 0;
 	dp_t curr = bv, next;
 	while (true) {
 		//TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
@@ -362,16 +362,16 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv) {
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
 
 	ip_t sx, sy;
-	sx.x = static_cast<short> ((bv.x + FLT_MIN) / HX);
+	sx.x = static_cast<int> ((bv.x + FLT_MIN) / HX);
 	if (bv.x + FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY);
+	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY);
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
 
 	ip_t ib(sx.x, sx.x + 1);
 	double result = 0;
-	short curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i = 0;
 	dp_t curr = bv, next;
 	while (true) {
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
@@ -412,18 +412,18 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv) {
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
 
 	ip_t sx, sy, ib;
-	sx.x = static_cast<short> ((bv.x + FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
+	sx.x = static_cast<int> ((bv.x + FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
 	if (bv.x + FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
+	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
-	ib.x = static_cast<short> ((uv.x - FLT_MIN) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+	ib.x = static_cast<int> ((uv.x - FLT_MIN) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
 	if (uv.x - FLT_MIN <= 0) ib.x -= 1;
 	ib.y = ib.x + 1;
 
 	double result = 0;
-	short curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i = 0;
 	dp_t curr = bv, next;
 	while (true) {
 		double slope = sy.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
@@ -465,18 +465,18 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv) {
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
 
 	ip_t sx, sy, ib;
-	sx.x = static_cast<short> ((bv.x - FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
+	sx.x = static_cast<int> ((bv.x - FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
 	if (bv.x - FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
+	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
-	ib.x = static_cast<short> ((uv.x + FLT_MIN) / HX);
+	ib.x = static_cast<int> ((uv.x + FLT_MIN) / HX);
 	if (uv.x + FLT_MIN <= 0) ib.x -= 1;
 	ib.y = ib.x + 1;
 
 	double result = 0;
-	short curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i = 0;
 	dp_t curr = bv, next;
 	while (true) {
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
