@@ -41,7 +41,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\aedam_000\Documents\Visual Studio 2013\Projects\FemVS;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\FemVS;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\aedam_000\Documents\Visual Studio 2013\Projects\FemVS;$(IncludePath)</IncludePath>
@@ -53,6 +53,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\FemVS</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -77,7 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="low_ord_oper.cpp" />
+    <ClCompile Include="compute_density.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />

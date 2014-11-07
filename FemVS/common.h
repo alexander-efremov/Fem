@@ -1,17 +1,12 @@
 ﻿#ifndef COMMON_H_INCLUDED
 #define COMMON_H_INCLUDED
 #include <stdio.h>
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <string.h>
 #include <algorithm>
 
-enum bound
-{
-	up,
-	bottom,
-	left,
-	right
-};
+#include <float.h>
 
 enum quad_type
 {
@@ -97,7 +92,6 @@ extern double* compute_density(
 	double time_step,
 	int time_step_count,
 	int ox_length,
-	int oy_length,
-	double* norm);
+	int oy_length);
 
 #endif

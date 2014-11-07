@@ -10,23 +10,25 @@ protected:
 
 	double* solve_internal(ComputeParameters* p)
 	{
-		return compute_density(p->b, p->lb, p->rb, p->bb,
-		                       p->ub, p->tau, p->t_count, p->x_size,
-		                       p->y_size, &p->norm);
+		double t = p->norm;
+		double *r = compute_density(p->b, p->lb, p->rb, p->bb,
+			p->ub, p->tau, p->t_count, p->x_size,
+			p->y_size);
+		return r;
 	}
 
 	double* get_model_result(ComputeParameters* p, int lvl)
 	{
 		return solByEqualVolWithVarStepPlusPrint1(p->a, p->b, p->lb, p->rb, p->bb,
-		                                          p->ub, p->tau, p->t_count, p->x_size,
-		                                          p->y_size, lvl, &p->norm);
+			p->ub, p->tau, p->t_count, p->x_size,
+			p->y_size, lvl);
 	}
 };
 
 TEST_F(cpu, test_to_model)
 {
 	const int first = 0;
-	const int last = 2;
+	const int last = 4;
 	double norm_test = 0;
 	double norm_model = 0;
 	ComputeParameters* p = new ComputeParameters();
@@ -44,12 +46,12 @@ TEST_F(cpu, test_to_model)
 		{
 			ASSERT_NEAR(model[i], data[i], 1e-12);
 		}
-		ASSERT_NEAR(norm_model, norm_test, 1e-12);
-		printf("norm test = %f\n", norm_test);
-		printf("norm model = %f\n", norm_model);
+		//ASSERT_NEAR(norm_model, norm_test, 1e-12);
+		//printf("norm test = %f\n", norm_test);
+		//printf("norm model = %f\n", norm_model);
 
-		delete[] data;
-		delete[] model;
+		delete [] data;
+		delete [] model;
 	}
 	delete p;
 }

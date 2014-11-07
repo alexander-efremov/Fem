@@ -52,7 +52,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\aedam_000\Documents\Visual Studio 2013\Projects\FemVS\FemVS;C:\Users\aedam_000\Documents\Visual Studio 2013\Projects\FemVS\gtest-1.7.0\include;C:\Users\aedam_000\Documents\Visual Studio 2013\Projects\FemVS\gtest-1.7.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\FemVS;$(SolutionDir)\gtest-1.7.0\include;$(SolutionDir)\FemVS\gtest-1.7.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
