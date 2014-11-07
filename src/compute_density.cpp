@@ -17,6 +17,8 @@ static int XY_LEN;
 static int TIME_STEP_CNT;
 static double HX;
 static double HY;
+static double *OX;
+static double *OY;
 
 double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
@@ -780,9 +782,9 @@ double solve(const double* ox, const double* oy, double* density) {
     return 0;
 }
 
-double* compute_density(double b, double lb, double rb, double bb, double ub,
-        double tau, int time_step_count, int ox_length, int oy_length,
-        double &norm) {
+inline void init(double b, double lb, double rb, double bb, double ub,
+        double tau, int time_step_count, int ox_length, int oy_length)
+{
     B = b;
     UB = ub;
     BB = bb;
@@ -793,20 +795,44 @@ double* compute_density(double b, double lb, double rb, double bb, double ub,
     OY_LEN = oy_length;
     TIME_STEP_CNT = time_step_count;
     XY_LEN = (ox_length + 1) * (oy_length + 1);
+    
+    OX = new double [ OX_LEN + 1 ];    
+    OY = new double [ OY_LEN + 1 ];
+    for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
+    for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
+    HX = OX[1] - OX[0];
+    HY = OY[1] - OY[0];
+}
+
+inline void clean()
+{
+    B = 0;
+    UB = 0;
+    BB = 0;
+    LB = 0;
+    RB = 0;
+    TAU = 0;
+    OX_LEN = 0;
+    OY_LEN = 0;
+    TIME_STEP_CNT = 0;
+    TMP_WALL_CNT = 0;
+    XY_LEN = 0;
+    HX = 0;
+    HY = 0;   
+    delete[] OX;
+    delete[] OY;    
+}
+
+double* compute_density(double b, double lb, double rb, double bb, double ub,
+        double tau, int time_step_count, int ox_length, int oy_length,
+        double &norm) {
+    
+    init(b,lb,rb,bb,ub,tau,time_step_count,ox_length,oy_length);
     double* density = new double [ XY_LEN ];
-    double* ox = new double [ OX_LEN + 1 ];
-    double* oy = new double [ OY_LEN + 1 ];
-    for (int i = 0; i <= OX_LEN; i++) ox[i] = lb + i * (rb - lb) / OX_LEN;
-    for (int i = 0; i <= OY_LEN; i++) oy[i] = bb + i * (ub - bb) / OY_LEN;
-    HX = oy[1] - oy[0];
-    HY = oy[1] - oy[0];
-
     print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
-    solve(ox, oy, density);
-    norm = get_norm_of_error(density, OX_LEN, OY_LEN, ox, oy, TIME_STEP_CNT * TAU);
-    printf("%d x %d wall count = %d\n", ox_length + 1, oy_length + 1, TMP_WALL_CNT);
-
-    delete[] ox;
-    delete[] oy;
+    solve(OX, OY, density);
+    norm = get_norm_of_error(density, OX_LEN, OY_LEN, OX, OY, TIME_STEP_CNT * TAU);
+    printf("%d x %d wall count = %d\n", OX_LEN + 1, OY_LEN + 1, TMP_WALL_CNT);
+    clean();
     return density;
 }
