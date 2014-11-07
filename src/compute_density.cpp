@@ -744,47 +744,23 @@ double solve(double* density) {
 
 inline void init(double b, double lb, double rb, double bb, double ub,
         double tau, int time_step_count, int ox_length, int oy_length) {
-    B = b;
-    UB = ub;
-    BB = bb;
-    LB = lb;
-    RB = rb;
-    TAU = tau;
-    OX_LEN = ox_length;
-    OY_LEN = oy_length;
-    TIME_STEP_CNT = time_step_count;
-    XY_LEN = (ox_length + 1) * (oy_length + 1);
-
-    OX = new double [ OX_LEN + 1 ];
-    OY = new double [ OY_LEN + 1 ];
+    B = b; UB = ub; BB = bb; LB = lb; RB = rb; TAU = tau; TIME_STEP_CNT = time_step_count;
+    XY_LEN = (ox_length + 1) * (oy_length + 1); OX_LEN = ox_length; OY_LEN = oy_length;
+    OX = new double [ OX_LEN + 1 ]; OY = new double [ OY_LEN + 1 ];
     for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
     for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
-    HX = OX[1] - OX[0];
-    HY = OY[1] - OY[0];
+    HX = OX[1] - OX[0]; HY = OY[1] - OY[0];
 }
 
 inline void clean() {
-    B = 0;
-    UB = 0;
-    BB = 0;
-    LB = 0;
-    RB = 0;
-    TAU = 0;
-    OX_LEN = 0;
-    OY_LEN = 0;
-    TIME_STEP_CNT = 0;
-    TMP_WALL_CNT = 0;
-    XY_LEN = 0;
-    HX = 0;
-    HY = 0;
-    delete[] OX;
-    delete[] OY;
+    B = 0; UB = 0; BB = 0; LB = 0; RB = 0; TAU = 0;
+    OX_LEN = 0;  OY_LEN = 0; TIME_STEP_CNT = 0; TMP_WALL_CNT = 0;
+    XY_LEN = 0; HX = 0; HY = 0;  delete[] OX; delete[] OY;
 }
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
         double tau, int time_step_count, int ox_length, int oy_length,
         double &norm) {
-
     init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
     double* density = new double [ XY_LEN ];
     print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);

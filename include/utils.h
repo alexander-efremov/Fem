@@ -9,13 +9,13 @@ inline void print_f_params(double x, double y, double arg_v,
     printf("y = %f\n", y);
     printf("arg_v = %f\n", arg_v);
     printf("rho = %f\n", rho);
-    printf("dRhoDT = %f\n", drho_dt);
-    printf("dRhoDX = %f\n", drho_dx);
-    printf("dRhoDY = %f\n", drho_dy);
+    printf("drho_dt = %f\n", drho_dt);
+    printf("drho_dx = %f\n", drho_dx);
+    printf("drho_dy = %f\n", drho_dy);
     printf("u = %f\n", u);
-    printf("duDX = %f\n", du_dx);
+    printf("du_dx = %f\n", du_dx);
     printf("v = %f\n", v);
-    printf("dvDY = %f\n", dv_dy);
+    printf("dv_dy = %f\n", dv_dy);
     printf("res = %f\n", res);
 }
 
