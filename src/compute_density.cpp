@@ -35,7 +35,7 @@ inline double func_u(double x, double y) {
 }
 
 inline double func_u(const dp_t &p) {
-    return func_u(p.x, p.y);    
+    return func_u(p.x, p.y);
 }
 
 inline double func_v(double t, double x, double y) {

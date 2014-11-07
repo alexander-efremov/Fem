@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <algorithm>
+#include <float.h>
 
 enum quad_type
 {
