@@ -21,6 +21,7 @@ static double *PREV_DENSITY;
 static int TL;
 static double TAU_TL;
 static double TAU_TL_1; // tau * (tl - 1)
+static double INVERTED_HX_HY;
 
 inline double analytical_solution(double t, double x, double y) {
 	return 1.1 + sin(t * x * y);
@@ -98,7 +99,7 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 	else {
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.y);
 	}
-	tmp = tmp / HX / HY;
+	tmp = tmp * INVERTED_HX_HY;
 	result = tmp * rho[0][0];
 	if (sx.x >= 0 && sy.y >= 0) {
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.y]);
@@ -106,7 +107,7 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 	else {
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.y);
 	}
-	tmp = tmp / HX / HY;
+	tmp = tmp * INVERTED_HX_HY;
 	result -= tmp * rho[1][0];
 	if (sx.y >= 0 && sy.x >= 0) {
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.x]);
@@ -114,7 +115,7 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 	else {
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.x);
 	}
-	tmp = tmp / HX / HY;
+	tmp = tmp  * INVERTED_HX_HY;
 	result -= tmp * rho[0][1];
 	if (sx.x >= 0 && sy.x >= 0) {
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.x]);
@@ -122,7 +123,7 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 	else {
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.x);
 	}
-	tmp = tmp / HX / HY;
+	tmp = tmp * INVERTED_HX_HY;
 	return result + tmp * rho[1][1];
 }
 
@@ -163,7 +164,7 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
 	}
 	tmp -= tmp_integral / 2;
-	result = tmp * rho[0][0] / HX / HY;
+	result = tmp * rho[0][0] * INVERTED_HX_HY;
 
 	//   2
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
@@ -176,7 +177,7 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
 	}
 	tmp += tmp_integral / 2;
-	result += tmp * rho[1][0] / HX / HY;
+	result += tmp * rho[1][0] * INVERTED_HX_HY;
 
 	//   3
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
@@ -189,7 +190,7 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
 	}
 	tmp += tmp_integral / 2;
-	result += tmp * rho[0][1] / HX / HY;
+	result += tmp * rho[0][1] * INVERTED_HX_HY;
 
 	//   4
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
@@ -202,7 +203,7 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
 	}
 	tmp -= tmp_integral / 2;
-	result += tmp * rho[1][1] / HX / HY;
+	result += tmp * rho[1][1] * INVERTED_HX_HY;
 	return result;
 }
 
@@ -756,7 +757,7 @@ void solve(double* density) {
 
 		for (int i = 1; i < OY_LEN; i++) {
 			for (int j = 1; j < OX_LEN; j++) {
-				density[(OX_LEN + 1) * i + j] = integrate(j, i) / HX / HY;
+				density[(OX_LEN + 1) * i + j] = integrate(j, i) * INVERTED_HX_HY;
 				density[(OX_LEN + 1) * i + j] += TAU * func_f(OX[j], OY[i]);
 			}
 		}
@@ -779,6 +780,7 @@ inline void init(double b, double lb, double rb, double bb, double ub,
 	OY_LEN = oy_length;
 	OX = new double[OX_LEN + 1];
 	OY = new double[OY_LEN + 1];
+	INVERTED_HX_HY = 0;
 	for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
 	for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
 	HX = OX[1] - OX[0];
@@ -800,6 +802,7 @@ inline void clean() {
 	XY_LEN = 0;
 	HX = 0;
 	HY = 0;
+	INVERTED_HX_HY = 1 / HX / HY;
 	TL = 0;
 	delete [] OX;
 	delete [] OY;
