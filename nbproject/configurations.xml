@@ -109,7 +109,7 @@
       <item path="tests/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
-    <conf name="Release" type="1">
+    <conf name="Release" type="3">
       <toolsSet>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
@@ -121,6 +121,9 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>include</pElem>
+          </incDir>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -128,6 +131,8 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <archiverTool>
+        </archiverTool>
       </compileType>
       <folder path="TestFiles/f1">
         <cTool>
@@ -139,11 +144,41 @@
         <ccTool>
           <incDir>
             <pElem>.</pElem>
-            <pElem>.</pElem>
+            <pElem>gtest-1.7.0</pElem>
+            <pElem>gtest-1.7.0/include</pElem>
+            <pElem>include</pElem>
+            <pElem>FemBase</pElem>
+            <pElem>test_inc</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
           <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="gtest"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="gtest"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgtest.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="FemBase"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="FemBase"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfembase.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+          </linkerLibItems>
         </linkerTool>
       </folder>
       <item path="include/common.h" ex="false" tool="3" flavor2="0">

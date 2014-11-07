@@ -74,12 +74,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgtest.a: ${OBJECTFILES}
 ${OBJECTDIR}/_ext/1804899502/gtest-all.o: ../gtest-1.7.0/src/gtest-all.cc 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1804899502
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest-all.o ../gtest-1.7.0/src/gtest-all.cc
+	$(COMPILE.cc) -O2 -I../gtest-1.7.0 -I../gtest-1.7.0/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest-all.o ../gtest-1.7.0/src/gtest-all.cc
 
 ${OBJECTDIR}/_ext/1804899502/gtest_main.o: ../gtest-1.7.0/src/gtest_main.cc 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1804899502
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest_main.o ../gtest-1.7.0/src/gtest_main.cc
+	$(COMPILE.cc) -O2 -I../gtest-1.7.0 -I../gtest-1.7.0/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest_main.o ../gtest-1.7.0/src/gtest_main.cc
 
 # Subprojects
 .build-subprojects:
@@ -99,7 +99,7 @@ ${OBJECTDIR}/_ext/1804899502/gtest-all_nomain.o: ${OBJECTDIR}/_ext/1804899502/gt
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest-all_nomain.o ../gtest-1.7.0/src/gtest-all.cc;\
+	    $(COMPILE.cc) -O2 -I../gtest-1.7.0 -I../gtest-1.7.0/include -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest-all_nomain.o ../gtest-1.7.0/src/gtest-all.cc;\
 	else  \
 	    ${CP} ${OBJECTDIR}/_ext/1804899502/gtest-all.o ${OBJECTDIR}/_ext/1804899502/gtest-all_nomain.o;\
 	fi
@@ -112,7 +112,7 @@ ${OBJECTDIR}/_ext/1804899502/gtest_main_nomain.o: ${OBJECTDIR}/_ext/1804899502/g
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest_main_nomain.o ../gtest-1.7.0/src/gtest_main.cc;\
+	    $(COMPILE.cc) -O2 -I../gtest-1.7.0 -I../gtest-1.7.0/include -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1804899502/gtest_main_nomain.o ../gtest-1.7.0/src/gtest_main.cc;\
 	else  \
 	    ${CP} ${OBJECTDIR}/_ext/1804899502/gtest_main.o ${OBJECTDIR}/_ext/1804899502/gtest_main_nomain.o;\
 	fi

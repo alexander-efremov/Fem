@@ -62,16 +62,18 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem.exe
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem.exe: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
+	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a ${OBJECTFILES} 
+	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
 
 ${OBJECTDIR}/src/compute_density.o: src/compute_density.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/compute_density.o src/compute_density.cpp
+	$(COMPILE.cc) -O2 -Iinclude -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/compute_density.o src/compute_density.cpp
 
 # Subprojects
 .build-subprojects:
@@ -80,13 +82,13 @@ ${OBJECTDIR}/src/compute_density.o: src/compute_density.cpp
 .build-tests-conf: .build-conf ${TESTFILES}
 ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/tests.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} 
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} gtest/dist/Debug/MinGW-Windows/libgtest.a FemBase/dist/Debug/MinGW-Windows/libfembase.a 
 
 
 ${TESTDIR}/tests/tests.o: tests/tests.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I. -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
+	$(COMPILE.cc) -O2 -Iinclude -I. -Igtest-1.7.0 -Igtest-1.7.0/include -Iinclude -IFemBase -Itest_inc -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/tests.o tests/tests.cpp
 
 
 ${OBJECTDIR}/src/compute_density_nomain.o: ${OBJECTDIR}/src/compute_density.o src/compute_density.cpp 
@@ -97,7 +99,7 @@ ${OBJECTDIR}/src/compute_density_nomain.o: ${OBJECTDIR}/src/compute_density.o sr
 	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
 	then  \
 	    ${RM} "$@.d";\
-	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/compute_density_nomain.o src/compute_density.cpp;\
+	    $(COMPILE.cc) -O2 -Iinclude -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/compute_density_nomain.o src/compute_density.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/compute_density.o ${OBJECTDIR}/src/compute_density_nomain.o;\
 	fi
@@ -114,7 +116,7 @@ ${OBJECTDIR}/src/compute_density_nomain.o: ${OBJECTDIR}/src/compute_density.o sr
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fem.exe
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libfem.a
 
 # Subprojects
 .clean-subprojects:

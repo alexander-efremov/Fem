@@ -17,11 +17,11 @@ CND_PACKAGE_PATH_Debug=dist/Debug/MinGW-Windows/package/Fem.tar
 # Release configuration
 CND_PLATFORM_Release=MinGW-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/MinGW-Windows
-CND_ARTIFACT_NAME_Release=fem
-CND_ARTIFACT_PATH_Release=dist/Release/MinGW-Windows/fem
+CND_ARTIFACT_NAME_Release=libfem.a
+CND_ARTIFACT_PATH_Release=dist/Release/MinGW-Windows/libfem.a
 CND_PACKAGE_DIR_Release=dist/Release/MinGW-Windows/package
-CND_PACKAGE_NAME_Release=fem.tar
-CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/fem.tar
+CND_PACKAGE_NAME_Release=Fem.tar
+CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/Fem.tar
 #
 # include compiler specific variables
 #
