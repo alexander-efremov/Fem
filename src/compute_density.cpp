@@ -3,7 +3,6 @@
 #include "utils.h"
 
 static int TMP_WALL_CNT = 0;
-static const double _PI = 3.14159265358979323846264338327;
 static const double _MINF = 1.e-14;
 static double B;
 static double UB;
@@ -33,7 +32,11 @@ inline double init_side(double x, double y, double t) {
 }
 
 inline double func_u(double x, double y) {
-    return B * y * (1 - y) * (_PI / 2 + atan(-x));
+    return B * y * (1 - y) * (M_PI_2 + atan(-x));
+}
+
+inline double func_u(const dp_t &p) {
+    return func_u(p.x, p.y);    
 }
 
 inline double func_v(double t, double x, double y) {
