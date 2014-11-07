@@ -40,7 +40,7 @@ inline double func_u(const dp_t &p) {
 }
 
 inline double func_v(double t, double x, double y) {
-	return atan((x - LB) * (x - RB) * (1 + t) / 10 * (y - UB) * (y - BB));
+	return atan((x - LB) * (x - RB) * (1 + t) * 0.1 * (y - UB) * (y - BB));
 }
 
 inline double func_v(double t, const dp_t &p) {
@@ -48,7 +48,7 @@ inline double func_v(double t, const dp_t &p) {
 }
 
 inline double func_f(double x, double y) {
-	double arg_v = (x - LB) * (x - RB) * (1 + TAU_TL) / 10 * (y - UB) * (y - BB);
+	double arg_v = (x - LB) * (x - RB) * (1 + TAU_TL) * 0.1 * (y - UB) * (y - BB);
 	double rho = analytical_solution(TAU_TL, x, y);
 	double drho_dt = x * y * cos(TAU_TL * x * y);
 	double drho_dx = TAU_TL * y * cos(TAU_TL * x * y);
@@ -56,7 +56,7 @@ inline double func_f(double x, double y) {
 	double u = func_u(x, y);
 	double v = func_v(TAU_TL, x, y);
 	double du_dx = -B * y * (1 - y) / (1 + x * x);
-	double dv_dx = (x - LB) * (x - RB) * (1 + TAU_TL) / 10 * (y - BB + y - UB);
+	double dv_dx = (x - LB) * (x - RB) * (1 + TAU_TL) * 0.1 * (y - BB + y - UB);
 	dv_dx /= (1 + arg_v * arg_v);
 	double res = drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
 	// print_f_params()...
@@ -64,7 +64,7 @@ inline double func_f(double x, double y) {
 }
 
 inline double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b) {
-	return ((hx - a) * (hx - a) - (gx - a) * (gx - a)) * ((qy - b) * (qy - b) - (py - b) * (py - b)) / 4;
+	return ((hx - a) * (hx - a) - (gx - a) * (gx - a)) * ((qy - b) * (qy - b) - (py - b) * (py - b)) * 0.25;
 }
 
 inline double integrate_triangle(double py, double qy, double alpha, double a, double b,
@@ -156,53 +156,53 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 	//   1
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
 	if (sx.y >= 0 && sy.y >= 0) {
-		tmp *= (hx - OX[sx.y]) * (hx - OX[sx.y]) / 4;
+		tmp *= (hx - OX[sx.y]) * (hx - OX[sx.y]) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.y], a_sl, b_sl, OX[sx.y]);
 	}
 	else {
-		tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
+		tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
 	}
-	tmp -= tmp_integral / 2;
+	tmp -= tmp_integral * 0.5;
 	result = tmp * rho[0][0] * INVERTED_HX_HY;
 
 	//   2
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
 	if (sx.x >= 0 && sy.y >= 0) {
-		tmp *= -1 * (hx - OX[sx.x]) * (hx - OX[sx.x]) / 4;
+		tmp *= -1 * (hx - OX[sx.x]) * (hx - OX[sx.x]) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.y], a_sl, b_sl, OX[sx.x]);
 	}
 	else {
-		tmp *= -1 * (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
+		tmp *= -1 * (hx - HX * sx.x) * (hx - HX * sx.x) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
 	}
-	tmp += tmp_integral / 2;
+	tmp += tmp_integral * 0.5;
 	result += tmp * rho[1][0] * INVERTED_HX_HY;
 
 	//   3
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
 	if (sx.y >= 0 && sy.x >= 0) {
-		tmp *= -1 * (hx - OX[sx.y]) * (hx - OX[sx.y]) / 4;
+		tmp *= -1 * (hx - OX[sx.y]) * (hx - OX[sx.y]) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.x], a_sl, b_sl, OX[sx.y]);
 	}
 	else {
-		tmp *= -1 * (hx - HX * sx.y) * (hx - HX * sx.y) / 4;
+		tmp *= -1 * (hx - HX * sx.y) * (hx - HX * sx.y) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
 	}
-	tmp += tmp_integral / 2;
+	tmp += tmp_integral * 0.5;
 	result += tmp * rho[0][1] * INVERTED_HX_HY;
 
 	//   4
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
 	if (sx.x >= 0 && sy.x >= 0) {
-		tmp *= (hx - OX[sx.x]) * (hx - OX[sx.x]) / 4;
+		tmp *= (hx - OX[sx.x]) * (hx - OX[sx.x]) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.x], a_sl, b_sl, OX[sx.x]);
 	}
 	else {
-		tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) / 4;
+		tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
 	}
-	tmp -= tmp_integral / 2;
+	tmp -= tmp_integral * 0.5;
 	result += tmp * rho[1][1] * INVERTED_HX_HY;
 	return result;
 }
@@ -590,41 +590,41 @@ quad_type get_coordinates_on_prev_layer(int ix, int iy,
 	//  OX:
 	if (ix == 0) {
 		alpha.x = OX[ix];
-		beta.x = (OX[ix] + OX[ix + 1]) / 2;
-		gamma.x = (OX[ix] + OX[ix + 1]) / 2;
+		beta.x = (OX[ix] + OX[ix + 1]) * 0.5;
+		gamma.x = (OX[ix] + OX[ix + 1]) * 0.5;
 		theta.x = OX[ix];
 	}
 	else if (ix == OX_LEN) {
-		alpha.x = (OX[ix - 1] + OX[ix]) / 2;
+		alpha.x = (OX[ix - 1] + OX[ix]) * 0.5;
 		beta.x = OX[ix];
 		gamma.x = OX[ix];
-		theta.x = (OX[ix - 1] + OX[ix]) / 2;
+		theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
 	}
 	else {
-		alpha.x = (OX[ix - 1] + OX[ix]) / 2;
-		beta.x = (OX[ix + 1] + OX[ix]) / 2;
-		gamma.x = (OX[ix + 1] + OX[ix]) / 2;
-		theta.x = (OX[ix - 1] + OX[ix]) / 2;
+		alpha.x = (OX[ix - 1] + OX[ix]) * 0.5;
+		beta.x = (OX[ix + 1] + OX[ix]) * 0.5;
+		gamma.x = (OX[ix + 1] + OX[ix]) * 0.5;
+		theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
 	}
 
 	//  OY:
 	if (iy == 0) {
 		alpha.y = OY[iy];
 		beta.y = OY[iy];
-		gamma.y = (OY[iy] + OY[iy + 1]) / 2;
-		theta.y = (OY[iy] + OY[iy + 1]) / 2;
+		gamma.y = (OY[iy] + OY[iy + 1]) * 0.5;
+		theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
 	}
 	else if (iy == OY_LEN) {
-		alpha.y = (OY[iy] + OY[iy - 1]) / 2;
-		beta.y = (OY[iy] + OY[iy - 1]) / 2;
+		alpha.y = (OY[iy] + OY[iy - 1]) * 0.5;
+		beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
 		gamma.y = OY[iy];
 		theta.y = OY[iy];
 	}
 	else {
-		alpha.y = (OY[iy] + OY[iy - 1]) / 2;
-		beta.y = (OY[iy] + OY[iy - 1]) / 2;
-		gamma.y = (OY[iy] + OY[iy + 1]) / 2;
-		theta.y = (OY[iy] + OY[iy + 1]) / 2;
+		alpha.y = (OY[iy] + OY[iy - 1]) * 0.5;
+		beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
+		gamma.y = (OY[iy] + OY[iy + 1]) * 0.5;
+		theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
 	}
 
 	double u, v;
