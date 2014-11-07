@@ -27,8 +27,8 @@ protected:
 
 TEST_F(cpu, test_to_model)
 {
-	const int first = 4;
-	const int last = 5;
+	const int first = 0;
+	const int last = 3;
 	double norm_test = 0;
 	double norm_model = 0;
 	ComputeParameters* p = new ComputeParameters();

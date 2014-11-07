@@ -169,11 +169,11 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 	//   2
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
 	if (sx.x >= 0 && sy.y >= 0) {
-		tmp *= -1 * (hx - OX[sx.x]) * (hx - OX[sx.x]) * 0.25;
+		tmp *= (hx - OX[sx.x]) * (hx - OX[sx.x]) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.y], a_sl, b_sl, OX[sx.x]);
 	}
 	else {
-		tmp *= -1 * (hx - HX * sx.x) * (hx - HX * sx.x) * 0.25;
+		tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
 	}
 	tmp += tmp_integral * 0.5;
@@ -182,11 +182,11 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 	//   3
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
 	if (sx.y >= 0 && sy.x >= 0) {
-		tmp *= -1 * (hx - OX[sx.y]) * (hx - OX[sx.y]) * 0.25;
+		tmp *= (hx - OX[sx.y]) * (hx - OX[sx.y]) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.x], a_sl, b_sl, OX[sx.y]);
 	}
 	else {
-		tmp *= -1 * (hx - HX * sx.y) * (hx - HX * sx.y) * 0.25;
+		tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
 	}
 	tmp += tmp_integral * 0.5;
