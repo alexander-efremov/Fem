@@ -11,8 +11,12 @@ struct dp_t {
         return (i == 0) ? x : y;
     }
 
-    dp_t(double x = 0, double y = 0)
+    dp_t(double x, double y)
     : x(x), y(y) {
+    }
+    
+     dp_t()
+    : x(0), y(0) {
     }
 
     dp_t& operator=(const dp_t& p) {
@@ -48,9 +52,13 @@ struct ip_t {
     double operator[](int i) {
         return (i == 0) ? x : y;
     }
-
-    ip_t(int x = 0, int y = 0)
+    
+    ip_t(int x, int y)
     : x(x), y(y) {
+    }
+
+    ip_t()
+    : x(0), y(0) {
     }
 
     ip_t& operator=(const ip_t& p) {
