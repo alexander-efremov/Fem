@@ -3,7 +3,6 @@
 #include "utils.h"
 
 static int TMP_WALL_CNT = 0;
-static const double _MINF = 1.e-14;
 static double B;
 static double UB;
 static double BB;
@@ -120,9 +119,9 @@ double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 
 double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double hx,
         const ip_t &sx, const ip_t &sy) {
-    if (fabs(bv.y - uv.y) <= _MINF) return 0;
+    if (fabs(bv.y - uv.y) <= FLT_MIN) return 0;
     double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
-    if (fabs(a_sl) <= _MINF) return 0;
+    if (fabs(a_sl) <= FLT_MIN) return 0;
     double b_sl = uv.x - a_sl * uv.y;
 
     double result, tmp, tmp_integral;
@@ -196,7 +195,7 @@ double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double h
 double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
         short curr_i, short next_i, const ip_t &sx, double b, const ip_t &sb,
         const ip_t &sy) {
-    if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
+    if (fabs(uv.y - bv.y) <= FLT_MIN) return fabs(uv.y - bv.y);
 
     double result = 0, gx = 0, hx = 0;
     dp_t mv, rv;
@@ -247,7 +246,7 @@ double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
         short curr_i, short next_i, const ip_t &sx, const ip_t &sy,
         double b, const ip_t &sb) {
-    if (fabs(uv.y - bv.y) <= _MINF) return fabs(uv.y - bv.y);
+    if (fabs(uv.y - bv.y) <= FLT_MIN) return fabs(uv.y - bv.y);
 
     dp_t lv, mv; //   -  Left and middle vertices.
     short m_i = 0; //   -  Where middle vertex is.        
@@ -298,11 +297,11 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv) {
 
     //   -  Index of current square by Ox and Oy axes. 
     ip_t sx, sy;
-    sx.x = static_cast<short> ((bv.x - _MINF) / HX);
-    if (bv.x - _MINF <= 0) sx.x -= 1;
+    sx.x = static_cast<short> ((bv.x - FLT_MIN) / HX);
+    if (bv.x - FLT_MIN <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MINF) / HY);
-    if (bv.y + _MINF <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY);
+    if (bv.y + FLT_MIN <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
     ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
@@ -323,7 +322,7 @@ double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv) {
             next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
             next.y = curr.y - k * (next.x - curr.x);
         }
-        if (next.x < (uv.x + _MINF)) {
+        if (next.x < (uv.x + FLT_MIN)) {
             // сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
             // и в случае когда прошлись по всем точкам...
             next_i = 0;
@@ -351,11 +350,11 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv) {
     if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy;
-    sx.x = static_cast<short> ((bv.x + _MINF) / HX);
-    if (bv.x + _MINF <= 0) sx.x -= 1;
+    sx.x = static_cast<short> ((bv.x + FLT_MIN) / HX);
+    if (bv.x + FLT_MIN <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MINF) / HY);
-    if (bv.y + _MINF <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY);
+    if (bv.y + FLT_MIN <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
     ip_t ib(sx.x, ib.x + 1);
@@ -374,7 +373,7 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv) {
             next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
             next.y = bv.y + k * (next.x - bv.x);
         }
-        if (next.x > (uv.x - _MINF)) {
+        if (next.x > (uv.x - FLT_MIN)) {
             next = uv;
             next_i = 0;
             result += integrate_chanel_slant_right(curr, next, curr_i, next_i, sx, bv.x, ib, sy);
@@ -400,14 +399,14 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv) {
     if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy, ib;
-    sx.x = static_cast<short> ((bv.x + _MINF) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
-    if (bv.x + _MINF <= 0) sx.x -= 1;
+    sx.x = static_cast<short> ((bv.x + FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
+    if (bv.x + FLT_MIN <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MINF) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
-    if (bv.y + _MINF <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
+    if (bv.y + FLT_MIN <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
-    ib.x = static_cast<short> ((uv.x - _MINF) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
-    if (uv.x - _MINF <= 0) ib.x -= 1;
+    ib.x = static_cast<short> ((uv.x - FLT_MIN) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+    if (uv.x - FLT_MIN <= 0) ib.x -= 1;
     ib.y = ib.x + 1;
 
     double result = 0.;
@@ -425,7 +424,7 @@ double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv) {
             next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
             next.y = bv.y + k * (next.x - bv.x);
         }
-        if (next.x > (uv.x - _MINF)) {
+        if (next.x > (uv.x - FLT_MIN)) {
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_left(curr, next, curr_i, next_i, sx, sy, uv.x, ib);
@@ -452,14 +451,14 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv) {
     if (!try_get_slope_ratio(bv, uv, k)) return k;
 
     ip_t sx, sy, ib;
-    sx.x = static_cast<short> ((bv.x - _MINF) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
-    if (bv.x - _MINF <= 0) sx.x -= 1;
+    sx.x = static_cast<short> ((bv.x - FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
+    if (bv.x - FLT_MIN <= 0) sx.x -= 1;
     sx.y = sx.x + 1;
-    sy.x = static_cast<short> ((bv.y + _MINF) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
-    if (bv.y + _MINF <= 0) sy.x -= 1;
+    sy.x = static_cast<short> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
+    if (bv.y + FLT_MIN <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
-    ib.x = static_cast<short> ((uv.x + _MINF) / HX);
-    if (uv.x + _MINF <= 0) ib.x -= 1;
+    ib.x = static_cast<short> ((uv.x + FLT_MIN) / HX);
+    if (uv.x + FLT_MIN <= 0) ib.x -= 1;
     ib.y = ib.x + 1;
 
     double result = 0.;
@@ -477,7 +476,7 @@ double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv) {
             next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
             next.y = bv.y - k * (next.x - bv.x);
         }
-        if (next.x < uv.x + _MINF) {
+        if (next.x < uv.x + FLT_MIN) {
             next_i = 0;
             next = uv;
             result += integrate_chanel_slant_right(curr, next, curr_i, next_i, sx, uv.x, ib, sy);
@@ -543,7 +542,7 @@ double integrate_uniform_triangle_wall(const dp_t& a, const dp_t& b, const dp_t&
 double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z) {
     //   a * x  +  b * y  = c.
     double a = z.y - x.y;
-    if (fabs(a) < _MINF) return _MINF;
+    if (fabs(a) < FLT_MIN) return FLT_MIN;
     double b = x.x - z.x;
     double c = b * x.y + a * x.x;
     dp_t ip((c - b * y.y) / a, y.y);
