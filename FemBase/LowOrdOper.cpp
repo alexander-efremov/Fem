@@ -282,42 +282,42 @@ bool solByEqualVolumes(
 
             //   Solution visualization.
 
-            bul = printSurface_asV(
-                                   "rho", //   -  char *fileName,
-                                   //
-                                   numOfOXSt, //   -  Number of OX steps. Grid parameter.
-                                   iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
-                                   numOfSolOrd, //   -  Solution order which we want to print.
-                                   //
-                                   numOfTSt, //   -  A number of time steps.
-                                   //
-                                   masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-                                   numOfOXSt, //   -  Number of OX steps.
-                                   //
-                                   masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-                                   numOfOYSt, //   -  Number of OY steps.
-                                   //
-                                   rhoInCurrTL_asV); //   -  Matrix of data.
-
-            //   Error visualization.
-
-            bul = printSurface_asV(
-                                   "rhoErr", //   -  char *fileName,
-                                   //
-                                   numOfOXSt, //   -  Number of OX steps. Grid parameter.
-                                   iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
-                                   numOfSolOrd, //   -  Solution order which we want to print.
-                                   //
-                                   numOfTSt, //   -  A number of time steps.
-                                   //
-                                   masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
-                                   numOfOXSt, //   -  Number of OX steps.
-                                   //
-                                   masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
-                                   numOfOYSt, //   -  Number of OY steps.
-                                   //
-                                   rhoInPrevTL_asV); //   -  Matrix of data. We use "rhoInPrevTSt" as absolute error.
-
+//            bul = printSurface_asV(
+//                                   "rho", //   -  char *fileName,
+//                                   //
+//                                   numOfOXSt, //   -  Number of OX steps. Grid parameter.
+//                                   iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
+//                                   numOfSolOrd, //   -  Solution order which we want to print.
+//                                   //
+//                                   numOfTSt, //   -  A number of time steps.
+//                                   //
+//                                   masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
+//                                   numOfOXSt, //   -  Number of OX steps.
+//                                   //
+//                                   masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
+//                                   numOfOYSt, //   -  Number of OY steps.
+//                                   //
+//                                   rhoInCurrTL_asV); //   -  Matrix of data.
+//
+//            //   Error visualization.
+//
+//            bul = printSurface_asV(
+//                                   "rhoErr", //   -  char *fileName,
+//                                   //
+//                                   numOfOXSt, //   -  Number of OX steps. Grid parameter.
+//                                   iCurrTL, //   -  Index of current time layer IN WHICH we printing solution.
+//                                   numOfSolOrd, //   -  Solution order which we want to print.
+//                                   //
+//                                   numOfTSt, //   -  A number of time steps.
+//                                   //
+//                                   masOX, //   -  Massive of OX points. Dimension = numOfOXSt +1.
+//                                   numOfOXSt, //   -  Number of OX steps.
+//                                   //
+//                                   masOY, //   -  Massive of OY points. Dimension = numOfOYSt +1.
+//                                   numOfOYSt, //   -  Number of OY steps.
+//                                   //
+//                                   rhoInPrevTL_asV); //   -  Matrix of data. We use "rhoInPrevTSt" as absolute error.
+//
 
             //   Error item.
 
@@ -761,18 +761,18 @@ double* solByEqualVolWithVarStepPlusPrint(
     {
         //   Let's write data to file.
 
-        bul = printVectorBy3D(
-                              "ordOfRhoErr", //   -  char *fileName,
-                              //
-                              numOfOXSt, //   -  �������������� �����.
-                              numOfGrStepLayer, //   -  � �������� �����.
-                              1. / 3., //   -  ��������� ���� �� ������� � ���� �� ������������.
-                              numOfGrStepLayer, //   -  ����� ����� ����� �� ����.
-                              //
-                              masOfGrStepItem, //   -  double *masOx,
-                              ordOfErr, //   -  double *VectorOfData,
-                              //
-                              numOfGrStepLayer - 1); //   -  dimOfVect.
+//        bul = printVectorBy3D(
+//                              "ordOfRhoErr", //   -  char *fileName,
+//                              //
+//                              numOfOXSt, //   -  �������������� �����.
+//                              numOfGrStepLayer, //   -  � �������� �����.
+//                              1. / 3., //   -  ��������� ���� �� ������� � ���� �� ������������.
+//                              numOfGrStepLayer, //   -  ����� ����� ����� �� ����.
+//                              //
+//                              masOfGrStepItem, //   -  double *masOx,
+//                              ordOfErr, //   -  double *VectorOfData,
+//                              //
+//                              numOfGrStepLayer - 1); //   -  dimOfVect.
     }
 
     if (isGridStShBeChan == false)

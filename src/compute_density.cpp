@@ -361,7 +361,7 @@ double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv) {
     if (bv.y + FLT_MIN <= 0) sy.x -= 1;
     sy.y = sy.x + 1;
 
-    ip_t ib(sx.x, ib.x + 1);
+    ip_t ib(sx.x, sx.x + 1);
     double result = 0;
     short curr_i = 0, next_i = 0;
     dp_t curr = bv, next;
@@ -634,20 +634,13 @@ quad_type get_coordinates_on_prev_layer(int ix, int iy,
     if (product < 0) return pseudo;
 
     // значит что точка улетела за левую границу
-    if (theta.x < 0 ||
-            theta.y < 0 ||
-            beta.x < 0 ||
-            beta.y < 0 ||
-            gamma.x < 0 ||
-            gamma.y < 0 ||
-            alpha.x < 0 ||
-            alpha.y < 0) {
+    if (theta.x < 0 ||  theta.y < 0 || beta.x < 0 || beta.y < 0 || gamma.x < 0 ||
+            gamma.y < 0 || alpha.x < 0 || alpha.y < 0) {
         return normal;
         //return wall;
     }
     return normal;
 }
-
 
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
@@ -714,9 +707,9 @@ double get_norm_of_error(double* density, double ts_count_mul_steps) {
 
 void solve(double* density) {
     PREV_DENSITY = new double [ XY_LEN ];
-    for (int iy = 0; iy < OY_LEN + 1; iy++) {
-        for (int ix = 0; ix < OX_LEN + 1; ix++) {
-            PREV_DENSITY[(OX_LEN + 1) * iy + ix] = analytical_solution(0, OX[ix], OY[iy]);
+    for (int j = 0; j < OY_LEN + 1; j++) {
+        for (int i = 0; i < OX_LEN + 1; i++) {
+            PREV_DENSITY[(OX_LEN + 1) * j + i] = analytical_solution(0, OX[i], OY[j]);
         }
     }
 
@@ -741,7 +734,6 @@ void solve(double* density) {
         }
         memcpy(PREV_DENSITY, density, XY_LEN * sizeof (double));
     }
-
     delete[] PREV_DENSITY;
 }
 
