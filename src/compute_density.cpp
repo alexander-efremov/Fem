@@ -22,7 +22,7 @@ static double *OY;
 static double *PREV_DENSITY;
 static int TL;
 static double TAU_TL;
-static double TAU_TL_1;  // tau * (tl - 1)
+static double TAU_TL_1; // tau * (tl - 1)
 
 inline double analytical_solution(double t, double x, double y) {
     return 1.1 + sin(t * x * y);
@@ -714,9 +714,9 @@ void solve(double* density) {
         }
     }
 
-    for (TL = 1; TL <= TIME_STEP_CNT; TL++) {        
+    for (TL = 1; TL <= TIME_STEP_CNT; TL++) {
         TAU_TL = TAU * TL;
-        TAU_TL_1 = TAU * (TL-1);
+        TAU_TL_1 = TAU * (TL - 1);
         for (int i = 0; i <= OX_LEN; i++) {
             density[i] = init_side(OX[i], BB, TAU_TL);
             density[(OX_LEN + 1) * OY_LEN + i] = init_side(OX[i], UB, TAU_TL);
@@ -733,7 +733,7 @@ void solve(double* density) {
                 density[(OX_LEN + 1) * i + j] += TAU * func_f(OX[j], OY[i]);
             }
         }
-        memcpy(PREV_DENSITY, density, (OX_LEN + 1) * (OY_LEN + 1) * sizeof (double));
+        memcpy(PREV_DENSITY, density, XY_LEN * sizeof (double));
     }
 
     delete[] PREV_DENSITY;
@@ -746,7 +746,7 @@ inline void init(double b, double lb, double rb, double bb, double ub,
     BB = bb;
     LB = lb;
     RB = rb;
-    TAU = tau;    
+    TAU = tau;
     TIME_STEP_CNT = time_step_count;
     XY_LEN = (ox_length + 1) * (oy_length + 1);
     OX_LEN = ox_length;
@@ -774,7 +774,7 @@ inline void clean() {
     XY_LEN = 0;
     HX = 0;
     HY = 0;
-    TL = 0;    
+    TL = 0;
     delete[] OX;
     delete[] OY;
 }
