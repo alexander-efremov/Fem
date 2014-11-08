@@ -312,15 +312,13 @@ double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 
 	double result = 0, gx = 0, hx = 0;
 	dp_t mv, rv;
-	int m_i = 0;
+	int m_i;
 	if (uv.x <= bv.x) {
 		mv = uv;
-		rv = bv;
 		m_i = next_i;
 	}
 	else {
 		mv = bv;
-		rv = uv;
 		m_i = curr_i;
 	}
 
@@ -368,12 +366,10 @@ double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 
 	// зачем то определили среднюю точку
 	if (uv.x <= bv.x) {
-		lv = uv;
 		mv = bv;
 		m_i = curr_i;
 	}
 	else {
-		lv = bv;
 		mv = uv;
 		m_i = next_i;
 	}
@@ -866,12 +862,12 @@ void solve(double* density) {
 
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
-	double tau, int time_step_count, int ox_length, int oy_length) {
+	double tau, int time_step_count, int ox_length, int oy_length, double &norm) {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	solve(density);
-//	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	printf("%d x %d wall count = %d\n", OX_LEN + 1, OY_LEN + 1, TMP_WALL_CNT);
 	clean();
 	return density;

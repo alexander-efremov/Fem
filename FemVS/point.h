@@ -1,5 +1,5 @@
-#ifndef MISC_H
-#define	MISC_H
+#ifndef POINT_H
+#define	POINT_H
 
 static const double MIN_VALUE = 1.e-12;
 
@@ -111,4 +111,4 @@ struct ip_t {
 	}
 };
 
-#endif /* MISC_H */
+#endif /* POINT_H */
