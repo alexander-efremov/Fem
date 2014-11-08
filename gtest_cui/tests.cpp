@@ -24,7 +24,7 @@ protected:
 
 TEST_F(cpu, test_to_model)
 {
-	int first = 0, last = 3;	
+	int first = 0, last = 3;
 	double norm_test, norm_model;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
@@ -34,10 +34,12 @@ TEST_F(cpu, test_to_model)
 		double norm_test = p.norm;
 		double* model = get_model_result(p, lvl);
 		double norm_model = p.norm;
-		for (int i = 0; i < p.get_size(); i++)
-		{
-	//		ASSERT_NEAR(model[i], data[i], 1e-12);
-		}
+
+		if (lvl < 3)
+			for (int i = 0; i < p.get_size(); i++)
+			{
+				ASSERT_NEAR(model[i], data[i], 1e-12);
+			}
 		printf("model norm = %f\n", norm_model);
 		printf("test norm = %f\n", norm_test);
 		ASSERT_NEAR(norm_model, norm_test, 1e-12);

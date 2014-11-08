@@ -2,6 +2,18 @@
 #include "point.h"
 #include "utils.h"
 
+#ifdef __GNUC__
+#define __pure
+//#define __pure __attribute__((const))
+/*почему то на GCC не работает и ломает результаты расчета*/
+#elif __INTEL_COMPILER
+#define __pure __declspec(const)
+#elif __NVCC__
+#define __pure
+#else
+#define __pure 
+#endif
+
 static double B;
 static double UB;
 static double BB;
@@ -23,7 +35,7 @@ static double TAU_TL;
 static double TAU_TL_1; // tau * (tl - 1)
 static double INVERTED_HX_HY;
 
-inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z)
+__pure inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z)
 {
 	if (x.y < y.y)
 	{
@@ -40,7 +52,7 @@ inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z)
 	if (z.y < y.y) std::swap(y, z);
 }
 
-inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& value)
+__pure inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& value)
 {
 	if (fabs(bv.x - uv.x) < MIN_VALUE)
 	{
@@ -54,7 +66,7 @@ inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& v
 	return true;
 }
 
-inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta)
+__pure inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta)
 {	
 	double a1 = gamma.y - alpha.y;
 	double b1 = -(gamma.x - alpha.x);
@@ -65,45 +77,45 @@ inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, c
 	return dp_t((b1 * c2 - b2 * c1) / (b1 * a2 - b2 * a1), (a1 * c2 - a2 * c1) / (-b1 * a2 + b2 * a1));
 }
 
-inline static double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta)
+__pure inline static double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta)
 {
 	return (beta.x - alpha.x) * (theta.y - alpha.y) - (beta.y - alpha.y) * (theta.x - alpha.x);
 }
 
-inline static double analytical_solution(double t, double x, double y)
+__pure inline static double analytical_solution(double t, double x, double y)
 {
 	return 1.1 + sin(t * x * y);
 }
 
-inline static double func_u(double b, double x, double y)
+__pure inline static double func_u(double b, double x, double y)
 {
 	return b * y * (1 - y) * (M_PI_2 + atan(-x));
 }
 
-inline static double func_u(double b, const dp_t& p)
+__pure inline static double func_u(double b, const dp_t& p)
 {
 	return func_u(b, p.x, p.y);
 }
 
-inline static double func_v(double t, double x, double y)
+__pure inline static double func_v(double ub, double bb, double lb, double rb, double t, double x, double y)
 {
-	return atan((x - LB) * (x - RB) * (1 + t) * 0.1 * (y - UB) * (y - BB));
+	return atan((x - lb) * (x - rb) * (1 + t) * 0.1 * (y - ub) * (y - bb));
 }
 
-inline static double func_v(double t, const dp_t& p)
+__pure inline static double func_v(double ub, double bb, double lb, double rb, double t, const dp_t& p)
 {
-	return func_v(t, p.x, p.y);
+	return func_v( ub,  bb,  lb,  rb, t, p.x, p.y);
 }
 
-inline static double func_f(double x, double y)
+inline static double func_f(double b, double tau_tl, double ub, double bb, double lb, double rb, double x, double y)
 {
-	double arg_v = (x - LB) * (x - RB) * (1 + TAU_TL) * 0.1 * (y - UB) * (y - BB);
-	double rho = analytical_solution(TAU_TL, x, y);
-	double drho_dt = x * y * cos(TAU_TL * x * y);
-	double drho_dx = TAU_TL * y * cos(TAU_TL * x * y);
-	double dtho_dy = TAU_TL * x * cos(TAU_TL * x * y);
-	double u = func_u(B, x, y);
-	double v = func_v(TAU_TL, x, y);
+	double arg_v = (x - lb) * (x - rb) * (1 + tau_tl) * 0.1 * (y - ub) * (y - bb);
+	double rho = analytical_solution(tau_tl, x, y);
+	double drho_dt = x * y * cos(tau_tl * x * y);
+	double drho_dx = tau_tl * y * cos(tau_tl * x * y);
+	double dtho_dy = tau_tl * x * cos(tau_tl * x * y);
+	double u = func_u(b, x, y);
+	double v = func_v(ub, bb, lb, rb, tau_tl, x, y);
 	double du_dx = -B * y * (1 - y) / (1 + x * x);
 	double dv_dx = (x - LB) * (x - RB) * (1 + TAU_TL) / 10 * (y - BB + y - UB);
 	dv_dx /= (1 + arg_v * arg_v);
@@ -697,22 +709,22 @@ static quad_type get_coordinates_on_prev_layer(int ix, int iy,
 
 	// Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
 	u = func_u(B, alpha);
-	v = func_v(TAU_TL, alpha);
+	v = func_v(UB, BB, LB, RB, TAU_TL, alpha);
 	alpha.x -= TAU * u;
 	alpha.y -= TAU * v;
 
 	u = func_u(B, beta);
-	v = func_v(TAU_TL, beta);
+	v = func_v(UB, BB, LB, RB, TAU_TL, beta);
 	beta.x -= TAU * u;
 	beta.y -= TAU * v;
 
 	u = func_u(B, gamma);
-	v = func_v(TAU_TL, gamma);
+	v = func_v(UB, BB, LB, RB, TAU_TL, gamma);
 	gamma.x -= TAU * u;
 	gamma.y -= TAU * v;
 
 	u = func_u(B, theta);
-	v = func_v(TAU_TL, theta);
+	v = func_v(UB, BB, LB, RB, TAU_TL, theta);
 	theta.x -= TAU * u;
 	theta.y -= TAU * v;
 
@@ -829,7 +841,7 @@ static void solve(double* density)
 			for (int j = 1; j < OX_LEN; j++)
 			{
 				density[(OX_LEN_1) * i + j] = integrate(j, i) * INVERTED_HX_HY;
-				density[(OX_LEN_1) * i + j] += TAU * func_f(OX[j], OY[i]);
+				density[(OX_LEN_1)* i + j] += TAU * func_f(B, TAU_TL, UB, BB, LB, RB, OX[j], OY[i]);
 			}
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));
