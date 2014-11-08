@@ -296,27 +296,17 @@ static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, d
 }
 
 static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
-	int curr_i, int next_i, const ip_t &sx, double b, const ip_t &sb,
+	bool is_rect_truncated, const ip_t &sx, double b, const ip_t &sb,
 	const ip_t &sy) {
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
-
 	double result = 0, gx = 0, hx;
-	dp_t mv, rv;
-	int m_i;
-	if (uv.x <= bv.x) {
-		mv = uv;
-		m_i = next_i;
-	}
-	else {
-		mv = bv;
-		m_i = curr_i;
-	}
+	dp_t mv = uv.x <= bv.x?uv:bv;
 
 	//   A. Under rectangle.
 	result += -1 * integrate_triangle_left_one_cell(bv, uv, mv.x, sx, sy);
 
-	// case B: не полный прямоугольник    
-	if (m_i == 1) {
+	// case B: неполный прямоугольник    
+	if (is_rect_truncated) {
 		if (sx.x == sb.x) gx = b;
 		if (sx.x > sb.x) {
 			gx = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
@@ -463,12 +453,10 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 			next.y = bv.y + k * (next.x - bv.x);
 		}
 		if (next.x > (uv.x - FLT_MIN)) {
-			next = uv;
-			next_i = 0;
-			result += integrate_chanel_slant_right(curr, next, curr_i, next_i, sx, bv.x, ib, sy);
+			result += integrate_chanel_slant_right(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
 			break;
 		}
-		result += integrate_chanel_slant_right(curr, next, curr_i, next_i, sx, bv.x, ib, sy);
+		result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
 		switch (next_i) {
 		case 1:
 			sy += 1;
@@ -565,13 +553,11 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = bv.y - k * (next.x - bv.x);
 		}
-		if (next.x < uv.x + FLT_MIN) {
-			next_i = 0;
-			next = uv;
-			result += integrate_chanel_slant_right(curr, next, curr_i, next_i, sx, uv.x, ib, sy);
+		if (next.x < uv.x + FLT_MIN) {			
+			result += integrate_chanel_slant_right(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, uv.x, ib, sy);
 			break;
 		}
-		result += integrate_chanel_slant_right(curr, next, curr_i, next_i, sx, uv.x, ib, sy);
+		result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
 		switch (next_i) {
 		case 1:
 			sy += 1;
