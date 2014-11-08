@@ -2,7 +2,6 @@
 #include "point.h"
 #include "utils.h"
 
-static int TMP_WALL_CNT = 0;
 static double B;
 static double UB;
 static double BB;
@@ -15,16 +14,17 @@ static int XY_LEN;
 static int TIME_STEP_CNT;
 static double HX;
 static double HY;
-static double *OX;
-static double *OY;
-static double *PREV_DENSITY;
+static double* OX;
+static double* OY;
+static double* PREV_DENSITY;
 static int TL;
 static double TAU_TL;
 static double TAU_TL_1; // tau * (tl - 1)
 static double INVERTED_HX_HY;
 
 inline static void init(double b, double lb, double rb, double bb, double ub,
-	double tau, int time_step_count, int ox_length, int oy_length) {
+                        double tau, int time_step_count, int ox_length, int oy_length)
+{
 	B = b;
 	UB = ub;
 	BB = bb;
@@ -44,7 +44,8 @@ inline static void init(double b, double lb, double rb, double bb, double ub,
 	INVERTED_HX_HY = 1 / HX / HY;
 }
 
-inline static void clean() {
+inline static void clean()
+{
 	B = 0;
 	UB = 0;
 	BB = 0;
@@ -55,7 +56,6 @@ inline static void clean() {
 	OX_LEN = 0;
 	OY_LEN = 0;
 	TIME_STEP_CNT = 0;
-	TMP_WALL_CNT = 0;
 	XY_LEN = 0;
 	HX = 0;
 	HY = 0;
@@ -65,12 +65,15 @@ inline static void clean() {
 	delete[] OY;
 }
 
-inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z) {
-	if (x.y < y.y) {
+inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z)
+{
+	if (x.y < y.y)
+	{
 		if (z.y < x.y)
 			std::swap(x, z);
 	}
-	else {
+	else
+	{
 		if (y.y < z.y)
 			std::swap(x, y);
 		else
@@ -79,18 +82,22 @@ inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z) {
 	if (z.y < y.y) std::swap(y, z);
 }
 
-inline static bool try_get_slope_ratio(const dp_t &bv, const dp_t &uv, double &value) {
-	if (fabs(bv.x - uv.x) < MIN_VALUE) {
+inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& value)
+{
+	if (fabs(bv.x - uv.x) < MIN_VALUE)
+	{
 		return false;
 	}
 	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // угловой коэффициент прямой
-	if (value < MIN_VALUE) {
+	if (value < MIN_VALUE)
+	{
 		return false;
 	}
 	return true;
 }
 
-inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta) {
+inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta)
+{
 	dp_t result;
 	dp_t alpha_to_gamma;
 	dp_t beta_to_theta;
@@ -111,37 +118,44 @@ inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, c
 	return result;
 }
 
-inline static double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta) {
+inline static double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta)
+{
 	return (beta.x - alpha.x) * (theta.y - alpha.y) - (beta.y - alpha.y) * (theta.x - alpha.x);
 }
 
-inline static double analytical_solution(double t, double x, double y) {
+inline static double analytical_solution(double t, double x, double y)
+{
 	return 1.1 + sin(t * x * y);
 }
 
-inline static double func_u(double x, double y) {
-	return B * y * (1 - y) * (M_PI_2 + atan(-x));
+inline static double func_u(double b, double x, double y)
+{
+	return b * y * (1 - y) * (M_PI_2 + atan(-x));
 }
 
-inline static double func_u(const dp_t &p) {
-	return func_u(p.x, p.y);
+inline static double func_u(double b, const dp_t& p)
+{
+	return func_u(b, p.x, p.y);
 }
 
-inline static double func_v(double t, double x, double y) {
-	return atan((x - LB) * (x - RB) * (1 + t) / 10 * (y - UB) * (y - BB));
+inline static double func_v(double t, double x, double y)
+{
+	return atan((x - LB) * (x - RB) * (1 + t) * 0.1 * (y - UB) * (y - BB));
 }
 
-inline static double func_v(double t, const dp_t &p) {
+inline static double func_v(double t, const dp_t& p)
+{
 	return func_v(t, p.x, p.y);
 }
 
-inline static double func_f(double x, double y) {
-	double arg_v = (x - LB) * (x - RB) * (1 + TAU_TL) / 10 * (y - UB) * (y - BB);
+inline static double func_f(double x, double y)
+{
+	double arg_v = (x - LB) * (x - RB) * (1 + TAU_TL) * 0.1 * (y - UB) * (y - BB);
 	double rho = analytical_solution(TAU_TL, x, y);
 	double drho_dt = x * y * cos(TAU_TL * x * y);
 	double drho_dx = TAU_TL * y * cos(TAU_TL * x * y);
 	double dtho_dy = TAU_TL * x * cos(TAU_TL * x * y);
-	double u = func_u(x, y);
+	double u = func_u(B, x, y);
 	double v = func_v(TAU_TL, x, y);
 	double du_dx = -B * y * (1 - y) / (1 + x * x);
 	double dv_dx = (x - LB) * (x - RB) * (1 + TAU_TL) / 10 * (y - BB + y - UB);
@@ -151,72 +165,82 @@ inline static double func_f(double x, double y) {
 	return res;
 }
 
-inline static double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b) {
+inline static double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b)
+{
 	return ((hx - a) * (hx - a) - (gx - a) * (gx - a)) * ((qy - b) * (qy - b) - (py - b) * (py - b)) * 0.25;
 }
 
 inline static double integrate_triangle(double py, double qy, double alpha, double a, double b,
-	double beta) {
+                                        double beta)
+{
 	return (((qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
 		- (py - alpha) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (3 * a)) - ((a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
 		- (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (12 * a * a);
 }
 
 static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
-	const ip_t &sx, const ip_t &sy) {
-	double result, tmp;
+                                           const ip_t& sx, const ip_t& sy)
+{	
 	double rho[2][2];
-	if (sx.x >= 0 && sy.x >= 0) {
+	if (sx.x >= 0 && sy.x >= 0)
+	{
 		rho[0][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
 		rho[0][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
 		rho[1][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
 		rho[1][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
 	}
-	else {
+	else
+	{
 		// TODO: убрать потому что это неверно (надо расчитывать граничные условия)
 		rho[0][0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
 		rho[0][1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
 		rho[1][0] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
 		rho[1][1] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
-		TMP_WALL_CNT++;
 	}
-
-	if (sx.y >= 0 && sy.y >= 0) {
+	// equation = i * (t_1*r_1 - t_2*r_2 - t_3*r_3 + t_4*r_4)
+	double tmp;
+	if (sx.y >= 0 && sy.y >= 0)
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.y]);
 	}
-	else {
+	else
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.y);
 	}
-	tmp = tmp * INVERTED_HX_HY;
-	result = tmp * rho[0][0];
-	if (sx.x >= 0 && sy.y >= 0) {
+	double result = tmp * rho[0][0];
+	if (sx.x >= 0 && sy.y >= 0)
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.y]);
 	}
-	else {
+	else
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.y);
 	}
-	tmp = tmp * INVERTED_HX_HY;
 	result -= tmp * rho[1][0];
-	if (sx.y >= 0 && sy.x >= 0) {
+	if (sx.y >= 0 && sy.x >= 0)
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.x]);
 	}
-	else {
+	else
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.x);
 	}
-	tmp = tmp * INVERTED_HX_HY;
 	result -= tmp * rho[0][1];
-	if (sx.x >= 0 && sy.x >= 0) {
+	if (sx.x >= 0 && sy.x >= 0)
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.x]);
 	}
-	else {
+	else
+	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.x);
 	}
-	tmp = tmp * INVERTED_HX_HY;
-	return result + tmp * rho[1][1];
+	result += tmp * rho[1][1];
+	return result * INVERTED_HX_HY;
 }
 
-static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, double hx,
-	const ip_t &sx, const ip_t &sy) {
+static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx,
+                                               const ip_t& sx, const ip_t& sy)
+{
 	if (fabs(bv.y - uv.y) <= FLT_MIN) return 0;
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
 	if (fabs(a_sl) <= FLT_MIN) return 0;
@@ -225,29 +249,32 @@ static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, d
 	double result, tmp, tmp_integral;
 	double rho[2][2];
 
-	if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN) {
+	if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN)
+	{
 		rho[0][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
 		rho[0][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
 		rho[1][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
 		rho[1][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
 	}
-	else {
+	else
+	{
 		// TODO: убрать потому что это неверно (надо расчитывать граничные условия)
 		// норма должна уменьшиться
 		rho[0][0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
 		rho[0][1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
 		rho[1][0] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
 		rho[1][1] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
-		TMP_WALL_CNT++;
 	}
 
 	//   1
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
-	if (sx.y >= 0 && sy.y >= 0) {
+	if (sx.y >= 0 && sy.y >= 0)
+	{
 		tmp *= (hx - OX[sx.y]) * (hx - OX[sx.y]) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.y], a_sl, b_sl, OX[sx.y]);
 	}
-	else {
+	else
+	{
 		tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
 	}
@@ -256,11 +283,13 @@ static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, d
 
 	//   2
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
-	if (sx.x >= 0 && sy.y >= 0) {
+	if (sx.x >= 0 && sy.y >= 0)
+	{
 		tmp *= (hx - OX[sx.x]) * (hx - OX[sx.x]) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.y], a_sl, b_sl, OX[sx.x]);
 	}
-	else {
+	else
+	{
 		tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
 	}
@@ -269,11 +298,13 @@ static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, d
 
 	//   3
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
-	if (sx.y >= 0 && sy.x >= 0) {
+	if (sx.y >= 0 && sy.x >= 0)
+	{
 		tmp *= (hx - OX[sx.y]) * (hx - OX[sx.y]) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.x], a_sl, b_sl, OX[sx.y]);
 	}
-	else {
+	else
+	{
 		tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
 	}
@@ -282,11 +313,13 @@ static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, d
 
 	//   4
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
-	if (sx.x >= 0 && sy.x >= 0) {
+	if (sx.x >= 0 && sy.x >= 0)
+	{
 		tmp *= (hx - OX[sx.x]) * (hx - OX[sx.x]) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, OY[sy.x], a_sl, b_sl, OX[sx.x]);
 	}
-	else {
+	else
+	{
 		tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
 	}
@@ -296,19 +329,22 @@ static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, d
 }
 
 static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
-	bool is_rect_truncated, const ip_t &sx, double b, const ip_t &sb,
-	const ip_t &sy) {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
+                                           bool is_rect_truncated, const ip_t& sx, double b, const ip_t& sb,
+                                           const ip_t& sy)
+{
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx = 0, hx;
-	dp_t mv = uv.x <= bv.x?uv:bv;
+	dp_t mv = uv.x <= bv.x ? uv : bv;
 
 	//   A. Under rectangle.
 	result += -1 * integrate_triangle_left_one_cell(bv, uv, mv.x, sx, sy);
 
 	// case B: неполный прямоугольник    
-	if (is_rect_truncated) {
+	if (is_rect_truncated)
+	{
 		if (sx.x == sb.x) gx = b;
-		if (sx.x > sb.x) {
+		if (sx.x > sb.x)
+		{
 			gx = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 		}
 		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv.x, sx, sy);
@@ -316,7 +352,8 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 
 	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
 	ip_t ch_pos(sb.x, sb.x + 1);
-	for (int j = sb.x; j < sx.x; j++) {
+	for (int j = sb.x; j < sx.x; j++)
+	{
 		if (j == sb.x) gx = b;
 		else gx = ch_pos.x >= 0 ? OX[ch_pos.x] : HX * ch_pos.x;
 		hx = ch_pos.x >= 0 ? OX[ch_pos.y] : HX * ch_pos.y;
@@ -336,17 +373,19 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 // BOTTOMLEFTTR
 
 static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
-	bool is_rect_trunc, const ip_t &sx, const ip_t &sy,
-	double b, const ip_t &sb) {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;      
+                                          bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
+                                          double b, const ip_t& sb)
+{
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx, hx = 0; //   -  Left and right boundary for each integration.   
-	dp_t mv = uv.x <= bv.x ? mv = bv : mv = uv;	
+	dp_t mv = uv.x <= bv.x ? mv = bv : mv = uv;
 
 	// case A: triangle
 	result += integrate_triangle_left_one_cell(bv, uv, mv.x, sx, sy);
 
 	// case B: не полный прямоугольник
-	if (is_rect_trunc) { // это значит, что прямоугольник занимает не всю ячейку  
+	if (is_rect_trunc)
+	{ // это значит, что прямоугольник занимает не всю ячейку  
 		hx = sx.x == sb.x ? b : (sx.y >= 0 ? OX[sx.y] : HX * sx.y);
 		gx = mv.x;
 		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, sx, sy);
@@ -354,7 +393,8 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 
 	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
 	ip_t ch_pos(sx.x + 1, sx.x + 2); //   - координаты канала
-	for (int j = sx.x + 1; j < sb.x + 1; j++) {
+	for (int j = sx.x + 1; j < sb.x + 1; j++)
+	{
 		hx = ch_pos.y <= 0 ? HX * ch_pos.y : hx = OX[ch_pos.y];
 		if (j == sb.x) hx = b;
 		gx = ch_pos.y <= 0 ? HX * ch_pos.x : OX[ch_pos.x];
@@ -370,16 +410,17 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 // sy = (x,y) координаты квадрата в которой лежит верхняя точка
 // в случае успешной проверки, k = будет  угловой коэфициент прямой
 
-static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv) {
+static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv)
+{
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
 
 	//   -  Index of current square by Ox and Oy axes. 
 	ip_t sx, sy;
-	sx.x = static_cast<int> ((bv.x - FLT_MIN) / HX);
+	sx.x = static_cast<int>((bv.x - FLT_MIN) / HX);
 	if (bv.x - FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY);
+	sy.x = static_cast<int>((bv.y + FLT_MIN) / HY);
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
 
@@ -388,28 +429,33 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 	double result = 0;
 	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
-	while (true) {
+	while (true)
+	{
 		//TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
 		double slope = sx.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? curr.x - OX[sx.x] : fabs(curr.x - HX * sx.x);
-		if (slope <= k) { //   Intersection with straight line parallel Ox axis.        
+		if (slope <= k)
+		{ //   Intersection with straight line parallel Ox axis.        
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = curr.x - (next.y - curr.y) / k;
 		}
-		else { //   Intersection with straight line parallel Oy axis.            
+		else
+		{ //   Intersection with straight line parallel Oy axis.            
 			next_i = 2;
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = curr.y - k * (next.x - curr.x);
 		}
-		if (next.x < (uv.x + FLT_MIN)) {
+		if (next.x < (uv.x + FLT_MIN))
+		{
 			// сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
 			// и в случае когда прошлись по всем точкам...
 			result += integrate_chanel_slant_left(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, bv.x, ib);
 			break;
 		}
 		result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
-		switch (next_i) {
+		switch (next_i)
+		{
 		case 1:
 			sy += 1;
 			break;
@@ -423,15 +469,16 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 	return result;
 }
 
-static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv) {
+static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv)
+{
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
 
 	ip_t sx, sy;
-	sx.x = static_cast<int> ((bv.x + FLT_MIN) / HX);
+	sx.x = static_cast<int>((bv.x + FLT_MIN) / HX);
 	if (bv.x + FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY);
+	sy.x = static_cast<int>((bv.y + FLT_MIN) / HY);
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
 
@@ -439,25 +486,30 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 	double result = 0;
 	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
-	while (true) {
+	while (true)
+	{
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
 		slope /= sx.y >= 0 ? fabs(OX[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
-		if (slope <= k) {//   Intersection with straight line parallel Ox axis.            
+		if (slope <= k)
+		{//   Intersection with straight line parallel Ox axis.            
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x + (next.y - bv.y) / k;
 		}
-		else {//   Intersection with straight line parallel Oy axis.
+		else
+		{//   Intersection with straight line parallel OY axis.
 			next_i = 2;
 			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
 		}
-		if (next.x > (uv.x - FLT_MIN)) {
+		if (next.x > (uv.x - FLT_MIN))
+		{
 			result += integrate_chanel_slant_right(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
 			break;
 		}
 		result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
-		switch (next_i) {
+		switch (next_i)
+		{
 		case 1:
 			sy += 1;
 			break;
@@ -471,44 +523,50 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 	return result;
 }
 
-static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv) {
+static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv)
+{
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
 
 	ip_t sx, sy, ib;
-	sx.x = static_cast<int> ((bv.x + FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
+	sx.x = static_cast<int>((bv.x + FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
 	if (bv.x + FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
+	sy.x = static_cast<int>((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
-	ib.x = static_cast<int> ((uv.x - FLT_MIN) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+	ib.x = static_cast<int>((uv.x - FLT_MIN) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
 	if (uv.x - FLT_MIN <= 0) ib.x -= 1;
 	ib.y = ib.x + 1;
 
 	double result = 0;
 	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
-	while (true) {
+	while (true)
+	{
 		double slope = sy.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
 		slope /= sx.y >= 0 ? OX[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
-		if (slope <= k) { //   intersection with straight line parallel Ox axis.
+		if (slope <= k)
+		{ //   intersection with straight line parallel Ox axis.
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x + (next.y - bv.y) / k;
 		}
-		else {//   intersection with straight line parallel Oy axis.            
+		else
+		{//   intersection with straight line parallel OY axis.            
 			next_i = 2;
 			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
 		}
-		if (next.x > (uv.x - FLT_MIN)) {
+		if (next.x > (uv.x - FLT_MIN))
+		{
 			result += integrate_chanel_slant_left(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 			break;
 		}
 		result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
 
-		switch (next_i) {
+		switch (next_i)
+		{
 		case 1:
 			sy += 1;
 			break;
@@ -522,43 +580,49 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 	return result;
 }
 
-static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv) {
+static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv)
+{
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
 
 	ip_t sx, sy, ib;
-	sx.x = static_cast<int> ((bv.x - FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
+	sx.x = static_cast<int>((bv.x - FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
 	if (bv.x - FLT_MIN <= 0) sx.x -= 1;
 	sx.y = sx.x + 1;
-	sy.x = static_cast<int> ((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
+	sy.x = static_cast<int>((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
-	ib.x = static_cast<int> ((uv.x + FLT_MIN) / HX);
+	ib.x = static_cast<int>((uv.x + FLT_MIN) / HX);
 	if (uv.x + FLT_MIN <= 0) ib.x -= 1;
 	ib.y = ib.x + 1;
 
 	double result = 0;
 	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
-	while (true) {
+	while (true)
+	{
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? fabs(curr.x - OX[sx.x]) : fabs(curr.x - HX * sx.x);
-		if (slope <= k) { //   Intersection with straight line parallel Ox axis.
+		if (slope <= k)
+		{ //   Intersection with straight line parallel Ox axis.
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x - (next.y - bv.y) / k;
 		}
-		else { //   Intersection with straight line parallel Oy axis.
+		else
+		{ //   Intersection with straight line parallel Oy axis.
 			next_i = 2;
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = bv.y - k * (next.x - bv.x);
 		}
-		if (next.x < uv.x + FLT_MIN) {			
+		if (next.x < uv.x + FLT_MIN)
+		{
 			result += integrate_chanel_slant_right(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, uv.x, ib, sy);
 			break;
 		}
 		result += integrate_chanel_slant_right(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
-		switch (next_i) {
+		switch (next_i)
+		{
 		case 1:
 			sy += 1;
 			break;
@@ -572,60 +636,74 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 	return result;
 }
 
-static double integrate_bottom_triangle(const dp_t& l, const dp_t& m, const dp_t& r) {
+static double integrate_bottom_triangle(const dp_t& l, const dp_t& m, const dp_t& r)
+{
 	double result = 0;
-	if (m.x == l.x) {
+	if (m.x == l.x)
+	{
 		result = integrate_right_triangle_bottom_right(m, r);
 	}
-	else if (m.x == r.x) {
+	else if (m.x == r.x)
+	{
 		result = integrate_right_triangle_bottom_left(m, l);
 	}
-	else if (m.x < l.x) {
+	else if (m.x < l.x)
+	{
 		result = integrate_right_triangle_bottom_right(m, r);
 		result -= integrate_right_triangle_bottom_right(m, l);
 	}
-	else if (m.x > l.x && m.x < r.x) {
+	else if (m.x > l.x && m.x < r.x)
+	{
 		result = integrate_right_triangle_bottom_left(m, l);
 		result += integrate_right_triangle_bottom_right(m, r);
 	}
-	else if (m.x > r.x) {
+	else if (m.x > r.x)
+	{
 		result = integrate_right_triangle_bottom_left(m, l);
 		result -= integrate_right_triangle_bottom_left(m, r);
 	}
 	return result;
 }
 
-static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t& r) {
+static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t& r)
+{
 	double result = 0;
-	if (m.x == l.x) {
+	if (m.x == l.x)
+	{
 		result = integrate_right_triangle_upper_right(r, m);
 	}
-	else if (m.x == r.x) {
+	else if (m.x == r.x)
+	{
 		result = integrate_right_triangle_upper_left(l, m);
 	}
-	else if (m.x < l.x) {
+	else if (m.x < l.x)
+	{
 		result = integrate_right_triangle_upper_right(r, m);
 		result -= integrate_right_triangle_upper_right(l, m);
 	}
-	else if (m.x > l.x && m.x < r.x) {
+	else if (m.x > l.x && m.x < r.x)
+	{
 		result = integrate_right_triangle_upper_left(l, m);
 		result += integrate_right_triangle_upper_right(r, m);
 	}
-	else if (m.x > r.x) {
+	else if (m.x > r.x)
+	{
 		result = integrate_right_triangle_upper_left(l, m);
 		result -= integrate_right_triangle_upper_left(r, m);
 	}
 	return result;
 }
 
-static double integrate_uniform_triangle_wall(const dp_t& a, const dp_t& b, const dp_t& c) {
+static double integrate_uniform_triangle_wall(const dp_t& a, const dp_t& b, const dp_t& c)
+{
 	return 0;
 }
 
-static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z) {
+static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
+{
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
-	if (fabs(a) < FLT_MIN) return FLT_MIN;
+	if (fabs(a) < FLT_MIN) return FLT_MIN ;
 	double b = x.x - z.x;
 	double c = b * x.y + a * x.x;
 	dp_t ip((c - b * y.y) / a, y.y);
@@ -634,7 +712,8 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z) 
 	//   слева или справа.
 	//   есди средняя точка справа от точки пересечения
 	//   обменяем местами  X координаты, чтобы использовать один код для расчета
-	if (y.x >= ip.x) {
+	if (y.x >= ip.x)
+	{
 		double tx = y.x;
 		y.x = ip.x;
 		ip.x = tx;
@@ -645,22 +724,26 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z) 
 }
 
 static quad_type get_coordinates_on_prev_layer(int ix, int iy,
-	dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta) {
+                                               dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
+{
 	//   1 First of all let's compute coordinates of square vertexes.
 	//  OX:
-	if (ix == 0) {
+	if (ix == 0)
+	{
 		alpha.x = OX[ix];
 		beta.x = (OX[ix] + OX[ix + 1]) * 0.5;
 		gamma.x = (OX[ix] + OX[ix + 1]) * 0.5;
 		theta.x = OX[ix];
 	}
-	else if (ix == OX_LEN) {
+	else if (ix == OX_LEN)
+	{
 		alpha.x = (OX[ix - 1] + OX[ix]) * 0.5;
 		beta.x = OX[ix];
 		gamma.x = OX[ix];
 		theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
 	}
-	else {
+	else
+	{
 		alpha.x = (OX[ix - 1] + OX[ix]) * 0.5;
 		beta.x = (OX[ix + 1] + OX[ix]) * 0.5;
 		gamma.x = (OX[ix + 1] + OX[ix]) * 0.5;
@@ -668,19 +751,22 @@ static quad_type get_coordinates_on_prev_layer(int ix, int iy,
 	}
 
 	//  OY:
-	if (iy == 0) {
+	if (iy == 0)
+	{
 		alpha.y = OY[iy];
 		beta.y = OY[iy];
 		gamma.y = (OY[iy] + OY[iy + 1]) * 0.5;
 		theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
 	}
-	else if (iy == OY_LEN) {
+	else if (iy == OY_LEN)
+	{
 		alpha.y = (OY[iy] + OY[iy - 1]) * 0.5;
 		beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
 		gamma.y = OY[iy];
 		theta.y = OY[iy];
 	}
-	else {
+	else
+	{
 		alpha.y = (OY[iy] + OY[iy - 1]) * 0.5;
 		beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
 		gamma.y = (OY[iy] + OY[iy + 1]) * 0.5;
@@ -690,22 +776,22 @@ static quad_type get_coordinates_on_prev_layer(int ix, int iy,
 	double u, v;
 
 	// Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
-	u = func_u(alpha);
+	u = func_u(B, alpha);
 	v = func_v(TAU_TL, alpha);
 	alpha.x -= TAU * u;
 	alpha.y -= TAU * v;
 
-	u = func_u(beta);
+	u = func_u(B, beta);
 	v = func_v(TAU_TL, beta);
 	beta.x -= TAU * u;
 	beta.y -= TAU * v;
 
-	u = func_u(gamma);
+	u = func_u(B, gamma);
 	v = func_v(TAU_TL, gamma);
 	gamma.x -= TAU * u;
 	gamma.y -= TAU * v;
 
-	u = func_u(theta);
+	u = func_u(B, theta);
 	v = func_v(TAU_TL, theta);
 	theta.x -= TAU * u;
 	theta.y -= TAU * v;
@@ -718,7 +804,8 @@ static quad_type get_coordinates_on_prev_layer(int ix, int iy,
 
 	// значит что точка улетела за левую границу
 	if (theta.x < 0 || theta.y < 0 || beta.x < 0 || beta.y < 0 || gamma.x < 0 ||
-		gamma.y < 0 || alpha.x < 0 || alpha.y < 0) {
+		gamma.y < 0 || alpha.x < 0 || alpha.y < 0)
+	{
 		return normal;
 		//return wall;
 	}
@@ -728,12 +815,12 @@ static quad_type get_coordinates_on_prev_layer(int ix, int iy,
 // Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
 
 static quad_type get_quadrangle_type(int ix, int iy,
-	dp_t& a, //   -  First vertex of first triangle.
-	dp_t& b, //   -  Second vertex of first triangle.
-	dp_t& c, //   -  Third vertex of first triangle.
-	dp_t& k, //   -  First vertex of second triangle.
-	dp_t& m, //   -  Second vertex of second triangle.
-	dp_t& n) //   -  Third vertex of second triangle.
+                                     dp_t& a, //   -  First vertex of first triangle.
+                                     dp_t& b, //   -  Second vertex of first triangle.
+                                     dp_t& c, //   -  Third vertex of first triangle.
+                                     dp_t& k, //   -  First vertex of second triangle.
+                                     dp_t& m, //   -  Second vertex of second triangle.
+                                     dp_t& n) //   -  Third vertex of second triangle.
 {
 	dp_t alpha, beta, gamma, theta; // coordinates on previous time layer
 	quad_type type = get_coordinates_on_prev_layer(ix, iy, alpha, beta, gamma, theta);
@@ -746,10 +833,12 @@ static quad_type get_quadrangle_type(int ix, int iy,
 	return type;
 }
 
-static double integrate(int ix, int iy) {
+static double integrate(int ix, int iy)
+{
 	dp_t a1, b1, c1, a2, b2, c2;
 	quad_type type = get_quadrangle_type(ix, iy, a1, b1, c1, a2, b2, c2);
-	if (type != normal && type != wall) {
+	if (type != normal && type != wall)
+	{
 		return -1;
 	}
 
@@ -760,7 +849,8 @@ static double integrate(int ix, int iy) {
 
 	// check the type of triangle to select appropriate computation method
 	double result = 0;
-	switch (type) {
+	switch (type)
+	{
 	case wall:
 		result += integrate_uniform_triangle_wall(a1, b1, c1);
 		result += integrate_uniform_triangle_wall(a2, b2, c2);
@@ -777,38 +867,47 @@ static double integrate(int ix, int iy) {
 	return 0;
 }
 
-static double get_norm_of_error(double* density, double ts_count_mul_steps) {
+static double get_norm_of_error(double* density, double ts_count_mul_steps)
+{
 	double r = 0;
-	for (int k = 1; k < OY_LEN; ++k) 
-		for (int j = 1; j < OX_LEN; ++j) 
+	for (int k = 1; k < OY_LEN; ++k)
+		for (int j = 1; j < OX_LEN; ++j)
 			r += fabs(analytical_solution(ts_count_mul_steps, OX[j], OY[k])
-				- density[(OY_LEN + 1) * k + j]);	
+				- density[(OY_LEN + 1) * k + j]);
 	return HX * HY * r;
 }
 
-static void solve(double* density) {
+static void solve(double* density)
+{
 	PREV_DENSITY = new double[XY_LEN];
-	for (int j = 0; j < OY_LEN + 1; j++) {
-		for (int i = 0; i < OX_LEN + 1; i++) {
+	for (int j = 0; j < OY_LEN + 1; j++)
+	{
+		for (int i = 0; i < OX_LEN + 1; i++)
+		{
 			PREV_DENSITY[(OX_LEN + 1) * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
 
-	for (TL = 1; TL <= TIME_STEP_CNT; TL++) {
+	for (TL = 1; TL <= TIME_STEP_CNT; TL++)
+	{
 		TAU_TL = TAU * TL;
 		TAU_TL_1 = TAU * (TL - 1);
-		for (int i = 0; i <= OX_LEN; i++) {
+		for (int i = 0; i <= OX_LEN; i++)
+		{
 			density[i] = analytical_solution(OX[i], BB, TAU_TL);
 			density[(OX_LEN + 1) * OY_LEN + i] = analytical_solution(OX[i], UB, TAU_TL);
 		}
 
-		for (int i = 0; i <= OY_LEN; i++) {
+		for (int i = 0; i <= OY_LEN; i++)
+		{
 			density[(OX_LEN + 1) * i] = analytical_solution(LB, OY[i], TAU_TL);
 			density[(OX_LEN + 1) * i + OX_LEN] = analytical_solution(RB, OY[i], TAU_TL);
 		}
 
-		for (int i = 1; i < OY_LEN; i++) {
-			for (int j = 1; j < OX_LEN; j++) {
+		for (int i = 1; i < OY_LEN; i++)
+		{
+			for (int j = 1; j < OX_LEN; j++)
+			{
 				density[(OX_LEN + 1) * i + j] = integrate(j, i) * INVERTED_HX_HY;
 				density[(OX_LEN + 1) * i + j] += TAU * func_f(OX[j], OY[i]);
 			}
@@ -820,13 +919,13 @@ static void solve(double* density) {
 
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
-	double tau, int time_step_count, int ox_length, int oy_length, double &norm) {
+                        double tau, int time_step_count, int ox_length, int oy_length, double& norm)
+{
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	solve(density);
-	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
-	printf("%d x %d wall count = %d\n", OX_LEN + 1, OY_LEN + 1, TMP_WALL_CNT);
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);	
 	clean();
 	return density;
 }
