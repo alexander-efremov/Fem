@@ -97,25 +97,14 @@ inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& v
 }
 
 inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta)
-{
-	dp_t result;
-	dp_t alpha_to_gamma;
-	dp_t beta_to_theta;
-	double a_1LC, b_1LC, c_1LC;
-	double a_2LC, b_2LC, c_2LC;
-	alpha_to_gamma.x = gamma.x - alpha.x;
-	alpha_to_gamma.y = gamma.y - alpha.y;
-	a_1LC = alpha_to_gamma.y;
-	b_1LC = -alpha_to_gamma.x;
-	c_1LC = alpha_to_gamma.y * alpha.x - alpha_to_gamma.x * alpha.y;
-	beta_to_theta.x = theta.x - beta.x;
-	beta_to_theta.y = theta.y - beta.y;
-	a_2LC = beta_to_theta.y;
-	b_2LC = -beta_to_theta.x;
-	c_2LC = beta_to_theta.y * beta.x - beta_to_theta.x * beta.y;
-	result.x = (b_1LC * c_2LC - b_2LC * c_1LC) / (b_1LC * a_2LC - b_2LC * a_1LC);
-	result.y = (a_1LC * c_2LC - a_2LC * c_1LC) / (-b_1LC * a_2LC + b_2LC * a_1LC);
-	return result;
+{	
+	double a1 = gamma.y - alpha.y;
+	double b1 = -(gamma.x - alpha.x);
+	double c1 = a1 * alpha.x + b1 * alpha.y;
+	double a2 = theta.y - beta.y;
+	double b2 = -(theta.x - beta.x);
+	double c2 = a2 * beta.x + b2 * beta.y;
+	return dp_t((b1 * c2 - b2 * c1) / (b1 * a2 - b2 * a1), (a1 * c2 - a2 * c1) / (-b1 * a2 + b2 * a1));
 }
 
 inline static double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta)
@@ -316,7 +305,7 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
                                            bool is_rect_truncated, const ip_t& sx, double b, const ip_t& sb,
                                            const ip_t& sy)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx = 0;
 	double x = uv.x <= bv.x ? uv.x : bv.x;
 
@@ -405,7 +394,7 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
 
-	ip_t ib(sx.x, sx.x + 1); 
+	ip_t ib(sx.x, sx.x + 1);
 	double result = 0;
 	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
@@ -693,8 +682,7 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 		ip.x = tx;
 	}
 
-	return integrate_upper_triangle(y, z, ip)
-		+ integrate_bottom_triangle(y, x, ip);
+	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
 }
 
 static quad_type get_coordinates_on_prev_layer(int ix, int iy,
