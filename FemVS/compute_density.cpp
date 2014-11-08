@@ -197,24 +197,11 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 	double b_sl = uv.x - a_sl * uv.y;
 
 	double result = 0, tmp;
-	double rho[4];
-
-	if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN)
-	{
-		rho[0] = PREV_DENSITY[OX_LEN_1 * sy.x + sx.x];
-		rho[1] = PREV_DENSITY[OX_LEN_1 * sy.y + sx.x];
-		rho[2] = PREV_DENSITY[OX_LEN_1 * sy.x + sx.y];
-		rho[3] = PREV_DENSITY[OX_LEN_1 * sy.y + sx.y];
-	}
-	else
-	{
-		// TODO: убрать потому что это неверно (надо расчитывать граничные условия)
-		// норма должна уменьшиться
-		rho[0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
-		rho[1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
-		rho[2] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
-		rho[3] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
-	}
+	double rho[4];	
+	rho[0] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY));
+	rho[1] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY));
+    rho[2] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY));
+	rho[3] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY));	
 
 	//   1
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
