@@ -171,63 +171,21 @@ inline static double integrate_triangle(double py, double qy, double alpha, doub
 		- (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (12 * a * a));
 }
 
-static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
-                                           const ip_t& sx, const ip_t& sy)
+static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx, const ip_t& sx, const ip_t& sy)
 {
-	double rho[4];
-	if (sx.x >= 0 && sy.x >= 0)
-	{
-		rho[0] = PREV_DENSITY[OX_LEN_1 * sy.x + sx.x]; // ЭТО ПЛОТНОСТЬ С ПРЕДЫДУЩЕГО СЛОЯ ДЛЯ ДАННОЙ ЯЧЕЙКИ?
-		rho[1] = PREV_DENSITY[OX_LEN_1 * sy.y + sx.x];
-		rho[2] = PREV_DENSITY[OX_LEN_1 * sy.x + sx.y];
-		rho[3] = PREV_DENSITY[OX_LEN_1 * sy.y + sx.y];
-	}
-	else
-	{
-		// TODO: убрать потому что это неверно (надо расчитывать граничные условия)
-		rho[0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
-		rho[1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
-		rho[2] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
-		rho[3] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
-	}
-	// equation = i * (t_1*r_1 - t_2*r_2 - t_3*r_3 + t_4*r_4)
-	double tmp;
-	if (sx.y >= 0 && sy.y >= 0)
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.y]);
-	}
-	else
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.y);
-	}
-	double result = tmp * rho[0];
-	if (sx.x >= 0 && sy.y >= 0)
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.y]);
-	}
-	else
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.y);
-	}
-	result -= tmp * rho[2];
-	if (sx.y >= 0 && sy.x >= 0)
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.x]);
-	}
-	else
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.x);
-	}
-	result -= tmp * rho[1];
-	if (sx.x >= 0 && sy.x >= 0)
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.x]);
-	}
-	else
-	{
-		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.x);
-	}
-	result += tmp * rho[3];
+	double result, a, b;
+	a = sx.y >= 0 && sy.y >= 0 ? OX[sx.y] : HX * sx.y;
+	b = sx.y >= 0 && sy.y >= 0 ? OY[sy.y] : HY * sy.y; // ЭТО ПЛОТНОСТЬ С ПРЕДЫДУЩЕГО СЛОЯ ДЛЯ ДАННОЙ ЯЧЕЙКИ
+	result = integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY));
+	a = sx.x >= 0 && sy.y >= 0 ? OX[sx.x] : HX * sx.x;
+	b = sx.x >= 0 && sy.y >= 0 ? OY[sy.y] : HY * sy.y;
+	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY));
+	a = sx.y >= 0 && sy.x >= 0 ? OX[sx.y] : HX * sx.y;
+	b = sx.y >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
+	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY));
+	a = sx.x >= 0 && sy.x >= 0 ? OX[sx.x] : HX * sx.x;
+	b = sx.x >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
+	result += integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY));
 	return result * INVERTED_HX_HY;
 }
 
