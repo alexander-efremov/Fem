@@ -405,8 +405,7 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
 	sy.y = sy.x + 1;
 
-	ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
-
+	ip_t ib(sx.x, sx.x + 1); 
 	double result = 0;
 	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
@@ -630,18 +629,15 @@ static double integrate_bottom_triangle(const dp_t& l, const dp_t& m, const dp_t
 	}
 	else if (m.x < l.x)
 	{
-		result = integrate_right_triangle_bottom_right(m, r);
-		result -= integrate_right_triangle_bottom_right(m, l);
+		result = integrate_right_triangle_bottom_right(m, r) - integrate_right_triangle_bottom_right(m, l);
 	}
 	else if (m.x > l.x && m.x < r.x)
 	{
-		result = integrate_right_triangle_bottom_left(m, l);
-		result += integrate_right_triangle_bottom_right(m, r);
+		result = integrate_right_triangle_bottom_left(m, l) + integrate_right_triangle_bottom_right(m, r);
 	}
 	else if (m.x > r.x)
 	{
-		result = integrate_right_triangle_bottom_left(m, l);
-		result -= integrate_right_triangle_bottom_left(m, r);
+		result = integrate_right_triangle_bottom_left(m, l) - integrate_right_triangle_bottom_left(m, r);
 	}
 	return result;
 }
@@ -659,18 +655,15 @@ static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t&
 	}
 	else if (m.x < l.x)
 	{
-		result = integrate_right_triangle_upper_right(r, m);
-		result -= integrate_right_triangle_upper_right(l, m);
+		result = integrate_right_triangle_upper_right(r, m) - integrate_right_triangle_upper_right(l, m);
 	}
 	else if (m.x > l.x && m.x < r.x)
 	{
-		result = integrate_right_triangle_upper_left(l, m);
-		result += integrate_right_triangle_upper_right(r, m);
+		result = integrate_right_triangle_upper_left(l, m) + integrate_right_triangle_upper_right(r, m);
 	}
 	else if (m.x > r.x)
 	{
-		result = integrate_right_triangle_upper_left(l, m);
-		result -= integrate_right_triangle_upper_left(r, m);
+		result = integrate_right_triangle_upper_left(l, m) - integrate_right_triangle_upper_left(r, m);
 	}
 	return result;
 }
