@@ -180,7 +180,7 @@ inline static double integrate_triangle(double py, double qy, double alpha, doub
 
 static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
                                            const ip_t& sx, const ip_t& sy)
-{	
+{
 	double rho[4];
 	if (sx.x >= 0 && sy.x >= 0)
 	{
@@ -246,7 +246,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 	if (fabs(a_sl) <= FLT_MIN) return 0;
 	double b_sl = uv.x - a_sl * uv.y;
 
-	double result=0, tmp, tmp_integral;
+	double result = 0, tmp, tmp_integral;
 	double rho[4];
 
 	if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN)
@@ -925,7 +925,7 @@ double* compute_density(double b, double lb, double rb, double bb, double ub,
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	solve(density);
-	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);	
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;
 }
