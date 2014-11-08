@@ -119,10 +119,6 @@ inline static double analytical_solution(double t, double x, double y) {
 	return 1.1 + sin(t * x * y);
 }
 
-inline static double init_side(double x, double y, double t) {
-	return analytical_solution(t, x, y);
-}
-
 inline static double func_u(double x, double y) {
 	return B * y * (1 - y) * (M_PI_2 + atan(-x));
 }
@@ -832,13 +828,13 @@ static void solve(double* density) {
 		TAU_TL = TAU * TL;
 		TAU_TL_1 = TAU * (TL - 1);
 		for (int i = 0; i <= OX_LEN; i++) {
-			density[i] = init_side(OX[i], BB, TAU_TL);
-			density[(OX_LEN + 1) * OY_LEN + i] = init_side(OX[i], UB, TAU_TL);
+			density[i] = analytical_solution(OX[i], BB, TAU_TL);
+			density[(OX_LEN + 1) * OY_LEN + i] = analytical_solution(OX[i], UB, TAU_TL);
 		}
 
 		for (int i = 0; i <= OY_LEN; i++) {
-			density[(OX_LEN + 1) * i] = init_side(LB, OY[i], TAU_TL);
-			density[(OX_LEN + 1) * i + OX_LEN] = init_side(RB, OY[i], TAU_TL);
+			density[(OX_LEN + 1) * i] = analytical_solution(LB, OY[i], TAU_TL);
+			density[(OX_LEN + 1) * i + OX_LEN] = analytical_solution(RB, OY[i], TAU_TL);
 		}
 
 		for (int i = 1; i < OY_LEN; i++) {
