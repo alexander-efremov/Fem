@@ -247,23 +247,23 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 	double b_sl = uv.x - a_sl * uv.y;
 
 	double result, tmp, tmp_integral;
-	double rho[2][2];
+	double rho[4];
 
 	if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN)
 	{
-		rho[0][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
-		rho[0][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
-		rho[1][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
-		rho[1][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
+		rho[0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
+		rho[1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
+		rho[2] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
+		rho[3] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
 	}
 	else
 	{
 		// TODO: убрать потому что это неверно (надо расчитывать граничные условия)
 		// норма должна уменьшиться
-		rho[0][0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
-		rho[0][1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
-		rho[1][0] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
-		rho[1][1] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
+		rho[0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
+		rho[1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
+		rho[2] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
+		rho[3] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
 	}
 
 	//   1
@@ -279,7 +279,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
 	}
 	tmp -= tmp_integral * 0.5;
-	result = tmp * rho[0][0] * INVERTED_HX_HY;
+	result = tmp * rho[0] * INVERTED_HX_HY;
 
 	//   2
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
@@ -294,7 +294,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
 	}
 	tmp += tmp_integral * 0.5;
-	result += tmp * rho[1][0] * INVERTED_HX_HY;
+	result += tmp * rho[2] * INVERTED_HX_HY;
 
 	//   3
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
@@ -309,7 +309,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
 	}
 	tmp += tmp_integral * 0.5;
-	result += tmp * rho[0][1] * INVERTED_HX_HY;
+	result += tmp * rho[1] * INVERTED_HX_HY;
 
 	//   4
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
@@ -324,7 +324,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
 	}
 	tmp -= tmp_integral * 0.5;
-	result += tmp * rho[1][1] * INVERTED_HX_HY;
+	result += tmp * rho[3] * INVERTED_HX_HY;
 	return result;
 }
 
