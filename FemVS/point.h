@@ -109,4 +109,60 @@ struct ip_t {
 	}
 };
 
+inline void sort_by_y(dp_t& x, dp_t& y, dp_t& z) {
+	if (x.y < y.y) {
+		if (z.y < x.y)
+			std::swap(x, z);
+	}
+	else {
+		if (y.y < z.y)
+			std::swap(x, y);
+		else
+			std::swap(x, z);
+	}
+	if (z.y < y.y) std::swap(y, z);
+}
+
+inline bool try_get_slope_ratio(const dp_t &bv, const dp_t &uv, double &value) {
+	if (fabs(bv.x - uv.x) < FLT_MIN) {
+		return false;
+	}
+	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // угловой коэффициент прямой
+	if (value < FLT_MIN) {
+		return false;
+	}
+	return true;
+}
+
+inline dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta) {
+	dp_t result;
+	dp_t alpha_to_gamma;
+	dp_t beta_to_theta;
+	double a_1LC, b_1LC, c_1LC;
+	double a_2LC, b_2LC, c_2LC;
+	alpha_to_gamma.x = gamma.x - alpha.x;
+	alpha_to_gamma.y = gamma.y - alpha.y;
+	a_1LC = alpha_to_gamma.y;
+	b_1LC = -alpha_to_gamma.x;
+	c_1LC = alpha_to_gamma.y * alpha.x - alpha_to_gamma.x * alpha.y;
+	beta_to_theta.x = theta.x - beta.x;
+	beta_to_theta.y = theta.y - beta.y;
+	a_2LC = beta_to_theta.y;
+	b_2LC = -beta_to_theta.x;
+	c_2LC = beta_to_theta.y * beta.x - beta_to_theta.x * beta.y;
+	result.x = (b_1LC * c_2LC - b_2LC * c_1LC) / (b_1LC * a_2LC - b_2LC * a_1LC);
+	result.y = (a_1LC * c_2LC - a_2LC * c_1LC) / (-b_1LC * a_2LC + b_2LC * a_1LC);
+	return result;
+}
+
+inline double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta) {
+	dp_t alpha_to_beta;
+	dp_t alpha_to_theta;
+	alpha_to_beta.x = beta.x - alpha.x;
+	alpha_to_beta.y = beta.y - alpha.y;
+	alpha_to_theta.x = theta.x - alpha.x;
+	alpha_to_theta.y = theta.y - alpha.y;
+	return alpha_to_beta.x * alpha_to_theta.y - alpha_to_beta.y * alpha_to_theta.x;
+}
+
 #endif /* MISC_H */
