@@ -164,7 +164,7 @@ inline static double integrate_triangle(double py, double qy, double alpha, doub
 
 static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
 	const ip_t &sx, const ip_t &sy) {
-	double result, tmp = 0;
+	double result, tmp;
 	double rho[2][2];
 	if (sx.x >= 0 && sy.x >= 0) {
 		rho[0][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
@@ -300,7 +300,7 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 	const ip_t &sy) {
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return fabs(uv.y - bv.y);
 
-	double result = 0, gx = 0, hx = 0;
+	double result = 0, gx = 0, hx;
 	dp_t mv, rv;
 	int m_i;
 	if (uv.x <= bv.x) {
@@ -351,8 +351,8 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return fabs(uv.y - bv.y);
 
 	dp_t lv, mv; //   -  Left and middle vertices.
-	int m_i = 0; //   -  Where middle vertex is.        
-	double result = 0, gx = 0, hx = 0; //   -  Left and right boundary for each integration.   
+	int m_i; //   -  Where middle vertex is.        
+	double result = 0, gx, hx = 0; //   -  Left and right boundary for each integration.   
 
 	// зачем то определили среднюю точку
 	if (uv.x <= bv.x) {
@@ -408,7 +408,7 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 	ip_t ib(sx.x, sx.x + 1); //   -  Index of right boundary.   
 
 	double result = 0;
-	int curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
 	while (true) {
 		//TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
@@ -461,7 +461,7 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 
 	ip_t ib(sx.x, sx.x + 1);
 	double result = 0;
-	int curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
 	while (true) {
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
@@ -513,7 +513,7 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 	ib.y = ib.x + 1;
 
 	double result = 0;
-	int curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
 	while (true) {
 		double slope = sy.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
@@ -566,7 +566,7 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 	ib.y = ib.x + 1;
 
 	double result = 0;
-	int curr_i = 0, next_i = 0;
+	int curr_i = 0, next_i;
 	dp_t curr = bv, next;
 	while (true) {
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
@@ -602,7 +602,7 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 	return result;
 }
 
-static double integrate_bottom_triangle(const dp_t& l, const dp_t& r, const dp_t& m) {
+static double integrate_bottom_triangle(const dp_t& l, const dp_t& m, const dp_t& r) {
 	double result = 0;
 	if (m.x == l.x) {
 		result = integrate_right_triangle_bottom_right(m, r);
@@ -625,7 +625,7 @@ static double integrate_bottom_triangle(const dp_t& l, const dp_t& r, const dp_t
 	return result;
 }
 
-static double integrate_upper_triangle(const dp_t& l, const dp_t& r, const dp_t& m) {
+static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t& r) {
 	double result = 0;
 	if (m.x == l.x) {
 		result = integrate_right_triangle_upper_right(r, m);
@@ -670,8 +670,8 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z) 
 		ip.x = tx;
 	}
 
-	return integrate_upper_triangle(y, ip, z)
-		+ integrate_bottom_triangle(y, ip, x);
+	return integrate_upper_triangle(y, z, ip)
+		+ integrate_bottom_triangle(y, x, ip);
 }
 
 static quad_type get_coordinates_on_prev_layer(int ix, int iy,
