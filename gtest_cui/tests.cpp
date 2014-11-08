@@ -24,14 +24,11 @@ protected:
 
 TEST_F(cpu, test_to_model)
 {
-	const int first = 0;
-	const int last = 2;
+	int first = 0, last = 2;	
 	double norm_test, norm_model;
 	ComputeParameters p = ComputeParameters();
-
 	for (int lvl = first; lvl < last; ++lvl)
 	{
-		printf("level = %d\n", lvl);
 		p.recompute_params(lvl);
 		double* data = solve_internal(p);
 		double norm_test = p.norm;
@@ -39,9 +36,9 @@ TEST_F(cpu, test_to_model)
 		double norm_model = p.norm;
 		for (int i = 0; i < p.get_size(); i++)
 		{
-			ASSERT_NEAR(model[i], data[i], FLT_MIN);
+			ASSERT_NEAR(model[i], data[i], 1e-12);
 		}
-		ASSERT_NEAR(norm_model, norm_test, FLT_MIN);
+		ASSERT_NEAR(norm_model, norm_test, 1e-12);
 		delete[] data;
 		delete[] model;
 	}
