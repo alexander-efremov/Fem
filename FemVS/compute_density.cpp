@@ -173,9 +173,9 @@ inline static double integrate_rectangle(double py, double qy, double gx, double
 inline static double integrate_triangle(double py, double qy, double alpha, double a, double b,
                                         double beta)
 {
-	return (((qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
+	return 0.5 * ((((qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
 		- (py - alpha) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (3 * a)) - ((a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
-		- (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (12 * a * a);
+		- (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (12 * a * a));
 }
 
 static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
@@ -278,7 +278,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
 	}
-	tmp -= tmp_integral * 0.5;
+	tmp -= tmp_integral;
 	result += tmp * rho[0];
 
 	//   2
@@ -293,7 +293,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
 	}
-	tmp += tmp_integral * 0.5;
+	tmp += tmp_integral;
 	result += tmp * rho[2];
 
 	//   3
@@ -308,7 +308,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp *= (hx - HX * sx.y) * (hx - HX * sx.y) * -0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
 	}
-	tmp += tmp_integral * 0.5;
+	tmp += tmp_integral;
 	result += tmp * rho[1];
 
 	//   4
@@ -323,7 +323,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp *= (hx - HX * sx.x) * (hx - HX * sx.x) * 0.25;
 		tmp_integral = integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
 	}
-	tmp -= tmp_integral * 0.5;
+	tmp -= tmp_integral;
 	result += tmp * rho[3];
 	return result * INVERTED_HX_HY;
 }
