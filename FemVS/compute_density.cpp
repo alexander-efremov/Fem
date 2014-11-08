@@ -316,8 +316,8 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
                                            bool is_rect_truncated, const ip_t& sx, double b, const ip_t& sb,
                                            const ip_t& sy)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
-	double result = 0, gx = 0, hx;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
+	double result = 0, gx = 0;
 	double x = uv.x <= bv.x ? uv.x : bv.x;
 
 	//   A. Under rectangle.
@@ -340,8 +340,7 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 	{
 		if (j == sb.x) gx = b;
 		else gx = ch_pos.x >= 0 ? OX[ch_pos.x] : HX * ch_pos.x;
-		hx = ch_pos.x >= 0 ? OX[ch_pos.y] : HX * ch_pos.y;
-		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, ch_pos, sy);
+		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, ch_pos.x >= 0 ? OX[ch_pos.y] : HX * ch_pos.y, ch_pos, sy);
 		ch_pos.x += 1;
 		ch_pos.y = ch_pos.x + 1;
 	}
@@ -361,7 +360,7 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
                                           double b, const ip_t& sb)
 {
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
-	double result = 0, gx, hx = 0; //   -  Left and right boundary for each integration.   
+	double result = 0, hx = 0; //   -  Left and right boundary for each integration.   
 	double x = uv.x <= bv.x ? bv.x : uv.x;
 
 	// case A: triangle
@@ -380,8 +379,7 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 	{
 		hx = ch_pos.y <= 0 ? HX * ch_pos.y : hx = OX[ch_pos.y];
 		if (j == sb.x) hx = b;
-		gx = ch_pos.y <= 0 ? HX * ch_pos.x : OX[ch_pos.x];
-		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, ch_pos, sy);
+		result += integrate_rectangle_one_cell(bv.y, uv.y, ch_pos.y <= 0 ? HX * ch_pos.x : OX[ch_pos.x], hx, ch_pos, sy);
 		ch_pos.x += 1;
 		ch_pos.y = ch_pos.x + 1;
 	}
