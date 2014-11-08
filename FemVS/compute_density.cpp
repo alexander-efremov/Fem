@@ -151,7 +151,7 @@ __pure inline static double func_f(double b, double tau_tl, double ub, double bb
 	double u = func_u(b, x, y);
 	double v = func_v(ub, bb, lb, rb, tau_tl, x, y);
 	double du_dx = -B * y * (1 - y) / (1 + x * x);
-	double dv_dx = (x - lb) * (x - rb) * (1 + tau_tl) / 10 * (y - bb + y - ub);
+	double dv_dx = (x - lb) * (x - rb) * (1 + tau_tl) * 0.1 * (y - bb + y - ub);
 	dv_dx /= (1 + arg_v * arg_v);
 	double res = drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
 	// print_f_params()...
