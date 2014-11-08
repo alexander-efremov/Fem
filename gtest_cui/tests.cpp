@@ -35,20 +35,20 @@ TEST_F(cpu, test_to_model)
 		printf("level = %d\n", lvl);
 		p->recompute_params(lvl);
 		double* data = solve_internal(p);
-		
+		norm_test = p->norm;
 		double* model = get_model_result(p, lvl);
-		//norm_model = p->norm;
+		norm_model = p->norm;
 		// print_matrix(model, p->x_length(), p->y_length());
 		for (int i = 0; i < p->get_size(); i++)
 		{
 			ASSERT_NEAR(model[i], data[i], 1e-12);
 		}
-	//	ASSERT_NEAR(norm_model, norm_test, 1e-12);
-		//printf("norm test = %f\n", norm_test);
-	//	printf("norm model = %f\n", norm_model);
+//		ASSERT_NEAR(norm_model, norm_test, 1e-12);
+//		printf("norm test = %f\n", norm_test);
+//		printf("norm model = %f\n", norm_model);
 
-		delete [] data;
-		delete [] model;
+		delete[] data;
+		delete[] model;
 	}
 	delete p;
 }

@@ -23,31 +23,129 @@ static double TAU_TL;
 static double TAU_TL_1; // tau * (tl - 1)
 static double INVERTED_HX_HY;
 
-inline double analytical_solution(double t, double x, double y) {
+inline static void init(double b, double lb, double rb, double bb, double ub,
+	double tau, int time_step_count, int ox_length, int oy_length) {
+	B = b;
+	UB = ub;
+	BB = bb;
+	LB = lb;
+	RB = rb;
+	TAU = tau;
+	TIME_STEP_CNT = time_step_count;
+	XY_LEN = (ox_length + 1) * (oy_length + 1);
+	OX_LEN = ox_length;
+	OY_LEN = oy_length;
+	OX = new double[OX_LEN + 1];
+	OY = new double[OY_LEN + 1];
+	for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
+	for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
+	HX = OX[1] - OX[0];
+	HY = OY[1] - OY[0];
+	INVERTED_HX_HY = 1 / HX / HY;
+}
+
+inline static void clean() {
+	B = 0;
+	UB = 0;
+	BB = 0;
+	LB = 0;
+	RB = 0;
+	TAU = 0;
+	TAU_TL = 0;
+	OX_LEN = 0;
+	OY_LEN = 0;
+	TIME_STEP_CNT = 0;
+	TMP_WALL_CNT = 0;
+	XY_LEN = 0;
+	HX = 0;
+	HY = 0;
+	INVERTED_HX_HY = 0;
+	TL = 0;
+	delete[] OX;
+	delete[] OY;
+}
+
+inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z) {
+	if (x.y < y.y) {
+		if (z.y < x.y)
+			std::swap(x, z);
+	}
+	else {
+		if (y.y < z.y)
+			std::swap(x, y);
+		else
+			std::swap(x, z);
+	}
+	if (z.y < y.y) std::swap(y, z);
+}
+
+inline static bool try_get_slope_ratio(const dp_t &bv, const dp_t &uv, double &value) {
+	if (fabs(bv.x - uv.x) < MIN_VALUE) {
+		return false;
+	}
+	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // угловой коэффициент прямой
+	if (value < MIN_VALUE) {
+		return false;
+	}
+	return true;
+}
+
+inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta) {
+	dp_t result;
+	dp_t alpha_to_gamma;
+	dp_t beta_to_theta;
+	double a_1LC, b_1LC, c_1LC;
+	double a_2LC, b_2LC, c_2LC;
+	alpha_to_gamma.x = gamma.x - alpha.x;
+	alpha_to_gamma.y = gamma.y - alpha.y;
+	a_1LC = alpha_to_gamma.y;
+	b_1LC = -alpha_to_gamma.x;
+	c_1LC = alpha_to_gamma.y * alpha.x - alpha_to_gamma.x * alpha.y;
+	beta_to_theta.x = theta.x - beta.x;
+	beta_to_theta.y = theta.y - beta.y;
+	a_2LC = beta_to_theta.y;
+	b_2LC = -beta_to_theta.x;
+	c_2LC = beta_to_theta.y * beta.x - beta_to_theta.x * beta.y;
+	result.x = (b_1LC * c_2LC - b_2LC * c_1LC) / (b_1LC * a_2LC - b_2LC * a_1LC);
+	result.y = (a_1LC * c_2LC - a_2LC * c_1LC) / (-b_1LC * a_2LC + b_2LC * a_1LC);
+	return result;
+}
+
+inline static double get_vector_product(const dp_t& alpha, const dp_t beta, const dp_t theta) {
+	dp_t alpha_to_beta;
+	dp_t alpha_to_theta;
+	alpha_to_beta.x = beta.x - alpha.x;
+	alpha_to_beta.y = beta.y - alpha.y;
+	alpha_to_theta.x = theta.x - alpha.x;
+	alpha_to_theta.y = theta.y - alpha.y;
+	return alpha_to_beta.x * alpha_to_theta.y - alpha_to_beta.y * alpha_to_theta.x;
+}
+
+inline static double analytical_solution(double t, double x, double y) {
 	return 1.1 + sin(t * x * y);
 }
 
-inline double init_side(double x, double y, double t) {
+inline static double init_side(double x, double y, double t) {
 	return analytical_solution(t, x, y);
 }
 
-inline double func_u(double x, double y) {
+inline static double func_u(double x, double y) {
 	return B * y * (1 - y) * (M_PI_2 + atan(-x));
 }
 
-inline double func_u(const dp_t &p) {
+inline static double func_u(const dp_t &p) {
 	return func_u(p.x, p.y);
 }
 
-inline double func_v(double t, double x, double y) {
+inline static double func_v(double t, double x, double y) {
 	return atan((x - LB) * (x - RB) * (1 + t) / 10 * (y - UB) * (y - BB));
 }
 
-inline double func_v(double t, const dp_t &p) {
+inline static double func_v(double t, const dp_t &p) {
 	return func_v(t, p.x, p.y);
 }
 
-inline double func_f(double x, double y) {
+inline static double func_f(double x, double y) {
 	double arg_v = (x - LB) * (x - RB) * (1 + TAU_TL) / 10 * (y - UB) * (y - BB);
 	double rho = analytical_solution(TAU_TL, x, y);
 	double drho_dt = x * y * cos(TAU_TL * x * y);
@@ -63,11 +161,11 @@ inline double func_f(double x, double y) {
 	return res;
 }
 
-inline double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b) {
+inline static double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b) {
 	return ((hx - a) * (hx - a) - (gx - a) * (gx - a)) * ((qy - b) * (qy - b) - (py - b) * (py - b)) * 0.25;
 }
 
-inline double integrate_triangle(double py, double qy, double alpha, double a, double b,
+inline static double integrate_triangle(double py, double qy, double alpha, double a, double b,
 	double beta) {
 	return (((qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
 		- (py - alpha) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (3 * a)) - ((a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
@@ -763,57 +861,17 @@ void solve(double* density) {
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));
 	}
-	delete [] PREV_DENSITY;
+	delete[] PREV_DENSITY;
 }
 
-inline void init(double b, double lb, double rb, double bb, double ub,
-	double tau, int time_step_count, int ox_length, int oy_length) {
-	B = b;
-	UB = ub;
-	BB = bb;
-	LB = lb;
-	RB = rb;
-	TAU = tau;
-	TIME_STEP_CNT = time_step_count;
-	XY_LEN = (ox_length + 1) * (oy_length + 1);
-	OX_LEN = ox_length;
-	OY_LEN = oy_length;
-	OX = new double[OX_LEN + 1];
-	OY = new double[OY_LEN + 1];
-	for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
-	for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
-	HX = OX[1] - OX[0];
-	HY = OY[1] - OY[0];
-	INVERTED_HX_HY = 1 / HX / HY;
-}
-
-inline void clean() {
-	B = 0;
-	UB = 0;
-	BB = 0;
-	LB = 0;
-	RB = 0;
-	TAU = 0;
-	TAU_TL = 0;
-	OX_LEN = 0;
-	OY_LEN = 0;
-	TIME_STEP_CNT = 0;
-	TMP_WALL_CNT = 0;
-	XY_LEN = 0;
-	HX = 0;
-	HY = 0;
-	INVERTED_HX_HY = 0;
-	TL = 0;
-	delete [] OX;
-	delete [] OY;
-}
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
-	double tau, int time_step_count, int ox_length, int oy_length){
+	double tau, int time_step_count, int ox_length, int oy_length) {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	solve(density);
+//	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	printf("%d x %d wall count = %d\n", OX_LEN + 1, OY_LEN + 1, TMP_WALL_CNT);
 	clean();
 	return density;
