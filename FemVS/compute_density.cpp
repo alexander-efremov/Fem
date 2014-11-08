@@ -141,7 +141,7 @@ __pure inline static double func_v(double ub, double bb, double lb, double rb, d
 	return func_v(ub, bb, lb, rb, t, p.x, p.y);
 }
 
-inline static double func_f(double b, double tau_tl, double ub, double bb, double lb, double rb, double x, double y)
+__pure inline static double func_f(double b, double tau_tl, double ub, double bb, double lb, double rb, double x, double y)
 {
 	double arg_v = (x - lb) * (x - rb) * (1 + tau_tl) * 0.1 * (y - ub) * (y - bb);
 	double rho = analytical_solution(tau_tl, x, y);
@@ -151,20 +151,19 @@ inline static double func_f(double b, double tau_tl, double ub, double bb, doubl
 	double u = func_u(b, x, y);
 	double v = func_v(ub, bb, lb, rb, tau_tl, x, y);
 	double du_dx = -B * y * (1 - y) / (1 + x * x);
-	double dv_dx = (x - LB) * (x - RB) * (1 + TAU_TL) / 10 * (y - BB + y - UB);
+	double dv_dx = (x - lb) * (x - rb) * (1 + tau_tl) / 10 * (y - bb + y - ub);
 	dv_dx /= (1 + arg_v * arg_v);
 	double res = drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
 	// print_f_params()...
 	return res;
 }
 
-inline static double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b)
+__pure inline static double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b)
 {
 	return ((hx - a) * (hx - a) - (gx - a) * (gx - a)) * ((qy - b) * (qy - b) - (py - b) * (py - b)) * 0.25;
 }
 
-inline static double integrate_triangle(double py, double qy, double alpha, double a, double b,
-                                        double beta)
+__pure inline static double integrate_triangle(double py, double qy, double alpha, double a, double b, double beta)
 {
 	return 0.5 * ((((qy - alpha) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
 		- (py - alpha) * (a * py + b - beta) * (a * py + b - beta) * (a * py + b - beta)) / (3 * a)) - ((a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta) * (a * qy + b - beta)
@@ -195,58 +194,25 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
 	if (fabs(a_sl) <= FLT_MIN) return 0;
 	double b_sl = uv.x - a_sl * uv.y;
-
-	double result = 0, tmp;
-	double rho[4];	
-	rho[0] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY));
-	rho[1] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY));
-    rho[2] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY));
-	rho[3] = (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY));	
-
-	//   1
+	double result = 0, tmp, a, b;
+	a = sx.y >= 0 && sy.y >= 0 ? OX[sx.y] : HX * sx.y;
+	b = sx.y >= 0 && sy.y >= 0 ? OY[sy.y] : HY * sy.y;
+	tmp = ((uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y])) * (hx - a) * (hx - a) * 0.25 - integrate_triangle(bv.y, uv.y, b, a_sl, b_sl, a);
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY));
+	a = sx.x >= 0 && sy.y >= 0 ? OX[sx.x] : HX * sx.x;
 	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
-	if (sx.y >= 0 && sy.y >= 0)
-	{
-		tmp = tmp * (hx - OX[sx.y]) * (hx - OX[sx.y]) * 0.25 - integrate_triangle(bv.y, uv.y, OY[sy.y], a_sl, b_sl, OX[sx.y]);
-	}
-	else
-	{
-		tmp = tmp * (hx - HX * sx.y) * (hx - HX * sx.y) * 0.25 - integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.y);
-	}
-	result += tmp * rho[0];
-	//   2
-	tmp = (uv.y - OY[sy.y]) * (uv.y - OY[sy.y]) - (bv.y - OY[sy.y]) * (bv.y - OY[sy.y]);
-	if (sx.x >= 0 && sy.y >= 0)
-	{
-		tmp = tmp * (hx - OX[sx.x]) * (hx - OX[sx.x]) * -0.25 + integrate_triangle(bv.y, uv.y, OY[sy.y], a_sl, b_sl, OX[sx.x]);
-	}
-	else
-	{
-		tmp = tmp * (hx - HX * sx.x) * (hx - HX * sx.x) * -0.25 + integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
-	}
-	result += tmp * rho[2];
-	//   3
+	tmp = tmp * (hx - a) * (hx - a) * -0.25 + integrate_triangle(bv.y, uv.y, b, a_sl, b_sl, a);
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY));
+	a = sx.y >= 0 && sy.x >= 0 ? OX[sx.y] : HX * sx.y;
+	b = sx.y >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
-	if (sx.y >= 0 && sy.x >= 0)
-	{
-		tmp = tmp * (hx - OX[sx.y]) * (hx - OX[sx.y]) * -0.25 + integrate_triangle(bv.y, uv.y, OY[sy.x], a_sl, b_sl, OX[sx.y]);
-	}
-	else
-	{
-		tmp = tmp * (hx - HX * sx.y) * (hx - HX * sx.y) * -0.25 + integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
-	}
-	result += tmp * rho[1];
-	//   4
+	tmp = tmp * (hx - a) * (hx - a) * -0.25 + integrate_triangle(bv.y, uv.y, b, a_sl, b_sl, a);
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY));
+	a = sx.x >= 0 && sy.x >= 0 ? OX[sx.x] : HX * sx.x;
+	b = sx.x >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
-	if (sx.x >= 0 && sy.x >= 0)
-	{
-		tmp = tmp * (hx - OX[sx.x]) * (hx - OX[sx.x]) * 0.25 - integrate_triangle(bv.y, uv.y, OY[sy.x], a_sl, b_sl, OX[sx.x]);
-	}
-	else
-	{
-		tmp = tmp * (hx - HX * sx.x) * (hx - HX * sx.x) * 0.25 - integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.x);
-	}
-	result += tmp * rho[3];
+	tmp = tmp * (hx - a) * (hx - a) * 0.25 - integrate_triangle(bv.y, uv.y, b, a_sl, b_sl, a);
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.y] : analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY));
 	return result * INVERTED_HX_HY;
 }
 
