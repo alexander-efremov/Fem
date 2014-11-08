@@ -177,7 +177,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	double rho[4];
 	if (sx.x >= 0 && sy.x >= 0)
 	{
-		rho[0] = PREV_DENSITY[OX_LEN_1 * sy.x + sx.x];
+		rho[0] = PREV_DENSITY[OX_LEN_1 * sy.x + sx.x]; // ЭТО ПЛОТНОСТЬ С ПРЕДЫДУЩЕГО СЛОЯ ДЛЯ ДАННОЙ ЯЧЕЙКИ?
 		rho[1] = PREV_DENSITY[OX_LEN_1 * sy.y + sx.x];
 		rho[2] = PREV_DENSITY[OX_LEN_1 * sy.x + sx.y];
 		rho[3] = PREV_DENSITY[OX_LEN_1 * sy.y + sx.y];
