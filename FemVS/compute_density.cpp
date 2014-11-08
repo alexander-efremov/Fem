@@ -9,6 +9,7 @@ static double LB;
 static double RB;
 static double TAU;
 static int OX_LEN;
+static int OX_LEN_1; // OX_LEN_1
 static int OY_LEN;
 static int XY_LEN;
 static int TIME_STEP_CNT;
@@ -21,49 +22,6 @@ static int TL;
 static double TAU_TL;
 static double TAU_TL_1; // tau * (tl - 1)
 static double INVERTED_HX_HY;
-
-inline static void init(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length)
-{
-	B = b;
-	UB = ub;
-	BB = bb;
-	LB = lb;
-	RB = rb;
-	TAU = tau;
-	TIME_STEP_CNT = time_step_count;
-	XY_LEN = (ox_length + 1) * (oy_length + 1);
-	OX_LEN = ox_length;
-	OY_LEN = oy_length;
-	OX = new double[OX_LEN + 1];
-	OY = new double[OY_LEN + 1];
-	for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
-	for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
-	HX = OX[1] - OX[0];
-	HY = OY[1] - OY[0];
-	INVERTED_HX_HY = 1 / HX / HY;
-}
-
-inline static void clean()
-{
-	B = 0;
-	UB = 0;
-	BB = 0;
-	LB = 0;
-	RB = 0;
-	TAU = 0;
-	TAU_TL = 0;
-	OX_LEN = 0;
-	OY_LEN = 0;
-	TIME_STEP_CNT = 0;
-	XY_LEN = 0;
-	HX = 0;
-	HY = 0;
-	INVERTED_HX_HY = 0;
-	TL = 0;
-	delete[] OX;
-	delete[] OY;
-}
 
 inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z)
 {
@@ -173,10 +131,10 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	double rho[4];
 	if (sx.x >= 0 && sy.x >= 0)
 	{
-		rho[0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
-		rho[1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
-		rho[2] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
-		rho[3] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
+		rho[0] = PREV_DENSITY[(OX_LEN_1) * sy.x + sx.x];
+		rho[1] = PREV_DENSITY[(OX_LEN_1) * sy.y + sx.x];
+		rho[2] = PREV_DENSITY[(OX_LEN_1) * sy.x + sx.y];
+		rho[3] = PREV_DENSITY[(OX_LEN_1) * sy.y + sx.y];
 	}
 	else
 	{
@@ -239,10 +197,10 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 
 	if (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN)
 	{
-		rho[0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
-		rho[1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
-		rho[2] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
-		rho[3] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
+		rho[0] = PREV_DENSITY[(OX_LEN_1) * sy.x + sx.x];
+		rho[1] = PREV_DENSITY[(OX_LEN_1) * sy.y + sx.x];
+		rho[2] = PREV_DENSITY[(OX_LEN_1) * sy.x + sx.y];
+		rho[3] = PREV_DENSITY[(OX_LEN_1) * sy.y + sx.y];
 	}
 	else
 	{
@@ -844,9 +802,9 @@ static void solve(double* density)
 	PREV_DENSITY = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
 	{
-		for (int i = 0; i < OX_LEN + 1; i++)
+		for (int i = 0; i < OX_LEN_1; i++)
 		{
-			PREV_DENSITY[(OX_LEN + 1) * j + i] = analytical_solution(0, OX[i], OY[j]);
+			PREV_DENSITY[(OX_LEN_1) * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
 
@@ -857,21 +815,21 @@ static void solve(double* density)
 		for (int i = 0; i <= OX_LEN; i++)
 		{
 			density[i] = analytical_solution(OX[i], BB, TAU_TL);
-			density[(OX_LEN + 1) * OY_LEN + i] = analytical_solution(OX[i], UB, TAU_TL);
+			density[(OX_LEN_1) * OY_LEN + i] = analytical_solution(OX[i], UB, TAU_TL);
 		}
 
 		for (int i = 0; i <= OY_LEN; i++)
 		{
-			density[(OX_LEN + 1) * i] = analytical_solution(LB, OY[i], TAU_TL);
-			density[(OX_LEN + 1) * i + OX_LEN] = analytical_solution(RB, OY[i], TAU_TL);
+			density[(OX_LEN_1) * i] = analytical_solution(LB, OY[i], TAU_TL);
+			density[(OX_LEN_1) * i + OX_LEN] = analytical_solution(RB, OY[i], TAU_TL);
 		}
 
 		for (int i = 1; i < OY_LEN; i++)
 		{
 			for (int j = 1; j < OX_LEN; j++)
 			{
-				density[(OX_LEN + 1) * i + j] = integrate(j, i) * INVERTED_HX_HY;
-				density[(OX_LEN + 1) * i + j] += TAU * func_f(OX[j], OY[i]);
+				density[(OX_LEN_1) * i + j] = integrate(j, i) * INVERTED_HX_HY;
+				density[(OX_LEN_1) * i + j] += TAU * func_f(OX[j], OY[i]);
 			}
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));
@@ -879,6 +837,51 @@ static void solve(double* density)
 	delete[] PREV_DENSITY;
 }
 
+
+inline static void init(double b, double lb, double rb, double bb, double ub,
+	double tau, int time_step_count, int ox_length, int oy_length)
+{
+	B = b;
+	UB = ub;
+	BB = bb;
+	LB = lb;
+	RB = rb;
+	TAU = tau;
+	TIME_STEP_CNT = time_step_count;
+	XY_LEN = (ox_length + 1) * (oy_length + 1);
+	OX_LEN = ox_length;
+	OX_LEN_1 = ox_length + 1;
+	OY_LEN = oy_length;
+	OX = new double[OX_LEN_1];
+	OY = new double[OY_LEN + 1];
+	for (int i = 0; i <= OX_LEN; ++i) OX[i] = lb + i * (rb - lb) / OX_LEN;
+	for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
+	HX = OX[1] - OX[0];
+	HY = OY[1] - OY[0];
+	INVERTED_HX_HY = 1 / HX / HY;
+}
+
+inline static void clean()
+{
+	B = 0;
+	UB = 0;
+	BB = 0;
+	LB = 0;
+	RB = 0;
+	TAU = 0;
+	TAU_TL = 0;
+	OX_LEN = 0;
+	OY_LEN = 0;
+	OX_LEN_1 = 0;
+	TIME_STEP_CNT = 0;
+	XY_LEN = 0;
+	HX = 0;
+	HY = 0;
+	INVERTED_HX_HY = 0;
+	TL = 0;
+	delete[] OX;
+	delete[] OY;
+}
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length, double& norm)
