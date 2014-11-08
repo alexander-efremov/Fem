@@ -181,21 +181,21 @@ inline static double integrate_triangle(double py, double qy, double alpha, doub
 static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx,
                                            const ip_t& sx, const ip_t& sy)
 {	
-	double rho[2][2];
+	double rho[4];
 	if (sx.x >= 0 && sy.x >= 0)
 	{
-		rho[0][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
-		rho[0][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
-		rho[1][0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
-		rho[1][1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
+		rho[0] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.x];
+		rho[1] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.x];
+		rho[2] = PREV_DENSITY[(OX_LEN + 1) * sy.x + sx.y];
+		rho[3] = PREV_DENSITY[(OX_LEN + 1) * sy.y + sx.y];
 	}
 	else
 	{
 		// TODO: убрать потому что это неверно (надо расчитывать граничные условия)
-		rho[0][0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
-		rho[0][1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
-		rho[1][0] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
-		rho[1][1] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
+		rho[0] = analytical_solution(TAU_TL_1, sx.x * HX, sy.x * HY);
+		rho[1] = analytical_solution(TAU_TL_1, sx.x * HX, sy.y * HY);
+		rho[2] = analytical_solution(TAU_TL_1, sx.y * HX, sy.x * HY);
+		rho[3] = analytical_solution(TAU_TL_1, sx.y * HX, sy.y * HY);
 	}
 	// equation = i * (t_1*r_1 - t_2*r_2 - t_3*r_3 + t_4*r_4)
 	double tmp;
@@ -207,7 +207,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.y);
 	}
-	double result = tmp * rho[0][0];
+	double result = tmp * rho[0];
 	if (sx.x >= 0 && sy.y >= 0)
 	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.y]);
@@ -216,7 +216,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.y);
 	}
-	result -= tmp * rho[1][0];
+	result -= tmp * rho[2];
 	if (sx.y >= 0 && sy.x >= 0)
 	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.y], OY[sy.x]);
@@ -225,7 +225,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.y, HY * sy.x);
 	}
-	result -= tmp * rho[0][1];
+	result -= tmp * rho[1];
 	if (sx.x >= 0 && sy.x >= 0)
 	{
 		tmp = integrate_rectangle(py, qy, gx, hx, OX[sx.x], OY[sy.x]);
@@ -234,7 +234,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	{
 		tmp = integrate_rectangle(py, qy, gx, hx, HX * sx.x, HY * sy.x);
 	}
-	result += tmp * rho[1][1];
+	result += tmp * rho[3];
 	return result * INVERTED_HX_HY;
 }
 
