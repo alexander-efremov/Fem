@@ -241,7 +241,6 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx,
                                                const ip_t& sx, const ip_t& sy)
 {
-	if (fabs(bv.y - uv.y) <= FLT_MIN) return 0;
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
 	if (fabs(a_sl) <= FLT_MIN) return 0;
 	double b_sl = uv.x - a_sl * uv.y;
@@ -288,7 +287,6 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp = tmp * (hx - HX * sx.x) * (hx - HX * sx.x) * -0.25 + integrate_triangle(bv.y, uv.y, HY * sy.y, a_sl, b_sl, HX * sx.x);
 	}
 	result += tmp * rho[2];
-
 	//   3
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
 	if (sx.y >= 0 && sy.x >= 0)
@@ -300,7 +298,6 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 		tmp = tmp * (hx - HX * sx.y) * (hx - HX * sx.y) * -0.25 + integrate_triangle(bv.y, uv.y, HY * sy.x, a_sl, b_sl, HX * sx.y);
 	}
 	result += tmp * rho[1];
-
 	//   4
 	tmp = (uv.y - OY[sy.x]) * (uv.y - OY[sy.x]) - (bv.y - OY[sy.x]) * (bv.y - OY[sy.x]);
 	if (sx.x >= 0 && sy.x >= 0)
@@ -321,10 +318,10 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 {
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx = 0, hx;
-	dp_t mv = uv.x <= bv.x ? uv : bv;
+	double x = uv.x <= bv.x ? uv.x : bv.x;
 
 	//   A. Under rectangle.
-	result += -1 * integrate_triangle_left_one_cell(bv, uv, mv.x, sx, sy);
+	result += -1 * integrate_triangle_left_one_cell(bv, uv, x, sx, sy);
 
 	// case B: неполный прямоугольник    
 	if (is_rect_truncated)
@@ -334,7 +331,7 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 		{
 			gx = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 		}
-		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, mv.x, sx, sy);
+		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, x, sx, sy);
 	}
 
 	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
@@ -365,17 +362,16 @@ static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
 {
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx, hx = 0; //   -  Left and right boundary for each integration.   
-	dp_t mv = uv.x <= bv.x ? mv = bv : mv = uv;
+	double x = uv.x <= bv.x ? bv.x : uv.x;
 
 	// case A: triangle
-	result += integrate_triangle_left_one_cell(bv, uv, mv.x, sx, sy);
+	result += integrate_triangle_left_one_cell(bv, uv, x, sx, sy);
 
 	// case B: не полный прямоугольник
 	if (is_rect_trunc)
 	{ // это значит, что прямоугольник занимает не всю ячейку  
 		hx = sx.x == sb.x ? b : (sx.y >= 0 ? OX[sx.y] : HX * sx.y);
-		gx = mv.x;
-		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, sx, sy);
+		result += integrate_rectangle_one_cell(bv.y, uv.y, x, hx, sx, sy);
 	}
 
 	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
