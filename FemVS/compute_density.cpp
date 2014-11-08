@@ -298,7 +298,7 @@ static double integrate_triangle_left_one_cell(const dp_t &bv, const dp_t &uv, d
 static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 	int curr_i, int next_i, const ip_t &sx, double b, const ip_t &sb,
 	const ip_t &sy) {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return fabs(uv.y - bv.y);
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
 
 	double result = 0, gx = 0, hx;
 	dp_t mv, rv;
@@ -346,29 +346,17 @@ static double integrate_chanel_slant_right(const dp_t& bv, const dp_t& uv,
 // BOTTOMLEFTTR
 
 static double integrate_chanel_slant_left(const dp_t& bv, const dp_t& uv,
-	int curr_i, int next_i, const ip_t &sx, const ip_t &sy,
+	bool is_rect_trunc, const ip_t &sx, const ip_t &sy,
 	double b, const ip_t &sb) {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return fabs(uv.y - bv.y);
-
-	dp_t lv, mv; //   -  Left and middle vertices.
-	int m_i; //   -  Where middle vertex is.        
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;      
 	double result = 0, gx, hx = 0; //   -  Left and right boundary for each integration.   
-
-	// зачем то определили среднюю точку
-	if (uv.x <= bv.x) {
-		mv = bv;
-		m_i = curr_i;
-	}
-	else {
-		mv = uv;
-		m_i = next_i;
-	}
+	dp_t mv = uv.x <= bv.x ? mv = bv : mv = uv;	
 
 	// case A: triangle
 	result += integrate_triangle_left_one_cell(bv, uv, mv.x, sx, sy);
 
 	// case B: не полный прямоугольник
-	if (m_i == 1) { // это значит, что прямоугольник занимает не всю ячейку  
+	if (is_rect_trunc) { // это значит, что прямоугольник занимает не всю ячейку  
 		hx = sx.x == sb.x ? b : (sx.y >= 0 ? OX[sx.y] : HX * sx.y);
 		gx = mv.x;
 		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, hx, sx, sy);
@@ -427,12 +415,10 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 		if (next.x < (uv.x + FLT_MIN)) {
 			// сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
 			// и в случае когда прошлись по всем точкам...
-			next_i = 0;
-			next = uv;
-			result += integrate_chanel_slant_left(curr, next, curr_i, next_i, sx, sy, bv.x, ib);
+			result += integrate_chanel_slant_left(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, bv.x, ib);
 			break;
 		}
-		result += integrate_chanel_slant_left(curr, next, curr_i, next_i, sx, sy, bv.x, ib);
+		result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
 		switch (next_i) {
 		case 1:
 			sy += 1;
@@ -529,12 +515,10 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 			next.y = bv.y + k * (next.x - bv.x);
 		}
 		if (next.x > (uv.x - FLT_MIN)) {
-			next_i = 0;
-			next = uv;
-			result += integrate_chanel_slant_left(curr, next, curr_i, next_i, sx, sy, uv.x, ib);
+			result += integrate_chanel_slant_left(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 			break;
 		}
-		result += integrate_chanel_slant_left(curr, next, curr_i, next_i, sx, sy, uv.x, ib);
+		result += integrate_chanel_slant_left(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
 
 		switch (next_i) {
 		case 1:
