@@ -647,64 +647,6 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
 }
 
-static void get_coordinates_on_prev_layer(int i, int j,
-                                               dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
-{
-	//   1 First of all let's compute coordinates of square vertexes.
-	if (i == 0)
-	{
-		alpha.x = theta.x = OX[i];
-		gamma.x = beta.x = (OX[i] + OX[i + 1]) * 0.5;
-	}
-	else if (i == OX_LEN)
-	{
-		alpha.x = theta.x = (OX[i - 1] + OX[i]) * 0.5;
-		gamma.x = beta.x = OX[i];
-	}
-	else
-	{
-		alpha.x = theta.x = (OX[i - 1] + OX[i]) * 0.5;
-		gamma.x = beta.x  = (OX[i + 1] + OX[i]) * 0.5;
-	}
-
-	if (j == 0)
-	{
-		alpha.y = beta.y = OY[j];
-		gamma.y = theta.y = (OY[j] + OY[j + 1]) * 0.5;
-	}
-	else if (j == OY_LEN)
-	{
-		alpha.y = beta.y = (OY[j] + OY[j - 1]) * 0.5;
-		gamma.y = theta.y = OY[j];
-	}
-	else
-	{
-		alpha.y = beta.y = (OY[j] + OY[j - 1]) * 0.5;
-		gamma.y = theta.y = (OY[j] + OY[j + 1]) * 0.5;
-	}
-
-	double u = func_u(B, alpha);
-	double v = func_v(UB, BB, LB, RB, TIME, alpha);
-	alpha.x -= TAU * u;
-	alpha.y -= TAU * v;
-
-	u = func_u(B, beta);
-	v = func_v(UB, BB, LB, RB, TIME, beta);
-	beta.x -= TAU * u;
-	beta.y -= TAU * v;
-
-	u = func_u(B, gamma);
-	v = func_v(UB, BB, LB, RB, TIME, gamma);
-	gamma.x -= TAU * u;
-	gamma.y -= TAU * v;
-
-	u = func_u(B, theta);
-	v = func_v(UB, BB, LB, RB, TIME, theta);
-	theta.x -= TAU * u;
-	theta.y -= TAU * v;	
-}
-
-
 __pure inline wall_intersection_type get_wall_intersection_type(dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
 {
 	if (alpha.x <= 0 && beta.x <= 0 && gamma.x <= 0 && theta.x <= 0)
@@ -776,9 +718,25 @@ __pure inline wall_intersection_type get_wall_intersection_type(dp_t& alpha, dp_
 static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n, 
 	dp_t& w1, dp_t& w2, dp_t& w3, dp_t& w4, dp_t& y)
 {
-	dp_t alpha, beta, gamma, theta;
-	quad_type type;
-	get_coordinates_on_prev_layer(i, j, alpha, beta, gamma, theta);
+	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
+	dp_t alpha((OX[i - 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5), 
+		 beta((OX[i + 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5), 
+		 gamma((OX[i + 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5), 
+		 theta((OX[i - 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5);	
+	// get prev coordnates
+	double v = func_v(UB, BB, LB, RB, TIME, alpha);
+	alpha.x -= TAU * func_u(B, alpha);
+	alpha.y -= TAU * v;
+	v = func_v(UB, BB, LB, RB, TIME, beta);
+	beta.x -= TAU * func_u(B, beta);
+	beta.y -= TAU * v;
+	v = func_v(UB, BB, LB, RB, TIME, gamma);
+	gamma.x -= TAU * func_u(B, gamma);
+	gamma.y -= TAU * v;
+	v = func_v(UB, BB, LB, RB, TIME, theta);
+	theta.x -= TAU * func_u(B, theta);
+	theta.y -= TAU * v;
+
 	dp_t intersection = get_intersection_point(alpha, beta, gamma, theta);
 	if ((beta.y - intersection.y) * (theta.y - intersection.y) > 0) return pseudo; // ??
 	if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0) return pseudo; // ??	
@@ -973,12 +931,12 @@ static void solve(double* density)
 			density[OX_LEN_1 * i + OX_LEN] = analytical_solution(RB, OY[i], TIME);
 		}
 
-		for (int i = 1; i < OY_LEN; i++)
+		for (int j = 1; j < OY_LEN; j++)
 		{
-			for (int j = 1; j < OX_LEN; j++)
+			for (int i = 1; i < OX_LEN; i++)
 			{
-				density[OX_LEN_1 * i + j] = integrate(j, i) * INVERTED_HX_HY;
-				density[OX_LEN_1 * i + j] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[j], OY[i]);
+				density[OX_LEN_1 * j + i] = integrate(i, j) * INVERTED_HX_HY;
+				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
 			}
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
