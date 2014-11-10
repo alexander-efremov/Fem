@@ -90,6 +90,57 @@ __pure inline static void sort_by_y(dp_t& x, dp_t& y, dp_t& z)
 	}
 }
 
+__pure inline static void sort_by_x(dp_t& x, dp_t& y, dp_t& z)
+{
+	double t;
+	if (x.x < y.x)
+	{
+		if (z.x < x.x)
+		{
+			t = x.x;
+			x.x = z.x;
+			z.x = t;
+			t = y.y;
+			y.y = z.y;
+			z.y = t;
+			//swap(x, z);
+		}
+	}
+	else
+	{
+		if (y.x < z.x)
+		{
+			t = x.x;
+			x.x = y.x;
+			y.x = t;
+			t = x.y;
+			x.y = y.y;
+			y.y = t;
+			//swap(x, y);
+		}
+		else
+		{
+			t = x.x;
+			x.x = z.x;
+			z.x = t;
+			t = y.y;
+			y.y = z.y;
+			z.y = t;
+			//swap(x, z);
+		}
+	}
+	if (z.x < y.x)
+	{
+		t = y.x;
+		y.x = z.x;
+		z.x = t;
+		t = y.y;
+		y.y = z.y;
+		z.y = t;
+		//swap(y, z);
+	}
+}
+
 __pure inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& value)
 {
 	if (fabs(bv.x - uv.x) < MIN_VALUE)
@@ -605,55 +656,40 @@ static void get_coordinates_on_prev_layer(int ix, int iy,
                                                dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
 {
 	//   1 First of all let's compute coordinates of square vertexes.
-	//  OX:
 	if (ix == 0)
 	{
-		alpha.x = OX[ix];
-		beta.x = (OX[ix] + OX[ix + 1]) * 0.5;
-		gamma.x = (OX[ix] + OX[ix + 1]) * 0.5;
-		theta.x = OX[ix];
+		alpha.x = theta.x = OX[ix];
+		gamma.x = beta.x = (OX[ix] + OX[ix + 1]) * 0.5;
 	}
 	else if (ix == OX_LEN)
 	{
-		alpha.x = (OX[ix - 1] + OX[ix]) * 0.5;
-		beta.x = OX[ix];
-		gamma.x = OX[ix];
-		theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
+		alpha.x = theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
+		gamma.x = beta.x = OX[ix];
 	}
 	else
 	{
-		alpha.x = (OX[ix - 1] + OX[ix]) * 0.5;
-		beta.x = (OX[ix + 1] + OX[ix]) * 0.5;
-		gamma.x = (OX[ix + 1] + OX[ix]) * 0.5;
-		theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
+		alpha.x = theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
+		gamma.x = beta.x  = (OX[ix + 1] + OX[ix]) * 0.5;
 	}
 
-	//  OY:
 	if (iy == 0)
 	{
-		alpha.y = OY[iy];
-		beta.y = OY[iy];
-		gamma.y = (OY[iy] + OY[iy + 1]) * 0.5;
-		theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
+		alpha.y = beta.y = OY[iy];
+		gamma.y = theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
 	}
 	else if (iy == OY_LEN)
 	{
-		alpha.y = (OY[iy] + OY[iy - 1]) * 0.5;
-		beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
-		gamma.y = OY[iy];
-		theta.y = OY[iy];
+		alpha.y = beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
+		gamma.y = theta.y = OY[iy];
 	}
 	else
 	{
-		alpha.y = (OY[iy] + OY[iy - 1]) * 0.5;
-		beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
-		gamma.y = (OY[iy] + OY[iy + 1]) * 0.5;
-		theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
+		alpha.y = beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
+		gamma.y = theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
 	}
 
-	double u, v;
-	u = func_u(B, alpha);
-	v = func_v(UB, BB, LB, RB, TIME, alpha);
+	double u = func_u(B, alpha);
+	double v = func_v(UB, BB, LB, RB, TIME, alpha);
 	alpha.x -= TAU * u;
 	alpha.y -= TAU * v;
 
