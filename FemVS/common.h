@@ -15,6 +15,31 @@ enum quad_type
 	pseudo
 };
 
+enum wall_intersection_type
+{
+	_none = 0x0,
+	_1 = 0x1,
+	_2 = 0x2,
+	_3=  0x4,
+	_4 = 0x8,
+	_1_2 = 0x3,
+	_1_3 = 0x5,
+	_1_4 = 0x9,
+	_2_3 = 0x6,
+	_2_4 = 0x10,	
+	_3_4 = 0x12,
+	_1_2_3 = 0x7,
+	_1_2_4 = 0x11,
+	_1_3_4 = 0x13,
+	_2_3_4 = 0x14,
+	_1_2_3_4 = 0x15
+};
+
+inline wall_intersection_type operator|(wall_intersection_type a, wall_intersection_type b)
+{
+	return static_cast<wall_intersection_type>(static_cast<int>(a) | static_cast<int>(b));
+}
+
 struct ComputeParameters
 {
 public:

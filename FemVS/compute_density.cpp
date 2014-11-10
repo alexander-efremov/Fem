@@ -264,7 +264,7 @@ static double integrate_left_slant_chanel(const dp_t& bv, const dp_t& uv,
                                           bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
                                           double b, const ip_t& sb)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
 	double result = 0, hx = 0; //   -  Left and right boundary for each integration.   
 	double x = uv.x <= bv.x ? bv.x : uv.x;
 
@@ -320,13 +320,13 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 		double slope = sx.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? curr.x - OX[sx.x] : fabs(curr.x - HX * sx.x);
 		if (slope <= k)
-		{ //   Intersection with straight line parallel Ox axis.        
+		{        
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = curr.x - (next.y - curr.y) / k;
 		}
 		else
-		{ //   Intersection with straight line parallel Oy axis.            
+		{         
 			next_i = 2;
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = curr.y - k * (next.x - curr.x);
@@ -376,18 +376,18 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
 		slope /= sx.y >= 0 ? fabs(OX[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
 		if (slope <= k)
-		{//   Intersection with straight line parallel Ox axis.            
+		{         
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x + (next.y - bv.y) / k;
 		}
 		else
-		{//   Intersection with straight line parallel OY axis.
+		{
 			next_i = 2;
 			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
 		}
-		if (next.x - uv.x> FLT_MIN)
+		if (next.x - uv.x > FLT_MIN)
 		{
 			result += integrate_right_slant_chanel(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
 			break;
@@ -432,13 +432,13 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 		double slope = sy.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
 		slope /= sx.y >= 0 ? OX[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
 		if (slope <= k)
-		{ //   intersection with straight line parallel Ox axis.
+		{
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x + (next.y - bv.y) / k;
 		}
 		else
-		{//   intersection with straight line parallel OY axis.            
+		{          
 			next_i = 2;
 			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
@@ -489,13 +489,13 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? fabs(curr.x - OX[sx.x]) : fabs(curr.x - HX * sx.x);
 		if (slope <= k)
-		{ //   Intersection with straight line parallel Ox axis.
+		{ 
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x - (next.y - bv.y) / k;
 		}
 		else
-		{ //   Intersection with straight line parallel Oy axis.
+		{ 
 			next_i = 2;
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = bv.y - k * (next.x - bv.x);
@@ -582,7 +582,7 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 {
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
-	if (fabs(a) < FLT_MIN) return FLT_MIN ;
+	if (fabs(a) < FLT_MIN) return FLT_MIN;
 	double b = x.x - z.x;
 	double c = b * x.y + a * x.x;
 	dp_t ip((c - b * y.y) / a, y.y);
@@ -601,7 +601,7 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
 }
 
-static quad_type get_coordinates_on_prev_layer(int ix, int iy,
+static void get_coordinates_on_prev_layer(int ix, int iy,
                                                dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
 {
 	//   1 First of all let's compute coordinates of square vertexes.
@@ -652,8 +652,6 @@ static quad_type get_coordinates_on_prev_layer(int ix, int iy,
 	}
 
 	double u, v;
-
-	// Now let's compute new coordinates on the previous time level of alpha, beta, gamma, theta points.
 	u = func_u(B, alpha);
 	v = func_v(UB, BB, LB, RB, TIME, alpha);
 	alpha.x -= TAU * u;
@@ -672,48 +670,123 @@ static quad_type get_coordinates_on_prev_layer(int ix, int iy,
 	u = func_u(B, theta);
 	v = func_v(UB, BB, LB, RB, TIME, theta);
 	theta.x -= TAU * u;
-	theta.y -= TAU * v;
+	theta.y -= TAU * v;	
+}
 
+
+__pure inline wall_intersection_type get_wall_intersection_type(dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
+{
+	if (alpha.x <= 0 && beta.x <= 0 && gamma.x <= 0 && theta.x <= 0)
+	{
+		return _1_2_3_4;
+	}
+	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x <= 0 && theta.x > 0)
+	{
+		return _1_2_3;
+	}
+	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x > 0 && theta.x <= 0)
+	{
+		return _1_2_4;
+	}
+	else if (alpha.x <= 0 && beta.x > 0 && gamma.x <= 0 && theta.x <= 0)
+	{
+		return _1_3_4;
+	}
+	else if (alpha.x > 0 && beta.x <= 0 && gamma.x <= 0 && theta.x <= 0)
+	{
+		return _2_3_4;
+	}
+	else if (alpha.x > 0 && beta.x > 0 && gamma.x <= 0 && theta.x <= 0)
+	{
+		return _3_4;
+	}
+	else if (alpha.x > 0 && beta.x <= 0 && gamma.x > 0 && theta.x <= 0)
+	{
+		return _2_4;
+	}
+	else if (alpha.x > 0 && beta.x <= 0 && gamma.x <= 0 && theta.x > 0)
+	{
+		return _2_3;
+	}
+	else if (alpha.x <= 0 && beta.x > 0 && gamma.x > 0 && theta.x <= 0)
+	{
+		return _1_4;
+	}
+	else if (alpha.x <= 0 && beta.x > 0 && gamma.x <= 0 && theta.x > 0)
+	{
+		return _1_3;
+	}
+	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x > 0 && theta.x > 0)
+	{
+		return _1_2;
+	}
+	else if (alpha.x <= 0 && beta.x > 0 && gamma.x > 0 && theta.x > 0)
+	{
+		return _1;
+	}
+	else if (alpha.x > 0 && beta.x <= 0 && gamma.x > 0 && theta.x > 0)
+	{
+		return _2;
+	}
+	else if (alpha.x > 0 && beta.x > 0 && gamma.x <= 0 && theta.x > 0)
+	{
+		return _3;
+	}
+	else if (alpha.x > 0 && beta.x > 0 && gamma.x > 0 && theta.x <= 0)
+	{
+		return _4;
+	}
+	else if (alpha.x > 0 && beta.x > 0 && gamma.x > 0 && theta.x > 0)
+	{
+		return _none;
+	}
+}
+
+static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n) 
+{
+	dp_t alpha, beta, gamma, theta;
+	quad_type type;
+	get_coordinates_on_prev_layer(i, j, alpha, beta, gamma, theta);
 	dp_t intersection = get_intersection_point(alpha, beta, gamma, theta);
 	if ((beta.y - intersection.y) * (theta.y - intersection.y) > 0) return pseudo; // ??
-	if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0) return pseudo; // ??
-	double product = get_vector_product(alpha, beta, theta); // ?
-	if (product < 0) return pseudo;
+	if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0) return pseudo; // ??	
+	if (get_vector_product(alpha, beta, theta) < 0) return pseudo;
 
-	// значит что точка улетела за левую границу
-	if (alpha.x < 0 || beta.x < 0 || gamma.x < 0 || theta.x < 0)
-	{
+	wall_intersection_type wit = get_wall_intersection_type(alpha, beta, gamma, theta);
+	switch (wit)
+	{	
+	case _1:		
+	case _2:		
+	case _3:		
+	case _4:
+	case _1_2:
+	case _1_3:
+	case _1_4:
+	case _2_3:
+	case _2_4:
+	case _3_4:
+	case _1_2_3:
+	case _1_2_4:
+	case _1_3_4:
+	case _2_3_4:
+	case _1_2_3_4:
+	case _none:
+	default:
+		a = alpha;
+		b = beta;
+		c = gamma;
+		k = alpha;
+		m = theta;
+		n = gamma;
 		return normal;
-		//return wall;
-	}
-	return normal;
+	}	
+	return wall;
 }
 
-// Type of quadrangle: 0 - pseudo; 1 - convex; 2 - concave;
-
-static quad_type get_quadrangle_type(int ix, int iy,
-                                     dp_t& a, //   -  First vertex of first triangle.
-                                     dp_t& b, //   -  Second vertex of first triangle.
-                                     dp_t& c, //   -  Third vertex of first triangle.
-                                     dp_t& k, //   -  First vertex of second triangle.
-                                     dp_t& m, //   -  Second vertex of second triangle.
-                                     dp_t& n) //   -  Third vertex of second triangle.
-{
-	dp_t alpha, beta, gamma, theta; // coordinates on previous time layer
-	quad_type type = get_coordinates_on_prev_layer(ix, iy, alpha, beta, gamma, theta);
-	a = alpha;
-	b = beta;
-	c = gamma;
-	k = alpha;
-	m = theta;
-	n = gamma;
-	return type;
-}
-
-static double integrate(int ix, int iy)
+static double integrate(int i, int j)
 {
 	dp_t a1, b1, c1, a2, b2, c2;
-	quad_type type = get_quadrangle_type(ix, iy, a1, b1, c1, a2, b2, c2);
+	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2);
 	if (type != normal && type != wall)
 	{
 		return -1;
