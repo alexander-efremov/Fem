@@ -141,20 +141,52 @@ __pure inline static void sort_by_x(dp_t& x, dp_t& y, dp_t& z)
 	}
 }
 
-__pure inline void sort_by_y(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
+//__pure inline void sort_by_y(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
+//{
+//	if (w.y > x.y)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
+//	if (w.y > y.y)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
+//	if (w.y > z.y)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
+//	sort_by_y(x, y, z);
+//}
+//
+//__pure inline void sort_by_x_asc(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
+//{
+//	if (w.x > x.x)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
+//	if (w.x > y.x)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
+//	if (w.x > z.x)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
+//	sort_by_x_asc(x, y, z);
+//}
+
+inline void sort_by_y(dp_t* a)
 {
-	if (w.y > x.y)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
-	if (w.y > y.y)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
-	if (w.y > z.y)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
-	sort_by_y(x, y, z);
+	for (int i = 1; i < 4; i++)
+	{
+		for (int j = i; j > 0 && a[j - 1].y > a[j].y; j--)
+		{
+			double t = a[j].x;
+			a[j].x = a[j - 1].x;
+			a[j - 1].x = t;
+			t = a[j].y;
+			a[j].y = a[j - 1].y;
+			a[j - 1].y = t;
+		}
+	}
 }
 
-__pure inline void sort_by_x(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
+inline void sort_by_x_asc(dp_t* a)
 {
-	if (w.x > x.x)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
-	if (w.x > y.x)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
-	if (w.x > z.x)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
-	sort_by_x(x, y, z);
+	for (int i = 1; i < 4; i++)
+	{
+		for (int j = i; j > 0 && a[j - 1].x > a[j].x; j--)
+		{
+			double t = a[j].x;
+			a[j].x = a[j - 1].x;
+			a[j - 1].x = t;
+			t = a[j].y;
+			a[j].y = a[j - 1].y;
+			a[j - 1].y = t;
+		}
+	}
 }
 
 __pure inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& value)
@@ -663,29 +695,29 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
 }
 
-__pure inline quad_type get_wall_intersection_type(dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
-{
-	sort_by_x(alpha,beta,gamma,theta);
-	if (alpha.x <= 0 && beta.x <= 0 && gamma.x <= 0 && theta.x <= 0)
+__pure inline quad_type get_wall_intersection_type(dp_t* a)
+{ 
+	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0)
 	{
 		return wall_4;
 	}
-	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x <= 0 && theta.x > 0)
+	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x > 0)
 	{
 		return wall_3;
 	}
-	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x > 0 && theta.x > 0)
+	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x > 0 && a[3].x > 0)
 	{
 		return wall_2;
 	}
-	else if (alpha.x <= 0 && beta.x > 0 && gamma.x > 0 && theta.x > 0)
+	if (a[0].x <= 0 && a[1].x > 0 && a[2].x > 0 && a[3].x > 0)
 	{
 		return wall_1;
 	}
 	return normal;
 }
 
-static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n, 
+static quad_type get_quadrangle_type(int i, int j, 
+	dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n, 
 	dp_t& w1, dp_t& w2, dp_t& w3, dp_t& w4, dp_t& y)
 {
 	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
@@ -718,30 +750,19 @@ static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, d
 	k = alpha;
 	m = theta;
 	n = gamma;
-	quad_type wit = get_wall_intersection_type(alpha, beta, gamma, theta); // НАДО ПРОСТО ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
-	switch (wit)
-	{	
-	case wall_1: // трехугольник на стене, на полу пятиугольник	
-		w1 = alpha;
-		//return wall_1;
-	case wall_2: // трехугольник на стене, на полу пятиугольник		
-		w1 = alpha;
-		w2 = beta;
-		//return wall_1;
-	case wall_3: // трехугольник на стене, на полу пятиугольник
-		w1 = alpha;
-		w2 = beta;
-		w3 = gamma;
-		//return wall_1;
-	case wall_4: // трехугольник на стене, на полу пятиугольник
-		w1 = alpha;
-		w2 = beta;
-		w3 = gamma;
-		w4 = theta;
-		//return wall_1;
-	default:	
-		return normal;
-	}	
+	
+	dp_t* p = new dp_t[4];
+	p[0] = dp_t(alpha);
+	p[1] = dp_t(beta);
+	p[2] = dp_t(gamma);
+	p[3] = dp_t(theta);
+	sort_by_x_asc(p);
+	quad_type type = get_wall_intersection_type(p); // НАДО ПРОСТО ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
+	w1 = p[0];
+	w2 = p[1];
+	w3 = p[2];
+	w4 = p[3];
+	return type;
 }
 
 static double integrate_wall_triangle(const dp_t wp, // wall point
@@ -787,17 +808,17 @@ static double integrate(int i, int j)
 	}
 
 	// check the type of triangle to select appropriate computation method
-	double result = 0;
+	double result;
 	switch (type)
 	{
 	case wall_1:
-		return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
+	//	return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
 	case wall_2:
-		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
+//		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
 	case wall_3:
-		return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
+	//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_4:
-		return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
+	//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
 	case normal:
 		// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования
 		sort_by_y(a1, b1, c1); // TODO: перенести в  get_quadrangle_type ???
