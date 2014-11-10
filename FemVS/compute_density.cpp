@@ -767,8 +767,8 @@ static void solve(double* density)
 
 	for (TL = 1; TL <= TIME_STEP_CNT; TL++)
 	{
-		TIME = TAU * TL;
-		PREV_TIME = TAU * (TL - 1);
+		PREV_TIME = TIME;
+		TIME = TAU * TL;		
 		for (int i = 0; i <= OX_LEN; i++)
 		{
 			density[i] = analytical_solution(OX[i], BB, TIME);
