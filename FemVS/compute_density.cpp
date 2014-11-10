@@ -883,7 +883,7 @@ static double integrate(int i, int j)
 		return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
 	case normal:
 		// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования
-		sort_by_y(a1, b1, c1);
+		sort_by_y(a1, b1, c1); // TODO: перенести в  get_quadrangle_type ???
 		sort_by_y(a2, b2, c2);
 		return integrate_uniform_triangle(a1, b1, c1) +	integrate_uniform_triangle(a2, b2, c2);
 	case concave:
