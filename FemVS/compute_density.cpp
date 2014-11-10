@@ -143,19 +143,17 @@ __pure inline static void sort_by_x(dp_t& x, dp_t& y, dp_t& z)
 
 __pure inline void sort_by_y(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
 {
-	double t;
-	if (w.y > x.y)  { t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
-	if (w.y > y.y)  { t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
-	if (w.y > z.y)  { t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
+	if (w.y > x.y)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
+	if (w.y > y.y)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
+	if (w.y > z.y)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
 	sort_by_y(x, y, z);
 }
 
 __pure inline void sort_by_x(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
 {
-	double t;
-	if (w.x > x.x)  { t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
-	if (w.x > y.x)  { t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
-	if (w.x > z.x)  { t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
+	if (w.x > x.x)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
+	if (w.x > y.x)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
+	if (w.x > z.x)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
 	sort_by_x(x, y, z);
 }
 
