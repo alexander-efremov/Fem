@@ -107,10 +107,10 @@ __pure inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, do
 __pure inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta)
 {
 	double a1 = gamma.y - alpha.y;
-	double b1 = -(gamma.x - alpha.x);
+	double b1 = alpha.x - gamma.x; //double b1 = -(gamma.x - alpha.x);
 	double c1 = a1 * alpha.x + b1 * alpha.y;
 	double a2 = theta.y - beta.y;
-	double b2 = -(theta.x - beta.x);
+	double b2 = beta.x - theta.x; //double b2 = -(theta.x - beta.x);
 	double c2 = a2 * beta.x + b2 * beta.y;
 	return dp_t((b1 * c2 - b2 * c1) / (b1 * a2 - b2 * a1), (a1 * c2 - a2 * c1) / (-b1 * a2 + b2 * a1));
 }
@@ -154,7 +154,7 @@ __pure inline static double func_f(double b, double time, double ub, double bb, 
 	double dtho_dy = time * x * cos(time * x * y);
 	double u = func_u(b, x, y);
 	double v = func_v(ub, bb, lb, rb, time, x, y);
-	double du_dx = -b * y * (1 - y) / (1 + x * x);
+	double du_dx = -b * y * (1 - y) / (1 + sqr(x));
 	double dv_dx = 0.1 * (x - lb) * (x - rb) * (1 + time) * (y - bb + y - ub);
 	dv_dx /= (1 + arg_v * arg_v);
 	double res = drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
@@ -755,21 +755,21 @@ static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, d
 	wall_intersection_type wit = get_wall_intersection_type(alpha, beta, gamma, theta);
 	switch (wit)
 	{	
-	case _1:		
-	case _2:		
-	case _3:		
-	case _4:
-	case _1_2:
-	case _1_3:
-	case _1_4:
-	case _2_3:
-	case _2_4:
-	case _3_4:
-	case _1_2_3:
-	case _1_2_4:
-	case _1_3_4:
-	case _2_3_4:
-	case _1_2_3_4:
+	case _1: // трехугольник на стене, на полу пятиугольник		
+	case _2: // трехугольник на стене, на полу пятиугольник		
+	case _3: // трехугольник на стене, на полу пятиугольник
+	case _4: // трехугольник на стене, на полу пятиугольник
+	case _1_2: // четырехугольник на стене, на полу четырехугольник
+	case _1_3: // четырехугольник на стене, на полу четырехугольник
+	case _1_4:// четырехугольник на стене, на полу четырехугольник
+	case _2_3:// четырехугольник на стене, на полу четырехугольник
+	case _2_4:// четырехугольник на стене, на полу четырехугольник
+	case _3_4:// четырехугольник на стене, на полу четырехугольник
+	case _1_2_3: // пятиугольник на стене, на полу треугольник
+	case _1_2_4:// пятиугольник на стене, на полу треугольник
+	case _1_3_4:// пятиугольник на стене, на полу треугольник
+	case _2_3_4:// пятиугольник на стене, на полу треугольник
+	case _1_2_3_4: // четырех угольник полностью на стенке
 	case _none:
 	default:
 		a = alpha;
