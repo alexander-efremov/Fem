@@ -141,6 +141,24 @@ __pure inline static void sort_by_x(dp_t& x, dp_t& y, dp_t& z)
 	}
 }
 
+__pure inline void sort_by_y(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
+{
+	double t;
+	if (w.y > x.y)  { t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
+	if (w.y > y.y)  { t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
+	if (w.y > z.y)  { t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
+	sort_by_y(x, y, z);
+}
+
+__pure inline void sort_by_x(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
+{
+	double t;
+	if (w.x > x.x)  { t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
+	if (w.x > y.x)  { t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
+	if (w.x > z.x)  { t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
+	sort_by_x(x, y, z);
+}
+
 __pure inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& value)
 {
 	if (fabs(bv.x - uv.x) < MIN_VALUE)
@@ -742,7 +760,7 @@ static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, d
 	if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0) return pseudo; // ??	
 	if (get_vector_product(alpha, beta, theta) < 0) return pseudo;
 
-	wall_intersection_type wit = get_wall_intersection_type(alpha, beta, gamma, theta);
+	wall_intersection_type wit = get_wall_intersection_type(alpha, beta, gamma, theta); // НАДО ПРОСТО ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
 	a = alpha;
 	b = beta;
 	c = gamma;
