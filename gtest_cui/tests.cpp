@@ -35,7 +35,7 @@ TEST_F(cpu, test_to_model)
 		double* model = get_model_result(p, lvl);
 		double norm_model = p.norm;
 
-		if (lvl < 2)
+		//if (lvl < 2)
 			for (int i = 0; i < p.get_size(); i++)
 			{
 				ASSERT_NEAR(model[i], data[i], 1e-12);
