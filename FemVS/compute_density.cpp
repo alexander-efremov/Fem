@@ -296,7 +296,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
 	if (fabs(a_sl) <= FLT_MIN) return 0;
 	double b_sl = uv.x - a_sl * uv.y;
-	double result = 0, tmp, alpha, beta;	
+	double result = 0, tmp, alpha, beta;
 	alpha = sx.y >= 0 && sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 	beta = sx.y >= 0 && sy.y >= 0 ? OX[sx.y] : HX * sx.y;
 	tmp = 0.25 * (sqr(uv.y - OY[sy.y]) - sqr(bv.y - OY[sy.y])) * sqr(hx - beta) - integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
@@ -306,10 +306,10 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 	tmp = -0.25 * tmp * sqr(hx - beta) + integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
 	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.x * HY));
 	alpha = sx.y >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
-	beta = sx.y >= 0 && sy.x >= 0 ? OX[sx.y] : HX * sx.y;	
+	beta = sx.y >= 0 && sy.x >= 0 ? OX[sx.y] : HX * sx.y;
 	tmp = sqr(uv.y - OY[sy.x]) - sqr(bv.y - OY[sy.x]);
 	tmp = -0.25 * tmp * sqr(hx - beta) + integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.y * HY));	
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.y * HY));
 	alpha = sx.x >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
 	beta = sx.x >= 0 && sy.x >= 0 ? OX[sx.x] : HX * sx.x;
 	tmp = sqr(uv.y - OY[sy.x]) - sqr(bv.y - OY[sy.x]);
@@ -363,7 +363,7 @@ static double integrate_left_slant_chanel(const dp_t& bv, const dp_t& uv,
                                           bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
                                           double b, const ip_t& sb)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, hx = 0; //   -  Left and right boundary for each integration.   
 	double x = uv.x <= bv.x ? bv.x : uv.x;
 
@@ -419,13 +419,13 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 		double slope = sx.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? curr.x - OX[sx.x] : fabs(curr.x - HX * sx.x);
 		if (slope <= k)
-		{        
+		{
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = curr.x - (next.y - curr.y) / k;
 		}
 		else
-		{         
+		{
 			next_i = 2;
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = curr.y - k * (next.x - curr.x);
@@ -475,7 +475,7 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
 		slope /= sx.y >= 0 ? fabs(OX[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
 		if (slope <= k)
-		{         
+		{
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x + (next.y - bv.y) / k;
@@ -537,7 +537,7 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 			next.x = bv.x + (next.y - bv.y) / k;
 		}
 		else
-		{          
+		{
 			next_i = 2;
 			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
@@ -588,13 +588,13 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? fabs(curr.x - OX[sx.x]) : fabs(curr.x - HX * sx.x);
 		if (slope <= k)
-		{ 
+		{
 			next_i = 1;
 			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 			next.x = bv.x - (next.y - bv.y) / k;
 		}
 		else
-		{ 
+		{
 			next_i = 2;
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = bv.y - k * (next.x - bv.x);
@@ -676,7 +676,7 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 {
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
-	if (fabs(a) < FLT_MIN) return FLT_MIN;
+	if (fabs(a) < FLT_MIN) return FLT_MIN ;
 	double b = x.x - z.x;
 	double c = b * x.y + a * x.x;
 	dp_t ip((c - b * y.y) / a, y.y);
@@ -696,7 +696,7 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 }
 
 __pure inline quad_type get_wall_intersection_type(dp_t* a)
-{ 
+{
 	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0)
 	{
 		return wall_4;
@@ -716,15 +716,15 @@ __pure inline quad_type get_wall_intersection_type(dp_t* a)
 	return normal;
 }
 
-static quad_type get_quadrangle_type(int i, int j, 
-	dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n, 
-	dp_t& w1, dp_t& w2, dp_t& w3, dp_t& w4, dp_t& y)
+static quad_type get_quadrangle_type(int i, int j,
+                                     dp_t& a, dp_t& b, dp_t& c, dp_t& k, dp_t& m, dp_t& n,
+                                     dp_t& w1, dp_t& w2, dp_t& w3, dp_t& w4, dp_t& y)
 {
 	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
-	dp_t alpha((OX[i - 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5), 
-		 beta((OX[i + 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5), 
-		 gamma((OX[i + 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5), 
-		 theta((OX[i - 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5);	
+	dp_t alpha((OX[i - 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
+		beta((OX[i + 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
+		gamma((OX[i + 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5),
+		theta((OX[i - 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5);
 	// get prev coordnates
 	double v = func_v(UB, BB, LB, RB, TIME, alpha);
 	alpha.x -= TAU * func_u(B, alpha);
@@ -750,7 +750,7 @@ static quad_type get_quadrangle_type(int i, int j,
 	k = alpha;
 	m = theta;
 	n = gamma;
-	
+
 	dp_t* p = new dp_t[4];
 	p[0] = dp_t(alpha);
 	p[1] = dp_t(beta);
@@ -762,13 +762,27 @@ static quad_type get_quadrangle_type(int i, int j,
 	w2 = p[1];
 	w3 = p[2];
 	w4 = p[3];
+	switch (type)
+	{
+	case wall_1: 
+
+		break;
+	case wall_2: break;
+	case wall_3: break;
+	case wall_4: break;
+	case normal: break;
+	case convex: break;
+	case concave: break;
+	case pseudo: break;
+	default: break;
+	}
 	return type;
 }
 
 static double integrate_wall_triangle(const dp_t wp, // wall point
-	double ly, // left y coordinate
-	double ry // right y coordinate
-	)
+                                      double ly, // left y coordinate
+                                      double ry // right y coordinate
+)
 {
 	return 0;
 }
@@ -796,7 +810,7 @@ static double integrate_pentagon(const dp_t x, const dp_t y, const dp_t z, doubl
 static double integrate(int i, int j)
 {
 	dp_t a1, b1, c1, a2, b2, c2, w1, w2, w3, w4, y;
-	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, w1,w2,w3,w4,y);
+	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, w1, w2, w3, w4, y);
 	switch (type)
 	{
 	case convex:
@@ -804,7 +818,7 @@ static double integrate(int i, int j)
 	case pseudo:
 		return -1;
 	default:
-		break;	
+		break;
 	}
 
 	// check the type of triangle to select appropriate computation method
@@ -812,18 +826,18 @@ static double integrate(int i, int j)
 	switch (type)
 	{
 	case wall_1:
-	//	return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
+		//	return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
 	case wall_2:
-//		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
+		//		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
 	case wall_3:
-	//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
+		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_4:
-	//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
+		//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
 	case normal:
 		// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования
 		sort_by_y(a1, b1, c1); // TODO: перенести в  get_quadrangle_type ???
 		sort_by_y(a2, b2, c2);
-		return integrate_uniform_triangle(a1, b1, c1) +	integrate_uniform_triangle(a2, b2, c2);
+		return integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
 	case concave:
 	case convex:
 	case pseudo:
@@ -856,7 +870,7 @@ static void solve(double* density)
 	for (TL = 1; TL <= TIME_STEP_CNT; TL++)
 	{
 		PREV_TIME = TIME;
-		TIME = TAU * TL;		
+		TIME = TAU * TL;
 		for (int i = 0; i <= OX_LEN; i++)
 		{
 			density[i] = analytical_solution(OX[i], BB, TIME);
