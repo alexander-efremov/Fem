@@ -624,11 +624,6 @@ static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t&
 	return result;
 }
 
-static double integrate_uniform_triangle_wall(const dp_t& a, const dp_t& b, const dp_t& c)
-{
-	return 0;
-}
-
 static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 {
 	//   a * x  +  b * y  = c.
@@ -652,40 +647,40 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
 }
 
-static void get_coordinates_on_prev_layer(int ix, int iy,
+static void get_coordinates_on_prev_layer(int i, int j,
                                                dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
 {
 	//   1 First of all let's compute coordinates of square vertexes.
-	if (ix == 0)
+	if (i == 0)
 	{
-		alpha.x = theta.x = OX[ix];
-		gamma.x = beta.x = (OX[ix] + OX[ix + 1]) * 0.5;
+		alpha.x = theta.x = OX[i];
+		gamma.x = beta.x = (OX[i] + OX[i + 1]) * 0.5;
 	}
-	else if (ix == OX_LEN)
+	else if (i == OX_LEN)
 	{
-		alpha.x = theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
-		gamma.x = beta.x = OX[ix];
+		alpha.x = theta.x = (OX[i - 1] + OX[i]) * 0.5;
+		gamma.x = beta.x = OX[i];
 	}
 	else
 	{
-		alpha.x = theta.x = (OX[ix - 1] + OX[ix]) * 0.5;
-		gamma.x = beta.x  = (OX[ix + 1] + OX[ix]) * 0.5;
+		alpha.x = theta.x = (OX[i - 1] + OX[i]) * 0.5;
+		gamma.x = beta.x  = (OX[i + 1] + OX[i]) * 0.5;
 	}
 
-	if (iy == 0)
+	if (j == 0)
 	{
-		alpha.y = beta.y = OY[iy];
-		gamma.y = theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
+		alpha.y = beta.y = OY[j];
+		gamma.y = theta.y = (OY[j] + OY[j + 1]) * 0.5;
 	}
-	else if (iy == OY_LEN)
+	else if (j == OY_LEN)
 	{
-		alpha.y = beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
-		gamma.y = theta.y = OY[iy];
+		alpha.y = beta.y = (OY[j] + OY[j - 1]) * 0.5;
+		gamma.y = theta.y = OY[j];
 	}
 	else
 	{
-		alpha.y = beta.y = (OY[iy] + OY[iy - 1]) * 0.5;
-		gamma.y = theta.y = (OY[iy] + OY[iy + 1]) * 0.5;
+		alpha.y = beta.y = (OY[j] + OY[j - 1]) * 0.5;
+		gamma.y = theta.y = (OY[j] + OY[j + 1]) * 0.5;
 	}
 
 	double u = func_u(B, alpha);
@@ -778,7 +773,8 @@ __pure inline wall_intersection_type get_wall_intersection_type(dp_t& alpha, dp_
 	}
 }
 
-static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n) 
+static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n, 
+	dp_t& w1, dp_t& w2, dp_t& w3, dp_t& w4, dp_t& y)
 {
 	dp_t alpha, beta, gamma, theta;
 	quad_type type;
@@ -789,62 +785,149 @@ static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, d
 	if (get_vector_product(alpha, beta, theta) < 0) return pseudo;
 
 	wall_intersection_type wit = get_wall_intersection_type(alpha, beta, gamma, theta);
+	a = alpha;
+	b = beta;
+	c = gamma;
+	k = alpha;
+	m = theta;
+	n = gamma;
 	switch (wit)
 	{	
-	case _1: // трехугольник на стене, на полу пятиугольник		
+	case _1: // трехугольник на стене, на полу пятиугольник	
+		w1 = alpha;
+		y.x = beta.y;
+		y.y = theta.y;
+		//return wall_1;
 	case _2: // трехугольник на стене, на полу пятиугольник		
+		w1 = beta;		
+		y.x = gamma.y;
+		y.y = alpha.y;
+		//return wall_1;
 	case _3: // трехугольник на стене, на полу пятиугольник
+		w1 = gamma;
+		y.x = theta.y;
+		y.y = beta.y;
+		//return wall_1;
 	case _4: // трехугольник на стене, на полу пятиугольник
+		w1 = theta;
+		y.x = alpha.y;
+		y.y = gamma.y;
+		//return wall_1;
 	case _1_2: // четырехугольник на стене, на полу четырехугольник
+		w1 = alpha;
+		w2 = beta;		
+		//return wall_2;
 	case _1_3: // четырехугольник на стене, на полу четырехугольник
+		w1 = alpha;
+		w2 = gamma;
+		
+		//return wall_2;
 	case _1_4:// четырехугольник на стене, на полу четырехугольник
+		w1 = alpha;
+		w2 = theta;		
+		//return wall_2;
 	case _2_3:// четырехугольник на стене, на полу четырехугольник
+		w1 = beta;
+		w2 = gamma;		
+		//return wall_2;
 	case _2_4:// четырехугольник на стене, на полу четырехугольник
+		w1 = beta;
+		w2 = gamma;		
+		//return wall_2;
 	case _3_4:// четырехугольник на стене, на полу четырехугольник
+		w1 = gamma;
+		w2 = theta;		
+		//return wall_2;
 	case _1_2_3: // пятиугольник на стене, на полу треугольник
+		w1 = alpha;
+		w2 = beta;
+		w3 = gamma;		
+		//return wall_3;
 	case _1_2_4:// пятиугольник на стене, на полу треугольник
+		w1 = alpha;
+		w2 = beta;
+		w3 = theta;		
+		//return wall_3;
 	case _1_3_4:// пятиугольник на стене, на полу треугольник
+		w1 = alpha;
+		w2 = gamma;
+		w3 = theta;
+		//return wall_3;
 	case _2_3_4:// пятиугольник на стене, на полу треугольник
-	case _1_2_3_4: // четырех угольник полностью на стенке
-	case _none:
-	default:
-		a = alpha;
-		b = beta;
-		c = gamma;
-		k = alpha;
-		m = theta;
-		n = gamma;
+		w1 = beta;
+		w2 = gamma;
+		w3 = theta;
+		//return wall_3;
+	case _1_2_3_4: // четырехугольник полностью на стенке
+		w1 = alpha;
+		w2 = beta;
+		w3 = gamma;
+		w4 = theta;
+		//return wall_4;
+	case _none:	
 		return normal;
 	}	
-	return wall;
+}
+
+static double integrate_wall_triangle(const dp_t wp, // wall point
+	double ly, // left y coordinate
+	double ry // right y coordinate
+	)
+{
+	return 0;
+}
+
+static double integrate_wall_rectangle(const dp_t wp1, const dp_t wp2, const dp_t wp3, const dp_t wp4, double wp1y, double wp2y)
+{
+	return 0;
+}
+
+static double integrate_wall_rectangle(const dp_t wp1, const dp_t wp2, double wp1y, double wp2y)
+{
+	return 0;
+}
+
+static double integrate_wall_pentagon(const dp_t wp1, const dp_t wp2, const dp_t wp3, double y1, double y2)
+{
+	return 0;
+}
+
+static double integrate_pentagon(const dp_t x, const dp_t y, const dp_t z, double ly, double ry)
+{
+	return 0;
 }
 
 static double integrate(int i, int j)
 {
-	dp_t a1, b1, c1, a2, b2, c2;
-	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2);
-	if (type != normal && type != wall)
+	dp_t a1, b1, c1, a2, b2, c2, w1, w2, w3, w4, y;
+	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, w1,w2,w3,w4,y);
+	switch (type)
 	{
+	case convex:
+	case concave:
+	case pseudo:
 		return -1;
+	default:
+		break;	
 	}
-
-	// чтобы правилно отработала процедура интегрирования
-	// точки должны идти в порядке возрастания y координаты
-	sort_by_y(a1, b1, c1);
-	sort_by_y(a2, b2, c2);
 
 	// check the type of triangle to select appropriate computation method
 	double result = 0;
 	switch (type)
 	{
-	case wall:
-		result += integrate_uniform_triangle_wall(a1, b1, c1);
-		result += integrate_uniform_triangle_wall(a2, b2, c2);
-		return result;
+	case wall_1:
+		return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
+	case wall_2:
+		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
+	case wall_3:
+		return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
+	case wall_4:
+		return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
 	case normal:
-		result += integrate_uniform_triangle(a1, b1, c1);
-		result += integrate_uniform_triangle(a2, b2, c2);
-		return result;
+		// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования
+		sort_by_y(a1, b1, c1);
+		sort_by_y(a2, b2, c2);
+		return integrate_uniform_triangle(a1, b1, c1) +	integrate_uniform_triangle(a2, b2, c2);
 	case concave:
 	case convex:
 	case pseudo:
