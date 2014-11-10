@@ -331,7 +331,7 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = curr.y - k * (next.x - curr.x);
 		}
-		if (next.x < (uv.x + FLT_MIN))
+		if (next.x - uv.x < FLT_MIN)
 		{
 			// сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
 			// и в случае когда прошлись по всем точкам...
@@ -387,7 +387,7 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
 		}
-		if (next.x > (uv.x - FLT_MIN))
+		if (next.x - uv.x> FLT_MIN)
 		{
 			result += integrate_right_slant_chanel(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
 			break;
@@ -443,7 +443,7 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
 		}
-		if (next.x > (uv.x - FLT_MIN)) // если следующая точка уже правее, чем наша граничная точка, то мы обработали канал
+		if (next.x - uv.x > FLT_MIN) // если следующая точка уже правее, чем наша граничная точка, то мы обработали канал
 		{
 			result += integrate_left_slant_chanel(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 			break;
@@ -500,7 +500,7 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
 			next.y = bv.y - k * (next.x - bv.x);
 		}
-		if (next.x < uv.x + FLT_MIN)
+		if (next.x - uv.x < FLT_MIN)
 		{
 			result += integrate_right_slant_chanel(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, uv.x, ib, sy);
 			break;
