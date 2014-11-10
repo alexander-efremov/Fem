@@ -665,72 +665,26 @@ static double integrate_uniform_triangle(const dp_t& x, dp_t& y, const dp_t& z)
 	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
 }
 
-__pure inline wall_intersection_type get_wall_intersection_type(dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
+__pure inline quad_type get_wall_intersection_type(dp_t& alpha, dp_t& beta, dp_t& gamma, dp_t& theta)
 {
+	sort_by_x(alpha,beta,gamma,theta);
 	if (alpha.x <= 0 && beta.x <= 0 && gamma.x <= 0 && theta.x <= 0)
 	{
-		return _1_2_3_4;
+		return wall_4;
 	}
 	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x <= 0 && theta.x > 0)
 	{
-		return _1_2_3;
-	}
-	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x > 0 && theta.x <= 0)
-	{
-		return _1_2_4;
-	}
-	else if (alpha.x <= 0 && beta.x > 0 && gamma.x <= 0 && theta.x <= 0)
-	{
-		return _1_3_4;
-	}
-	else if (alpha.x > 0 && beta.x <= 0 && gamma.x <= 0 && theta.x <= 0)
-	{
-		return _2_3_4;
-	}
-	else if (alpha.x > 0 && beta.x > 0 && gamma.x <= 0 && theta.x <= 0)
-	{
-		return _3_4;
-	}
-	else if (alpha.x > 0 && beta.x <= 0 && gamma.x > 0 && theta.x <= 0)
-	{
-		return _2_4;
-	}
-	else if (alpha.x > 0 && beta.x <= 0 && gamma.x <= 0 && theta.x > 0)
-	{
-		return _2_3;
-	}
-	else if (alpha.x <= 0 && beta.x > 0 && gamma.x > 0 && theta.x <= 0)
-	{
-		return _1_4;
-	}
-	else if (alpha.x <= 0 && beta.x > 0 && gamma.x <= 0 && theta.x > 0)
-	{
-		return _1_3;
+		return wall_3;
 	}
 	else if (alpha.x <= 0 && beta.x <= 0 && gamma.x > 0 && theta.x > 0)
 	{
-		return _1_2;
+		return wall_2;
 	}
 	else if (alpha.x <= 0 && beta.x > 0 && gamma.x > 0 && theta.x > 0)
 	{
-		return _1;
+		return wall_1;
 	}
-	else if (alpha.x > 0 && beta.x <= 0 && gamma.x > 0 && theta.x > 0)
-	{
-		return _2;
-	}
-	else if (alpha.x > 0 && beta.x > 0 && gamma.x <= 0 && theta.x > 0)
-	{
-		return _3;
-	}
-	else if (alpha.x > 0 && beta.x > 0 && gamma.x > 0 && theta.x <= 0)
-	{
-		return _4;
-	}
-	else if (alpha.x > 0 && beta.x > 0 && gamma.x > 0 && theta.x > 0)
-	{
-		return _none;
-	}
+	return normal;
 }
 
 static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, dp_t& k, dp_t& m, dp_t& n, 
@@ -760,87 +714,34 @@ static quad_type get_quadrangle_type(int i, int j, dp_t& a, dp_t& b,  dp_t& c, d
 	if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0) return pseudo; // ??	
 	if (get_vector_product(alpha, beta, theta) < 0) return pseudo;
 
-	wall_intersection_type wit = get_wall_intersection_type(alpha, beta, gamma, theta); // НАДО ПРОСТО ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
 	a = alpha;
 	b = beta;
 	c = gamma;
 	k = alpha;
 	m = theta;
 	n = gamma;
+	quad_type wit = get_wall_intersection_type(alpha, beta, gamma, theta); // НАДО ПРОСТО ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
 	switch (wit)
 	{	
-	case _1: // трехугольник на стене, на полу пятиугольник	
+	case wall_1: // трехугольник на стене, на полу пятиугольник	
 		w1 = alpha;
-		y.x = beta.y;
-		y.y = theta.y;
 		//return wall_1;
-	case _2: // трехугольник на стене, на полу пятиугольник		
-		w1 = beta;		
-		y.x = gamma.y;
-		y.y = alpha.y;
-		//return wall_1;
-	case _3: // трехугольник на стене, на полу пятиугольник
-		w1 = gamma;
-		y.x = theta.y;
-		y.y = beta.y;
-		//return wall_1;
-	case _4: // трехугольник на стене, на полу пятиугольник
-		w1 = theta;
-		y.x = alpha.y;
-		y.y = gamma.y;
-		//return wall_1;
-	case _1_2: // четырехугольник на стене, на полу четырехугольник
-		w1 = alpha;
-		w2 = beta;		
-		//return wall_2;
-	case _1_3: // четырехугольник на стене, на полу четырехугольник
-		w1 = alpha;
-		w2 = gamma;
-		
-		//return wall_2;
-	case _1_4:// четырехугольник на стене, на полу четырехугольник
-		w1 = alpha;
-		w2 = theta;		
-		//return wall_2;
-	case _2_3:// четырехугольник на стене, на полу четырехугольник
-		w1 = beta;
-		w2 = gamma;		
-		//return wall_2;
-	case _2_4:// четырехугольник на стене, на полу четырехугольник
-		w1 = beta;
-		w2 = gamma;		
-		//return wall_2;
-	case _3_4:// четырехугольник на стене, на полу четырехугольник
-		w1 = gamma;
-		w2 = theta;		
-		//return wall_2;
-	case _1_2_3: // пятиугольник на стене, на полу треугольник
+	case wall_2: // трехугольник на стене, на полу пятиугольник		
 		w1 = alpha;
 		w2 = beta;
-		w3 = gamma;		
-		//return wall_3;
-	case _1_2_4:// пятиугольник на стене, на полу треугольник
+		//return wall_1;
+	case wall_3: // трехугольник на стене, на полу пятиугольник
 		w1 = alpha;
 		w2 = beta;
-		w3 = theta;		
-		//return wall_3;
-	case _1_3_4:// пятиугольник на стене, на полу треугольник
-		w1 = alpha;
-		w2 = gamma;
-		w3 = theta;
-		//return wall_3;
-	case _2_3_4:// пятиугольник на стене, на полу треугольник
-		w1 = beta;
-		w2 = gamma;
-		w3 = theta;
-		//return wall_3;
-	case _1_2_3_4: // четырехугольник полностью на стенке
+		w3 = gamma;
+		//return wall_1;
+	case wall_4: // трехугольник на стене, на полу пятиугольник
 		w1 = alpha;
 		w2 = beta;
 		w3 = gamma;
 		w4 = theta;
-		//return wall_4;
-	case _none:	
+		//return wall_1;
+	default:	
 		return normal;
 	}	
 }
