@@ -736,7 +736,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		случай 2: средняя точка справа
 
 		a
-		b
+		       b
 		c
 
 		*/
@@ -748,9 +748,9 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		/*
 		случай 3: средняя точка слева
 
-		a
+		            a
 		b
-		c
+		            c
 
 		*/
 		if (a[2].x < a[1].x && a[2].x < a[3].x)
