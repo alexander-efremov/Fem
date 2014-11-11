@@ -730,7 +730,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		*/
 		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
 		{
-			return wall_1_middle_at;
+			return wall_3_middle_at;
 		}
 		/*
 		случай 2: средняя точка справа
@@ -740,9 +740,9 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		c
 
 		*/
-		if (a[1].x < a[2].x && a[2].x > a[3].x)
+		if (a[0].x < a[1].x && a[1].x > a[2].x)
 		{
-			return wall_1_middle_out;
+			return wall_3_middle_out;
 		}
 
 		/*
@@ -753,9 +753,9 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		            c
 
 		*/
-		if (a[2].x < a[1].x && a[2].x < a[3].x)
+		if (a[1].x < a[0].x && a[1].x < a[2].x)
 		{
-			return wall_1_middle_in;
+			return wall_3_middle_in;
 		}
 	}
 	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x > 0 && a[3].x > 0)
