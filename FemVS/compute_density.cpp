@@ -713,13 +713,50 @@ static double integrate_uniform_triangle(const dp_t1& x, dp_t1& y, const dp_t1& 
 
 __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 {
+	sort_by_x_asc(a);
 	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0)
 	{
 		return wall_4;
 	}
 	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x > 0)
 	{
-		return wall_3;
+		sort_by_y_desc_3(a);
+		/*
+		случай 1: точки на одной прямой
+		   *  *	    *  
+		   *   *   *
+		   *    * *
+		   http://www.pm298.ru/reshenie/fha0327.php
+		*/
+		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[2].x - a[3].x) < FLT_MIN)
+		{
+			return wall_1_middle_at;
+		}
+		/*
+		случай 2: средняя точка справа
+
+		        *
+		               *
+		        *
+
+		*/
+		if (a[1].x < a[2].x && a[2].x > a[3].x)
+		{
+			return wall_1_middle_out;
+		}
+
+		/*
+		случай 3: средняя точка слева
+
+		            *
+				*   
+				    *
+
+		*/
+		if (a[2].x < a[1].x && a[2].x < a[3].x)
+		{
+			return wall_1_middle_in;
+		}
 	}
 	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x > 0 && a[3].x > 0)
 	{
@@ -727,7 +764,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 	}
 	if (a[0].x <= 0 && a[1].x > 0 && a[2].x > 0 && a[3].x > 0)
 	{
-		return wall_1;
+		return normal;
 	}
 	return normal;
 }
@@ -770,27 +807,8 @@ static quad_type get_quadrangle_type(int i, int j,
 	p[1] = dp_t1(beta);
 	p[2] = dp_t1(gamma);
 	p[3] = dp_t1(theta);
-
-	sort_by_x_asc(p);
 	quad_type type = get_wall_intersection_type(p); // НАДО  ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
-//	w1 = p[0];
-//	w2 = p[1];
-//	w3 = p[2];
-//	w4 = p[3];
-	switch (type)
-	{
-	case wall_1: 
 
-		break;
-	case wall_2: break;
-	case wall_3: break;
-	case wall_4: break;
-	case normal: break;
-	case convex: break;
-	case concave: break;
-	case pseudo: break;
-	default: break;
-	}
 	return type;
 }
 
@@ -824,17 +842,27 @@ static double integrate_pentagon(const dp_t1 x, const dp_t1 y, const dp_t1 z, do
 
 static double integrate(int i, int j)
 {
-	dp_t1 a1, b1, c1, a2, b2, c2, w1, w2, w3, w4, y;
-	dp_t1* p = new dp_t1[4];
+	dp_t1 a1, b1, c1, a2, b2, c2;
+	dp_t1* p = new dp_t1[10];
 	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, p);
-	
+
 	switch (type)
 	{
-	case wall_1:
+	case wall_1_middle_at:
+
+	case wall_1_middle_in:
+
+	case wall_1_middle_out:
+
+
 		//	return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
 	case wall_2:
 		//		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
-	case wall_3:
+	case wall_3_middle_in:
+		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
+	case wall_3_middle_out:
+		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
+	case wall_3_middle_at:
 		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_4:
 		//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
