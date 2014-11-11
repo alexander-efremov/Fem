@@ -723,21 +723,21 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		sort_by_y_desc_3(a);
 		/*
 		случай 1: точки на одной прямой
-		   *  *	    *  
-		   *   *   *
-		   *    * *
-		   http://www.pm298.ru/reshenie/fha0327.php
+		a  a	 a
+		b   b   b
+		c    c c
+		http://www.pm298.ru/reshenie/fha0327.php
 		*/
-		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[2].x - a[3].x) < FLT_MIN)
+		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[1].y - a[2].y) < FLT_MIN)
 		{
 			return wall_1_middle_at;
 		}
 		/*
 		случай 2: средняя точка справа
 
-		        *
-		               *
-		        *
+		a
+		b
+		c
 
 		*/
 		if (a[1].x < a[2].x && a[2].x > a[3].x)
@@ -748,9 +748,9 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		/*
 		случай 3: средняя точка слева
 
-		            *
-				*   
-				    *
+		a
+		b
+		c
 
 		*/
 		if (a[2].x < a[1].x && a[2].x < a[3].x)
@@ -764,7 +764,43 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 	}
 	if (a[0].x <= 0 && a[1].x > 0 && a[2].x > 0 && a[3].x > 0)
 	{
-		return normal;
+		sort_by_y_desc_3(a);
+		/*
+		случай 1: точки на одной прямой
+		a  a	 a
+		b   b   b
+		c    c c
+		http://www.pm298.ru/reshenie/fha0327.php
+		*/
+		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[2].y - a[3].y) < FLT_MIN)
+		{
+			return wall_1_middle_at;
+		}
+		/*
+		случай 2: средняя точка справа
+
+		a
+		      b
+		c
+
+		*/
+		if (a[1].x < a[2].x && a[2].x > a[3].x)
+		{
+			return wall_1_middle_out;
+		}
+
+		/*
+		случай 3: средняя точка слева
+
+		     a
+		b
+		     c
+
+		*/
+		if (a[2].x < a[1].x && a[2].x < a[3].x)
+		{
+			return wall_1_middle_in;
+		}
 	}
 	return normal;
 }
