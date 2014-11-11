@@ -784,8 +784,8 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		*/
 		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[1].y - a[3].y) < FLT_MIN)
 		{
-			a[4]=;
-			a[5]=;
+//			a[4]=mu;
+//			a[5]=nu;
 			return wall_1_middle_at;
 		}
 		/*
