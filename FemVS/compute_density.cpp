@@ -728,7 +728,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		c    c c
 		http://www.pm298.ru/reshenie/fha0327.php
 		*/
-		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[1].y - a[2].y) < FLT_MIN)
+		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
 		{
 			return wall_1_middle_at;
 		}
@@ -772,7 +772,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		c    c c
 		http://www.pm298.ru/reshenie/fha0327.php
 		*/
-		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[2].y - a[3].y) < FLT_MIN)
+		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[1].y - a[3].y) < FLT_MIN)
 		{
 			return wall_1_middle_at;
 		}
