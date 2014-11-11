@@ -177,7 +177,7 @@ inline void sort_by_y_desc_3(dp_t1* a)
 {
 	for (int i = 2; i < 4; i++)
 	{
-		for (int j = i; j > 0 && a[j - 1].y < a[j].y; j--)
+		for (int j = i; j > 1 && a[j - 1].y < a[j].y; j--)
 		{
 			double t = a[j].x;
 			a[j].x = a[j - 1].x;
@@ -697,7 +697,7 @@ static double integrate_uniform_triangle(const dp_t1& x, dp_t1& y, const dp_t1& 
 	double c = b * x.y + a * x.x;
 	dp_t1 ip((c - b * y.y) / a, y.y);
 
-	//   Возможны 2 случая расположения точки перечеения относительно средней
+	//   Возможны 2 случая расположения точки пересечения относительно средней
 	//   слева или справа.
 	//   есди средняя точка справа от точки пересечения
 	//   обменяем местами  X координаты, чтобы использовать один код для расчета
@@ -733,8 +733,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 }
 
 static quad_type get_quadrangle_type(int i, int j,
-                                     dp_t1& a, dp_t1& b, dp_t1& c, dp_t1& k, dp_t1& m, dp_t1& n,
-                                     dp_t1& w1, dp_t1& w2, dp_t1& w3, dp_t1& w4, dp_t1& y)
+                                     dp_t1& a, dp_t1& b, dp_t1& c, dp_t1& k, dp_t1& m, dp_t1& n, dp_t1* p)
 {
 	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
 	dp_t1 alpha((OX[i - 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
@@ -767,11 +766,11 @@ static quad_type get_quadrangle_type(int i, int j,
 	m = theta;
 	n = gamma;
 
-	dp_t1* p = new dp_t1[4];
 	p[0] = dp_t1(alpha);
 	p[1] = dp_t1(beta);
 	p[2] = dp_t1(gamma);
 	p[3] = dp_t1(theta);
+
 	sort_by_x_asc(p);
 	quad_type type = get_wall_intersection_type(p); // НАДО  ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
 //	w1 = p[0];
@@ -826,19 +825,9 @@ static double integrate_pentagon(const dp_t1 x, const dp_t1 y, const dp_t1 z, do
 static double integrate(int i, int j)
 {
 	dp_t1 a1, b1, c1, a2, b2, c2, w1, w2, w3, w4, y;
-	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, w1, w2, w3, w4, y);
-	switch (type)
-	{
-	case convex:
-	case concave:
-	case pseudo:
-		return -1;
-	default:
-		break;
-	}
-
-	// check the type of triangle to select appropriate computation method
-	double result;
+	dp_t1* p = new dp_t1[4];
+	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, p);
+	
 	switch (type)
 	{
 	case wall_1:
@@ -857,7 +846,7 @@ static double integrate(int i, int j)
 	case concave:
 	case convex:
 	case pseudo:
-		return 0;
+		return -1;
 	}
 	return 0;
 }
