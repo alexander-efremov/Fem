@@ -713,6 +713,16 @@ static double integrate_uniform_triangle(const dp_t1& x, dp_t1& y, const dp_t1& 
 
 __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 {
+	/*
+	
+	a[0] - alpha
+	a[1] - beta
+	a[2] - gamma
+	a[3] - theta
+	a[4] - mu
+	a[5] - nu
+	
+	*/
 	sort_by_x_asc(a);
 	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0)
 	{
@@ -774,6 +784,8 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		*/
 		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[1].y - a[3].y) < FLT_MIN)
 		{
+			a[4]=;
+			a[5]=;
 			return wall_1_middle_at;
 		}
 		/*
@@ -843,9 +855,7 @@ static quad_type get_quadrangle_type(int i, int j,
 	p[1] = dp_t1(beta);
 	p[2] = dp_t1(gamma);
 	p[3] = dp_t1(theta);
-	quad_type type = get_wall_intersection_type(p); // НАДО  ОТСОРТИРОВАТЬ 4 ТОЧКИ по возрастанию Х координаты
-
-	return type;
+	return get_wall_intersection_type(p); 
 }
 
 static double integrate_wall_triangle(const dp_t1 wp, // wall point
@@ -879,7 +889,7 @@ static double integrate_pentagon(const dp_t1 x, const dp_t1 y, const dp_t1 z, do
 static double integrate(int i, int j)
 {
 	dp_t1 a1, b1, c1, a2, b2, c2;
-	dp_t1* p = new dp_t1[10];
+	dp_t1* p = new dp_t1[6];
 	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, p);
 
 	switch (type)
