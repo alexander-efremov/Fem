@@ -271,7 +271,6 @@ __pure inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& 
 	return dp_t((b1 * c2 - b2 * c1) / (b1 * a2 - b2 * a1), (a1 * c2 - a2 * c1) / (-b1 * a2 + b2 * a1));
 }
 
-
 __pure inline static double sign(const dp_t& p1, const dp_t p2, const dp_t p3)
 {
 	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
