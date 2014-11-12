@@ -711,19 +711,8 @@ static double integrate_uniform_triangle(const dp_t1& x, dp_t1& y, const dp_t1& 
 	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
 }
 
-__pure inline quad_type get_wall_intersection_type(dp_t1* a)
+__pure inline int get_wall_intersection_type_as_int(dp_t1* a)
 {
-	/*
-
-	a[0] - alpha
-	a[1] - beta
-	a[2] - gamma
-	a[3] - theta
-	a[4] - mu
-	a[5] - nu
-
-	*/
-	sort_by_x_asc(a);
 	int type = -1;
 	bool is_four_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0;
 	bool is_three_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x > 0;
@@ -749,44 +738,60 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 	{
 		type = 0;
 	}
+	return type;
+}
 
-	double y;
+__pure inline quad_type get_wall_intersection_type(dp_t1* a)
+{
+
+	/*
+	 формулы расчетов здесь http://www.pm298.ru/reshenie/fha0327.php
+	a[0] - alpha
+	a[1] - beta
+	a[2] - gamma
+	a[3] - theta
+	a[4] - mu
+	a[5] - nu
+
+	*/
+	sort_by_x_asc(a);	
+	int type = get_wall_intersection_type_as_int(a);	
 	switch (type)
 	{
 	case 4:
 		return wall_4;
 	case 3:
+		//sort_by_y_desc_3(a);
+		//// рассчитаем точку пересечения OY и прямой a[0]:a[1]
+		//// тут не надо fabs, потому что a[1].x > a[0].x
+		//double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x));
+		//a[4] = dp_t1(0, y);
+
+		//// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+		//// тут не надо fabs, потому что a[3].x > a[0].x
+		//y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
+		//a[5] = dp_t1(0, y);
+		//if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
+		//	return wall_3_middle_at;
+		//if (a[0].x < a[1].x && a[1].x > a[2].x)
+		//	return wall_3_middle_out;
+		//if (a[1].x < a[0].x && a[1].x < a[2].x)
+		//	return wall_3_middle_in;
+	case 2:
+		return wall_2;
+	case 1: //	wall_1.pdf 		
+	{
 		sort_by_y_desc_3(a);
 		// рассчитаем точку пересечения OY и прямой a[0]:a[1]
 		// тут не надо fabs, потому что a[1].x > a[0].x
-		y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x));
+		double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x));
 		a[4] = dp_t1(0, y);
 
 		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
 		// тут не надо fabs, потому что a[3].x > a[0].x
 		y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
 		a[5] = dp_t1(0, y);
-		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
-			return wall_3_middle_at;
-		if (a[0].x < a[1].x && a[1].x > a[2].x)
-			return wall_3_middle_out;
-		if (a[1].x < a[0].x && a[1].x < a[2].x)
-			return wall_3_middle_in;
-	case 2:
-		return wall_2;
-	case 1:
-		//	wall_1.pdf http://www.pm298.ru/reshenie/fha0327.php
-		sort_by_y_desc_3(a);
-		// рассчитаем точку пересечения OY и прямой a[0]:a[1]
-		// тут не надо fabs, потому что a[1].x > a[0].x
-		y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x));
-		a[4] = dp_t1(0, y);
 
-		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
-     	// тут не надо fabs, потому что a[3].x > a[0].x
-		y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
-		a[5] = dp_t1(0, y);	
-		
 		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[1].y - a[3].y) < FLT_MIN)
 			return wall_1_middle_at;
 		if (a[1].x < a[2].x && a[2].x > a[3].x)
@@ -794,6 +799,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		if (a[2].x < a[1].x && a[2].x < a[3].x)
 			return wall_1_middle_in;
 		break;
+	}		
 	default:
 		return normal;
 	}	
