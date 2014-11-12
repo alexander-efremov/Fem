@@ -956,32 +956,37 @@ static double integrate(int i, int j)
 
 	switch (type)
 	{
+	case wall_1_middle_in: // вообщем это один и тот же способ
+	case wall_1_middle_out:
 	case wall_1_middle_at:
-		{//тут получается всегда 3 треугольника
+		{
+		//тут получается всегда 3 треугольника
 			double result = 0;
-			double t = 0;
-			dp_t v1 = p[2];
-			dp_t v2 = p[4];
+			double t = 0;			
+			dp_t v1 = p[4];
+			dp_t v2 = p[2];
 			dp_t v3 = p[1];
 			sort_by_y_asc(v1, v2, v3);
 			t = integrate_uniform_triangle(v1, v2, v3);
 			result += t;
-			v1 = p[2];
-			v2 = p[4];
+			
+			v1 = p[4];
+			v2 = p[2];
 			v3 = p[5];
 			sort_by_y_asc(v1, v2, v3);
-			t = integrate_uniform_triangle(v1, v2, v3);
+			t = integrate_uniform_triangle(v1, v2, v3); // почему то тут приходит отрицательный результат
 			result += t;
-			v1 = p[2];
-			v2 = p[3];
+			
+			v1 = p[3];
+			v2 = p[2];
 			v3 = p[5];
 			sort_by_y_asc(v1, v2, v3);
 			t = integrate_uniform_triangle(v1, v2, v3);
 			result += t;
 			return result;
 		}
-	case wall_1_middle_in:
-	case wall_1_middle_out:
+	
+	
 
 		//	return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
 	case wall_2:
