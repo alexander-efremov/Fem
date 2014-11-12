@@ -957,13 +957,13 @@ static double integrate(int i, int j)
 	switch (type)
 	{
 	case wall_1_middle_at:
-	//{//тут получается всегда 3 треугольника
-	//	double result = 0;
-	//	result += integrate_uniform_triangle(p[2], p[4], p[1]);
+	{//тут получается всегда 3 треугольника
+		double result = 0;
+		result += integrate_uniform_triangle(p[2], p[4], p[1]); // TODO: p[4] считается неверно
 	//	result += integrate_uniform_triangle(p[4], p[2], p[5]);
 	//	result += integrate_uniform_triangle(p[2], p[3], p[5]);
-	//	return result;
-	//}
+		return result;
+	}
 	case wall_1_middle_in:
 	case wall_1_middle_out:
 		
