@@ -279,7 +279,7 @@ __pure inline static double func_f(double b, double time, double ub, double bb, 
 
 __pure inline static double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b)
 {
-	return 0.25 * (sqr(hx - a) - sqr(gx - a)) * (sqr(qy - b) - sqr(py - b)) ;
+	return 0.25 * (sqr(hx - a) - sqr(gx - a)) * (sqr(qy - b) - sqr(py - b));
 }
 
 __pure inline static double integrate_triangle(double py, double qy, double alpha, double beta, double a, double b)
@@ -307,7 +307,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 }
 
 static double integrate_triangle_left_one_cell(const dp_t1& bv, const dp_t1& uv, double hx, // TODO: вычислять внутри!!!!!!
-                                               const ip_t& sx, const ip_t& sy)
+	const ip_t& sx, const ip_t& sy)
 {
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
 	if (fabs(a_sl) <= FLT_MIN) return 0;
@@ -336,7 +336,7 @@ static double integrate_triangle_left_one_cell(const dp_t1& bv, const dp_t1& uv,
 
 static double integrate_right_slant_chanel(const dp_t1& bv, const dp_t1& uv, bool is_rect_truncated, const ip_t& sx, double b, const ip_t& sb, const ip_t& sy)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
 	double result = 0, gx = 0;
 	double x = uv.x <= bv.x ? uv.x : bv.x;
 
@@ -376,10 +376,10 @@ static double integrate_right_slant_chanel(const dp_t1& bv, const dp_t1& uv, boo
 // BOTTOMLEFTTR
 
 static double integrate_left_slant_chanel(const dp_t1& bv, const dp_t1& uv,
-                                          bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
-                                          double b, const ip_t& sb)
+	bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
+	double b, const ip_t& sb)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
 	double result = 0, hx = 0; //   -  Left and right boundary for each integration.   
 	double x = uv.x <= bv.x ? bv.x : uv.x;
 
@@ -692,7 +692,7 @@ static double integrate_uniform_triangle(const dp_t1& x, dp_t1& y, const dp_t1& 
 {
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
-	if (fabs(a) < FLT_MIN) return FLT_MIN ;
+	if (fabs(a) < FLT_MIN) return FLT_MIN;
 	double b = x.x - z.x;
 	double c = b * x.y + a * x.x;
 	dp_t1 ip((c - b * y.y) / a, y.y);
@@ -714,111 +714,94 @@ static double integrate_uniform_triangle(const dp_t1& x, dp_t1& y, const dp_t1& 
 __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 {
 	/*
-	
+
 	a[0] - alpha
 	a[1] - beta
 	a[2] - gamma
 	a[3] - theta
 	a[4] - mu
 	a[5] - nu
-	
+
 	*/
 	sort_by_x_asc(a);
-	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0)
+	int type = -1;
+	bool is_four_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0;
+	bool is_three_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x > 0;
+	bool is_two_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x > 0 && a[3].x > 0;
+	bool is_one_point_on_the_wall = a[0].x <= 0 && a[1].x > 0 && a[2].x > 0 && a[3].x > 0;
+	if (is_four_point_on_the_wall)
 	{
+		type = 4;
+	}
+	else if (is_three_point_on_the_wall)
+	{
+		type = 3;
+	}
+	else if (is_two_point_on_the_wall)
+	{
+		type = 2;
+	}
+	else if (is_one_point_on_the_wall)
+	{
+		type = 1;
+	}
+	else
+	{
+		type = 0;
+	}
+
+	double y;
+	switch (type)
+	{
+	case 4:
 		return wall_4;
-	}
-	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x > 0)
-	{
+	case 3:
 		sort_by_y_desc_3(a);
-		/*
-		случай 1: точки на одной прямой
-		a  a	 a
-		b   b   b
-		c    c c
-		http://www.pm298.ru/reshenie/fha0327.php
-		*/
+		// рассчитаем точку пересечения OY и прямой a[0]:a[1]
+		// тут не надо fabs, потому что a[1].x > a[0].x
+		y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x));
+		a[4] = dp_t1(0, y);
+
+		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+		// тут не надо fabs, потому что a[3].x > a[0].x
+		y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
+		a[5] = dp_t1(0, y);
 		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
-		{
 			return wall_3_middle_at;
-		}
-		/*
-		случай 2: средняя точка справа
-
-		a
-		       b
-		c
-
-		*/
 		if (a[0].x < a[1].x && a[1].x > a[2].x)
-		{
 			return wall_3_middle_out;
-		}
-
-		/*
-		случай 3: средняя точка слева
-
-		            a
-		b
-		            c
-
-		*/
 		if (a[1].x < a[0].x && a[1].x < a[2].x)
-		{
 			return wall_3_middle_in;
-		}
-	}
-	if (a[0].x <= 0 && a[1].x <= 0 && a[2].x > 0 && a[3].x > 0)
-	{
+	case 2:
 		return wall_2;
-	}
-	if (a[0].x <= 0 && a[1].x > 0 && a[2].x > 0 && a[3].x > 0)
-	{
+	case 1:
+		//	wall_1.pdf http://www.pm298.ru/reshenie/fha0327.php
 		sort_by_y_desc_3(a);
-		/*
-		случай 1: точки на одной прямой
-		a  a	 a
-		b   b   b
-		c    c c
-		http://www.pm298.ru/reshenie/fha0327.php
-		*/
+		// рассчитаем точку пересечения OY и прямой a[0]:a[1]
+		// тут не надо fabs, потому что a[1].x > a[0].x
+		y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x));
+		a[4] = dp_t1(0, y);
+
+		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+     	// тут не надо fabs, потому что a[3].x > a[0].x
+		y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
+		a[5] = dp_t1(0, y);	
+		
 		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[1].y - a[3].y) < FLT_MIN)
-		{
-//			a[4]=mu;
-//			a[5]=nu;
 			return wall_1_middle_at;
-		}
-		/*
-		случай 2: средняя точка справа
-
-		a
-		      b
-		c
-
-		*/
 		if (a[1].x < a[2].x && a[2].x > a[3].x)
-		{
 			return wall_1_middle_out;
-		}
-
-		/*
-		случай 3: средняя точка слева
-
-		     a
-		b
-		     c
-
-		*/
 		if (a[2].x < a[1].x && a[2].x < a[3].x)
-		{
 			return wall_1_middle_in;
-		}
-	}
+		break;
+	default:
+		return normal;
+	}	
 	return normal;
 }
 
 static quad_type get_quadrangle_type(int i, int j,
-                                     dp_t1& a, dp_t1& b, dp_t1& c, dp_t1& k, dp_t1& m, dp_t1& n, dp_t1* p)
+	dp_t1& a, dp_t1& b, dp_t1& c, dp_t1& k, dp_t1& m, dp_t1& n, dp_t1* p)
 {
 	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
 	dp_t1 alpha((OX[i - 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
@@ -855,13 +838,12 @@ static quad_type get_quadrangle_type(int i, int j,
 	p[1] = dp_t1(beta);
 	p[2] = dp_t1(gamma);
 	p[3] = dp_t1(theta);
-	return get_wall_intersection_type(p); 
+	return get_wall_intersection_type(p);
 }
 
 static double integrate_wall_triangle(const dp_t1 wp, // wall point
-                                      double ly, // left y coordinate
-                                      double ry // right y coordinate
-)
+	double ly, // left y coordinate
+	double ry) // right y coordinate
 {
 	return 0;
 }
@@ -931,7 +913,7 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 	for (int k = 1; k < OY_LEN; ++k)
 		for (int j = 1; j < OX_LEN; ++j)
 			r += fabs(analytical_solution(ts_count_mul_steps, OX[j], OY[k])
-				- density[(OY_LEN + 1) * k + j]);
+			- density[(OY_LEN + 1) * k + j]);
 	return HX * HY * r;
 }
 
@@ -972,12 +954,12 @@ static void solve(double* density)
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
 	}
-	delete[] PREV_DENSITY;
+	delete [] PREV_DENSITY;
 }
 
 
 inline static void init(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length)
+	double tau, int time_step_count, int ox_length, int oy_length)
 {
 	B = b;
 	UB = ub;
@@ -1017,12 +999,12 @@ inline static void clean()
 	HY = 0;
 	INVERTED_HX_HY = 0;
 	TL = 0;
-	delete[] OX;
-	delete[] OY;
+	delete [] OX;
+	delete [] OY;
 }
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length, double& norm)
+	double tau, int time_step_count, int ox_length, int oy_length, double& norm)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
