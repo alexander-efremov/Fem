@@ -730,7 +730,7 @@ static double integrate_upper_triangle(const dp_t1& l, const dp_t1& m, const dp_
 }
 
 // x,y,z
-static double integrate_uniform_triangle(dp_t1& x, dp_t1& y, dp_t1& z)
+static double integrate_uniform_triangle(const dp_t1& x, const dp_t1& y, const dp_t1& z)
 {
 	// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования		
 	
