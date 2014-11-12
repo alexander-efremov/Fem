@@ -985,12 +985,14 @@ static double integrate(int i, int j)
 			result += t;
 			return result;
 		}
-	
-	
-
-		//	return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
 	case wall_2:
-		//		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
+	{
+		// надо рассмотреть три случая
+		// 1. p2 внутри треугольника (p4,p5,p3)
+		// 2. p3 внутри треугольника (p4,p5,p2)
+		// 3. ни 1 ни 2 условие - нормальный случай
+
+	}		
 	case wall_3_middle_in:
 		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_3_middle_out:
