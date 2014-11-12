@@ -805,8 +805,6 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 	{
 		sort_by_x_asc(a);
 		sort_by_y_desc_3(a);
-
-	}
 		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
 		// тут не надо fabs, потому что a[3].x > a[0].x
 		double y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
@@ -814,7 +812,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 
 		// рассчитаем точку пересечения OY и прямой a[2]:a[3]
 		// тут не надо fabs, потому что a[3].x > a[2].x
-		y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));		
+		y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));
 		a[5] = dp_t1(0, y); // nu
 
 		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
@@ -823,6 +821,7 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 			return wall_3_middle_out;
 		if (a[1].x < a[0].x && a[1].x < a[2].x)
 			return wall_3_middle_in;
+	}
 	case 2:
 	{
 		sort_by_xy_wall_2(a);	
