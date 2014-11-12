@@ -189,7 +189,48 @@ inline void sort_by_y_desc_3(dp_t1* a)
 	}
 }
 
-inline void sort_by_x_asc(dp_t1* a)
+__pure inline void sort_by_x_asc(dp_t1* a)
+{
+	for (int i = 1; i < 4; i++)
+	{
+		for (int j = i; j > 0 && a[j - 1].x > a[j].x; j--)
+		{
+			double t = a[j].x;
+			a[j].x = a[j - 1].x;
+			a[j - 1].x = t;
+			t = a[j].y;
+			a[j].y = a[j - 1].y;
+			a[j - 1].y = t;
+		}
+	}
+
+	if (a[0].y > a[1].y)
+	{
+		double t = a[0].x;
+		a[0].x = a[1].x;
+		a[1].x = t;
+		t = a[0].y;
+		a[0].y = a[1].y;
+		a[1].y = t;
+	}
+	if (a[2].y < a[3].y)
+	{
+		double t = a[2].x;
+		a[2].x = a[3].x;
+		a[3].x = t;
+		t = a[2].y;
+		a[2].y = a[3].y;
+		a[3].y = t;
+	}
+}
+
+// получается порядок
+/*
+
+a[1]    a[2]
+a[0]   a[3]
+*/
+__pure inline void sort_by_xy_wall_2(dp_t1* a)
 {
 	for (int i = 1; i < 4; i++)
 	{
@@ -779,33 +820,30 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		//	return wall_3_middle_in;
 	case 2:
 	{
-		sort_by_x_asc(a);
-		if (a[0].y > a[1].y)
+		sort_by_xy_wall_2(a);	
+		double y = 0;
+		if (a[2].x - a[1].x < FLT_MIN)
 		{
-			double t = a[0].x;
-			a[0].x = a[1].x;
-			a[1].x = t;
-			t = a[0].y;
-			a[0].y = a[1].y;
-			a[1].y = t;
+			y = (a[1].y + a[2].y)*0.5;
 		}
-		if (a[2].y < a[3].y)
+		else
 		{
-			double t = a[2].x;
-			a[2].x = a[3].x;
-			a[3].x = t;
-			t = a[2].y;
-			a[2].y = a[3].y;
-			a[3].y = t;
+			y = a[1].y - a[1].x*((a[2].y - a[1].y) / (a[2].x - a[1].x));
 		}
-		// получается порядок
-		/*
+		a[4] = dp_t1(0,y); // mu
 
-		 a[1]    a[2]
-		   a[0]   a[3]
-		*/
-	}
+		if (a[3].x - a[0].x < FLT_MIN)
+		{
+			y = (a[0].y + a[3].y)*0.5;
+		}
+		else
+		{
+			y = a[0].y - a[0].x*((a[3].y - a[0].y) / (a[3].x - a[0].x));
+		}
+		a[5] = dp_t1(0, y); // nu
 		return wall_2;
+	}
+		
 	case 1: //	wall_1.pdf 		
 	{
 		sort_by_x_asc(a);
