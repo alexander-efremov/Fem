@@ -39,7 +39,7 @@ static double TIME;
 static double PREV_TIME; // tau * (tl - 1)
 static double INVERTED_HX_HY;
 
-__pure inline static void sort_by_y(dp_t1& x, dp_t1& y, dp_t1& z)
+__pure inline static void sort_by_y_asc(dp_t1& x, dp_t1& y, dp_t1& z)
 {
 	double t;
 	if (x.y < y.y)
@@ -729,8 +729,11 @@ static double integrate_upper_triangle(const dp_t1& l, const dp_t1& m, const dp_
 	return result;
 }
 
-static double integrate_uniform_triangle(const dp_t1& x, dp_t1& y, const dp_t1& z)
+// x,y,z
+static double integrate_uniform_triangle(dp_t1& x, dp_t1& y, dp_t1& z)
 {
+	// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования		
+	sort_by_y_asc(x, y, z);
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
 	if (fabs(a) < FLT_MIN) return FLT_MIN;
@@ -953,12 +956,12 @@ static double integrate(int i, int j)
 	switch (type)
 	{
 	case wall_1_middle_at:
-
+		//тут получается всегда 3 треугольника
+		/*return integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2)
+			+ integrate_uniform_triangle(a2, b2, c2);*/
 	case wall_1_middle_in:
-
 	case wall_1_middle_out:
-
-
+		
 		//	return integrate_wall_triangle(w1, y.x, y.y) + integrate_pentagon(a2, b2, c2, y.x, y.y);
 	case wall_2:
 		//		return integrate_wall_rectangle(w1, w2, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
@@ -970,10 +973,7 @@ static double integrate(int i, int j)
 		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_4:
 		//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
-	case normal:
-		// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования
-		sort_by_y(a1, b1, c1); // TODO: перенести в  get_quadrangle_type ???
-		sort_by_y(a2, b2, c2);
+	case normal:		
 		return integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
 	case concave:
 	case convex:
