@@ -271,9 +271,24 @@ __pure inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& 
 	return dp_t((b1 * c2 - b2 * c1) / (b1 * a2 - b2 * a1), (a1 * c2 - a2 * c1) / (-b1 * a2 + b2 * a1));
 }
 
-__pure inline static bool is_points_belong_to_one_line(const dp_t& alpha, const dp_t beta, const dp_t theta)
+
+__pure inline static double sign(const dp_t& p1, const dp_t p2, const dp_t p3)
 {
-	return ((alpha.x - theta.x) * (beta.y - theta.y) - (beta.y - theta.y) * (alpha.x - theta.x)) == FLT_MIN;
+	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
+__pure inline static bool is_points_belong_to_one_line(const dp_t& p1, const dp_t p2, const dp_t p3)
+{
+	return sign(p1,p2,p3) == FLT_MIN;
+}
+
+bool is_point_in_triangle(dp_t pt, dp_t v1, dp_t v2, dp_t v3)
+{
+	bool b1, b2, b3;
+	b1 = sign(pt, v1, v2) < 0.0;
+	b2 = sign(pt, v2, v3) < 0.0;
+	b3 = sign(pt, v3, v1) < 0.0;
+	return b1 == b2 && b2 == b3;
 }
 
 __pure inline static double analytical_solution(double t, double x, double y)
