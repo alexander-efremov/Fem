@@ -733,7 +733,7 @@ static double integrate_upper_triangle(const dp_t1& l, const dp_t1& m, const dp_
 static double integrate_uniform_triangle(dp_t1& x, dp_t1& y, dp_t1& z)
 {
 	// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования		
-	sort_by_y_asc(x, y, z);
+	
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
 	if (fabs(a) < FLT_MIN) return FLT_MIN;
@@ -745,14 +745,15 @@ static double integrate_uniform_triangle(dp_t1& x, dp_t1& y, dp_t1& z)
 	//   слева или справа.
 	//   есди средняя точка справа от точки пересечения
 	//   обменяем местами  X координаты, чтобы использовать один код для расчета
-	if (y.x >= ip.x)
+	dp_t1 t = y;
+	if (t.x >= ip.x)
 	{
-		double tx = y.x;
-		y.x = ip.x;
+		double tx = t.x;
+		t.x = ip.x;
 		ip.x = tx;
 	}
 
-	return integrate_upper_triangle(y, z, ip) + integrate_bottom_triangle(y, x, ip);
+	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
 }
 
 __pure inline int get_wall_intersection_type_as_int(dp_t1* a)
@@ -956,9 +957,13 @@ static double integrate(int i, int j)
 	switch (type)
 	{
 	case wall_1_middle_at:
-		//тут получается всегда 3 треугольника
-		/*return integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2)
-			+ integrate_uniform_triangle(a2, b2, c2);*/
+	//{//тут получается всегда 3 треугольника
+	//	double result = 0;
+	//	result += integrate_uniform_triangle(p[2], p[4], p[1]);
+	//	result += integrate_uniform_triangle(p[4], p[2], p[5]);
+	//	result += integrate_uniform_triangle(p[2], p[3], p[5]);
+	//	return result;
+	//}
 	case wall_1_middle_in:
 	case wall_1_middle_out:
 		
@@ -973,7 +978,9 @@ static double integrate(int i, int j)
 		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_4:
 		//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
-	case normal:		
+	case normal:
+		sort_by_y_asc(a1, b1, c1);
+		sort_by_y_asc(a2, b2, c2);
 		return integrate_uniform_triangle(a1, b1, c1) + integrate_uniform_triangle(a2, b2, c2);
 	case concave:
 	case convex:
