@@ -3,15 +3,15 @@
 
 static const double MIN_VALUE = 1.e-12;
 
-struct dp_t1 {
+struct dp_t {
 	double x;
 	double y;	
 
-	dp_t1(double x, double y)
+	dp_t(double x, double y)
 		: x(x), y(y) {
 	}
 
-	dp_t1()
+	dp_t()
 		: x(0), y(0) {
 	}
 
@@ -19,7 +19,7 @@ struct dp_t1 {
 		return (i == 0) ? x : y;
 	}
 
-	inline dp_t1& operator=(const dp_t1& p) {
+	inline dp_t& operator=(const dp_t& p) {
 		if (this != &p) {
 			x = p.x;
 			y = p.y;
@@ -28,19 +28,19 @@ struct dp_t1 {
 		return *this;
 	}
 
-	inline dp_t1 operator+(const dp_t1& p) const {
-		return dp_t1(p.x + x, p.y + y);
+	inline dp_t operator+(const dp_t& p) const {
+		return dp_t(p.x + x, p.y + y);
 	}
 
-	inline bool operator==(const dp_t1& p) const {
+	inline bool operator==(const dp_t& p) const {
 		return (x == p.x && y == p.y);
 	}
 
-	inline int operator<(const dp_t1& p) {
+	inline int operator<(const dp_t& p) {
 		return ((x < p.x) || ((x == p.x) && (y < p.y)));
 	}
 
-	inline int operator>(const dp_t1& p) {
+	inline int operator>(const dp_t& p) {
 		return ((x > p.x) || ((x == p.x) && (y > p.y)));
 	}
 };
