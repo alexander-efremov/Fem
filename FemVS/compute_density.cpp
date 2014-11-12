@@ -851,12 +851,12 @@ __pure inline quad_type get_wall_intersection_type(dp_t1* a)
 		// рассчитаем точку пересечения OY и прямой a[0]:a[1]
 		// тут не надо fabs, потому что a[1].x > a[0].x
 		double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
-		a[4] = dp_t1(0, y);
+		a[4] = dp_t1(0, y); // mu
 
 		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
 		// тут не надо fabs, потому что a[3].x > a[0].x
 		y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : (a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x)));
-		a[5] = dp_t1(0, y);
+		a[5] = dp_t1(0, y); // nu
 
 		if ((a[1].x - a[3].x) * (a[2].y - a[3].y) - (a[2].x - a[3].x) * (a[1].y - a[3].y) < FLT_MIN)
 			return wall_1_middle_at;
