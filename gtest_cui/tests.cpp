@@ -22,9 +22,42 @@ protected:
 	}
 };
 
+inline static double sign(const dp_t1& p1, const dp_t1 p2, const dp_t1 p3)
+{
+	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
+inline static bool is_points_belong_to_one_line(const dp_t1& p1, const dp_t1 p2, const dp_t1 p3)
+{
+	return sign(p1, p2, p3) == FLT_MIN;
+}
+
+inline static bool is_point_in_triangle(dp_t1 pt, dp_t1 v1, dp_t1 v2, dp_t1 v3)
+{
+	bool b1, b2, b3;
+	b1 = sign(pt, v1, v2) < 0.0;
+	b2 = sign(pt, v2, v3) < 0.0;
+	b3 = sign(pt, v3, v1) < 0.0;
+	return b1 == b2 && b2 == b3;
+}
 
 
-TEST_F(cpu, test_to_model)
+TEST_F(cpu, test_tri)
+{
+	dp_t1 p[4];
+	p[0] = dp_t1(1,1);
+	p[1] = dp_t1(1,3);
+	p[2] = dp_t1(3,2);
+	p[3] = dp_t1(1.72,2.01);
+	bool b = is_point_in_triangle(p[3], p[0], p[1], p[2]);
+	ASSERT_TRUE(b);
+
+}
+
+
+
+TEST_F(cpu, DISABLED_test_to_model)
+//TEST_F(cpu, test_to_model)
 {
 	int first = 0, last = 3;
 	double norm_test, norm_model;

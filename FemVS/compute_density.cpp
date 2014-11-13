@@ -281,7 +281,7 @@ __pure inline static bool is_points_belong_to_one_line(const dp_t& p1, const dp_
 	return sign(p1,p2,p3) == FLT_MIN;
 }
 
-bool is_point_in_triangle(dp_t pt, dp_t v1, dp_t v2, dp_t v3)
+__pure inline static bool is_point_in_triangle(dp_t pt, dp_t v1, dp_t v2, dp_t v3)
 {
 	bool b1, b2, b3;
 	b1 = sign(pt, v1, v2) < 0.0;
