@@ -1077,13 +1077,21 @@ static double integrate(int i, int j)
 		//}
 	}		
 	case wall_3_middle_in:
-		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_3_middle_out:
-		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
 	case wall_3_middle_at:
-		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
+	{
+		double result = 0;
+		double t = 0;
+		dp_t v1 = p[4];
+		dp_t v2 = p[5];
+		dp_t v3 = p[3];
+		sort_by_y_asc(v1,v2,v3);
+		t = integrate_uniform_triangle(a1, b1, c1);
+		result += t;		
+		return result;
+	}
 	case wall_4:
-		//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
+		return 0;
 	case normal:
 		{
 			double result = 0;
