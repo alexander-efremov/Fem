@@ -1080,7 +1080,7 @@ static double integrate(int i, int j)
 	case wall_3_middle_out:
 	case wall_3_middle_at:
 	{
-		double result = 0;
+		/*double result = 0;
 		double t = 0;
 		dp_t v1 = p[4];
 		dp_t v2 = p[5];
@@ -1088,10 +1088,10 @@ static double integrate(int i, int j)
 		sort_by_y_asc(v1, v2, v3);
 		t = integrate_uniform_triangle(a1, b1, c1);
 		result += t;
-		return result;
+		return result;*/
 	}
 	case wall_4:
-		return 0;
+		//return 0;
 	case normal:
 	{
 		double result = 0;
