@@ -1001,11 +1001,80 @@ static double integrate(int i, int j)
 //		}
 	case wall_2:
 	{
-		// надо рассмотреть три случая
-		// 1. p2 внутри треугольника (p4,p5,p3) = итегрирование по 3 треугольникам
-		// 2. p3 внутри треугольника (p4,p5,p2) =  итегрирование по 3 треугольникам
-		// 3. ни 1 ни 2 условие - нормальный случай 4 угольник, интегрируем как обычно
+		//// надо рассмотреть три случая
+		//// 1. p2 внутри треугольника (p4,p5,p3) = итегрирование по 3 треугольникам
+		//if (is_point_in_triangle(p[2], p[4], p[5], p[3]))
+		//{
+		//	double t = 0;
+		//	double result = 0;
+		//	dp_t v1 = p[5];
+		//	dp_t v2 = p[3];
+		//	dp_t v3 = p[4];
+		//	//сразу их располагаем в порядке возростания y координаты
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
+		//				
+		//	v1 = p[5];
+		//	v2 = p[3];
+		//	v3 = p[2];
+		//	sort_by_y_asc(v1, v2, v3);
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
+		//				
+		//	v1 = p[3];
+		//	v2 = p[2];
+		//	v3 = p[4];
+		//	sort_by_y_asc(v1, v2, v3);
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
+		//	return result;
+		//}
+		//// 2. p3 внутри треугольника (p4,p5,p2) =  итегрирование по 3 треугольникам
+		//else if (is_point_in_triangle(p[3], p[4], p[5], p[2]))
+		//{
+		//	double t = 0;
+		//	double result = 0;
+		//	//сразу их располагаем в порядке возростания y координаты
+		//	dp_t v1 = p[5];
+		//	dp_t v2 = p[2];
+		//	dp_t v3 = p[4];			
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
 
+		//	v1 = p[5];
+		//	v2 = p[2];
+		//	v3 = p[3];
+		//	sort_by_y_asc(v1, v2, v3);
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
+
+		//	v1 = p[4];
+		//	v2 = p[2];
+		//	v3 = p[3];
+		//	sort_by_y_asc(v1, v2, v3);
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
+		//	return result;
+		//}
+		//// 3. ни 1 ни 2 условие - нормальный случай 4 угольник, интегрируем как обычно
+		//else
+		//{
+		//	double result = 0;
+		//	double t = 0;
+		//	dp_t v1 = p[4];
+		//	dp_t v2 = p[5];
+		//	dp_t v3 = p[3];
+		//	sort_by_y_asc(v1, v2, v3);
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
+		//	v1 = p[4];
+		//	v2 = p[2];
+		//	v3 = p[3];
+		//	sort_by_y_asc(v1, v2, v3);
+		//	t = integrate_uniform_triangle(v1, v2, v3);
+		//	result += t;
+		//	return result;
+		//}
 	}		
 	case wall_3_middle_in:
 		//	return integrate_wall_pentagon(w1, w2, w3, y.x, y.y) + integrate_uniform_triangle(a1, b1, c1);
@@ -1016,7 +1085,6 @@ static double integrate(int i, int j)
 	case wall_4:
 		//	return integrate_wall_rectangle(w1, w2, w3, w4, y.x, y.y);
 	case normal:
-
 		{
 			double result = 0;
 			double t = 0;
