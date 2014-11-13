@@ -1,47 +1,6 @@
 #ifndef TEST_UTILS_H
 #define	TEST_UTILS_H
 
-struct dp_t1 {
-	double x;
-	double y;
-
-	dp_t1(double x, double y)
-		: x(x), y(y) {
-	}
-
-	dp_t1()
-		: x(0), y(0) {
-	}
-
-	inline double operator[](int i) {
-		return (i == 0) ? x : y;
-	}
-
-	inline dp_t1& operator=(const dp_t1& p) {
-		if (this != &p) {
-			x = p.x;
-			y = p.y;
-		}
-
-		return *this;
-	}
-
-	inline dp_t1 operator+(const dp_t1& p) const {
-		return dp_t1(p.x + x, p.y + y);
-	}
-
-	inline bool operator==(const dp_t1& p) const {
-		return (x == p.x && y == p.y);
-	}
-
-	inline int operator<(const dp_t1& p) {
-		return ((x < p.x) || ((x == p.x) && (y < p.y)));
-	}
-
-	inline int operator>(const dp_t1& p) {
-		return ((x > p.x) || ((x == p.x) && (y > p.y)));
-	}
-};
 
 inline void _print_matrix_to_file(int n, int m, double* data, char* filename)
 {
