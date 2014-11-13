@@ -77,7 +77,7 @@ strcat( strOfName, str5 );
 
 double *mas_Empty = new double [ 1 ];
 
-mas_Empty[0] = ( (int)(numOfCurrTimeIter *1000. /numOfTimeSteps) ) /10;
+mas_Empty[0] = static_cast<double>(static_cast<int>(numOfCurrTimeIter *1000. /numOfTimeSteps)) /10;
 
 
 //	Вывод данных.
@@ -91,7 +91,7 @@ print_TecPlot_3D(	strOfName,
 					);
 
 
-delete mas_Empty;
+delete[] mas_Empty;
 
 
 return true;

@@ -349,7 +349,7 @@ bool solByEqualVolumes(
 	delete rhoInPrevTL;
 	*/
 
-	delete rhoInPrevTL_asV;
+	delete[] rhoInPrevTL_asV;
 
 
 
@@ -530,9 +530,9 @@ double* solByEqualVolWithVarStepPlusPrint1(
 		varMasOY, //   -  Massive of OY grid nodes. Dimension = dimOY.
 		varNumOfOYSt + 1,
 		rhoInCurrTL_asV);
-	delete varMasOX;
-	delete varMasOY;
-	delete rhoInCurrTL_asV;
+	delete[] varMasOX;
+	delete[] varMasOY;
+	delete[] rhoInCurrTL_asV;
 
 
 	return result;
@@ -781,9 +781,9 @@ double* solByEqualVolWithVarStepPlusPrint(
 		delete varMasOY;
 		delete rhoInCurrTL_asV;
 	}
-	delete maxModAbsErr;
-	delete masOfGrStepItem;
-	delete ordOfErr;
+	delete[] maxModAbsErr;
+	delete[] masOfGrStepItem;
+	delete[] ordOfErr;
 	return result;
 }
 

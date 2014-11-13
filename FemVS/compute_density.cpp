@@ -18,23 +18,23 @@
 #define __pure 
 #endif
 
-static double B;
-static double UB;
-static double BB;
-static double LB;
-static double RB;
+static double B; //-V707
+static double UB; //-V707
+static double BB; //-V707
+static double LB; //-V707
+static double RB; //-V707
 static double TAU;
 static int OX_LEN;
 static int OX_LEN_1; // OX_LEN_1
 static int OY_LEN;
 static int XY_LEN;
 static int TIME_STEP_CNT;
-static double HX;
-static double HY;
-static double* OX;
-static double* OY;
+static double HX; //-V707
+static double HY; //-V707
+static double* OX; //-V707
+static double* OY; //-V707
 static double* PREV_DENSITY;
-static int TL;
+static int TL; //-V707
 static double TIME;
 static double PREV_TIME; // tau * (tl - 1)
 static double INVERTED_HX_HY;
