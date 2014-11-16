@@ -4,7 +4,7 @@
 
 #define sqr(x) ((x)*(x))
 #define cub(x) ((x)*(x)*(x))
-#define sqr2(x) ((x)*(x)*(x)*(x))
+#define quad(x) ((x)*(x)*(x)*(x))
 
 #ifdef __GNUC__
 #define __pure
@@ -49,8 +49,8 @@ __pure inline static void sort_by_y_asc(dp_t& x, dp_t& y, dp_t& z)
 			t = x.x;
 			x.x = z.x;
 			z.x = t;
-			t = y.y;
-			y.y = z.y;
+			t = x.y;
+			x.y = z.y;
 			z.y = t;
 			//swap(x, z);
 		}
@@ -59,12 +59,12 @@ __pure inline static void sort_by_y_asc(dp_t& x, dp_t& y, dp_t& z)
 	{
 		if (y.y < z.y)
 		{
-			t = x.x;
-			x.x = y.x;
-			y.x = t;
-			t = x.y;
-			x.y = y.y;
-			y.y = t;
+			t = y.x;
+			y.x = z.x;
+			z.x = t;
+			t = y.y;
+			y.y = z.y;
+			z.y = t;
 			//swap(x, y);
 		}
 		else
@@ -123,8 +123,8 @@ __pure inline static void sort_by_x(dp_t& x, dp_t& y, dp_t& z)
 			t = x.x;
 			x.x = z.x;
 			z.x = t;
-			t = y.y;
-			y.y = z.y;
+			t = x.y;
+			x.y = z.y;
 			z.y = t;
 			//swap(x, z);
 		}
@@ -340,7 +340,7 @@ __pure inline static double integrate_rectangle(double py, double qy, double gx,
 __pure inline static double integrate_triangle(double py, double qy, double alpha, double beta, double a, double b)
 {
 	return (((qy - alpha) * cub(a * qy + b - beta) - (py - alpha) * cub(a * py + b - beta)) / (6 * a))
-		- (sqr2(a * qy + b - beta) - sqr2(a * py + b - beta)) / (24 * sqr(a));
+		- (quad(a * qy + b - beta) - quad(a * py + b - beta)) / (24 * sqr(a));
 }
 
 static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx, const ip_t& sx, const ip_t& sy)
@@ -973,32 +973,32 @@ static double integrate(int i, int j)
 	case wall_1_middle_in: // вообщем это один и тот же способ
 	case wall_1_middle_out:
 	case wall_1_middle_at:
-		//		{
-		//		//тут получается всегда 3 треугольника
-		//			double result = 0;
-		//			double t = 0;			
-		//			dp_t v1 = p[4];
-		//			dp_t v2 = p[2];
-		//			dp_t v3 = p[1];
-		//			sort_by_y_asc(v1, v2, v3);
-		//			t = integrate_uniform_triangle(v1, v2, v3);
-		//			result += t;
-		//			
-		//			v1 = p[4];
-		//			v2 = p[2];
-		//			v3 = p[5];
-		//			sort_by_y_asc(v1, v2, v3);
-		//			t = integrate_uniform_triangle(v1, v2, v3); // почему то тут приходит отрицательный результат
-		//			result += t;
-		//			
-		//			v1 = p[3];
-		//			v2 = p[2];
-		//			v3 = p[5];
-		//			sort_by_y_asc(v1, v2, v3);
-		//			t = integrate_uniform_triangle(v1, v2, v3);
-		//			result += t;
-		//			return result;
-		//		}
+	{
+	//тут получается всегда 3 треугольника
+		double result = 0;
+		double t = 0;			
+		dp_t v1 = p[4];
+		dp_t v2 = p[2];
+		dp_t v3 = p[1];
+		sort_by_y_asc(v1, v2, v3);
+		t = integrate_uniform_triangle(v1, v2, v3);
+		result += t;
+					
+		v1 = p[4];
+		v2 = p[2];
+		v3 = p[5];
+		sort_by_y_asc(v1, v2, v3);
+		t = integrate_uniform_triangle(v1, v2, v3); // почему то тут приходит отрицательный результат
+		result += t;
+					
+		v1 = p[3];
+		v2 = p[2];
+		v3 = p[5];
+		sort_by_y_asc(v1, v2, v3);
+		t = integrate_uniform_triangle(v1, v2, v3);
+		result += t;
+		return result;
+	}
 	case wall_2:
 	{
 		//// надо рассмотреть три случая
