@@ -361,7 +361,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 	return result * INVERTED_HX_HY;
 }
 
-static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx, // TODO: вычислять внутри!!!!!!
+static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx,
 	const ip_t& sx, const ip_t& sy)
 {
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
