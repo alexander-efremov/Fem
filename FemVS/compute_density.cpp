@@ -43,14 +43,16 @@ static double INVERTED_HX_HY;
 __pure inline static void sort_by_y_asc(dp_t& x, dp_t& y, dp_t& z)
 {
 	using std::swap; // TODO: переписать без swap (использовать std::move)
-	if (x.y < y.y) {
+	if (x.y < y.y)
+	{
 		if (z.y < x.y) swap(x, z);
 	}
-	else {
+	else
+	{
 		if (y.y < z.y) swap(x, y);
 		else swap(x, z);
 	}
-	if (z.y<y.y) swap(y, z);
+	if (z.y < y.y) swap(y, z);
 }
 
 __pure inline static void sort_by_x(dp_t& x, dp_t& y, dp_t& z)
@@ -241,7 +243,7 @@ __pure inline static double sign(const dp_t& p1, const dp_t p2, const dp_t p3)
 
 __pure inline static bool is_points_belong_to_one_line(const dp_t& p1, const dp_t p2, const dp_t p3)
 {
-	return sign(p1, p2, p3) == FLT_MIN;
+	return sign(p1, p2, p3) == FLT_MIN ;
 }
 
 __pure inline static bool is_point_in_triangle(dp_t pt, dp_t v1, dp_t v2, dp_t v3)
@@ -325,7 +327,7 @@ static double integrate_rectangle_one_cell(double py, double qy, double gx, doub
 }
 
 static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx,
-	const ip_t& sx, const ip_t& sy)
+                                               const ip_t& sx, const ip_t& sy)
 {
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
 	if (fabs(a_sl) <= FLT_MIN) return 0;
@@ -354,7 +356,7 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 
 static double integrate_right_slant_chanel(const dp_t& bv, const dp_t& uv, bool is_rect_truncated, const ip_t& sx, double b, const ip_t& sb, const ip_t& sy)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx = 0;
 	double x = uv.x <= bv.x ? uv.x : bv.x;
 
@@ -394,10 +396,10 @@ static double integrate_right_slant_chanel(const dp_t& bv, const dp_t& uv, bool 
 // BOTTOMLEFTTR
 
 static double integrate_left_slant_chanel(const dp_t& bv, const dp_t& uv,
-	bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
-	double b, const ip_t& sb)
+                                          bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
+                                          double b, const ip_t& sb)
 {
-	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN;
+	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, hx = 0; //   -  Left and right boundary for each integration.   
 	double x = uv.x <= bv.x ? bv.x : uv.x;
 
@@ -713,7 +715,7 @@ static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_
 
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
-	if (fabs(a) < FLT_MIN) return FLT_MIN;
+	if (fabs(a) < FLT_MIN) return FLT_MIN ;
 	double b = x.x - z.x;
 	double c = b * x.y + a * x.x;
 	dp_t ip((c - b * y.y) / a, y.y);
@@ -736,8 +738,8 @@ static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_
 static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, const dp_t& z)
 {
 	return 0;
-//	dp_t cp(0, ); // из y до OY
-//	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
+	//	dp_t cp(0, ); // из y до OY
+	//	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
 }
 
 __pure inline int get_wall_intersection_type_as_int(dp_t* a)
@@ -789,78 +791,78 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 	case 4:
 		return wall_4;
 	case 3:
-	{
-		sort_by_x_asc(a);
-		sort_by_y_desc_3(a);
-		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
-		// тут не надо fabs, потому что a[3].x > a[0].x
-		double y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
-		a[4] = dp_t(0, y); // mu
+		{
+			sort_by_x_asc(a);
+			sort_by_y_desc_3(a);
+			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+			// тут не надо fabs, потому что a[3].x > a[0].x
+			double y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
+			a[4] = dp_t(0, y); // mu
 
-		// рассчитаем точку пересечения OY и прямой a[2]:a[3]
-		// тут не надо fabs, потому что a[3].x > a[2].x
-		y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));
-		a[5] = dp_t(0, y); // nu
+			// рассчитаем точку пересечения OY и прямой a[2]:a[3]
+			// тут не надо fabs, потому что a[3].x > a[2].x
+			y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));
+			a[5] = dp_t(0, y); // nu
 
-		if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
-			return wall_3_middle_at;
-		if (a[0].x < a[1].x && a[1].x > a[2].x)
-			return wall_3_middle_out;
-		if (a[1].x < a[0].x && a[1].x < a[2].x)
-			return wall_3_middle_in;
-	}
+			if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
+				return wall_3_middle_at;
+			if (a[0].x < a[1].x && a[1].x > a[2].x)
+				return wall_3_middle_out;
+			if (a[1].x < a[0].x && a[1].x < a[2].x)
+				return wall_3_middle_in;
+		}
 	case 2:
-	{
-		sort_by_xy_wall_2(a);
-		double y = 0;
-		if (a[2].x - a[1].x < FLT_MIN)
 		{
-			y = (a[1].y + a[2].y) * 0.5;
-		}
-		else
-		{
-			y = a[1].y - a[1].x * ((a[2].y - a[1].y) / (a[2].x - a[1].x));
-		}
-		a[4] = dp_t(0, y); // mu
+			sort_by_xy_wall_2(a);
+			double y = 0;
+			if (a[2].x - a[1].x < FLT_MIN)
+			{
+				y = (a[1].y + a[2].y) * 0.5;
+			}
+			else
+			{
+				y = a[1].y - a[1].x * ((a[2].y - a[1].y) / (a[2].x - a[1].x));
+			}
+			a[4] = dp_t(0, y); // mu
 
-		if (a[3].x - a[0].x < FLT_MIN)
-		{
-			y = (a[0].y + a[3].y) * 0.5;
+			if (a[3].x - a[0].x < FLT_MIN)
+			{
+				y = (a[0].y + a[3].y) * 0.5;
+			}
+			else
+			{
+				y = a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
+			}
+			a[5] = dp_t(0, y); // nu
+			return wall_2;
 		}
-		else
-		{
-			y = a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
-		}
-		a[5] = dp_t(0, y); // nu
-		return wall_2;
-	}
 
 	case 1: //	wall_1.pdf 		
-	{
-		sort_by_x_asc(a);
-		sort_by_y_desc_3(a);
+		{
+			sort_by_x_asc(a);
+			sort_by_y_desc_3(a);
 
-		// точка a[0] - точка, которая упала на стенку, значит для нее x=t
-		// считаем y компоненту
+			// точка a[0] - точка, которая упала на стенку, значит для нее x=t
+			// считаем y компоненту
 
-		// рассчитаем точку пересечения OY и прямой a[0]:a[1]
-		// тут не надо fabs, потому что a[1].x > a[0].x
-		double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
-		a[4] = dp_t(0, y); // mu
+			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
+			// тут не надо fabs, потому что a[1].x > a[0].x
+			double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
+			a[4] = dp_t(0, y); // mu
 
-		// рассчитаем точку пересечения OY и прямой a[0]:a[3]
-		// тут не надо fabs, потому что a[3].x > a[0].x
-		y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : (a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x)));
-		a[5] = dp_t(0, y); // nu
+			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+			// тут не надо fabs, потому что a[3].x > a[0].x
+			y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : (a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x)));
+			a[5] = dp_t(0, y); // nu
 
-		if (is_points_belong_to_one_line(a[1], a[2], a[3]))
-			return wall_1_middle_at;
-		if (a[1].x < a[2].x && a[2].x > a[3].x)
-			return wall_1_middle_out;
-		if (a[2].x < a[1].x && a[2].x < a[3].x)
-			return wall_1_middle_in;
-		break;
-	}
+			if (is_points_belong_to_one_line(a[1], a[2], a[3]))
+				return wall_1_middle_at;
+			if (a[1].x < a[2].x && a[2].x > a[3].x)
+				return wall_1_middle_out;
+			if (a[2].x < a[1].x && a[2].x < a[3].x)
+				return wall_1_middle_in;
+			break;
+		}
 	default:
 		return normal;
 	}
@@ -868,53 +870,51 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 }
 
 static quad_type get_quadrangle_type(int i, int j,
-	dp_t& a, dp_t& b, dp_t& c, dp_t& k, dp_t& m, dp_t& n, dp_t* p)
+                                     dp_t& a, dp_t& b, dp_t& c, dp_t& k, dp_t& m, dp_t& n, dp_t* p)
 {
 	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
 	dp_t alpha((OX[i - 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
 		beta((OX[i + 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
 		gamma((OX[i + 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5),
 		theta((OX[i - 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5);
+	
 	// get prev coordnates
 	double u = func_u(B, alpha);
 	double v = func_v(UB, BB, LB, RB, TIME, alpha);
-	alpha.x -= TAU * u;
-	alpha.y -= TAU * v;
+	p[0].x = alpha.x - TAU * u;
+	p[0].y = alpha.y - TAU * v;
 	v = func_v(UB, BB, LB, RB, TIME, beta);
 	u = func_u(B, beta);
-	beta.x -= TAU * u;
-	beta.y -= TAU * v;
+	p[1].x = beta.x - TAU * u;
+	p[1].y = beta.y - TAU * v;
+
 	v = func_v(UB, BB, LB, RB, TIME, gamma);
 	u = func_u(B, gamma);
-	gamma.x -= TAU * u;
-	gamma.y -= TAU * v;
+	p[2].x= gamma.x - TAU * u;
+	p[2].y= gamma.y - TAU * v;	
 	v = func_v(UB, BB, LB, RB, TIME, theta);
 	u = func_u(B, theta);
-	theta.x -= TAU * u;
-	theta.y -= TAU * v;
+	p[3].x = theta.x - TAU * u;
+	p[3].y = theta.y - TAU * v;	
 
-	dp_t intersection = get_intersection_point(alpha, beta, gamma, theta);
-	if ((beta.y - intersection.y) * (theta.y - intersection.y) > 0) return pseudo; // ??
-	if ((alpha.x - intersection.x) * (gamma.x - intersection.x) > 0) return pseudo; // ??	
-	if (is_points_belong_to_one_line(alpha, beta, theta)) return pseudo;
+	dp_t intersection = get_intersection_point(p[0], p[1], p[2], p[3]);
+	if ((p[1].y - intersection.y) * (p[3].y - intersection.y) > 0) return pseudo; // ??
+	if ((p[0].x - intersection.x) * (p[2].x - intersection.x) > 0) return pseudo; // ??	
+	if (is_points_belong_to_one_line(p[0], p[1], p[3])) return pseudo;
 
-	a = alpha;
-	b = beta;
-	c = gamma;
-	k = alpha;
-	m = theta;
-	n = gamma;
+	a = p[0];
+	b = p[1];
+	c = p[2];
+	k = p[0];
+	m = p[3];
+	n = p[2];
 
-	p[0] = dp_t(alpha);
-	p[1] = dp_t(beta);
-	p[2] = dp_t(gamma);
-	p[3] = dp_t(theta);
 	return get_wall_intersection_type(p);
 }
 
 static double integrate_wall_triangle(const dp_t wp, // wall point
-	double ly, // left y coordinate
-	double ry) // right y coordinate
+                                      double ly, // left y coordinate
+                                      double ry) // right y coordinate
 {
 	return 0;
 }
@@ -951,121 +951,121 @@ static double integrate(int i, int j)
 	case wall_1_middle_in: // вообщем это один и тот же способ
 	case wall_1_middle_out:
 	case wall_1_middle_at:
-//	{
-//	//тут получается всегда 3 треугольника
-//		double result = 0;
-//		double t = 0;			
-//		dp_t v1 = p[4];
-//		dp_t v2 = p[2];
-//		dp_t v3 = p[1];
-//		sort_by_y_asc(v1, v2, v3);
-//		t = integrate_uniform_triangle(v1, v2, v3);
-//		result += t;
-//					
-//		v1 = p[4];
-//		v2 = p[2];
-//		v3 = p[5];
-//		sort_by_y_asc(v1, v2, v3);
-//		t = integrate_uniform_triangle(v1, v2, v3); // почему то тут приходит отрицательный результат
-//		result += t;
-//					
-//		v1 = p[3];
-//		v2 = p[2];
-//		v3 = p[5];
-//		sort_by_y_asc(v1, v2, v3);
-//		t = integrate_uniform_triangle(v1, v2, v3);
-//		result += t;
-//
-//		v1 = p[0];
-//		v2 = p[4];
-//		v3 = p[5];
-//		sort_by_y_asc(v1, v2, v3);
-//		t = integrate_uniform_triangle_wall(v1, v2, v3);
-//		result += t;
-//		return result;
-//	}
+		//	{
+		//	//тут получается всегда 3 треугольника
+		//		double result = 0;
+		//		double t = 0;			
+		//		dp_t v1 = p[4];
+		//		dp_t v2 = p[2];
+		//		dp_t v3 = p[1];
+		//		sort_by_y_asc(v1, v2, v3);
+		//		t = integrate_uniform_triangle(v1, v2, v3);
+		//		result += t;
+		//					
+		//		v1 = p[4];
+		//		v2 = p[2];
+		//		v3 = p[5];
+		//		sort_by_y_asc(v1, v2, v3);
+		//		t = integrate_uniform_triangle(v1, v2, v3); // почему то тут приходит отрицательный результат
+		//		result += t;
+		//					
+		//		v1 = p[3];
+		//		v2 = p[2];
+		//		v3 = p[5];
+		//		sort_by_y_asc(v1, v2, v3);
+		//		t = integrate_uniform_triangle(v1, v2, v3);
+		//		result += t;
+		//
+		//		v1 = p[0];
+		//		v2 = p[4];
+		//		v3 = p[5];
+		//		sort_by_y_asc(v1, v2, v3);
+		//		t = integrate_uniform_triangle_wall(v1, v2, v3);
+		//		result += t;
+		//		return result;
+		//	}
 	case wall_2:
-	{
-		//// надо рассмотреть три случая
-		//// 1. p2 внутри треугольника (p4,p5,p3) = итегрирование по 3 треугольникам
-		//if (is_point_in_triangle(p[2], p[4], p[5], p[3]))
-		//{
-		//	double t = 0;
-		//	double result = 0;
-		//	dp_t v1 = p[5];
-		//	dp_t v2 = p[3];
-		//	dp_t v3 = p[4];
-		//	//сразу их располагаем в порядке возростания y координаты
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
-		//				
-		//	v1 = p[5];
-		//	v2 = p[3];
-		//	v3 = p[2];
-		//	sort_by_y_asc(v1, v2, v3);
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
-		//				
-		//	v1 = p[3];
-		//	v2 = p[2];
-		//	v3 = p[4];
-		//	sort_by_y_asc(v1, v2, v3);
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
-		//	return result;
-		//}
-		//// 2. p3 внутри треугольника (p4,p5,p2) =  итегрирование по 3 треугольникам
-		//else if (is_point_in_triangle(p[3], p[4], p[5], p[2]))
-		//{
-		//	double t = 0;
-		//	double result = 0;
-		//	//сразу их располагаем в порядке возростания y координаты
-		//	dp_t v1 = p[5];
-		//	dp_t v2 = p[2];
-		//	dp_t v3 = p[4];			
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
+		{
+			//// надо рассмотреть три случая
+			//// 1. p2 внутри треугольника (p4,p5,p3) = итегрирование по 3 треугольникам
+			//if (is_point_in_triangle(p[2], p[4], p[5], p[3]))
+			//{
+			//	double t = 0;
+			//	double result = 0;
+			//	dp_t v1 = p[5];
+			//	dp_t v2 = p[3];
+			//	dp_t v3 = p[4];
+			//	//сразу их располагаем в порядке возростания y координаты
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
+			//				
+			//	v1 = p[5];
+			//	v2 = p[3];
+			//	v3 = p[2];
+			//	sort_by_y_asc(v1, v2, v3);
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
+			//				
+			//	v1 = p[3];
+			//	v2 = p[2];
+			//	v3 = p[4];
+			//	sort_by_y_asc(v1, v2, v3);
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
+			//	return result;
+			//}
+			//// 2. p3 внутри треугольника (p4,p5,p2) =  итегрирование по 3 треугольникам
+			//else if (is_point_in_triangle(p[3], p[4], p[5], p[2]))
+			//{
+			//	double t = 0;
+			//	double result = 0;
+			//	//сразу их располагаем в порядке возростания y координаты
+			//	dp_t v1 = p[5];
+			//	dp_t v2 = p[2];
+			//	dp_t v3 = p[4];			
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
 
-		//	v1 = p[5];
-		//	v2 = p[2];
-		//	v3 = p[3];
-		//	sort_by_y_asc(v1, v2, v3);
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
+			//	v1 = p[5];
+			//	v2 = p[2];
+			//	v3 = p[3];
+			//	sort_by_y_asc(v1, v2, v3);
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
 
-		//	v1 = p[4];
-		//	v2 = p[2];
-		//	v3 = p[3];
-		//	sort_by_y_asc(v1, v2, v3);
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
-		//	return result;
-		//}
-		//// 3. ни 1 ни 2 условие - нормальный случай 4 угольник, интегрируем как обычно
-		//else
-		//{
-		//	double result = 0;
-		//	double t = 0;
-		//	dp_t v1 = p[4];
-		//	dp_t v2 = p[5];
-		//	dp_t v3 = p[3];
-		//	sort_by_y_asc(v1, v2, v3);
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
-		//	v1 = p[4];
-		//	v2 = p[2];
-		//	v3 = p[3];
-		//	sort_by_y_asc(v1, v2, v3);
-		//	t = integrate_uniform_triangle(v1, v2, v3);
-		//	result += t;
-		//	return result;
-		//}
-	}
+			//	v1 = p[4];
+			//	v2 = p[2];
+			//	v3 = p[3];
+			//	sort_by_y_asc(v1, v2, v3);
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
+			//	return result;
+			//}
+			//// 3. ни 1 ни 2 условие - нормальный случай 4 угольник, интегрируем как обычно
+			//else
+			//{
+			//	double result = 0;
+			//	double t = 0;
+			//	dp_t v1 = p[4];
+			//	dp_t v2 = p[5];
+			//	dp_t v3 = p[3];
+			//	sort_by_y_asc(v1, v2, v3);
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
+			//	v1 = p[4];
+			//	v2 = p[2];
+			//	v3 = p[3];
+			//	sort_by_y_asc(v1, v2, v3);
+			//	t = integrate_uniform_triangle(v1, v2, v3);
+			//	result += t;
+			//	return result;
+			//}
+		}
 	case wall_3_middle_in:
 	case wall_3_middle_out:
 	case wall_3_middle_at:
-	{
-		/*double result = 0;
+		{
+			/*double result = 0;
 		double t = 0;
 		dp_t v1 = p[4];
 		dp_t v2 = p[5];
@@ -1074,21 +1074,21 @@ static double integrate(int i, int j)
 		t = integrate_uniform_triangle(a1, b1, c1);
 		result += t;
 		return result;*/
-	}
+		}
 	case wall_4:
 		//return 0;
 	case normal:
-	{
-		double result = 0;
-		double t = 0;
-		sort_by_y_asc(a1, b1, c1);
-		t = integrate_uniform_triangle(a1, b1, c1);
-		result += t;
-		sort_by_y_asc(a2, b2, c2);
-		t = integrate_uniform_triangle(a2, b2, c2);
-		result += t;
-		return result;
-	}
+		{
+			double result = 0;
+			double t = 0;
+			sort_by_y_asc(a1, b1, c1);
+			t = integrate_uniform_triangle(a1, b1, c1);
+			result += t;
+			sort_by_y_asc(a2, b2, c2);
+			t = integrate_uniform_triangle(a2, b2, c2);
+			result += t;
+			return result;
+		}
 	case concave:
 	case convex:
 	case pseudo:
@@ -1103,7 +1103,7 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 	for (int k = 1; k < OY_LEN; ++k)
 		for (int j = 1; j < OX_LEN; ++j)
 			r += fabs(analytical_solution(ts_count_mul_steps, OX[j], OY[k])
-			- density[(OY_LEN + 1) * k + j]);
+				- density[(OY_LEN + 1) * k + j]);
 	return HX * HY * r;
 }
 
@@ -1149,7 +1149,7 @@ static void solve(double* density)
 
 
 inline static void init(double b, double lb, double rb, double bb, double ub,
-	double tau, int time_step_count, int ox_length, int oy_length)
+                        double tau, int time_step_count, int ox_length, int oy_length)
 {
 	B = b;
 	UB = ub;
@@ -1194,7 +1194,7 @@ inline static void clean()
 }
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
-	double tau, int time_step_count, int ox_length, int oy_length, double& norm)
+                        double tau, int time_step_count, int ox_length, int oy_length, double& norm)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
