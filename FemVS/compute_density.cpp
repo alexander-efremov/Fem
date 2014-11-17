@@ -733,6 +733,13 @@ static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_
 	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
 }
 
+static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, const dp_t& z)
+{
+	return 0;
+//	dp_t cp(0, ); // из y до OY
+//	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
+}
+
 __pure inline int get_wall_intersection_type_as_int(dp_t* a)
 {
 	int type = -1;
@@ -832,6 +839,10 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 	{
 		sort_by_x_asc(a);
 		sort_by_y_desc_3(a);
+
+		// точка a[0] - точка, которая упала на стенку, значит для нее x=t
+		// считаем y компоненту
+
 		// рассчитаем точку пересечения OY и прямой a[0]:a[1]
 		// тут не надо fabs, потому что a[1].x > a[0].x
 		double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
@@ -865,17 +876,21 @@ static quad_type get_quadrangle_type(int i, int j,
 		gamma((OX[i + 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5),
 		theta((OX[i - 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5);
 	// get prev coordnates
+	double u = func_u(B, alpha);
 	double v = func_v(UB, BB, LB, RB, TIME, alpha);
-	alpha.x -= TAU * func_u(B, alpha);
+	alpha.x -= TAU * u;
 	alpha.y -= TAU * v;
 	v = func_v(UB, BB, LB, RB, TIME, beta);
-	beta.x -= TAU * func_u(B, beta);
+	u = func_u(B, beta);
+	beta.x -= TAU * u;
 	beta.y -= TAU * v;
 	v = func_v(UB, BB, LB, RB, TIME, gamma);
-	gamma.x -= TAU * func_u(B, gamma);
+	u = func_u(B, gamma);
+	gamma.x -= TAU * u;
 	gamma.y -= TAU * v;
 	v = func_v(UB, BB, LB, RB, TIME, theta);
-	theta.x -= TAU * func_u(B, theta);
+	u = func_u(B, theta);
+	theta.x -= TAU * u;
 	theta.y -= TAU * v;
 
 	dp_t intersection = get_intersection_point(alpha, beta, gamma, theta);
@@ -937,7 +952,7 @@ static double integrate(int i, int j)
 	case wall_1_middle_out:
 	case wall_1_middle_at:
 //	{
-	//тут получается всегда 3 треугольника
+//	//тут получается всегда 3 треугольника
 //		double result = 0;
 //		double t = 0;			
 //		dp_t v1 = p[4];
@@ -960,8 +975,15 @@ static double integrate(int i, int j)
 //		sort_by_y_asc(v1, v2, v3);
 //		t = integrate_uniform_triangle(v1, v2, v3);
 //		result += t;
+//
+//		v1 = p[0];
+//		v2 = p[4];
+//		v3 = p[5];
+//		sort_by_y_asc(v1, v2, v3);
+//		t = integrate_uniform_triangle_wall(v1, v2, v3);
+//		result += t;
 //		return result;
-	//}
+//	}
 	case wall_2:
 	{
 		//// надо рассмотреть три случая
