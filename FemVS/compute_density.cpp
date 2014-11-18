@@ -138,7 +138,7 @@ inline void sort_by_y(dp_t* a)
 	}
 }
 
-inline void sort_by_y_desc_3(dp_t* a)
+inline void sort_by_y_desc_3(dp4_t* a)
 {
 	for (int i = 2; i < 4; i++)
 	{
@@ -150,11 +150,17 @@ inline void sort_by_y_desc_3(dp_t* a)
 			t = a[j].y;
 			a[j].y = a[j - 1].y;
 			a[j - 1].y = t;
+			t = a[j].x_initial;
+			a[j].x_initial = a[j - 1].x_initial;
+			a[j - 1].x_initial = t;
+			t = a[j].y_initial;
+			a[j].y_initial = a[j - 1].y_initial;
+			a[j - 1].y_initial = t;
 		}
 	}
 }
 
-__pure inline void sort_by_x_asc(dp_t* a)
+__pure inline void sort_by_x_asc(dp4_t* a)
 {
 	for (int i = 1; i < 4; i++)
 	{
@@ -166,6 +172,12 @@ __pure inline void sort_by_x_asc(dp_t* a)
 			t = a[j].y;
 			a[j].y = a[j - 1].y;
 			a[j - 1].y = t;
+			t = a[j].x_initial;
+			a[j].x_initial = a[j - 1].x_initial;
+			a[j - 1].x_initial = t;
+			t = a[j].y_initial;
+			a[j].y_initial = a[j - 1].y_initial;
+			a[j - 1].y_initial = t;
 		}
 	}
 
@@ -177,6 +189,12 @@ __pure inline void sort_by_x_asc(dp_t* a)
 		t = a[0].y;
 		a[0].y = a[1].y;
 		a[1].y = t;
+		t = a[0].x_initial;
+		a[0].x_initial = a[1].x_initial;
+		a[1].x_initial = t;
+		t = a[0].y_initial;
+		a[0].y_initial = a[1].y_initial;
+		a[1].y_initial = t;
 	}
 	if (a[2].y < a[3].y)
 	{
@@ -186,6 +204,13 @@ __pure inline void sort_by_x_asc(dp_t* a)
 		t = a[2].y;
 		a[2].y = a[3].y;
 		a[3].y = t;
+
+		t = a[2].x_initial;
+		a[2].x_initial = a[3].x_initial;
+		a[3].x_initial = t;
+		t = a[2].x_initial;
+		a[2].x_initial = a[3].x_initial;
+		a[3].x_initial = t;
 	}
 }
 
@@ -195,7 +220,7 @@ __pure inline void sort_by_x_asc(dp_t* a)
 a[1]    a[2]
 a[0]   a[3]
 */
-__pure inline void sort_by_xy_wall_2(dp_t* a)
+__pure inline void sort_by_xy_wall_2(dp4_t* a)
 {
 	for (int i = 1; i < 4; i++)
 	{
@@ -207,25 +232,33 @@ __pure inline void sort_by_xy_wall_2(dp_t* a)
 			t = a[j].y;
 			a[j].y = a[j - 1].y;
 			a[j - 1].y = t;
+			t = a[j].x_initial;
+			a[j].x_initial = a[j - 1].x_initial;
+			a[j - 1].x_initial = t;
+			t = a[j].y_initial;
+			a[j].y_initial = a[j - 1].y_initial;
+			a[j - 1].y_initial = t;
 		}
 	}
 }
 
 __pure inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, double& value)
 {
-	if (fabs(bv.x - uv.x) < MIN_VALUE)
+	if (fabs(bv.x - uv.x) < 1e-12)
 	{
 		return false;
 	}
 	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // угловой коэффициент прямой
-	if (value < MIN_VALUE)
+	if (value < 1e-12)
 	{
 		return false;
 	}
 	return true;
 }
 
-__pure inline static dp_t get_intersection_point(const dp_t& alpha, const dp_t& beta, const dp_t& gamma, const dp_t& theta)
+
+
+__pure inline static dp_t get_intersection_point(const dp4_t& alpha, const dp4_t& beta, const dp4_t& gamma, const dp4_t& theta)
 {
 	double a1 = gamma.y - alpha.y;
 	double b1 = alpha.x - gamma.x; //double b1 = -(gamma.x - alpha.x);
@@ -241,7 +274,12 @@ __pure inline static double sign(const dp_t& p1, const dp_t p2, const dp_t p3)
 	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 }
 
-__pure inline static bool is_points_belong_to_one_line(const dp_t& p1, const dp_t p2, const dp_t p3)
+__pure inline static double sign(const dp4_t& p1, const dp4_t p2, const dp4_t p3)
+{
+	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
+__pure inline static bool is_points_belong_to_one_line(const dp4_t& p1, const dp4_t p2, const dp4_t p3)
 {
 	return sign(p1, p2, p3) == FLT_MIN ;
 }
@@ -742,7 +780,7 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, cons
 	//	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
 }
 
-__pure inline int get_wall_intersection_type_as_int(dp_t* a)
+__pure inline int get_wall_intersection_type_as_int(dp4_t* a)
 {
 	int type = -1;
 	bool is_four_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0;
@@ -772,7 +810,7 @@ __pure inline int get_wall_intersection_type_as_int(dp_t* a)
 	return type;
 }
 
-__pure inline static quad_type get_wall_intersection_type(dp_t* a)
+__pure inline static quad_type get_wall_intersection_type(dp4_t* a)
 {
 	/*
 	 формулы расчетов здесь http://www.pm298.ru/reshenie/fha0327.php
@@ -797,12 +835,12 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
 			// тут не надо fabs, потому что a[3].x > a[0].x
 			double y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
-			a[4] = dp_t(0, y); // mu
+			a[4] = dp4_t(0, y); // mu
 
 			// рассчитаем точку пересечения OY и прямой a[2]:a[3]
 			// тут не надо fabs, потому что a[3].x > a[2].x
 			y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));
-			a[5] = dp_t(0, y); // nu
+			a[5] = dp4_t(0, y); // nu
 
 			if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
 				return wall_3_middle_at;
@@ -823,7 +861,7 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 			{
 				y = a[1].y - a[1].x * ((a[2].y - a[1].y) / (a[2].x - a[1].x));
 			}
-			a[4] = dp_t(0, y); // mu
+			a[4] = dp4_t(0, y); // mu
 
 			if (a[3].x - a[0].x < FLT_MIN)
 			{
@@ -833,7 +871,7 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 			{
 				y = a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
 			}
-			a[5] = dp_t(0, y); // nu
+			a[5] = dp4_t(0, y); // nu
 			return wall_2;
 		}
 
@@ -848,12 +886,12 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
 			// тут не надо fabs, потому что a[1].x > a[0].x
 			double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
-			a[4] = dp_t(0, y); // mu
+			a[4] = dp4_t(0, y); // mu
 
 			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
 			// тут не надо fabs, потому что a[3].x > a[0].x
 			y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : (a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x)));
-			a[5] = dp_t(0, y); // nu
+			a[5] = dp4_t(0, y); // nu
 
 			if (is_points_belong_to_one_line(a[1], a[2], a[3]))
 				return wall_1_middle_at;
@@ -870,7 +908,7 @@ __pure inline static quad_type get_wall_intersection_type(dp_t* a)
 }
 
 static quad_type get_quadrangle_type(int i, int j,
-                                     dp_t& a, dp_t& b, dp_t& c, dp_t& k, dp_t& m, dp_t& n, dp_t* p)
+                                     dp_t& a, dp_t& b, dp_t& c, dp_t& k, dp_t& m, dp_t& n, dp4_t* p)
 {
 	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
 	dp_t alpha((OX[i - 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
@@ -942,7 +980,7 @@ static double integrate_pentagon(const dp_t x, const dp_t y, const dp_t z, doubl
 static double integrate(int i, int j)
 {
 	dp_t a1, b1, c1, a2, b2, c2;
-	dp_t* p = new dp_t[6];
+	dp4_t* p = new dp4_t[6];
 	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, p);
 
 
