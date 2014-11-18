@@ -307,14 +307,14 @@ __pure inline static double func_u(double b, const dp_t& p)
 	return func_u(b, p.x, p.y);
 }
 
-__pure inline static double func_v(double ub, double bb, double lb, double rb, double t, double x, double y)
+__pure inline static double func_v(double ub, double bb, double lb, double rb, double time, double x, double y)
 {
-	return atan(0.1 * (x - lb) * (x - rb) * (1 + t) * (y - ub) * (y - bb));
+	return atan(0.1 * (x - lb) * (x - rb) * (1 + time) * (y - ub) * (y - bb));
 }
 
-__pure inline static double func_v(double ub, double bb, double lb, double rb, double t, const dp_t& p)
+__pure inline static double func_v(double ub, double bb, double lb, double rb, double time, const dp_t& p)
 {
-	return func_v(ub, bb, lb, rb, t, p.x, p.y);
+	return func_v(ub, bb, lb, rb, time, p.x, p.y);
 }
 
 __pure inline static double func_f(double b, double time, double ub, double bb, double lb, double rb, double x, double y)
