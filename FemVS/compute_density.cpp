@@ -921,19 +921,26 @@ static quad_type get_quadrangle_type(int i, int j,
 	double v = func_v(UB, BB, LB, RB, TIME, alpha);
 	p[0].x = alpha.x - TAU * u;
 	p[0].y = alpha.y - TAU * v;
+	p[0].x_initial = alpha.x;
+	p[0].y_initial = alpha.y;
 	v = func_v(UB, BB, LB, RB, TIME, beta);
 	u = func_u(B, beta);
 	p[1].x = beta.x - TAU * u;
 	p[1].y = beta.y - TAU * v;
-
+	p[1].x_initial = beta.x;
+	p[1].y_initial = beta.y;
 	v = func_v(UB, BB, LB, RB, TIME, gamma);
 	u = func_u(B, gamma);
 	p[2].x= gamma.x - TAU * u;
 	p[2].y= gamma.y - TAU * v;	
+	p[2].x_initial = gamma.x;
+	p[2].y_initial = gamma.y;
 	v = func_v(UB, BB, LB, RB, TIME, theta);
 	u = func_u(B, theta);
 	p[3].x = theta.x - TAU * u;
 	p[3].y = theta.y - TAU * v;	
+	p[3].x_initial = theta.x;
+	p[3].y_initial = theta.y;
 
 	dp_t intersection = get_intersection_point(p[0], p[1], p[2], p[3]);
 	if ((p[1].y - intersection.y) * (p[3].y - intersection.y) > 0) return pseudo; // ??
