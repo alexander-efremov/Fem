@@ -41,6 +41,7 @@ TEST_F(cpu, test_to_model)
 			{
 				ASSERT_NEAR(model[i], data[i], 1e-12);
 			}
+		printf("!!!!!!!!!! ASSERT_NEAR IS DISABLED !!!!!!!!!\n", norm_model);
 		printf("model norm = %f\n", norm_model);
 		printf("test norm = %f\n", norm_test);
 		ASSERT_NEAR(norm_model, norm_test, 1e-12);

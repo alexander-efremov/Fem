@@ -1009,7 +1009,7 @@ __pure inline static quad_type get_wall_intersection_type(dp4_t* a)
 
 			// точка a[0] - точка, которая упала на стенку, значит для нее x=t
 			// считаем y компоненту
-			a[0].x = 0;
+			a[0].x = TIME - a[0].x_initial*(1/func_u(B, a[0].x_initial, a[0].y_initial)); // здесь будет Mt = tk - Ax*tg(alpha); tg(alpha) = 1 / U(A)
 			a[0].y = a[0].y_initial - a[0].x_initial * func_v(UB, BB, LB, RB, TIME, a[0].x_initial, a[0].y_initial) / func_u(B, a[0].x_initial, a[0].y_initial);
 
 			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
@@ -1127,36 +1127,36 @@ static double integrate(int i, int j)
 	case wall_1_middle_at:
 		{
 			//тут получается всегда 3 треугольника
-			//				double result = 0;
-			//				double t = 0;			
-			//				dp_t v1 = dp_t(p[4].x, p[4].y);
-			//				dp_t v2 = dp_t(p[2].x, p[2].y);
-			//				dp_t v3 = dp_t(p[1].x, p[1].y);
-			//				sort_by_y_asc(v1, v2, v3);
-			//				t = integrate_uniform_triangle(v1, v2, v3);
-			//				result += t;
-			//							
-			//				v1 = p[4];
-			//				v2 = p[2];
-			//				v3 = p[5];
-			//				sort_by_y_asc(v1, v2, v3);
-			//				t = integrate_uniform_triangle(v1, v2, v3); 
-			//				result += t;
-			//							
-			//				v1 = p[3];
-			//				v2 = p[2];
-			//				v3 = p[5];
-			//				sort_by_y_asc(v1, v2, v3);
-			//				t = integrate_uniform_triangle(v1, v2, v3);
-			//				result += t;
-			//		
-			//				v1 = p[0];
-			//				v2 = p[4];
-			//				v3 = p[5];
-			//				sort_by_y_asc(v1, v2, v3);
-			//				t = integrate_uniform_triangle_wall(v1, v2, v3, type);
-			//				result += t;
-			//				return result;
+							double result = 0;
+							double t = 0;			
+							dp_t v1 = dp_t(p[4].x, p[4].y);
+							dp_t v2 = dp_t(p[2].x, p[2].y);
+							dp_t v3 = dp_t(p[1].x, p[1].y);
+							sort_by_y_asc(v1, v2, v3);
+							t = integrate_uniform_triangle(v1, v2, v3);
+							result += t;
+										
+							v1 = dp_t(p[4].x, p[4].y);
+							v2 = dp_t(p[2].x, p[2].y);
+							v3 = dp_t(p[5].x, p[5].y);
+							sort_by_y_asc(v1, v2, v3);
+							t = integrate_uniform_triangle(v1, v2, v3); 
+							result += t;
+										
+							v1 = dp_t(p[3].x, p[3].y);
+							v2 = dp_t(p[2].x, p[2].y);
+							v3 = dp_t(p[5].x, p[5].y);
+							sort_by_y_asc(v1, v2, v3);
+							t = integrate_uniform_triangle(v1, v2, v3);
+							result += t;
+					
+							v1 = dp_t(p[0].x, p[0].y);
+							v2 = dp_t(p[4].x, p[4].y);
+							v3 = dp_t(p[5].x, p[5].y);
+							sort_by_y_asc(v1, v2, v3);
+							t = integrate_uniform_triangle_wall(v1, v2, v3, type);
+							result += t;
+							return result;
 		}
 	case wall_2:
 		{
