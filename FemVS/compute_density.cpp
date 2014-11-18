@@ -580,6 +580,60 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 	return result;
 }
 
+static double integrate_right_triangle_bottom_right_wall(const dp_t& bv, const dp_t& uv)
+{
+	double k = 0;
+	if (!try_get_slope_ratio(bv, uv, k)) return k;
+
+	ip_t sx, sy;
+	sx.x = static_cast<int>((bv.x + FLT_MIN) / HX);
+	if (bv.x + FLT_MIN <= 0) sx.x -= 1;
+	sx.y = sx.x + 1;
+	sy.x = static_cast<int>((bv.y + FLT_MIN) / HY);
+	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
+	sy.y = sy.x + 1;
+
+	ip_t ib(sx.x, sx.x + 1);
+	double result = 0;
+	int curr_i = 0, next_i;
+	dp_t curr = bv, next;
+	while (true)
+	{
+		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
+		slope /= sx.y >= 0 ? fabs(OX[sx.y] - curr.x) : fabs(HX * sx.y - curr.x);
+		if (slope <= k)
+		{
+			next_i = 1;
+			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
+			next.x = bv.x + (next.y - bv.y) / k;
+		}
+		else
+		{
+			next_i = 2;
+			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
+			next.y = bv.y + k * (next.x - bv.x);
+		}
+		if (next.x - uv.x > FLT_MIN)
+		{
+			result += integrate_right_slant_chanel(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
+			break;
+		}
+		result += integrate_right_slant_chanel(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
+		switch (next_i)
+		{
+		case 1:
+			sy += 1;
+			break;
+		case 2:
+			sx += 1;
+			break;
+		}
+		curr_i = next_i;
+		curr = next;
+	}
+	return result;
+}
+
 static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
@@ -638,6 +692,62 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 }
 
 static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv)
+{
+	double k = 0;
+	if (!try_get_slope_ratio(bv, uv, k)) return k;
+
+	ip_t sx, sy, ib;
+	sx.x = static_cast<int>((bv.x - FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be between in the left side.
+	if (bv.x - FLT_MIN <= 0) sx.x -= 1;
+	sx.y = sx.x + 1;
+	sy.x = static_cast<int>((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper side.
+	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
+	sy.y = sy.x + 1;
+	ib.x = static_cast<int>((uv.x + FLT_MIN) / HX);
+	if (uv.x + FLT_MIN <= 0) ib.x -= 1;
+	ib.y = ib.x + 1;
+
+	double result = 0;
+	int curr_i = 0, next_i;
+	dp_t curr = bv, next;
+	while (true)
+	{
+		double slope = sy.y >= 0 ? fabs(OY[sy.y] - curr.y) : fabs(HY * sy.y - curr.y);
+		slope /= sx.x >= 0 ? fabs(curr.x - OX[sx.x]) : fabs(curr.x - HX * sx.x);
+		if (slope <= k)
+		{
+			next_i = 1;
+			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
+			next.x = bv.x - (next.y - bv.y) / k;
+		}
+		else
+		{
+			next_i = 2;
+			next.x = sx.x >= 0 ? OX[sx.x] : HX * sx.x;
+			next.y = bv.y - k * (next.x - bv.x);
+		}
+		if (next.x - uv.x < FLT_MIN)
+		{
+			result += integrate_right_slant_chanel(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, uv.x, ib, sy);
+			break;
+		}
+		result += integrate_right_slant_chanel(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
+		switch (next_i)
+		{
+		case 1:
+			sy += 1;
+			break;
+		case 2:
+			sx -= 1;
+			break;
+		}
+		curr_i = next_i;
+		curr = next;
+	}
+	return result;
+}
+
+static double integrate_right_triangle_upper_right_wall(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -836,12 +946,15 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
 	case wall_1_middle_in:
 	case wall_1_middle_out:
 		{
+		  // в данном случае настенный треугольник распадается на два
+		//integrate_right_triangle_upper_right снизу
+		// integrate_right_triangle_bottom_right сверху wall_1_on_wall_2.ggb
 			dp_t ip(0, y.y); // из y до OY
 			double t = 0;
 			double res = 0;
-			t = integrate_bottom_triangle_wall(x, y, ip);
+			t = integrate_right_triangle_upper_right_wall(x, y);
 			res += t;
-			t = integrate_upper_triangle_wall(ip, y, z);
+			t = integrate_right_triangle_bottom_right_wall(y, z);
 			res += t;
 			return res;
 		}
