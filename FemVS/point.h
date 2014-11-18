@@ -14,11 +14,7 @@ struct dp_t {
 	dp_t()
 		: x(0), y(0) {
 	}
-
-	inline double operator[](int i) {
-		return (i == 0) ? x : y;
-	}
-
+	
 	inline dp_t& operator=(const dp_t& p) {
 		if (this != &p) {
 			x = p.x;
@@ -26,11 +22,7 @@ struct dp_t {
 		}
 
 		return *this;
-	}
-
-	inline dp_t operator+(const dp_t& p) const {
-		return dp_t(p.x + x, p.y + y);
-	}
+	}	
 
 	inline bool operator==(const dp_t& p) const {
 		return (x == p.x && y == p.y);
@@ -43,6 +35,33 @@ struct dp_t {
 	inline int operator>(const dp_t& p) {
 		return ((x > p.x) || ((x == p.x) && (y > p.y)));
 	}
+};
+
+
+struct dp4_t {
+	double x;
+	double y;
+	double x_initial;
+	double y_initial;
+
+	dp4_t(double x, double y, double x_init, double y_init )
+		: x(x), y(y), x_initial(x_init), y_initial(y_init) {
+	}
+
+	dp4_t()
+		: x(0), y(0), x_initial(0), y_initial(0) {
+	}
+
+	inline dp4_t& operator=(const dp4_t& p) {
+		if (this != &p) {
+			x = p.x;
+			y = p.y;
+			x_initial = p.x_initial;
+			y_initial = p.y_initial;
+		}
+
+		return *this;
+	}	
 };
 
 struct ip_t {
@@ -58,10 +77,6 @@ struct ip_t {
 		: x(0), y(0) {
 	}
 
-
-	inline double operator[](int i) {
-		return (i == 0) ? x : y;
-	}
 
 	ip_t& operator=(const ip_t& p) {
 		if (this != &p) {
