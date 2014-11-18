@@ -882,6 +882,8 @@ __pure inline static quad_type get_wall_intersection_type(dp4_t* a)
 
 			// точка a[0] - точка, которая упала на стенку, значит для нее x=t
 			// считаем y компоненту
+			a[0].x = 0;
+			a[0].y = a[0].y_initial - a[0].x_initial * func_v(UB, BB, LB, RB, TIME, a[0].x_initial, a[0].y_initial) / func_u(B, a[0].x_initial, a[0].y_initial);
 
 			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
 			// тут не надо fabs, потому что a[1].x > a[0].x
