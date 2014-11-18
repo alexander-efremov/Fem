@@ -257,7 +257,6 @@ __pure inline static bool try_get_slope_ratio(const dp_t& bv, const dp_t& uv, do
 }
 
 
-
 __pure inline static dp_t get_intersection_point(const dp4_t& alpha, const dp4_t& beta, const dp4_t& gamma, const dp4_t& theta)
 {
 	double a1 = gamma.y - alpha.y;
@@ -828,16 +827,27 @@ static double integrate_upper_triangle_wall(const dp_t& l, const dp_t& m, const 
 	return result;
 }
 
-static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, const dp_t& z )
-{	
-	dp_t ip(0, y.y); // из y до OY
-	double t = 0;
-	double res = 0;
-	t = integrate_bottom_triangle_wall(x, y, ip);
-	res += t;
-	t = integrate_upper_triangle_wall(ip, y, z);
-	res += t;
-	return res;
+static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
+                                              const dp_t& z, quad_type type)
+{
+	switch (type)
+	{
+	case wall_1_middle_at:
+	case wall_1_middle_in:
+	case wall_1_middle_out:
+		{
+			dp_t ip(0, y.y); // из y до OY
+			double t = 0;
+			double res = 0;
+			t = integrate_bottom_triangle_wall(x, y, ip);
+			res += t;
+			t = integrate_upper_triangle_wall(ip, y, z);
+			res += t;
+			return res;
+		}
+	default:
+		return 0;
+	}
 }
 
 __pure inline int get_wall_intersection_type_as_int(dp4_t* a)
@@ -977,7 +987,7 @@ static quad_type get_quadrangle_type(int i, int j,
 		beta((OX[i + 1] + OX[i]) * 0.5, (OY[j - 1] + OY[j]) * 0.5),
 		gamma((OX[i + 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5),
 		theta((OX[i - 1] + OX[i]) * 0.5, (OY[j + 1] + OY[j]) * 0.5);
-	
+
 	// get prev coordnates
 	double u = func_u(B, alpha);
 	double v = func_v(UB, BB, LB, RB, TIME, alpha);
@@ -993,14 +1003,14 @@ static quad_type get_quadrangle_type(int i, int j,
 	p[1].y_initial = beta.y;
 	v = func_v(UB, BB, LB, RB, TIME, gamma);
 	u = func_u(B, gamma);
-	p[2].x= gamma.x - TAU * u;
-	p[2].y= gamma.y - TAU * v;	
+	p[2].x = gamma.x - TAU * u;
+	p[2].y = gamma.y - TAU * v;
 	p[2].x_initial = gamma.x;
 	p[2].y_initial = gamma.y;
 	v = func_v(UB, BB, LB, RB, TIME, theta);
 	u = func_u(B, theta);
 	p[3].x = theta.x - TAU * u;
-	p[3].y = theta.y - TAU * v;	
+	p[3].y = theta.y - TAU * v;
 	p[3].x_initial = theta.x;
 	p[3].y_initial = theta.y;
 
@@ -1058,39 +1068,39 @@ static double integrate(int i, int j)
 	case wall_1_middle_in: // вообщем это один и тот же способ
 	case wall_1_middle_out:
 	case wall_1_middle_at:
-			{
+		{
 			//тут получается всегда 3 треугольника
-//				double result = 0;
-//				double t = 0;			
-//				dp_t v1 = dp_t(p[4].x, p[4].y);
-//				dp_t v2 = dp_t(p[2].x, p[2].y);
-//				dp_t v3 = dp_t(p[1].x, p[1].y);
-//				sort_by_y_asc(v1, v2, v3);
-//				t = integrate_uniform_triangle(v1, v2, v3);
-//				result += t;
-//							
-//				v1 = p[4];
-//				v2 = p[2];
-//				v3 = p[5];
-//				sort_by_y_asc(v1, v2, v3);
-//				t = integrate_uniform_triangle(v1, v2, v3); 
-//				result += t;
-//							
-//				v1 = p[3];
-//				v2 = p[2];
-//				v3 = p[5];
-//				sort_by_y_asc(v1, v2, v3);
-//				t = integrate_uniform_triangle(v1, v2, v3);
-//				result += t;
-//		
-//				v1 = p[0];
-//				v2 = p[4];
-//				v3 = p[5];
-//				sort_by_y_asc(v1, v2, v3);
-//				t = integrate_uniform_triangle_wall(v1, v2, v3);
-//				result += t;
-//				return result;
-			}
+			//				double result = 0;
+			//				double t = 0;			
+			//				dp_t v1 = dp_t(p[4].x, p[4].y);
+			//				dp_t v2 = dp_t(p[2].x, p[2].y);
+			//				dp_t v3 = dp_t(p[1].x, p[1].y);
+			//				sort_by_y_asc(v1, v2, v3);
+			//				t = integrate_uniform_triangle(v1, v2, v3);
+			//				result += t;
+			//							
+			//				v1 = p[4];
+			//				v2 = p[2];
+			//				v3 = p[5];
+			//				sort_by_y_asc(v1, v2, v3);
+			//				t = integrate_uniform_triangle(v1, v2, v3); 
+			//				result += t;
+			//							
+			//				v1 = p[3];
+			//				v2 = p[2];
+			//				v3 = p[5];
+			//				sort_by_y_asc(v1, v2, v3);
+			//				t = integrate_uniform_triangle(v1, v2, v3);
+			//				result += t;
+			//		
+			//				v1 = p[0];
+			//				v2 = p[4];
+			//				v3 = p[5];
+			//				sort_by_y_asc(v1, v2, v3);
+			//				t = integrate_uniform_triangle_wall(v1, v2, v3, type);
+			//				result += t;
+			//				return result;
+		}
 	case wall_2:
 		{
 			//// надо рассмотреть три случая
