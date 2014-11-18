@@ -773,11 +773,71 @@ static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_
 	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
 }
 
-static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, const dp_t& z)
+static double integrate_bottom_triangle_wall(const dp_t& l, const dp_t& m, const dp_t& r)
 {
-	return 0;
-	//	dp_t cp(0, ); // из y до OY
-	//	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
+	double result = 0;
+	return result;
+	if (m.x == l.x)
+	{
+		result = integrate_right_triangle_bottom_right(m, r);
+	}
+	else if (m.x == r.x)
+	{
+		result = integrate_right_triangle_bottom_left(m, l);
+	}
+	else if (m.x < l.x)
+	{
+		result = integrate_right_triangle_bottom_right(m, r) - integrate_right_triangle_bottom_right(m, l);
+	}
+	else if (m.x > l.x && m.x < r.x)
+	{
+		result = integrate_right_triangle_bottom_left(m, l) + integrate_right_triangle_bottom_right(m, r);
+	}
+	else if (m.x > r.x)
+	{
+		result = integrate_right_triangle_bottom_left(m, l) - integrate_right_triangle_bottom_left(m, r);
+	}
+	return result;
+}
+
+
+static double integrate_upper_triangle_wall(const dp_t& l, const dp_t& m, const dp_t& r)
+{
+	double result = 0;
+	return result;
+	if (m.x == l.x)
+	{
+		result = integrate_right_triangle_upper_right(r, m);
+	}
+	else if (m.x == r.x)
+	{
+		result = integrate_right_triangle_upper_left(l, m);
+	}
+	else if (m.x < l.x)
+	{
+		result = integrate_right_triangle_upper_right(r, m) - integrate_right_triangle_upper_right(l, m);
+	}
+	else if (m.x > l.x && m.x < r.x)
+	{
+		result = integrate_right_triangle_upper_left(l, m) + integrate_right_triangle_upper_right(r, m);
+	}
+	else if (m.x > r.x)
+	{
+		result = integrate_right_triangle_upper_left(l, m) - integrate_right_triangle_upper_left(r, m);
+	}
+	return result;
+}
+
+static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, const dp_t& z)
+{	
+	dp_t ip(0, y.y); // из y до OY
+	double t = 0;
+	double res = 0;
+	t = integrate_bottom_triangle_wall(x, y, ip);
+	res += t;
+	t = integrate_upper_triangle_wall(ip, y, z);
+	res += t;
+	return res;
 }
 
 __pure inline int get_wall_intersection_type_as_int(dp4_t* a)
