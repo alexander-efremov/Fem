@@ -893,8 +893,7 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
 		{
 		  // в данном случае настенный треугольник распадается на два
 		//integrate_right_triangle_upper_right снизу
-		// integrate_right_triangle_bottom_right сверху wall_1_on_wall_2.ggb
-			dp_t ip(0, y.y); // из y до OY
+		// integrate_right_triangle_bottom_right сверху wall_1_on_wall_2.ggb 
 			double t = 0;
 			double res = 0;
 			t = integrate_right_triangle_upper_right_wall(x, y);
