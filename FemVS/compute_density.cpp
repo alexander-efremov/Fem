@@ -1127,36 +1127,36 @@ static double integrate(int i, int j)
 	case wall_1_middle_at:
 		{
 			//тут получается всегда 3 треугольника
-							double result = 0;
-							double t = 0;			
-							dp_t v1 = dp_t(p[4].x, p[4].y);
-							dp_t v2 = dp_t(p[2].x, p[2].y);
-							dp_t v3 = dp_t(p[1].x, p[1].y);
-							sort_by_y_asc(v1, v2, v3);
-							t = integrate_uniform_triangle(v1, v2, v3);
-							result += t;
-										
-							v1 = dp_t(p[4].x, p[4].y);
-							v2 = dp_t(p[2].x, p[2].y);
-							v3 = dp_t(p[5].x, p[5].y);
-							sort_by_y_asc(v1, v2, v3);
-							t = integrate_uniform_triangle(v1, v2, v3); 
-							result += t;
-										
-							v1 = dp_t(p[3].x, p[3].y);
-							v2 = dp_t(p[2].x, p[2].y);
-							v3 = dp_t(p[5].x, p[5].y);
-							sort_by_y_asc(v1, v2, v3);
-							t = integrate_uniform_triangle(v1, v2, v3);
-							result += t;
-					
-							v1 = dp_t(p[0].x, p[0].y);
-							v2 = dp_t(p[4].x, p[4].y);
-							v3 = dp_t(p[5].x, p[5].y);
-							sort_by_y_asc(v1, v2, v3);
-							t = integrate_uniform_triangle_wall(v1, v2, v3, type);
-							result += t;
-							return result;
+//							double result = 0;
+//							double t = 0;			
+//							dp_t v1 = dp_t(p[4].x, p[4].y);
+//							dp_t v2 = dp_t(p[2].x, p[2].y);
+//							dp_t v3 = dp_t(p[1].x, p[1].y);
+//							sort_by_y_asc(v1, v2, v3);
+//							t = integrate_uniform_triangle(v1, v2, v3);
+//							result += t;
+//										
+//							v1 = dp_t(p[4].x, p[4].y);
+//							v2 = dp_t(p[2].x, p[2].y);
+//							v3 = dp_t(p[5].x, p[5].y);
+//							sort_by_y_asc(v1, v2, v3);
+//							t = integrate_uniform_triangle(v1, v2, v3); 
+//							result += t;
+//										
+//							v1 = dp_t(p[3].x, p[3].y);
+//							v2 = dp_t(p[2].x, p[2].y);
+//							v3 = dp_t(p[5].x, p[5].y);
+//							sort_by_y_asc(v1, v2, v3);
+//							t = integrate_uniform_triangle(v1, v2, v3);
+//							result += t;
+//					
+//							v1 = dp_t(p[0].x, p[0].y);
+//							v2 = dp_t(p[4].x, p[4].y);
+//							v3 = dp_t(p[5].x, p[5].y);
+//							sort_by_y_asc(v1, v2, v3);
+//							t = integrate_uniform_triangle_wall(v1, v2, v3, type);
+//							result += t;
+//							return result;
 		}
 	case wall_2:
 		{
