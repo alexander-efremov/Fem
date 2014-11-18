@@ -882,61 +882,6 @@ static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_
 	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
 }
 
-static double integrate_bottom_triangle_wall(const dp_t& l, const dp_t& m, const dp_t& r)
-{
-	double result = 0;
-	return result;
-	if (m.x == l.x)
-	{
-		result = integrate_right_triangle_bottom_right(m, r);
-	}
-	else if (m.x == r.x)
-	{
-		result = integrate_right_triangle_bottom_left(m, l);
-	}
-	else if (m.x < l.x)
-	{
-		result = integrate_right_triangle_bottom_right(m, r) - integrate_right_triangle_bottom_right(m, l);
-	}
-	else if (m.x > l.x && m.x < r.x)
-	{
-		result = integrate_right_triangle_bottom_left(m, l) + integrate_right_triangle_bottom_right(m, r);
-	}
-	else if (m.x > r.x)
-	{
-		result = integrate_right_triangle_bottom_left(m, l) - integrate_right_triangle_bottom_left(m, r);
-	}
-	return result;
-}
-
-
-static double integrate_upper_triangle_wall(const dp_t& l, const dp_t& m, const dp_t& r)
-{
-	double result = 0;
-	return result;
-	if (m.x == l.x)
-	{
-		result = integrate_right_triangle_upper_right(r, m);
-	}
-	else if (m.x == r.x)
-	{
-		result = integrate_right_triangle_upper_left(l, m);
-	}
-	else if (m.x < l.x)
-	{
-		result = integrate_right_triangle_upper_right(r, m) - integrate_right_triangle_upper_right(l, m);
-	}
-	else if (m.x > l.x && m.x < r.x)
-	{
-		result = integrate_right_triangle_upper_left(l, m) + integrate_right_triangle_upper_right(r, m);
-	}
-	else if (m.x > r.x)
-	{
-		result = integrate_right_triangle_upper_left(l, m) - integrate_right_triangle_upper_left(r, m);
-	}
-	return result;
-}
-
 static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
                                               const dp_t& z, quad_type type)
 {
