@@ -828,7 +828,7 @@ static double integrate_upper_triangle_wall(const dp_t& l, const dp_t& m, const 
 	return result;
 }
 
-static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, const dp_t& z)
+static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y, const dp_t& z )
 {	
 	dp_t ip(0, y.y); // из y до OY
 	double t = 0;
