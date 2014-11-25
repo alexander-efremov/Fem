@@ -891,9 +891,17 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
 	case wall_1_middle_in:
 	case wall_1_middle_out:
 		{
-		  // в данном случае настенный треугольник распадается на два
-		//integrate_right_triangle_upper_right снизу
-		// integrate_right_triangle_bottom_right сверху wall_1_on_wall_2.ggb 
+			// !phd\2014\fem\ggb\wa1\4.ggb
+			// случай А
+			if (x.y > y.y && x.y > z.y)
+			{
+				double res = 0;
+				double t = integrate_right_triangle_upper_right_wall(y, x);
+				res += t;
+				t = integrate_right_triangle_upper_right_wall(z, x);
+				res += t;
+				return res;
+			}
 			double t = 0;
 			double res = 0;
 			t = integrate_right_triangle_upper_right_wall(x, y);
@@ -901,7 +909,29 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
 			t = integrate_right_triangle_bottom_right_wall(y, z);
 			res += t;
 			return res;
+		  // в данном случае настенный треугольник распадается на два
+		  //integrate_right_triangle_upper_right снизу
+		// integrate_right_triangle_bottom_right сверху wall_1_on_wall_2.ggb 
+//			double t = 0;
+//			double res = 0;
+//			t = integrate_right_triangle_upper_right_wall(x, y);
+//			res += t;
+//			t = integrate_right_triangle_bottom_right_wall(y, z);
+//			res += t;
+//			return res;
 		}
+	case wall_2:
+	{
+		double t = 0;
+		double res = 0;
+		t = integrate_right_triangle_upper_right_wall(x, y);
+		res += t;
+		t = integrate_right_triangle_bottom_right_wall(y, z);
+		res += t;
+		return res;
+	}
+		break;
+
 	default:
 		return 0;
 	}
@@ -1126,46 +1156,46 @@ static double integrate(int i, int j)
 	case wall_1_middle_out:
 	case wall_1_middle_at:
 		{
-			//тут получается всегда 3 треугольника
-//							double result = 0;
-//							double t = 0;			
-//							dp_t v1 = dp_t(p[4].x, p[4].y);
-//							dp_t v2 = dp_t(p[2].x, p[2].y);
-//							dp_t v3 = dp_t(p[1].x, p[1].y);
-//							sort_by_y_asc(v1, v2, v3);
-//							t = integrate_uniform_triangle(v1, v2, v3);
-//							result += t;
+//			//тут получается всегда 3 треугольника
+//			double result = 0;
+//			double t = 0;			
+//			dp_t v1 = dp_t(p[4].x, p[4].y);
+//			dp_t v2 = dp_t(p[2].x, p[2].y);
+//			dp_t v3 = dp_t(p[1].x, p[1].y);
+//			sort_by_y_asc(v1, v2, v3);
+//			t = integrate_uniform_triangle(v1, v2, v3);
+//			result += t;
 //										
-//							v1 = dp_t(p[4].x, p[4].y);
-//							v2 = dp_t(p[2].x, p[2].y);
-//							v3 = dp_t(p[5].x, p[5].y);
-//							sort_by_y_asc(v1, v2, v3);
-//							t = integrate_uniform_triangle(v1, v2, v3); 
-//							result += t;
+//			v1 = dp_t(p[4].x, p[4].y);
+//			v2 = dp_t(p[2].x, p[2].y);
+//			v3 = dp_t(p[5].x, p[5].y);
+//			sort_by_y_asc(v1, v2, v3);
+//			t = integrate_uniform_triangle(v1, v2, v3); 
+//			result += t;
 //										
-//							v1 = dp_t(p[3].x, p[3].y);
-//							v2 = dp_t(p[2].x, p[2].y);
-//							v3 = dp_t(p[5].x, p[5].y);
-//							sort_by_y_asc(v1, v2, v3);
-//							t = integrate_uniform_triangle(v1, v2, v3);
-//							result += t;
+//			v1 = dp_t(p[3].x, p[3].y);
+//			v2 = dp_t(p[2].x, p[2].y);
+//			v3 = dp_t(p[5].x, p[5].y);
+//			sort_by_y_asc(v1, v2, v3);
+//			t = integrate_uniform_triangle(v1, v2, v3);
+//			result += t;
 //					
-//							v1 = dp_t(p[0].x, p[0].y);
-//							v2 = dp_t(p[4].x, p[4].y);
-//							v3 = dp_t(p[5].x, p[5].y);
-//							sort_by_y_asc(v1, v2, v3);
-//							t = integrate_uniform_triangle_wall(v1, v2, v3, type);
-//							result += t;
-//							return result;
+//			v1 = dp_t(p[0].x, p[0].y);
+//			v2 = dp_t(p[4].x, p[4].y);
+//			v3 = dp_t(p[5].x, p[5].y);
+//			t = integrate_uniform_triangle_wall(v1, v2, v3, type);
+//			result += t;
+			//return result;
+			//break;
 		}
 	case wall_2:
-		{
+	{
+		double t = 0;
+		double result = 0;
 			//// надо рассмотреть три случая
 			//// 1. p2 внутри треугольника (p4,p5,p3) = итегрирование по 3 треугольникам
 			//if (is_point_in_triangle(p[2], p[4], p[5], p[3]))
 			//{
-			//	double t = 0;
-			//	double result = 0;
 			//	dp_t v1 = p[5];
 			//	dp_t v2 = p[3];
 			//	dp_t v3 = p[4];
@@ -1186,13 +1216,10 @@ static double integrate(int i, int j)
 			//	sort_by_y_asc(v1, v2, v3);
 			//	t = integrate_uniform_triangle(v1, v2, v3);
 			//	result += t;
-			//	return result;
 			//}
 			//// 2. p3 внутри треугольника (p4,p5,p2) =  итегрирование по 3 треугольникам
 			//else if (is_point_in_triangle(p[3], p[4], p[5], p[2]))
 			//{
-			//	double t = 0;
-			//	double result = 0;
 			//	//сразу их располагаем в порядке возростания y координаты
 			//	dp_t v1 = p[5];
 			//	dp_t v2 = p[2];
@@ -1213,13 +1240,10 @@ static double integrate(int i, int j)
 			//	sort_by_y_asc(v1, v2, v3);
 			//	t = integrate_uniform_triangle(v1, v2, v3);
 			//	result += t;
-			//	return result;
 			//}
 			//// 3. ни 1 ни 2 условие - нормальный случай 4 угольник, интегрируем как обычно
 			//else
 			//{
-			//	double result = 0;
-			//	double t = 0;
 			//	dp_t v1 = p[4];
 			//	dp_t v2 = p[5];
 			//	dp_t v3 = p[3];
@@ -1232,8 +1256,23 @@ static double integrate(int i, int j)
 			//	sort_by_y_asc(v1, v2, v3);
 			//	t = integrate_uniform_triangle(v1, v2, v3);
 			//	result += t;
-			//	return result;
 			//}
+//		if (type == wall_2){
+//			dp_t v1 = dp_t(p[0].x, p[0].y);
+//			dp_t v2 = dp_t(p[1].x, p[1].y);
+//			dp_t v3 = dp_t(p[5].x, p[5].y);
+//			sort_by_y_asc(v1, v2, v3);
+//			t = integrate_uniform_triangle_wall(v1, v2, v3, type);
+//			result += t;
+//			v1 = dp_t(p[4].x, p[4].y);
+//			v2 = dp_t(p[1].x, p[1].y);
+//			v3 = dp_t(p[5].x, p[5].y);
+//			sort_by_y_asc(v1, v2, v3);
+//			t = integrate_uniform_triangle_wall(v1, v2, v3, type);
+//			result += t;
+//		}
+			//return 0;
+			//return result;
 		}
 	case wall_3_middle_in:
 	case wall_3_middle_out:
