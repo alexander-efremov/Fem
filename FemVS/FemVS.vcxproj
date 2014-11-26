@@ -155,6 +155,12 @@
     <ClInclude Include="timer.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Pics\wall1\1.ggb" />
+    <None Include="Pics\wall1\2.ggb" />
+    <None Include="Pics\wall1\3.ggb" />
+    <None Include="Pics\wall1\4.ggb" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
