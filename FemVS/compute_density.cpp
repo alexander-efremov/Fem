@@ -747,6 +747,63 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 	return result;
 }
 
+static double integrate_right_triangle_upper_left_wall(const dp_t& bv, const dp_t& uv)
+{
+	double k = 0;
+	if (!try_get_slope_ratio(bv, uv, k)) return k;
+
+	ip_t sx, sy, ib;
+	sx.x = static_cast<int>((bv.x + FLT_MIN) / HX); //   -  If bv.x is in grid edge I want it will be in the right side.
+	if (bv.x + FLT_MIN <= 0) sx.x -= 1;
+	sx.y = sx.x + 1;
+	sy.x = static_cast<int>((bv.y + FLT_MIN) / HY); //   -  If bv.y is in grid edge I want it will be in the upper square.
+	if (bv.y + FLT_MIN <= 0) sy.x -= 1;
+	sy.y = sy.x + 1;
+	ib.x = static_cast<int>((uv.x - FLT_MIN) / HY); //   -  If uv.x is in grid edge I want it will be in the left side.
+	if (uv.x - FLT_MIN <= 0) ib.x -= 1;
+	ib.y = ib.x + 1;
+
+	double result = 0;
+	int curr_i = 0, next_i;
+	dp_t curr = bv, next;
+	while (true)
+	{
+		double slope = sy.y >= 0 ? OY[sy.y] - curr.y : fabs(HY * sy.y - curr.y);
+		slope /= sx.y >= 0 ? OX[sx.y] - curr.x : fabs(HX * sx.y - curr.x);
+		if (slope <= k)
+		{
+			next_i = 1;
+			next.y = sy.y >= 0 ? OY[sy.y] : HY * sy.y;
+			next.x = bv.x + (next.y - bv.y) / k;
+		}
+		else
+		{
+			next_i = 2;
+			next.x = sx.y >= 0 ? OX[sx.y] : HX * sx.y;
+			next.y = bv.y + k * (next.x - bv.x);
+		}
+		if (next.x - uv.x > FLT_MIN) // если следующая точка уже правее, чем наша граничная точка, то мы обработали канал
+		{
+			result += integrate_left_slant_chanel(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
+			break;
+		}
+		result += integrate_left_slant_chanel(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
+
+		switch (next_i)
+		{
+		case 1:
+			sy += 1;
+			break;
+		case 2:
+			sx += 1;
+			break;
+		}
+		curr_i = next_i;
+		curr = next;
+	}
+	return result;
+}
+
 static double integrate_right_triangle_upper_right_wall(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
@@ -885,6 +942,11 @@ static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_
 static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
                                               const dp_t& z, quad_type type)
 {
+	// для точек YOt оси координат обозначены по другому
+	// по OX будет откладываться значение y
+	// по OY будет откладываться значение t
+	// т.е. будет плоскость YOt
+	// здесь y координата точки должна быть временем	
 	switch (type)
 	{
 	case wall_1_middle_at:
@@ -893,22 +955,34 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
 		{
 			// !phd\2014\fem\ggb\wa1\4.ggb
 			// случай А
-			if (x.y > y.y && x.y > z.y)
+			if (x.x >= y.x)
+			{
+				double res = 0;
+				double t = integrate_right_triangle_upper_left_wall(z, x);
+				res += t;
+				t = integrate_right_triangle_upper_left_wall(y, x);
+				res += t;
+				return res;
+			}
+			if (x.x < y.x && x.x > z.x) // случай B
+			{
+				double res = 0;
+				double t = integrate_right_triangle_upper_left_wall(z, x);
+				res += t;
+				t = integrate_right_triangle_upper_right_wall(y, x);
+				res += t;
+				return res;
+			}
+			if (x.x <= z.x) // случай C
 			{
 				double res = 0;
 				double t = integrate_right_triangle_upper_right_wall(y, x);
 				res += t;
-				t = integrate_right_triangle_upper_right_wall(z, x);
+				t = integrate_right_triangle_upper_left_wall(z, x);
 				res += t;
 				return res;
 			}
-			double t = 0;
-			double res = 0;
-			t = integrate_right_triangle_upper_right_wall(x, y);
-			res += t;
-			t = integrate_right_triangle_bottom_right_wall(y, z);
-			res += t;
-			return res;
+			
 		  // в данном случае настенный треугольник распадается на два
 		  //integrate_right_triangle_upper_right снизу
 		// integrate_right_triangle_bottom_right сверху wall_1_on_wall_2.ggb 
@@ -1037,10 +1111,14 @@ __pure inline static quad_type get_wall_intersection_type(dp4_t* a)
 			sort_by_x_asc(a);
 			sort_by_y_desc_3(a);
 
-			// точка a[0] - точка, которая упала на стенку, значит для нее x=t
+			// для точек на стенке оси координат обозначены по другому
+			// по OX будет откладываться значение y
+			// по OY будет откладываться значение t
+			// точка a[0] - точка, которая упала на стенку
 			// считаем y компоненту
-			a[0].x = TIME - a[0].x_initial*(1/func_u(B, a[0].x_initial, a[0].y_initial)); // здесь будет Mt = tk - Ax*tg(alpha); tg(alpha) = 1 / U(A)
-			a[0].y = a[0].y_initial - a[0].x_initial * func_v(UB, BB, LB, RB, TIME, a[0].x_initial, a[0].y_initial) / func_u(B, a[0].x_initial, a[0].y_initial);
+			a[0].x = a[0].y_initial - a[0].x_initial * func_v(UB, BB, LB, RB, TIME, a[0].x_initial, a[0].y_initial) / func_u(B, a[0].x_initial, a[0].y_initial);
+			a[0].y = TIME - a[0].x_initial*(1 / func_u(B, a[0].x_initial, a[0].y_initial)); // здесь будет Mt = tk - Ax*tg(alpha); tg(alpha) = 1 / U(A)
+			
 
 			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
 			// тут не надо fabs, потому что a[1].x > a[0].x
