@@ -15,6 +15,15 @@
     <Filter Include="Pics\wall1">
       <UniqueIdentifier>{0834146e-01c7-4cce-9452-077940602492}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pics\wall2">
+      <UniqueIdentifier>{63069b69-133d-4e3a-aa71-d11243bad979}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pics\wall3">
+      <UniqueIdentifier>{5fc84d4a-e79a-4bfd-b209-7df856b8f0d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pics\wall4">
+      <UniqueIdentifier>{7efce2a9-395c-439a-8b5c-318c64e551b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -47,6 +56,12 @@
     </None>
     <None Include="Pics\wall1\4.ggb">
       <Filter>Pics\wall1</Filter>
+    </None>
+    <None Include="Pics\wall2\1.ggb">
+      <Filter>Pics\wall2</Filter>
+    </None>
+    <None Include="Pics\wall2\2.ggb">
+      <Filter>Pics\wall2</Filter>
     </None>
   </ItemGroup>
 </Project>

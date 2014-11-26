@@ -160,6 +160,8 @@
     <None Include="Pics\wall1\2.ggb" />
     <None Include="Pics\wall1\3.ggb" />
     <None Include="Pics\wall1\4.ggb" />
+    <None Include="Pics\wall2\1.ggb" />
+    <None Include="Pics\wall2\2.ggb" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
