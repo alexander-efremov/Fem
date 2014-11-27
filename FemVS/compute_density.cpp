@@ -951,8 +951,7 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
 	{
 	case wall_1_middle_at:
 	case wall_1_middle_in:
-	case wall_1_middle_out:
-		{
+	case wall_1_middle_out:		
 			// !phd\2014\fem\ggb\wa1\4.ggb
 			// случай А
 			if (x.x >= y.x)
@@ -982,18 +981,6 @@ static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
 				res += t;
 				return res;
 			}
-			
-		  // в данном случае настенный треугольник распадается на два
-		  //integrate_right_triangle_upper_right снизу
-		// integrate_right_triangle_bottom_right сверху wall_1_on_wall_2.ggb 
-//			double t = 0;
-//			double res = 0;
-//			t = integrate_right_triangle_upper_right_wall(x, y);
-//			res += t;
-//			t = integrate_right_triangle_bottom_right_wall(y, z);
-//			res += t;
-//			return res;
-		}
 	case wall_2:
 	{
 		double t = 0;
@@ -1106,7 +1093,7 @@ __pure inline static quad_type get_wall_intersection_type(dp4_t* a)
 			return wall_2;
 		}
 
-	case 1: //	wall_1.pdf 		
+	case 1: 
 		{
 			sort_by_x_asc(a);
 			sort_by_y_desc_3(a);
