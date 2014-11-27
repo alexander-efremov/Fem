@@ -63,5 +63,8 @@
     <None Include="Pics\wall2\2.ggb">
       <Filter>Pics\wall2</Filter>
     </None>
+    <None Include="Pics\wall2\3.ggb">
+      <Filter>Pics\wall2</Filter>
+    </None>
   </ItemGroup>
 </Project>
