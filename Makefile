@@ -1,7 +1,7 @@
 # hello from MAC
 
 # Location of the CUDA Toolkit
-CUDA_PATH  ?= /usr/local/cuda-6.0
+CUDA_PATH  ?= /usr/local/cuda-6.5
 NVCC := $(CUDA_PATH)/bin/nvcc -ccbin g++
 
 # internal flags
