@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Pics">
+      <UniqueIdentifier>{b5235a88-f393-4eff-bd32-445db95ca5f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pics\wall1">
+      <UniqueIdentifier>{0834146e-01c7-4cce-9452-077940602492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pics\wall2">
+      <UniqueIdentifier>{63069b69-133d-4e3a-aa71-d11243bad979}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pics\wall3">
+      <UniqueIdentifier>{5fc84d4a-e79a-4bfd-b209-7df856b8f0d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pics\wall4">
+      <UniqueIdentifier>{7efce2a9-395c-439a-8b5c-318c64e551b8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="compute_density.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Pics\wall1\1.ggb">
+      <Filter>Pics\wall1</Filter>
+    </None>
+    <None Include="Pics\wall1\2.ggb">
+      <Filter>Pics\wall1</Filter>
+    </None>
+    <None Include="Pics\wall1\3.ggb">
+      <Filter>Pics\wall1</Filter>
+    </None>
+    <None Include="Pics\wall1\4.ggb">
+      <Filter>Pics\wall1</Filter>
+    </None>
+    <None Include="Pics\wall2\1.ggb">
+      <Filter>Pics\wall2</Filter>
+    </None>
+    <None Include="Pics\wall2\2.ggb">
+      <Filter>Pics\wall2</Filter>
+    </None>
+    <None Include="Pics\wall2\3.ggb">
+      <Filter>Pics\wall2</Filter>
+    </None>
+  </ItemGroup>
+</Project>
