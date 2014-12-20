@@ -2,6 +2,12 @@
 #include "point.h"
 #include "utils.h"
 #include <algorithm>
+#ifdef _OPENMP
+  #include <omp.h>
+#else
+  #define omp_get_thread_num() 1
+  #define omp_get_num_threads() 1
+#endif
 
 #define sqr(x) ((x)*(x))
 #define cub(x) ((x)*(x)*(x))
@@ -1395,9 +1401,19 @@ static void solve(double* density)
 			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
-
+	int th_id = 0;
+        int nthreads = 0;
+#if defined(_OPENMP)
+   #pragma omp parallel for
+#endif
 	for (TL = 1; TL <= TIME_STEP_CNT; TL++)
 	{
+	    	th_id = omp_get_thread_num();
+        	if ( th_id == 0 ) {
+		  nthreads = omp_get_num_threads();
+	          printf("There are %d threads\n",nthreads);
+    		}
+
 		PREV_TIME = TIME;
 		TIME = TAU * TL;
 		for (int i = 0; i <= OX_LEN; i++)
