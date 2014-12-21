@@ -159,6 +159,4 @@ $RECYCLE.BIN/
 test_fixture
 fem_icc
 fem_openmp
-obj/
-obj_icc/
-obj_openmp/
+obj/*
