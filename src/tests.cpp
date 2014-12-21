@@ -3,11 +3,20 @@
 #include "test_utils.h"
 #include "LowOrdOper.h"
 #include <timer.h>
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
 
 class cpu : public testing::Test
 {
+public:
+	cpu()
+	{
+	    #ifdef VER
+		 printf("%s\n", STRINGIZE_VALUE_OF(VER));
+	    #endif
+	}
+	
 protected:
-
 	double* solve_internal(ComputeParameters& p)
 	{
 		return compute_density(p.b, p.lb, p.rb, p.bb,
