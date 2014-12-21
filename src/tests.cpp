@@ -2,6 +2,7 @@
 #include "common.h"
 #include "test_utils.h"
 #include "LowOrdOper.h"
+#include <timer.h>
 
 class cpu : public testing::Test
 {
@@ -35,6 +36,7 @@ TEST_F(cpu, test_to_model)
 		double norm_test = p.norm;
 		double* model = get_model_result(p, lvl);
 		double norm_model = p.norm;
+		StartTimer();
 
 		if (lvl < 2)
 			for (int i = 0; i < p.get_size(); i++)
@@ -44,8 +46,12 @@ TEST_F(cpu, test_to_model)
 		//printf("!!!!!!!!!! ASSERT_NEAR IS DISABLED !!!!!!!!!\n", norm_model);
 		printf("model norm = %f\n", norm_model);
 		printf("test norm = %f\n", norm_test);
+		double time = GetTimer();
+		printf("Time: %lf\n", time);
 		ASSERT_NEAR(norm_model, norm_test, 1e-12);
 		delete[] data;
 		delete[] model;
+		
+		
 	}
 }
