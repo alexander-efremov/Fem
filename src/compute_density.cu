@@ -20,20 +20,14 @@ __constant__ int c_x_length;
 __constant__ int c_y_length;
 __constant__ int c_n;
 
+__device__ double *OX_DEVICE, *OY_DEVICE, *PREV_DENSITY_DEVICE;
+
 #define sqr(x) ((x)*(x))
 #define cub(x) ((x)*(x)*(x))
 #define quad(x) ((x)*(x)*(x)*(x))
 
-#ifdef __GNUC__
-#define __pure
-//#define __pure __attribute__((const))
-/*почему то на GCC не работает и ломает результаты расчета*/
-#elif __INTEL_COMPILER
-#define __pure __declspec(const)
-#elif __NVCC__
-#define __pure
-#else
-#define __pure 
+#ifdef __NVCC__
+#define __pure __device__
 #endif
 
 static double B; //-V707
@@ -51,7 +45,7 @@ static double HX; //-V707
 static double HY; //-V707
 static double* OX; //-V707
 static double* OY; //-V707
-static double* PREV_DENSITY;
+static double* PREV_DENSITY_HOST;
 static int TL; //-V707
 static double TIME;
 static double PREV_TIME; // tau * (tl - 1)
@@ -362,25 +356,25 @@ __pure inline static double integrate_triangle(double py, double qy, double alph
 		- (quad(a * qy + b - beta) - quad(a * py + b - beta)) / (24 * sqr(a));
 }
 
-static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx, const ip_t& sx, const ip_t& sy)
+__pure static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx, const ip_t& sx, const ip_t& sy)
 {
 	double result, a, b;
 	a = sx.y >= 0 && sy.y >= 0 ? OX[sx.y] : HX * sx.y;
 	b = sx.y >= 0 && sy.y >= 0 ? OY[sy.y] : HY * sy.y; // ЭТО ПЛОТНОСТЬ С ПРЕДЫДУЩЕГО СЛОЯ ДЛЯ ДАННОЙ ЯЧЕЙКИ
-	result = integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.x * HY));
+	result = integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.x + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.x * HY));
 	a = sx.x >= 0 && sy.y >= 0 ? OX[sx.x] : HX * sx.x;
 	b = sx.x >= 0 && sy.y >= 0 ? OY[sy.y] : HY * sy.y;
-	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.x * HY));
+	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.x + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.x * HY));
 	a = sx.y >= 0 && sy.x >= 0 ? OX[sx.y] : HX * sx.y;
 	b = sx.y >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
-	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.y * HY));
+	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.y + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.y * HY));
 	a = sx.x >= 0 && sy.x >= 0 ? OX[sx.x] : HX * sx.x;
 	b = sx.x >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
-	result += integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.y * HY));
+	result += integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.y + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.y * HY));
 	return result * INVERTED_HX_HY;
 }
 
-static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx,
+__pure static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, double hx,
                                                const ip_t& sx, const ip_t& sy)
 {
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
@@ -390,25 +384,25 @@ static double integrate_triangle_left_one_cell(const dp_t& bv, const dp_t& uv, d
 	alpha = sx.y >= 0 && sy.y >= 0 ? OY[sy.y] : HY * sy.y;
 	beta = sx.y >= 0 && sy.y >= 0 ? OX[sx.y] : HX * sx.y;
 	tmp = 0.25 * (sqr(uv.y - OY[sy.y]) - sqr(bv.y - OY[sy.y])) * sqr(hx - beta) - integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.x * HY));
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.x + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.x * HY));
 	beta = sx.x >= 0 && sy.y >= 0 ? OX[sx.x] : HX * sx.x;
 	tmp = sqr(uv.y - OY[sy.y]) - sqr(bv.y - OY[sy.y]);
 	tmp = -0.25 * tmp * sqr(hx - beta) + integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.x + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.x * HY));
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.x + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.x * HY));
 	alpha = sx.y >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
 	beta = sx.y >= 0 && sy.x >= 0 ? OX[sx.y] : HX * sx.y;
 	tmp = sqr(uv.y - OY[sy.x]) - sqr(bv.y - OY[sy.x]);
 	tmp = -0.25 * tmp * sqr(hx - beta) + integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.y * HY));
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.y + sx.x] : analytical_solution(PREV_TIME, sx.x * HX, sy.y * HY));
 	alpha = sx.x >= 0 && sy.x >= 0 ? OY[sy.x] : HY * sy.x;
 	beta = sx.x >= 0 && sy.x >= 0 ? OX[sx.x] : HX * sx.x;
 	tmp = sqr(uv.y - OY[sy.x]) - sqr(bv.y - OY[sy.x]);
 	tmp = 0.25 * tmp * sqr(hx - beta) - integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY[OX_LEN_1 * sy.y + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.y * HY));
+	result += tmp * (sx.x >= 0 && sx.y <= OX_LEN && sy.x >= 0 && sy.y <= OY_LEN ? PREV_DENSITY_DEVICE[OX_LEN_1 * sy.y + sx.y] : analytical_solution(PREV_TIME, sx.y * HX, sy.y * HY));
 	return result * INVERTED_HX_HY;
 }
 
-static double integrate_right_slant_chanel(const dp_t& bv, const dp_t& uv, bool is_rect_truncated, const ip_t& sx, double b, const ip_t& sb, const ip_t& sy)
+__pure static double integrate_right_slant_chanel(const dp_t& bv, const dp_t& uv, bool is_rect_truncated, const ip_t& sx, double b, const ip_t& sb, const ip_t& sy)
 {
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx = 0;
@@ -449,7 +443,7 @@ static double integrate_right_slant_chanel(const dp_t& bv, const dp_t& uv, bool 
 //
 // BOTTOMLEFTTR
 
-static double integrate_left_slant_chanel(const dp_t& bv, const dp_t& uv,
+__pure static double integrate_left_slant_chanel(const dp_t& bv, const dp_t& uv,
                                           bool is_rect_trunc, const ip_t& sx, const ip_t& sy,
                                           double b, const ip_t& sb)
 {
@@ -485,7 +479,7 @@ static double integrate_left_slant_chanel(const dp_t& bv, const dp_t& uv,
 // sy = (x,y) координаты квадрата в которой лежит верхняя точка
 // в случае успешной проверки, k = будет  угловой коэфициент прямой
 
-static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv)
+__pure static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -543,7 +537,7 @@ static double integrate_right_triangle_bottom_left(const dp_t& bv, const dp_t& u
 	return result;
 }
 
-static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv)
+__pure static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -597,7 +591,7 @@ static double integrate_right_triangle_bottom_right(const dp_t& bv, const dp_t& 
 	return result;
 }
 
-static double integrate_right_triangle_bottom_right_wall(const dp_t& bv, const dp_t& uv)
+__pure static double integrate_right_triangle_bottom_right_wall(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -651,7 +645,7 @@ static double integrate_right_triangle_bottom_right_wall(const dp_t& bv, const d
 	return result;
 }
 
-static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv)
+__pure static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -708,7 +702,7 @@ static double integrate_right_triangle_upper_left(const dp_t& bv, const dp_t& uv
 	return result;
 }
 
-static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv)
+__pure static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -764,7 +758,7 @@ static double integrate_right_triangle_upper_right(const dp_t& bv, const dp_t& u
 	return result;
 }
 
-static double integrate_right_triangle_upper_left_wall(const dp_t& bv, const dp_t& uv)
+__pure static double integrate_right_triangle_upper_left_wall(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -821,7 +815,7 @@ static double integrate_right_triangle_upper_left_wall(const dp_t& bv, const dp_
 	return result;
 }
 
-static double integrate_right_triangle_upper_right_wall(const dp_t& bv, const dp_t& uv)
+__pure static double integrate_right_triangle_upper_right_wall(const dp_t& bv, const dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -877,7 +871,7 @@ static double integrate_right_triangle_upper_right_wall(const dp_t& bv, const dp
 	return result;
 }
 
-static double integrate_bottom_triangle(const dp_t& l, const dp_t& m, const dp_t& r)
+__pure static double integrate_bottom_triangle(const dp_t& l, const dp_t& m, const dp_t& r)
 {
 	double result = 0;
 	if (m.x == l.x)
@@ -903,7 +897,7 @@ static double integrate_bottom_triangle(const dp_t& l, const dp_t& m, const dp_t
 	return result;
 }
 
-static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t& r)
+__pure static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t& r)
 {
 	double result = 0;
 	if (m.x == l.x)
@@ -930,7 +924,7 @@ static double integrate_upper_triangle(const dp_t& l, const dp_t& m, const dp_t&
 }
 
 // x,y,z
-static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_t& z)
+__pure static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_t& z)
 {
 	// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования		
 
@@ -1148,7 +1142,7 @@ __pure inline static quad_type get_wall_intersection_type(dp4_t* a)
 	return normal;
 }
 
-static quad_type get_quadrangle_type(int i, int j,
+__pure static quad_type get_quadrangle_type(int i, int j,
                                      dp_t& a, dp_t& b, dp_t& c, dp_t& k, dp_t& m, dp_t& n, dp4_t* p)
 {
 	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
@@ -1198,34 +1192,34 @@ static quad_type get_quadrangle_type(int i, int j,
 	return get_wall_intersection_type(p);
 }
 
-static double integrate_wall_triangle(const dp_t wp, // wall point
+__pure static double integrate_wall_triangle(const dp_t wp, // wall point
                                       double ly, // left y coordinate
                                       double ry) // right y coordinate
 {
 	return 0;
 }
 
-static double integrate_wall_rectangle(const dp_t wp1, const dp_t wp2, const dp_t wp3, const dp_t wp4, double wp1y, double wp2y)
+__pure static double integrate_wall_rectangle(const dp_t wp1, const dp_t wp2, const dp_t wp3, const dp_t wp4, double wp1y, double wp2y)
 {
 	return 0;
 }
 
-static double integrate_wall_rectangle(const dp_t wp1, const dp_t wp2, double wp1y, double wp2y)
+__pure static double integrate_wall_rectangle(const dp_t wp1, const dp_t wp2, double wp1y, double wp2y)
 {
 	return 0;
 }
 
-static double integrate_wall_pentagon(const dp_t wp1, const dp_t wp2, const dp_t wp3, double y1, double y2)
+__pure static double integrate_wall_pentagon(const dp_t wp1, const dp_t wp2, const dp_t wp3, double y1, double y2)
 {
 	return 0;
 }
 
-static double integrate_pentagon(const dp_t x, const dp_t y, const dp_t z, double ly, double ry)
+__pure static double integrate_pentagon(const dp_t x, const dp_t y, const dp_t z, double ly, double ry)
 {
 	return 0;
 }
 
-static double integrate(int i, int j)
+__pure static double integrate(int i, int j)
 {
 	dp_t a1, b1, c1, a2, b2, c2;
 	dp4_t* p = new dp4_t[6];
@@ -1447,6 +1441,41 @@ inline static void clean()
 	delete [] OY;
 }
 
+__global__ void kernel(double* result, int current_tl)
+{
+	for (int opt = blockIdx.x * blockDim.x + threadIdx.x; opt < c_n; opt += blockDim.x * gridDim.x)
+	{
+		int i = opt % (c_x_length + 1);
+		int j = opt / (c_y_length + 1);
+
+		// расчет границы
+		if (j == 0)  // bottom bound
+		{
+			result[ opt ]  = 1.1  +  sin( c_tau_to_h * current_tl * j * c_bb );
+		}
+		else if (i == 0) // left bound
+		{
+			result[ opt ] = 1.1  +  sin( c_tau_to_h * current_tl * i * c_lb );
+		}
+		else if (j == c_y_length) // upper bound
+		{ 
+			result[ opt ] = 1.1  +  sin( c_tau_to_h * current_tl * i * c_ub );
+		}
+		else if (i == c_x_length) // right bound
+		{ 
+			result[ opt ] = 1.1  +  sin(  c_tau_to_h * current_tl * j * c_rb );
+		}
+		else if (i > 0 && j > 0 && j != c_x_length && i != c_x_length)
+		{        
+			result[ opt ] = integrate(i, j);
+         //	double t = integrate(i, j) / c_h;
+			//t = t / c_h;
+			//result[ opt ] = t;
+			//result[ opt ] += c_tau * func_f(i, j);
+		}
+	}
+}
+
 float solve_cuda(double* density)
 {
 //	const int gridSize = 256;
@@ -1460,73 +1489,51 @@ float solve_cuda(double* density)
 	double *result = NULL, *prev_result = NULL, *d_diff = NULL;
 	n = XY_LEN;
 	int size = sizeof(double)*n;
-	PREV_DENSITY = new double[XY_LEN];
+	PREV_DENSITY_HOST = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
 	{
 		for (int i = 0; i < OX_LEN_1; i++)
 		{
-			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
+			PREV_DENSITY_HOST[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
 	cudaEvent_t start, stop;
 	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
-	double t = 0;
-        cudaMemcpyToSymbol(c_tau, &t, sizeof(double));
-/*	cudaMemcpyToSymbol(c_lb, &LB, sizeof(double));
+    cudaMemcpyToSymbol(c_tau, &TAU, sizeof(double));
+	cudaMemcpyToSymbol(c_lb, &LB, sizeof(double));
 	cudaMemcpyToSymbol(c_b, &B, sizeof(double));
 	cudaMemcpyToSymbol(c_rb, &RB, sizeof(double));
 	cudaMemcpyToSymbol(c_bb, &BB, sizeof(double));
 	cudaMemcpyToSymbol(c_ub, &UB, sizeof(double));
 	cudaMemcpyToSymbol(c_n, &n, sizeof(int));
-
-	cudaMemcpyToSymbol(c_x_length, &X_LEN, sizeof(int));
-	cudaMemcpyToSymbol(c_y_length, &Y_LEN, sizeof(int));
-//	cudaMemcpyToSymbol(c_h, &temp_d, sizeof(double));
-
-//	temp_d = p->tau / (p->x_size);
-//	cudaMemcpyToSymbol(c_tau_to_h, &temp_d, sizeof(double));
-
-//	temp_d = p->b * p->tau;
-//	cudaMemcpyToSymbol(c_tau_b, &temp_d, sizeof(double));
-
-	temp_d = M_PI / 2.;
-	cudaMemcpyToSymbol(c_pi_half, &temp_d, sizeof(double));
-
+	cudaMemcpyToSymbol(c_x_length, &OX_LEN, sizeof(int));
+	cudaMemcpyToSymbol(c_y_length, &OY_LEN, sizeof(int));
+	
 	checkCuda(cudaMalloc((void**)&(result), size) );
-	checkCuda(cudaMalloc((void**)&(prev_result), size) );
-
-	cudaMemcpy(prev_result, rhoInPrevTL_asV, size, cudaMemcpyHostToDevice);
+	checkCuda(cudaMalloc((void**)&(PREV_DENSITY_DEVICE), size) );
+	checkCuda(cudaMemcpyToSymbol(PREV_DENSITY_DEVICE, &PREV_DENSITY_HOST, sizeof(PREV_DENSITY_HOST)));
 
 	cudaEventRecord(start, 0);   
 
-	if (tl1 == true)
+	int tl = 0;
+	int tempTl = TIME_STEP_CNT-1;  
+	while(tl < tempTl)
 	{
-		kernel<<<gridSize, blockSize>>>(prev_result, result, 1);
-		cudaMemcpy(p->result, result, size, cudaMemcpyDeviceToHost);
-	}
-	else
-	{
-		int tl = 0;
-		int tempTl = p->t_count - 1;  
-		while(tl < tempTl)
-		{
-			kernel<<<gridSize, blockSize>>>(prev_result, result, tl + 1);
-			kernel<<<gridSize, blockSize>>>(result, prev_result, tl + 2);         
-			tl += 2;            
-		}  
-		cudaMemcpy(p->result, prev_result, size, cudaMemcpyDeviceToHost);
-	}
+	    kernel<<<gridSize, blockSize>>>(result, tl + 1);
+	    kernel<<<gridSize, blockSize>>>(result, tl + 2);         
+	    tl += 2;            
+	}  
+	cudaMemcpy(density, prev_result, size, cudaMemcpyDeviceToHost);	
 
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
 
 	cudaFree(result);
-	cudaFree(prev_result);
+	cudaFree(PREV_DENSITY_DEVICE);
 	cudaDeviceReset();
-	delete[] rhoInPrevTL_asV;*/
 	return time;
 #else
 	return 0;
