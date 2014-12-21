@@ -11,7 +11,7 @@ endif
 ALL_LDFLAGS := $(ALL_CCFLAGS) -L./gtest/lib/.libs
 INCLUDES  := -I./FemBase -I./gtest-1.7.0 -I./include
 LIBRARIES := -lgtest -lgtest_main -pthread -openmp
-OBJ := obj_openmp
+OBJ := obj/openmp
 
 all: build
 

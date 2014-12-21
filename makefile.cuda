@@ -1,18 +1,9 @@
-# hello from MAC
-
-# Location of the CUDA Toolkit
-CUDA_PATH  ?= /usr/local/cuda-6.5
-NVCC := $(CUDA_PATH)/bin/nvcc -ccbin g++
+NVCC := /usr/local/cuda-6.5/bin/nvcc -ccbin g++
 
 # internal flags
 NVCCFLAGS   := -m64 -O2
 CCFLAGS     := -m64 -O2
 LDFLAGS     := 
-
-
-ifeq ($(flagman), 1)
-   NVCCFALGS += -DFLAGMAN
-endif
 
 # Extra user flags
 EXTRA_NVCCFLAGS   ?=
@@ -36,8 +27,7 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 INCLUDES  := -I./FemBase -I./gtest-1.7.0 -I./include
-LIBRARIES :=
-LIBRARIES += -lgtest -lgtest_main
+LIBRARIES := -lgtest -lgtest_main
 
 ################################################################################
 
@@ -46,12 +36,12 @@ GENCODE_FLAGS   ?= $(GENCODE_SM20)
 
 ################################################################################
 
-OBJ := obj
+OBJ := obj/cuda
 
 # Target rules
 all: build
 
-build: test_fixture
+build: fem_cuda
 	
 $(OBJ)/compute_density_base.o: src/LowOrdOper.cpp
 	-mkdir -p $(OBJ)
@@ -97,13 +87,13 @@ $(OBJ)/gtest_main.o: src/gtest_main.cc
 	-mkdir -p $(OBJ)
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-test_fixture: $(OBJ)/special_print.o $(OBJ)/origin_print.o $(OBJ)/one_cell_integ.o $(OBJ)/space_volume.o $(OBJ)/integ_und_rig_ang_tr.o $(OBJ)/gtest_main.o $(OBJ)/integ_und_gor_chan.o $(OBJ)/compute_density_base.o $(OBJ)/init_and_boundary_data.o $(OBJ)/compute_density.o $(OBJ)/tests.o
+fem_cuda: $(OBJ)/special_print.o $(OBJ)/origin_print.o $(OBJ)/one_cell_integ.o $(OBJ)/space_volume.o $(OBJ)/integ_und_rig_ang_tr.o $(OBJ)/gtest_main.o $(OBJ)/integ_und_gor_chan.o $(OBJ)/compute_density_base.o $(OBJ)/init_and_boundary_data.o $(OBJ)/compute_density.o $(OBJ)/tests.o
 	$(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 run: build
-	./test_fixture
+	./fem_cuda
 
 clean:
-	rm -f test_fixture $(OBJ)/*.o
+	rm -f fem_cuda $(OBJ)/*.o
 
 clobber: clean
