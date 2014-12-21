@@ -23,6 +23,12 @@ protected:
 		                       p.ub, p.tau, p.t_count, p.x_size,
 		                       p.y_size, p.norm);
 	}
+	
+	double* solve_internal_cuda(ComputeParameters& p)
+	{
+		return compute_density_cuda(p.b, p.lb, p.rb, p.bb, p.ub, p.tau, p.t_count, p.x_size, p.y_size, p.norm);
+	}
+	
 
 	double* get_model_result(ComputeParameters& p, int lvl)
 	{
@@ -62,5 +68,35 @@ TEST_F(cpu, test_to_model)
 		delete[] model;
 		
 		
+	}
+}
+
+//TEST_F(cpu, DISABLED_test_to_model)
+TEST_F(cpu, test_to_model_cuda)
+{
+	int first = 0, last = 3;
+	double norm_test, norm_model;
+	ComputeParameters p = ComputeParameters();
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		p.recompute_params(lvl);
+		double* data = solve_internal_cuda(p);
+		double norm_test = p.norm;
+		double* model = get_model_result(p, lvl);
+		double norm_model = p.norm;
+		StartTimer();
+
+		if (lvl < 2)
+			for (int i = 0; i < p.get_size(); i++)
+			{
+				ASSERT_NEAR(model[i], data[i], 1e-12);
+			}
+		printf("model norm = %f\n", norm_model);
+		printf("test norm = %f\n", norm_test);
+		double time = GetTimer();
+		printf("Time: %lf\n", time);
+		ASSERT_NEAR(norm_model, norm_test, 1e-12);
+		delete[] data;
+		delete[] model;
 	}
 }

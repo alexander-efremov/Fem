@@ -10,7 +10,7 @@
 #endif
 
 
-#ifdef __CUDACC__
+#ifdef __NVCC__
     #include <cuda.h>
 #endif
 
@@ -1507,7 +1507,7 @@ double* compute_density(double b, double lb, double rb, double bb, double ub,
 double* compute_density_cuda(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length, double& norm)
 {
-#ifdef __CUDACC__
+#ifdef __NVCC__
     	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
