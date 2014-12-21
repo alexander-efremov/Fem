@@ -11,7 +11,6 @@ class cpu : public testing::Test
 public:
 	cpu()
 	{
-	
 	    #ifdef VER
 		 printf("%s\n", STRINGIZE_VALUE_OF(VER));
 	    #endif
