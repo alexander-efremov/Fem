@@ -99,4 +99,15 @@ extern double* compute_density(
 	int ox_length,
 	int oy_length, double &norm);
 
+extern double* compute_density_cuda(
+	double b,
+	double lb,
+	double rb,
+	double bb,
+	double ub,
+	double time_step,
+	int time_step_count,
+	int ox_length,
+	int oy_length, double &norm);
+
 #endif
