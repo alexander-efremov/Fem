@@ -1,17 +1,24 @@
 #include "common.h"
 #include "point.h"
 #include "utils.h"
+#include "compute_density_cuda.cuh"
 #include <algorithm>
-#ifdef _OPENMP
-  #include <omp.h>
-#else
-  #define omp_get_thread_num() 1
-  #define omp_get_num_threads() 1
-#endif
-
-#ifdef __NVCC__
-    #include "compute_density_cuda.cuh"
-#endif
+#include <cuda.h>
+#include <hemi.h>
+__constant__ double c_tau;
+__constant__ double c_h;
+__constant__ double c_b;
+__constant__ double c_tau_to_current_time_level;
+__constant__ double c_tau_to_h; // tau * h ( h = 1. / (p->x_size)) ;
+__constant__ double c_lb;
+__constant__ double c_rb;
+__constant__ double c_ub;
+__constant__ double c_bb;
+__constant__ double c_tau_b;
+__constant__ double c_pi_half;
+__constant__ int c_x_length;
+__constant__ int c_y_length;
+__constant__ int c_n;
 
 #define sqr(x) ((x)*(x))
 #define cub(x) ((x)*(x)*(x))
@@ -1395,57 +1402,6 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 	return HX * HY * r;
 }
 
-static void solve(double* density)
-{
-	PREV_DENSITY = new double[XY_LEN];
-	for (int j = 0; j < OY_LEN + 1; j++)
-	{
-		for (int i = 0; i < OX_LEN_1; i++)
-		{
-			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
-		}
-	}
-	int th_id = 0;
-        int nthreads = 0;
-#if defined(_OPENMP)
-   #pragma omp parallel for
-#endif
-	for (TL = 1; TL <= TIME_STEP_CNT; TL++)
-	{
-	    	th_id = omp_get_thread_num();
-        	if ( th_id == 0 ) {
-		  nthreads = omp_get_num_threads();
-	          printf("There are %d threads\n",nthreads);
-    		}
-
-		PREV_TIME = TIME;
-		TIME = TAU * TL;
-		for (int i = 0; i <= OX_LEN; i++)
-		{
-			density[i] = analytical_solution(OX[i], BB, TIME);
-			density[OX_LEN_1 * OY_LEN + i] = analytical_solution(OX[i], UB, TIME);
-		}
-
-		for (int i = 0; i <= OY_LEN; i++)
-		{
-			density[OX_LEN_1 * i] = analytical_solution(LB, OY[i], TIME);
-			density[OX_LEN_1 * i + OX_LEN] = analytical_solution(RB, OY[i], TIME);
-		}
-
-		for (int j = 1; j < OY_LEN; j++)
-		{
-			for (int i = 1; i < OX_LEN; i++)
-			{
-				density[OX_LEN_1 * j + i] = integrate(i, j) * INVERTED_HX_HY;
-				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
-			}
-		}
-		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
-	}
-	delete [] PREV_DENSITY;
-}
-
-
 inline static void init(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length)
 {
@@ -1491,23 +1447,105 @@ inline static void clean()
 	delete [] OY;
 }
 
-double* compute_density(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length, double& norm)
+float solve_cuda(double* density)
 {
-	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
-	double* density = new double[XY_LEN];
-	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
-	solve(density);
-	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
-	clean();
-	return density;
+//	const int gridSize = 256;
+//	const int blockSize =  512;
+#ifdef __NVCC__
+	const int gridSize = 1;
+	const int blockSize =  1;
+	size_t n(0);
+	int temp_i(0);
+	double temp_d(0);
+	double *result = NULL, *prev_result = NULL, *d_diff = NULL;
+	n = XY_LEN;
+	int size = sizeof(double)*n;
+	PREV_DENSITY = new double[XY_LEN];
+	for (int j = 0; j < OY_LEN + 1; j++)
+	{
+		for (int i = 0; i < OX_LEN_1; i++)
+		{
+			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
+		}
+	}
+	cudaEvent_t start, stop;
+	float time;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+	double t = 0;
+        cudaMemcpyToSymbol(c_tau, &t, sizeof(double));
+/*	cudaMemcpyToSymbol(c_lb, &LB, sizeof(double));
+	cudaMemcpyToSymbol(c_b, &B, sizeof(double));
+	cudaMemcpyToSymbol(c_rb, &RB, sizeof(double));
+	cudaMemcpyToSymbol(c_bb, &BB, sizeof(double));
+	cudaMemcpyToSymbol(c_ub, &UB, sizeof(double));
+	cudaMemcpyToSymbol(c_n, &n, sizeof(int));
+
+	cudaMemcpyToSymbol(c_x_length, &X_LEN, sizeof(int));
+	cudaMemcpyToSymbol(c_y_length, &Y_LEN, sizeof(int));
+//	cudaMemcpyToSymbol(c_h, &temp_d, sizeof(double));
+
+//	temp_d = p->tau / (p->x_size);
+//	cudaMemcpyToSymbol(c_tau_to_h, &temp_d, sizeof(double));
+
+//	temp_d = p->b * p->tau;
+//	cudaMemcpyToSymbol(c_tau_b, &temp_d, sizeof(double));
+
+	temp_d = M_PI / 2.;
+	cudaMemcpyToSymbol(c_pi_half, &temp_d, sizeof(double));
+
+	checkCuda(cudaMalloc((void**)&(result), size) );
+	checkCuda(cudaMalloc((void**)&(prev_result), size) );
+
+	cudaMemcpy(prev_result, rhoInPrevTL_asV, size, cudaMemcpyHostToDevice);
+
+	cudaEventRecord(start, 0);   
+
+	if (tl1 == true)
+	{
+		kernel<<<gridSize, blockSize>>>(prev_result, result, 1);
+		cudaMemcpy(p->result, result, size, cudaMemcpyDeviceToHost);
+	}
+	else
+	{
+		int tl = 0;
+		int tempTl = p->t_count - 1;  
+		while(tl < tempTl)
+		{
+			kernel<<<gridSize, blockSize>>>(prev_result, result, tl + 1);
+			kernel<<<gridSize, blockSize>>>(result, prev_result, tl + 2);         
+			tl += 2;            
+		}  
+		cudaMemcpy(p->result, prev_result, size, cudaMemcpyDeviceToHost);
+	}
+
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&time, start, stop);
+
+	cudaFree(result);
+	cudaFree(prev_result);
+	cudaDeviceReset();
+	delete[] rhoInPrevTL_asV;*/
+	return time;
+#else
+	return 0;
+#endif
 }
 
-double* compute_density_cuda(double b, double lb, double rb, double bb, double ub,
+
+double* compute_density_cuda_internal(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length, double& norm)
 {
 #ifdef __NVCC__
-	return compute_density_cuda_internal(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length, norm);                      
+	printf("HELLO FROM CUDA\n");
+    	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
+	double* density = new double[XY_LEN];
+	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
+	solve_cuda(density);
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
+	clean();
+	return density;
 #else
         return NULL;
 #endif
