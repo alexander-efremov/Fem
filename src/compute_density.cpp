@@ -1407,13 +1407,15 @@ static void solve(double* density, double& time)
 	}
 	int i = 0, j = 0, tl = 0;
 
-    float timeStart = 0, timeEnd = 0;
+        float timeStart = 0, timeEnd = 0;
 #ifdef _OPENMP
-    printf("OPENMP timer functions are used!\n");
-    printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
+    printf("OPENMP THREADS COUNT = %d\n", omp_get_num_threads());
+#endif
+#ifdef _OPENMP
+    printf("OPENMP timer function is used!\n");
     timeStart = omp_get_wtime();
 #else
-    printf("Standart timer functions are used!\n");
+    printf("Standart timer function is used!\n");
     StartTimer();
 #endif        
  
