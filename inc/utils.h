@@ -37,6 +37,7 @@ inline void print_params(double b,
 	printf("Time level count = %d\n", tl_count);
 	printf("ox length = %d\n", ox_length + 1);
 	printf("oy length = %d\n", oy_length + 1);
+	fflush(stdout);
 }
 
 inline void print_params(int index, int needed_index,

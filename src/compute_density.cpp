@@ -1405,11 +1405,11 @@ static void solve(double* density, double& time)
 			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
+	
 	int i = 0, j = 0, tl = 0;
-
-        float timeStart = 0, timeEnd = 0;
+        float timeStart = 0;
 #ifdef _OPENMP
-    printf("OPENMP THREADS COUNT = %d\n", omp_get_num_threads());
+    printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
 #endif
 #ifdef _OPENMP
     printf("OPENMP timer function is used!\n");
@@ -1418,7 +1418,7 @@ static void solve(double* density, double& time)
     printf("Standart timer function is used!\n");
     StartTimer();
 #endif        
- 
+ fflush(stdout);
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
 	{	    	
 		PREV_TIME = TIME;
@@ -1437,9 +1437,9 @@ static void solve(double* density, double& time)
 #ifdef _OPENMP
    #pragma omp parallel for collapse(2) private(i, j)
 #endif
-		for (j = 1; j < OY_LEN; j++)
+		for (j = 1; j < OY_LEN; ++j)
 		{
-			for (i = 1; i < OX_LEN; i++)
+			for (i = 1; i < OX_LEN; ++i)
 			{
 				density[OX_LEN_1 * j + i] = integrate(i, j) * INVERTED_HX_HY;
 				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
@@ -1448,8 +1448,9 @@ static void solve(double* density, double& time)
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
 	}
 #ifdef _OPENMP
-	timeEnd = omp_get_wtime();
-	time = timeStart - timeEnd;
+	double t = omp_get_wtime();
+	time = timeStart - t;
+	printf("time %f\n", fabs(time));
 #else
 	time = GetTimer();
 #endif   	

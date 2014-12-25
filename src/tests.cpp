@@ -4,6 +4,12 @@
 #include "LowOrdOper.h"
 #define STRINGIZE(x) #x
 #define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+#ifdef _OPENMP
+  #include <omp.h>
+#else
+  #define omp_get_thread_num() 1
+  #define omp_get_num_threads() -10
+#endif
 
 class cpu : public testing::Test
 {
@@ -66,7 +72,6 @@ TEST_F(cpu, test_to_model)
 	
 }
 
-//TEST_F(cpu, DISABLED_test_to_model)
 TEST_F(cpu, test_to_model_cuda)
 {
 	int first = 0, last = 1;
@@ -91,5 +96,22 @@ TEST_F(cpu, test_to_model_cuda)
 		ASSERT_NEAR(norm_model, norm_test, 1e-12);
 		delete[] data;
 		delete[] model;
+	}
+}
+
+
+TEST_F(cpu, openmp_experiment)
+{
+	int first = 3, last = 4;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		printf("Start level %d\n", lvl);
+		fflush(stdout);
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_internal(p, time);
+		delete[] data;
 	}
 }

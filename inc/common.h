@@ -75,6 +75,17 @@ struct ComputeParameters
 
 	void recompute_params(int step)
 	{
+		const int x_length_default = 10;
+		const int y_length_default = 10;
+		t_count = 50;
+		tau = 0.02;
+		double value = pow(2., 0);
+		x_size = x_length_default * value;
+		y_size = y_length_default * value;
+		size = (x_size + 1) * (y_size + 1);
+		tau /= value;
+		t_count *= value;
+
 		int power = pow(2., step);
 		tau /= power;
 		t_count *= power;
