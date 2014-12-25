@@ -48,6 +48,7 @@ static double* OY; //-V707
 static double TIME;
 static double INVERTED_HX_HY;
 
+/*
 __pure inline static void print_params_const(int index, int needed_index,
 	double b,
 	double lb,
@@ -72,7 +73,7 @@ __pure inline static void print_params_const(int index, int needed_index,
 		printf("ox length = %d\n", ox_length + 1);
 		printf("oy length = %d\n", oy_length + 1);
 	}
-}
+}*/
 
 __pure inline static void sort_by_y_asc(c_dp_t& x, c_dp_t& y, c_dp_t& z)
 {	
@@ -1033,138 +1034,138 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 // 	}
 // }
 
-__pure inline int get_wall_intersection_type_as_int(c_dp4_t* a)
-{
-	int type = -1;
-	bool is_four_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0;
-	bool is_three_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x > 0;
-	bool is_two_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x > 0 && a[3].x > 0;
-	bool is_one_point_on_the_wall = a[0].x <= 0 && a[1].x > 0 && a[2].x > 0 && a[3].x > 0;
-	if (is_four_point_on_the_wall)
-	{
-		type = 4;
-	}
-	else if (is_three_point_on_the_wall)
-	{
-		type = 3;
-	}
-	else if (is_two_point_on_the_wall)
-	{
-		type = 2;
-	}
-	else if (is_one_point_on_the_wall)
-	{
-		type = 1;
-	}
-	else
-	{
-		type = 0;
-	}
-	return type;
-}
+// __pure inline int get_wall_intersection_type_as_int(c_dp4_t* a)
+// {
+// 	int type = -1;
+// 	bool is_four_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x <= 0;
+// 	bool is_three_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x <= 0 && a[3].x > 0;
+// 	bool is_two_point_on_the_wall = a[0].x <= 0 && a[1].x <= 0 && a[2].x > 0 && a[3].x > 0;
+// 	bool is_one_point_on_the_wall = a[0].x <= 0 && a[1].x > 0 && a[2].x > 0 && a[3].x > 0;
+// 	if (is_four_point_on_the_wall)
+// 	{
+// 		type = 4;
+// 	}
+// 	else if (is_three_point_on_the_wall)
+// 	{
+// 		type = 3;
+// 	}
+// 	else if (is_two_point_on_the_wall)
+// 	{
+// 		type = 2;
+// 	}
+// 	else if (is_one_point_on_the_wall)
+// 	{
+// 		type = 1;
+// 	}
+// 	else
+// 	{
+// 		type = 0;
+// 	}
+// 	return type;
+// }
 
-__pure inline static quad_type get_wall_intersection_type(c_dp4_t* a)
-{
-	/*
-	 формулы расчетов здесь http://www.pm298.ru/reshenie/fha0327.php
-	 a[0] - alpha
-	 a[1] - beta
-	 a[2] - gamma
-	 a[3] - theta
-	 a[4] - mu
-	 a[5] - nu
+// __pure inline static quad_type get_wall_intersection_type(c_dp4_t* a)
+// {
+// 	/*
+// 	 формулы расчетов здесь http://www.pm298.ru/reshenie/fha0327.php
+// 	 a[0] - alpha
+// 	 a[1] - beta
+// 	 a[2] - gamma
+// 	 a[3] - theta
+// 	 a[4] - mu
+// 	 a[5] - nu
 
-	 */
+// 	 */
 
-	int type = get_wall_intersection_type_as_int(a);
-	switch (type)
-	{
-	case 4:
-		return wall_4;
-	case 3:
-		{
-			sort_by_x_asc(a);
-			sort_by_y_desc_3(a);
-			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
-			// тут не надо fabs, потому что a[3].x > a[0].x
-			double y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
-			a[4] = c_dp4_t(0, y); // mu
+// 	int type = get_wall_intersection_type_as_int(a);
+// 	switch (type)
+// 	{
+// 	case 4:
+// 		return wall_4;
+// 	case 3:
+// 		{
+// 			sort_by_x_asc(a);
+// 			sort_by_y_desc_3(a);
+// 			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+// 			// тут не надо fabs, потому что a[3].x > a[0].x
+// 			double y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
+// 			a[4] = c_dp4_t(0, y); // mu
 
-			// рассчитаем точку пересечения OY и прямой a[2]:a[3]
-			// тут не надо fabs, потому что a[3].x > a[2].x
-			y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));
-			a[5] = c_dp4_t(0, y); // nu
+// 			// рассчитаем точку пересечения OY и прямой a[2]:a[3]
+// 			// тут не надо fabs, потому что a[3].x > a[2].x
+// 			y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));
+// 			a[5] = c_dp4_t(0, y); // nu
 
-			if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
-				return wall_3_middle_at;
-			if (a[0].x < a[1].x && a[1].x > a[2].x)
-				return wall_3_middle_out;
-			if (a[1].x < a[0].x && a[1].x < a[2].x)
-				return wall_3_middle_in;
-		}
-	case 2:
-		{
-			sort_by_xy_wall_2(a);
-			double y = 0;
-			if (a[2].x - a[1].x < FLT_MIN)
-			{
-				y = (a[1].y + a[2].y) * 0.5;
-			}
-			else
-			{
-				y = a[1].y - a[1].x * ((a[2].y - a[1].y) / (a[2].x - a[1].x));
-			}
-			a[4] = c_dp4_t(0, y); // mu
+// 			if ((a[0].x - a[2].x) * (a[1].y - a[2].y) - (a[1].x - a[2].x) * (a[0].y - a[2].y) < FLT_MIN)
+// 				return wall_3_middle_at;
+// 			if (a[0].x < a[1].x && a[1].x > a[2].x)
+// 				return wall_3_middle_out;
+// 			if (a[1].x < a[0].x && a[1].x < a[2].x)
+// 				return wall_3_middle_in;
+// 		}
+// 	case 2:
+// 		{
+// 			sort_by_xy_wall_2(a);
+// 			double y = 0;
+// 			if (a[2].x - a[1].x < FLT_MIN)
+// 			{
+// 				y = (a[1].y + a[2].y) * 0.5;
+// 			}
+// 			else
+// 			{
+// 				y = a[1].y - a[1].x * ((a[2].y - a[1].y) / (a[2].x - a[1].x));
+// 			}
+// 			a[4] = c_dp4_t(0, y); // mu
 
-			if (a[3].x - a[0].x < FLT_MIN)
-			{
-				y = (a[0].y + a[3].y) * 0.5;
-			}
-			else
-			{
-				y = a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
-			}
-			a[5] = c_dp4_t(0, y); // nu
-			return wall_2;
-		}
+// 			if (a[3].x - a[0].x < FLT_MIN)
+// 			{
+// 				y = (a[0].y + a[3].y) * 0.5;
+// 			}
+// 			else
+// 			{
+// 				y = a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
+// 			}
+// 			a[5] = c_dp4_t(0, y); // nu
+// 			return wall_2;
+// 		}
 
-	case 1: 
-		{
-			sort_by_x_asc(a);
-			sort_by_y_desc_3(a);
+// 	case 1: 
+// 		{
+// 			sort_by_x_asc(a);
+// 			sort_by_y_desc_3(a);
 
-			// для точек на стенке оси координат обозначены по другому
-			// по OX будет откладываться значение y
-			// по OY будет откладываться значение t
-			// точка a[0] - точка, которая упала на стенку
-			// считаем y компоненту
-			a[0].x = a[0].y_initial - a[0].x_initial * func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, a[0].x_initial, a[0].y_initial) / func_u(C_B, a[0].x_initial, a[0].y_initial);
-			a[0].y = C_TIME - a[0].x_initial*(1 / func_u(C_B, a[0].x_initial, a[0].y_initial)); // здесь будет Mt = tk - Ax*tg(alpha); tg(alpha) = 1 / U(A)
+// 			// для точек на стенке оси координат обозначены по другому
+// 			// по OX будет откладываться значение y
+// 			// по OY будет откладываться значение t
+// 			// точка a[0] - точка, которая упала на стенку
+// 			// считаем y компоненту
+// 			a[0].x = a[0].y_initial - a[0].x_initial * func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, a[0].x_initial, a[0].y_initial) / func_u(C_B, a[0].x_initial, a[0].y_initial);
+// 			a[0].y = C_TIME - a[0].x_initial*(1 / func_u(C_B, a[0].x_initial, a[0].y_initial)); // здесь будет Mt = tk - Ax*tg(alpha); tg(alpha) = 1 / U(A)
 			
 
-			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
-			// тут не надо fabs, потому что a[1].x > a[0].x
-			double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
-			a[4] = c_dp4_t(0, y); // mu
+// 			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
+// 			// тут не надо fabs, потому что a[1].x > a[0].x
+// 			double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
+// 			a[4] = c_dp4_t(0, y); // mu
 
-			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
-			// тут не надо fabs, потому что a[3].x > a[0].x
-			y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : (a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x)));
-			a[5] = c_dp4_t(0, y); // nu
+// 			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+// 			// тут не надо fabs, потому что a[3].x > a[0].x
+// 			y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : (a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x)));
+// 			a[5] = c_dp4_t(0, y); // nu
 
-			if (is_points_belong_to_one_line(a[1], a[2], a[3]))
-				return wall_1_middle_at;
-			if (a[1].x < a[2].x && a[2].x > a[3].x)
-				return wall_1_middle_out;
-			if (a[2].x < a[1].x && a[2].x < a[3].x)
-				return wall_1_middle_in;
-			break;
-		}
-	default:
-		return normal;
-	}
-	return normal;
-}
+// 			if (is_points_belong_to_one_line(a[1], a[2], a[3]))
+// 				return wall_1_middle_at;
+// 			if (a[1].x < a[2].x && a[2].x > a[3].x)
+// 				return wall_1_middle_out;
+// 			if (a[2].x < a[1].x && a[2].x < a[3].x)
+// 				return wall_1_middle_in;
+// 			break;
+// 		}
+// 	default:
+// 		return normal;
+// 	}
+// 	return normal;
+// }
 
 __pure static quad_type get_quadrangle_type(int i, int j,
                                      c_dp_t& a, c_dp_t& b, c_dp_t& c, c_dp_t& k, c_dp_t& m, c_dp_t& n, c_dp4_t* p)
@@ -1215,7 +1216,7 @@ __pure static quad_type get_quadrangle_type(int i, int j,
 	m = p[3];
 	n = p[2];
 return normal;
-	return get_wall_intersection_type(p);
+	//return get_wall_intersection_type(p);
 }
 
 // __pure static double integrate_wall_triangle(const c_dp_t wp, // wall point

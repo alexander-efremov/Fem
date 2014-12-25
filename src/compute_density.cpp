@@ -46,7 +46,6 @@ static double HY; //-V707
 static double* OX; //-V707
 static double* OY; //-V707
 static double* PREV_DENSITY;
-//static int TL; //-V707
 static double TIME;
 static double PREV_TIME; // tau * (tl - 1)
 static double INVERTED_HX_HY;
@@ -1406,46 +1405,39 @@ static void solve(double* density, double& time)
 			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
-	int th_id = 0;
-        int nthreads = 0, tl = 0;
+	int i = 0, j = 0, tl = 0;
 
-        float timeStart = 0, timeEnd = 0;
-	printf("%d\n", TIME_STEP_CNT);
+    float timeStart = 0, timeEnd = 0;
 #ifdef _OPENMP
     printf("OPENMP timer functions are used!\n");
+    printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
     timeStart = omp_get_wtime();
 #else
     printf("Standart timer functions are used!\n");
     StartTimer();
 #endif        
-#ifdef _OPENMP
-   #pragma omp parallel for private(tl)
-#endif
+ 
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
-	{
-	    	th_id = omp_get_thread_num();
-        	if ( th_id == 0 ) {
-		  nthreads = omp_get_num_threads();
-	          printf("There are %d threads\n",nthreads);
-    		}
-
+	{	    	
 		PREV_TIME = TIME;
 		TIME = TAU * tl;
-		for (int i = 0; i <= OX_LEN; i++)
+		for (int k = 0; k <= OX_LEN; k++)
 		{
-			density[i] = analytical_solution(OX[i], BB, TIME);
-			density[OX_LEN_1 * OY_LEN + i] = analytical_solution(OX[i], UB, TIME);
+			density[k] = analytical_solution(OX[k], BB, TIME);
+			density[OX_LEN_1 * OY_LEN + k] = analytical_solution(OX[k], UB, TIME);
 		}
 
-		for (int i = 0; i <= OY_LEN; i++)
+		for (int u = 0; u <= OY_LEN; u++)
 		{
-			density[OX_LEN_1 * i] = analytical_solution(LB, OY[i], TIME);
-			density[OX_LEN_1 * i + OX_LEN] = analytical_solution(RB, OY[i], TIME);
+			density[OX_LEN_1 * u] = analytical_solution(LB, OY[u], TIME);
+			density[OX_LEN_1 * u + OX_LEN] = analytical_solution(RB, OY[u], TIME);
 		}
-
-		for (int j = 1; j < OY_LEN; j++)
+#ifdef _OPENMP
+   #pragma omp parallel for collapse(2) private(i, j)
+#endif
+		for (j = 1; j < OY_LEN; j++)
 		{
-			for (int i = 1; i < OX_LEN; i++)
+			for (i = 1; i < OX_LEN; i++)
 			{
 				density[OX_LEN_1 * j + i] = integrate(i, j) * INVERTED_HX_HY;
 				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
@@ -1503,7 +1495,6 @@ inline static void clean()
 	HX = 0;
 	HY = 0;
 	INVERTED_HX_HY = 0;
-//	TL = 0;
 	delete [] OX;
 	delete [] OY;
 }
@@ -1529,4 +1520,3 @@ double* compute_density_cuda(double b, double lb, double rb, double bb, double u
         return NULL;
 #endif
 }
-
