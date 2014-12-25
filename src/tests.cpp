@@ -16,7 +16,7 @@ public:
 	}
 	
 protected:
-	double* solve_internal(ComputeParameters& p, float& time)
+	double* solve_internal(ComputeParameters& p, double& time)
 	{
 		return compute_density(p.b, p.lb, p.rb, p.bb,
 		                       p.ub, p.tau, p.t_count, p.x_size,
@@ -40,9 +40,9 @@ protected:
 //TEST_F(cpu, DISABLED_test_to_model)
 TEST_F(cpu, test_to_model)
 {
-	int first = 0, last = 3;
+	int first = 0, last = 1;
 	double norm_test, norm_model;
-	float time;
+	double time;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
 	{
@@ -62,9 +62,8 @@ TEST_F(cpu, test_to_model)
 		ASSERT_NEAR(norm_model, norm_test, 1e-12);
 		delete[] data;
 		delete[] model;
-		
-		
 	}
+	
 }
 
 //TEST_F(cpu, DISABLED_test_to_model)

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "point.h"
 #include "utils.h"
+#include "timer.h"
 #include <algorithm>
 #ifdef _OPENMP
   #include <omp.h>
@@ -45,7 +46,7 @@ static double HY; //-V707
 static double* OX; //-V707
 static double* OY; //-V707
 static double* PREV_DENSITY;
-static int TL; //-V707
+//static int TL; //-V707
 static double TIME;
 static double PREV_TIME; // tau * (tl - 1)
 static double INVERTED_HX_HY;
@@ -1395,7 +1396,7 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 	return HX * HY * r;
 }
 
-static void solve(double* density, float& time)
+static void solve(double* density, double& time)
 {
 	PREV_DENSITY = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
@@ -1406,11 +1407,21 @@ static void solve(double* density, float& time)
 		}
 	}
 	int th_id = 0;
-        int nthreads = 0;
-#if defined(_OPENMP)
-   #pragma omp parallel for
+        int nthreads = 0, tl = 0;
+
+        float timeStart = 0, timeEnd = 0;
+	printf("%d\n", TIME_STEP_CNT);
+#ifdef _OPENMP
+    printf("OPENMP timer functions are used!\n");
+    timeStart = omp_get_wtime();
+#else
+    printf("Standart timer functions are used!\n");
+    StartTimer();
+#endif        
+#ifdef _OPENMP
+   #pragma omp parallel for private(tl)
 #endif
-	for (TL = 1; TL <= TIME_STEP_CNT; TL++)
+	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
 	{
 	    	th_id = omp_get_thread_num();
         	if ( th_id == 0 ) {
@@ -1419,7 +1430,7 @@ static void solve(double* density, float& time)
     		}
 
 		PREV_TIME = TIME;
-		TIME = TAU * TL;
+		TIME = TAU * tl;
 		for (int i = 0; i <= OX_LEN; i++)
 		{
 			density[i] = analytical_solution(OX[i], BB, TIME);
@@ -1442,6 +1453,12 @@ static void solve(double* density, float& time)
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
 	}
+#ifdef _OPENMP
+	timeEnd = omp_get_wtime();
+	time = timeStart - timeEnd;
+#else
+	time = GetTimer();
+#endif   	
 	delete [] PREV_DENSITY;
 }
 
@@ -1486,13 +1503,13 @@ inline static void clean()
 	HX = 0;
 	HY = 0;
 	INVERTED_HX_HY = 0;
-	TL = 0;
+//	TL = 0;
 	delete [] OX;
 	delete [] OY;
 }
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, float& time)
+                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
