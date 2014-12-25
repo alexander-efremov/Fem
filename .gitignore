@@ -157,6 +157,7 @@ $RECYCLE.BIN/
 
 *.dat
 test_fixture
-fem_icc
+fem_icpc
+fem_cuda
 fem_openmp
 obj/*
