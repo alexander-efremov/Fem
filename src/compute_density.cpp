@@ -1395,7 +1395,7 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 	return HX * HY * r;
 }
 
-static void solve(double* density)
+static void solve(double* density, float& time)
 {
 	PREV_DENSITY = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
@@ -1492,12 +1492,12 @@ inline static void clean()
 }
 
 double* compute_density(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length, double& norm)
+                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, float& time)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
-	solve(density);
+	solve(density, time);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;

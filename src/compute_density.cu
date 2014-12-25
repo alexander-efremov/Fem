@@ -5,30 +5,22 @@
 #include <algorithm>
 #include <cuda.h>
 #include <hemi.h>
-__constant__ double c_h;
 __constant__ double C_B;
-__constant__ double c_tau_to_current_time_level;
-__constant__ double C_TAU_TO_H; // tau * h ( h = 1. / (p->x_size)) ;
 __constant__ double C_LB;
 __constant__ double C_RB;
 __constant__ double C_UB;
 __constant__ double C_BB;
-__constant__ double c_tau_b;
-__constant__ double c_pi_half;
-__constant__ int c_x_length;
-__constant__ int c_y_length;
-__constant__ int c_n;
-__constant__ int C_INVERTED_HX_HY;
+__constant__ double C_INVERTED_HX_HY;
 __constant__ int C_HX;
 __constant__ int C_HY;
 __constant__ int C_OY_LEN;
 __constant__ int C_OX_LEN;
 __constant__ int C_OX_LEN_1;
-__constant__ double C_PREV_TIME;
+__constant__ int C_XY_LEN;
+__constant__ double C_PREV_TIME; // tau * (tl - 1)
 __constant__ double C_TIME;
 __constant__ double C_TAU;
-
-__device__ double *OX_DEVICE, *OY_DEVICE, *PREV_DENSITY_DEVICE;
+__device__ double *OX_DEVICE, *OY_DEVICE;
 
 #define sqr(x) ((x)*(x))
 #define cub(x) ((x)*(x)*(x))
@@ -53,10 +45,34 @@ static double HX; //-V707
 static double HY; //-V707
 static double* OX; //-V707
 static double* OY; //-V707
-static double* PREV_DENSITY_HOST;
 static double TIME;
-static double PREV_TIME; // tau * (tl - 1)
 static double INVERTED_HX_HY;
+
+__pure inline static void print_params_const(int index, int needed_index,
+	double b,
+	double lb,
+	double rb,
+	double bb,
+	double ub,
+	double tau,
+	int tl,
+	int tl_count,
+	int ox_length,
+	int oy_length) {
+	if (index == needed_index) {
+		printf("index = %d\n", index);
+		printf("b = %f\n", b);
+		printf("lbDom = %f\n", lb);
+		printf("rbDom = %f\n", rb);
+		printf("bbDom = %f\n", bb);
+		printf("ubDom = %f\n", ub);
+		printf("tau = %f\n", tau);
+		printf("Time level count = %d\n", tl_count);
+		printf("current time level = %d\n", tl);
+		printf("ox length = %d\n", ox_length + 1);
+		printf("oy length = %d\n", oy_length + 1);
+	}
+}
 
 __pure inline static void sort_by_y_asc(c_dp_t& x, c_dp_t& y, c_dp_t& z)
 {	
@@ -331,26 +347,31 @@ __pure inline static double integrate_triangle(double py, double qy, double alph
 	return (((qy - alpha) * cub(a * qy + b - beta) - (py - alpha) * cub(a * py + b - beta)) / (6 * a))
 		- (quad(a * qy + b - beta) - quad(a * py + b - beta)) / (24 * sqr(a));
 }
-
-__pure static double integrate_rectangle_one_cell(double py, double qy, double gx, double hx, const c_ip_t& sx, const c_ip_t& sy)
+__device__ int flag;
+__pure static double integrate_rectangle_one_cell(double* prev_dens, double py, double qy, double gx, double hx, const c_ip_t& sx, const c_ip_t& sy)
 {
 	double result, a, b;
 	a = sx.y >= 0 && sy.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
 	b = sx.y >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y; // ЭТО ПЛОТНОСТЬ С ПРЕДЫДУЩЕГО СЛОЯ ДЛЯ ДАННОЙ ЯЧЕЙКИ
-	result = integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.x + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.x * C_HY));
+	result = integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? prev_dens[C_OX_LEN_1 * sy.x + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.x * C_HY));
 	a = sx.x >= 0 && sy.y >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 	b = sx.x >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y;
-	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.x + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.x * C_HY));
+	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? prev_dens[C_OX_LEN_1 * sy.x + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.x * C_HY));
 	a = sx.y >= 0 && sy.x >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
 	b = sx.y >= 0 && sy.x >= 0 ? OY_DEVICE[sy.x] : C_HY * sy.x;
-	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.y + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.y * C_HY));
+	result -= integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? prev_dens[C_OX_LEN_1 * sy.y + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.y * C_HY));
 	a = sx.x >= 0 && sy.x >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 	b = sx.x >= 0 && sy.x >= 0 ? OY_DEVICE[sy.x] : C_HY * sy.x;
-	result += integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.y + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.y * C_HY));
+	result += integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? prev_dens[C_OX_LEN_1 * sy.y + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.y * C_HY));
+	// if (flag == 1) 
+	// {
+	// 	printf("%s\n", "integrate_rectangle_one_cell");
+	// 	printf("%lf\n", result);
+	// }
 	return result * C_INVERTED_HX_HY;
 }
 
-__pure static double integrate_triangle_left_one_cell(const c_dp_t& bv, const c_dp_t& uv, double hx,
+__pure static double integrate_triangle_left_one_cell(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv, double hx,
                                                const c_ip_t& sx, const c_ip_t& sy)
 {
 	double a_sl = (bv.x - uv.x) / (bv.y - uv.y); //   Coefficients of slant line: x = a_SL *y  +  b_SL.
@@ -360,32 +381,59 @@ __pure static double integrate_triangle_left_one_cell(const c_dp_t& bv, const c_
 	alpha = sx.y >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y;
 	beta = sx.y >= 0 && sy.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
 	tmp = 0.25 * (sqr(uv.y - OY_DEVICE[sy.y]) - sqr(bv.y - OY_DEVICE[sy.y])) * sqr(hx - beta) - integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.x + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.x * C_HY));
+	
+	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? prev_dens[C_OX_LEN_1 * sy.x + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.x * C_HY));
+	// if (flag == 1) 
+	// {
+	// 	printf("%s\n", "integrate_triangle_left_one_cell result 1");
+	// 	printf("%lf\n", result);
+	// }
 	beta = sx.x >= 0 && sy.y >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 	tmp = sqr(uv.y - OY_DEVICE[sy.y]) - sqr(bv.y - OY_DEVICE[sy.y]);
 	tmp = -0.25 * tmp * sqr(hx - beta) + integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.x + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.x * C_HY));
+
+	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? prev_dens[C_OX_LEN_1 * sy.x + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.x * C_HY));
+	// if (flag == 1) 
+	// {
+	// 	printf("%s\n", "integrate_triangle_left_one_cell result 2");
+	// 	printf("%lf\n", result);
+	// }
 	alpha = sx.y >= 0 && sy.x >= 0 ? OY_DEVICE[sy.x] : C_HY * sy.x;
 	beta = sx.y >= 0 && sy.x >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
 	tmp = sqr(uv.y - OY_DEVICE[sy.x]) - sqr(bv.y - OY_DEVICE[sy.x]);
 	tmp = -0.25 * tmp * sqr(hx - beta) + integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.y + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.y * C_HY));
+	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? prev_dens[C_OX_LEN_1 * sy.y + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.y * C_HY));
+		if (flag == 1) 
+	{
+		printf("%s\n", "integrate_triangle_left_one_cell result 3");
+		printf("%lf\n", sy.y);
+		printf("%lf\n", sx.x);
+		printf("%lf\n", C_OX_LEN_1);
+		printf("%lf\n", C_OX_LEN_1 * sy.y + sx.x);
+		printf("%lf\n", prev_dens[C_OX_LEN_1 * sy.y + sx.x]);
+		printf("%lf\n", result);
+	}
 	alpha = sx.x >= 0 && sy.x >= 0 ? OY_DEVICE[sy.x] : C_HY * sy.x;
 	beta = sx.x >= 0 && sy.x >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 	tmp = sqr(uv.y - OY_DEVICE[sy.x]) - sqr(bv.y - OY_DEVICE[sy.x]);
 	tmp = 0.25 * tmp * sqr(hx - beta) - integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
-	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? PREV_DENSITY_DEVICE[C_OX_LEN_1 * sy.y + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.y * C_HY));
+	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? prev_dens[C_OX_LEN_1 * sy.y + sx.y] : analytical_solution(C_PREV_TIME, sx.y * C_HX, sy.y * C_HY));	
+// if (flag == 1) 
+// 	{
+// 		printf("%s\n", "integrate_triangle_left_one_cell result 4");
+// 		printf("%lf\n", tmp);
+// 	}
 	return result * C_INVERTED_HX_HY;
 }
 
-__pure static double integrate_right_slant_chanel(const c_dp_t& bv, const c_dp_t& uv, bool is_rect_truncated, const c_ip_t& sx, double b, const c_ip_t& sb, const c_ip_t& sy)
+__pure static double integrate_right_slant_chanel(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv, bool is_rect_truncated, const c_ip_t& sx, double b, const c_ip_t& sb, const c_ip_t& sy)
 {
 	if (fabs(uv.y - bv.y) <= FLT_MIN) return FLT_MIN ;
 	double result = 0, gx = 0;
 	double x = uv.x <= bv.x ? uv.x : bv.x;
 
 	//   A. Under rectangle.
-	result += -1 * integrate_triangle_left_one_cell(bv, uv, x, sx, sy);
+	result += -1 * integrate_triangle_left_one_cell(prev_dens, bv, uv, x, sx, sy);
 
 	// case B: неполный прямоугольник    
 	if (is_rect_truncated)
@@ -395,7 +443,7 @@ __pure static double integrate_right_slant_chanel(const c_dp_t& bv, const c_dp_t
 		{
 			gx = sx.x >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 		}
-		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, x, sx, sy);
+		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, gx, x, sx, sy);
 	}
 
 	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
@@ -404,7 +452,7 @@ __pure static double integrate_right_slant_chanel(const c_dp_t& bv, const c_dp_t
 	{
 		if (j == sb.x) gx = b;
 		else gx = ch_pos.x >= 0 ? OX_DEVICE[ch_pos.x] : C_HX * ch_pos.x;
-		result += integrate_rectangle_one_cell(bv.y, uv.y, gx, ch_pos.x >= 0 ? OX_DEVICE[ch_pos.y] : C_HX * ch_pos.y, ch_pos, sy);
+		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, gx, ch_pos.x >= 0 ? OX_DEVICE[ch_pos.y] : C_HX * ch_pos.y, ch_pos, sy);
 		ch_pos.x += 1;
 		ch_pos.y = ch_pos.x + 1;
 	}
@@ -419,7 +467,7 @@ __pure static double integrate_right_slant_chanel(const c_dp_t& bv, const c_dp_t
 //
 // BOTTOMLEFTTR
 
-__pure static double integrate_left_slant_chanel(const c_dp_t& bv, const c_dp_t& uv,
+__pure static double integrate_left_slant_chanel(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv,
                                           bool is_rect_trunc, const c_ip_t& sx, const c_ip_t& sy,
                                           double b, const c_ip_t& sb)
 {
@@ -428,13 +476,13 @@ __pure static double integrate_left_slant_chanel(const c_dp_t& bv, const c_dp_t&
 	double x = uv.x <= bv.x ? bv.x : uv.x;
 
 	// case A: triangle
-	result += integrate_triangle_left_one_cell(bv, uv, x, sx, sy);
+	result += integrate_triangle_left_one_cell(prev_dens, bv, uv, x, sx, sy);
 
 	// case B: не полный прямоугольник
 	if (is_rect_trunc)
 	{ // это значит, что прямоугольник занимает не всю ячейку  
 		hx = sx.x == sb.x ? b : (sx.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y);
-		result += integrate_rectangle_one_cell(bv.y, uv.y, x, hx, sx, sy);
+		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, x, hx, sx, sy);
 	}
 
 	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
@@ -443,7 +491,7 @@ __pure static double integrate_left_slant_chanel(const c_dp_t& bv, const c_dp_t&
 	{
 		hx = ch_pos.y <= 0 ? C_HX * ch_pos.y : hx = OX_DEVICE[ch_pos.y];
 		if (j == sb.x) hx = b;
-		result += integrate_rectangle_one_cell(bv.y, uv.y, ch_pos.y <= 0 ? C_HX * ch_pos.x : OX_DEVICE[ch_pos.x], hx, ch_pos, sy);
+		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, ch_pos.y <= 0 ? C_HX * ch_pos.x : OX_DEVICE[ch_pos.x], hx, ch_pos, sy);
 		ch_pos.x += 1;
 		ch_pos.y = ch_pos.x + 1;
 	}
@@ -455,7 +503,7 @@ __pure static double integrate_left_slant_chanel(const c_dp_t& bv, const c_dp_t&
 // sy = (x,y) координаты квадрата в которой лежит верхняя точка
 // в случае успешной проверки, k = будет  угловой коэфициент прямой
 
-__pure static double integrate_right_triangle_bottom_left(const c_dp_t& bv, const c_dp_t& uv)
+__pure static double integrate_right_triangle_bottom_left(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -494,10 +542,10 @@ __pure static double integrate_right_triangle_bottom_left(const c_dp_t& bv, cons
 		{
 			// сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
 			// и в случае когда прошлись по всем точкам...
-			result += integrate_left_slant_chanel(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, bv.x, ib);
+			result += integrate_left_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, bv.x, ib);
 			break;
 		}
-		result += integrate_left_slant_chanel(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
+		result += integrate_left_slant_chanel(prev_dens, curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, bv.x, ib);
 		switch (next_i)
 		{
 		case 1:
@@ -513,7 +561,7 @@ __pure static double integrate_right_triangle_bottom_left(const c_dp_t& bv, cons
 	return result;
 }
 
-__pure static double integrate_right_triangle_bottom_right(const c_dp_t& bv, const c_dp_t& uv)
+__pure static double integrate_right_triangle_bottom_right(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -548,10 +596,10 @@ __pure static double integrate_right_triangle_bottom_right(const c_dp_t& bv, con
 		}
 		if (next.x - uv.x > FLT_MIN)
 		{
-			result += integrate_right_slant_chanel(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
+			result += integrate_right_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, bv.x, ib, sy);
 			break;
 		}
-		result += integrate_right_slant_chanel(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
+		result += integrate_right_slant_chanel(prev_dens, curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, bv.x, ib, sy);
 		switch (next_i)
 		{
 		case 1:
@@ -621,7 +669,7 @@ __pure static double integrate_right_triangle_bottom_right(const c_dp_t& bv, con
 // 	return result;
 // }
 
-__pure static double integrate_right_triangle_upper_left(const c_dp_t& bv, const c_dp_t& uv)
+__pure static double integrate_right_triangle_upper_left(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -658,10 +706,10 @@ __pure static double integrate_right_triangle_upper_left(const c_dp_t& bv, const
 		}
 		if (next.x - uv.x > FLT_MIN) // если следующая точка уже правее, чем наша граничная точка, то мы обработали канал
 		{
-			result += integrate_left_slant_chanel(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
+			result += integrate_left_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 			break;
 		}
-		result += integrate_left_slant_chanel(curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
+		result += integrate_left_slant_chanel(prev_dens, curr, next, (next.x <= curr.x ? curr_i : next_i) == 1, sx, sy, uv.x, ib);
 
 		switch (next_i)
 		{
@@ -678,7 +726,7 @@ __pure static double integrate_right_triangle_upper_left(const c_dp_t& bv, const
 	return result;
 }
 
-__pure static double integrate_right_triangle_upper_right(const c_dp_t& bv, const c_dp_t& uv)
+__pure static double integrate_right_triangle_upper_right(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv)
 {
 	double k = 0;
 	if (!try_get_slope_ratio(bv, uv, k)) return k;
@@ -715,10 +763,10 @@ __pure static double integrate_right_triangle_upper_right(const c_dp_t& bv, cons
 		}
 		if (next.x - uv.x < FLT_MIN)
 		{
-			result += integrate_right_slant_chanel(curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, uv.x, ib, sy);
+			result += integrate_right_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? 0 : curr_i) == 1, sx, uv.x, ib, sy);
 			break;
 		}
-		result += integrate_right_slant_chanel(curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
+		result += integrate_right_slant_chanel(prev_dens, curr, next, (next.x <= curr.x ? next_i : curr_i) == 1, sx, uv.x, ib, sy);
 		switch (next_i)
 		{
 		case 1:
@@ -847,60 +895,60 @@ __pure static double integrate_right_triangle_upper_right(const c_dp_t& bv, cons
 // 	return result;
 // }
 
-__pure static double integrate_bottom_triangle(const c_dp_t& l, const c_dp_t& m, const c_dp_t& r)
+__pure static double integrate_bottom_triangle(double* prev_dens, const c_dp_t& l, const c_dp_t& m, const c_dp_t& r)
 {
 	double result = 0;
 	if (m.x == l.x)
 	{
-		result = integrate_right_triangle_bottom_right(m, r);
+		result = integrate_right_triangle_bottom_right(prev_dens, m, r);
 	}
 	else if (m.x == r.x)
 	{
-		result = integrate_right_triangle_bottom_left(m, l);
+		result = integrate_right_triangle_bottom_left(prev_dens, m, l);
 	}
 	else if (m.x < l.x)
 	{
-		result = integrate_right_triangle_bottom_right(m, r) - integrate_right_triangle_bottom_right(m, l);
+		result = integrate_right_triangle_bottom_right(prev_dens, m, r) - integrate_right_triangle_bottom_right(prev_dens, m, l);
 	}
 	else if (m.x > l.x && m.x < r.x)
 	{
-		result = integrate_right_triangle_bottom_left(m, l) + integrate_right_triangle_bottom_right(m, r);
+		result = integrate_right_triangle_bottom_left(prev_dens, m, l) + integrate_right_triangle_bottom_right(prev_dens, m, r);
 	}
 	else if (m.x > r.x)
 	{
-		result = integrate_right_triangle_bottom_left(m, l) - integrate_right_triangle_bottom_left(m, r);
+		result = integrate_right_triangle_bottom_left(prev_dens, m, l) - integrate_right_triangle_bottom_left(prev_dens, m, r);
 	}
 	return result;
 }
 
-__pure static double integrate_upper_triangle(const c_dp_t& l, const c_dp_t& m, const c_dp_t& r)
+__pure static double integrate_upper_triangle(double* prev_dens, const c_dp_t& l, const c_dp_t& m, const c_dp_t& r)
 {
 	double result = 0;
 	if (m.x == l.x)
 	{
-		result = integrate_right_triangle_upper_right(r, m);
+		result = integrate_right_triangle_upper_right(prev_dens, r, m);
 	}
 	else if (m.x == r.x)
 	{
-		result = integrate_right_triangle_upper_left(l, m);
+		result = integrate_right_triangle_upper_left(prev_dens, l, m);
 	}
 	else if (m.x < l.x)
 	{
-		result = integrate_right_triangle_upper_right(r, m) - integrate_right_triangle_upper_right(l, m);
+		result = integrate_right_triangle_upper_right(prev_dens, r, m) - integrate_right_triangle_upper_right(prev_dens, l, m);
 	}
 	else if (m.x > l.x && m.x < r.x)
 	{
-		result = integrate_right_triangle_upper_left(l, m) + integrate_right_triangle_upper_right(r, m);
+		result = integrate_right_triangle_upper_left(prev_dens, l, m) + integrate_right_triangle_upper_right(prev_dens, r, m);
 	}
 	else if (m.x > r.x)
 	{
-		result = integrate_right_triangle_upper_left(l, m) - integrate_right_triangle_upper_left(r, m);
+		result = integrate_right_triangle_upper_left(prev_dens, l, m) - integrate_right_triangle_upper_left(prev_dens, r, m);
 	}
 	return result;
 }
 
 // x,y,z
-__pure static double integrate_uniform_triangle(const c_dp_t& x, const c_dp_t& y, const c_dp_t& z)
+__pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t& x, const c_dp_t& y, const c_dp_t& z)
 {
 	// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования		
 
@@ -923,7 +971,7 @@ __pure static double integrate_uniform_triangle(const c_dp_t& x, const c_dp_t& y
 		ip.x = tx;
 	}
 
-	return integrate_upper_triangle(t, z, ip) + integrate_bottom_triangle(t, x, ip);
+	return integrate_upper_triangle(prev_dens, t, z, ip) + integrate_bottom_triangle(prev_dens, t, x, ip);
 }
 
 // __pure static double integrate_uniform_triangle_wall(const c_dp_t& x, const c_dp_t& y,
@@ -1130,10 +1178,12 @@ __pure static quad_type get_quadrangle_type(int i, int j,
 	// get prev coordnates
 	double u = func_u(C_B, alpha);
 	double v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, alpha);
+
 	p[0].x = alpha.x - C_TAU * u;
 	p[0].y = alpha.y - C_TAU * v;
 	p[0].x_initial = alpha.x;
 	p[0].y_initial = alpha.y;
+
 	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, beta);
 	u = func_u(C_B, beta);
 	p[1].x = beta.x - C_TAU * u;
@@ -1157,14 +1207,14 @@ __pure static quad_type get_quadrangle_type(int i, int j,
 	if ((p[1].y - intersection.y) * (p[3].y - intersection.y) > 0) return pseudo; // ??
 	if ((p[0].x - intersection.x) * (p[2].x - intersection.x) > 0) return pseudo; // ??	
 	if (is_points_belong_to_one_line(p[0], p[1], p[3])) return pseudo;
-
+	
 	a = p[0];
 	b = p[1];
 	c = p[2];
 	k = p[0];
 	m = p[3];
 	n = p[2];
-
+return normal;
 	return get_wall_intersection_type(p);
 }
 
@@ -1195,7 +1245,7 @@ __pure static quad_type get_quadrangle_type(int i, int j,
 // 	return 0;
 // }
 
-__pure static double integrate(int i, int j)
+__pure static double integrate(double* prev_dens, int i, int j)
 {
 	c_dp_t a1, b1, c1, a2, b2, c2;
 	c_dp4_t* p = new c_dp4_t[6];
@@ -1347,10 +1397,23 @@ __pure static double integrate(int i, int j)
 			double result = 0;
 			double t = 0;
 			sort_by_y_asc(a1, b1, c1);
-			t = integrate_uniform_triangle(a1, b1, c1);
+			if (i==1 && j == 1)
+			{
+				flag = 1;
+			}
+			else
+			{
+				flag = 0;
+			}
+			t = integrate_uniform_triangle(prev_dens, a1, b1, c1);
+			// if (i==1 && j == 1)
+			// {
+			// 	printf("%s\n", "integrate");
+			// 	printf("%lf\n", t);
+			// }
 			result += t;
 			sort_by_y_asc(a2, b2, c2);
-			t = integrate_uniform_triangle(a2, b2, c2);
+			t = integrate_uniform_triangle(prev_dens, a2, b2, c2);
 			result += t;
 			return result;
 		}
@@ -1416,122 +1479,223 @@ inline static void clean()
 	delete [] OY;
 }
 
-__global__ void kernel(double* result, int current_tl)
+__global__ void kernel(double* prev_result, double* result)
 {
-	for (int opt = blockIdx.x * blockDim.x + threadIdx.x; opt < c_n; opt += blockDim.x * gridDim.x)
+	if (blockIdx.x * blockDim.x + threadIdx.x == 0)
 	{
-		int i = opt % (c_x_length + 1);
-		int j = opt / (c_y_length + 1);
+		printf("\nKERNEL PARAMS\n");
+		printf("b = %f\n", C_B);
+		printf("lbDom = %f\n", C_LB);
+	 	printf("rbDom = %f\n", C_RB);
+	 	printf("bbDom = %f\n", C_BB);
+		printf("ubDom = %f\n", C_UB);
+	 	printf("tau = %f\n", C_TAU);
+	 	printf("ox length = %d\n", C_OX_LEN + 1);
+	 	printf("oy length = %d\n", C_OX_LEN + 1);
+	 	printf("PREV_TIME = %lf\n", C_PREV_TIME);
+	 	printf("TIME = %lf\n", C_TIME);
+	 	printf("C_XY_LEN = %d\n", C_XY_LEN);
+	 	printf("%s\n", "OX DEVICE");
+	 	for(int i = 0; i < C_OX_LEN + 1; i++)
+	 	{
+	 		printf("%f ", OX_DEVICE[i]);
+	 	}
+	 	printf("%s\n", "");
+	 	printf("%s\n", "OY DEVICE");
+	 	for(int i = 0; i < C_OY_LEN + 1; i++)
+	 	{
+	 		printf("%f ", OY_DEVICE[i]);
+	 	}
+	 	printf("%s\n", "");
+	 	printf("%s\n", "PREV DENSITY");
+	 	for(int i = 0; i < C_OX_LEN + 1; i++)
+	 	{
+	 		for(int j = 0; j < C_OY_LEN + 1; j++)
+		 	{
+		 		printf("%f ", prev_result[C_OX_LEN_1 * j + i]);
+		 	}
+		 	printf("%s\n", "");
+	 	}
+	 	
+	}
+	
+	 for (int opt = blockIdx.x * blockDim.x + threadIdx.x; opt < C_XY_LEN; opt += blockDim.x * gridDim.x)
+	 {		
+	 	int i = opt % (C_OX_LEN + 1);
+	 	int j = opt / (C_OY_LEN + 1);
 
-		// расчет границы
-		if (j == 0)  // bottom bound
-		{
-			result[ opt ]  = 1.1  +  sin( C_TAU_TO_H * current_tl * j * C_BB );
-		}
+	 	// расчет границы
+	 	if (j == 0)  // bottom bound
+	 	{
+	 		result[ opt ]  = 1.1  +  sin( C_TIME * C_HX * j * C_BB );
+	 	}
 		else if (i == 0) // left bound
 		{
-			result[ opt ] = 1.1  +  sin( C_TAU_TO_H * current_tl * i * C_LB );
+			result[ opt ] = 1.1  +  sin( C_TIME * C_HX* i * C_LB );
 		}
-		else if (j == c_y_length) // upper bound
+		else if (j == C_OY_LEN) // upper bound
 		{ 
-			result[ opt ] = 1.1  +  sin( C_TAU_TO_H * current_tl * i * C_UB );
+			result[ opt ] = 1.1  +  sin( C_TIME * C_HX * i * C_UB );
 		}
-		else if (i == c_x_length) // right bound
+		else if (i == C_OX_LEN) // right bound
 		{ 
-			result[ opt ] = 1.1  +  sin(  C_TAU_TO_H * current_tl * j * C_RB );
+			result[ opt ] = 1.1  +  sin(  C_TIME * C_HX * j * C_RB );
 		}
-		else if (i > 0 && j > 0 && j != c_x_length && i != c_x_length)
-		{        
-			result[ opt ] = integrate(i, j);
-          	double t = integrate(i, j) / c_h;
-			t = t / c_h;
-			result[ opt ] = t;
+		else if (i > 0 && j > 0 && j != C_OY_LEN && i != C_OX_LEN)
+		{                   
+			double t = integrate(prev_result, i, j);	
+			result[ opt ] =  t * C_INVERTED_HX_HY;
+			if (opt == 13) 
+			{
+				printf("%s\n", "result = 13");
+				printf("%lf\n", t);
+				printf("%lf\n", result[ opt ]);
+			}
 			result[ opt ] += C_TAU * func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]);
+			if (opt == 13) 
+			{
+				printf("%s\n", " F result = 13");
+				printf("%lf\n", C_TAU);
+				printf("%lf\n", result[ opt ] );
+				printf("%lf\n", func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]) );
+			}
 		}
-	}
+	 }
 }
 
 float solve_cuda(double* density)
 {
 //	const int gridSize = 256;
-//	const int blockSize =  512;
-#ifdef __NVCC__
+//	const int blockSize =  512; 
 	const int gridSize = 1;
 	const int blockSize =  1;
-	size_t n(0);
-	double *result = NULL, *prev_result = NULL;
-	n = XY_LEN;
-	int size = sizeof(double)*n;
-	PREV_DENSITY_HOST = new double[XY_LEN];
+	double *result = NULL, *prev_result = NULL, *ox = NULL, *oy=NULL;
+	int size = sizeof(double)*XY_LEN;
+	double *prev_result_h = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
 	{
 		for (int i = 0; i < OX_LEN_1; i++)
 		{
-			PREV_DENSITY_HOST[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
+			prev_result_h[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
+
 	cudaEvent_t start, stop;
 	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
-    cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double));	
-	cudaMemcpyToSymbol(C_B, &B, sizeof(double));
-	cudaMemcpyToSymbol(C_LB, &LB, sizeof(double));
-	cudaMemcpyToSymbol(C_RB, &RB, sizeof(double));
-	cudaMemcpyToSymbol(C_BB, &BB, sizeof(double));
-	cudaMemcpyToSymbol(C_UB, &UB, sizeof(double));
-	cudaMemcpyToSymbol(c_n, &n, sizeof(int));
-	cudaMemcpyToSymbol(c_x_length, &OX_LEN, sizeof(int));
-	cudaMemcpyToSymbol(c_y_length, &OY_LEN, sizeof(int));
-	cudaMemcpyToSymbol(C_INVERTED_HX_HY, &INVERTED_HX_HY, sizeof(double));	
-	cudaMemcpyToSymbol(C_HX, &HX, sizeof(int));	
-	cudaMemcpyToSymbol(C_HY, &HY, sizeof(int));	
-	cudaMemcpyToSymbol(C_OX_LEN_1, &OX_LEN_1, sizeof(int));
-	cudaMemcpyToSymbol(C_OX_LEN, &OX_LEN, sizeof(int));
-	cudaMemcpyToSymbol(C_OY_LEN, &OY_LEN, sizeof(int));
-	cudaMemcpyToSymbol(C_PREV_TIME, &PREV_TIME, sizeof(double));
-	cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double));
-	
+    checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
+	checkCuda(cudaMemcpyToSymbol(C_B, &B, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_LB, &LB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_RB, &RB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_BB, &BB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_UB, &UB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_INVERTED_HX_HY, &INVERTED_HX_HY, sizeof(double)));	
+	checkCuda(cudaMemcpyToSymbol(C_HX, &HX, sizeof(int)));	
+	checkCuda(cudaMemcpyToSymbol(C_HY, &HY, sizeof(int)));	
+	checkCuda(cudaMemcpyToSymbol(C_OX_LEN_1, &OX_LEN_1, sizeof(int)));
+	checkCuda(cudaMemcpyToSymbol(C_XY_LEN, &XY_LEN, sizeof(int)));
+	checkCuda(cudaMemcpyToSymbol(C_OX_LEN, &OX_LEN, sizeof(int)));
+	checkCuda(cudaMemcpyToSymbol(C_OY_LEN, &OY_LEN, sizeof(int)));
 	
 	checkCuda(cudaMalloc((void**)&(result), size) );
-	checkCuda(cudaMalloc((void**)&(PREV_DENSITY_DEVICE), size) );
-	checkCuda(cudaMemcpyToSymbol(PREV_DENSITY_DEVICE, &PREV_DENSITY_HOST, sizeof(PREV_DENSITY_HOST)));
+	checkCuda(cudaMemset(result, 0, size) );
+	checkCuda(cudaMalloc((void**)&(prev_result), size) );
+	checkCuda(cudaMalloc((void**)&(ox), sizeof(ox)*(OX_LEN+1)));
+	checkCuda(cudaMalloc((void**)&(oy), sizeof(oy)*(OY_LEN+1)));
+	checkCuda(cudaMemcpy(ox, OX, sizeof(ox)*(OX_LEN + 1), cudaMemcpyHostToDevice));	
+	checkCuda(cudaMemcpy(oy, OY, sizeof(oy)*(OY_LEN + 1), cudaMemcpyHostToDevice));	
+	checkCuda(cudaMemcpy(prev_result, prev_result_h, size, cudaMemcpyHostToDevice));	
+	checkCuda(cudaMemcpyToSymbol(OX_DEVICE, &ox, sizeof(ox)));
+	checkCuda(cudaMemcpyToSymbol(OY_DEVICE, &oy, sizeof(oy)));	
 
 	cudaEventRecord(start, 0);   
 
+	TIME = 0;
 	int tl = 0;
-	int tempTl = TIME_STEP_CNT-1;  
+	TIME_STEP_CNT = 2;
+	int tempTl  = TIME_STEP_CNT - 1;
 	while(tl < tempTl)
 	{
-	    kernel<<<gridSize, blockSize>>>(result, tl + 1);
-	    kernel<<<gridSize, blockSize>>>(result, tl + 2);         
+		checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
+     	TIME = TAU * (tl+1);
+	    checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
+	    kernel<<<gridSize, blockSize>>>(prev_result, result);
+		// checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
+  		// TIME = TAU * (tl+2);
+		// checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
+		// kernel<<<gridSize, blockSize>>>(result, prev_result); 
 	    tl += 2;            
-	}  
-	cudaMemcpy(density, prev_result, size, cudaMemcpyDeviceToHost);	
+	}
 
+	printf("%s\n", "");
+	//checkCuda(cudaMemcpy(density, prev_result, size, cudaMemcpyDeviceToHost));	
+	checkCuda(cudaMemcpy(density, result, size, cudaMemcpyDeviceToHost));	
+	for (int j = 0; j < OX_LEN_1; j++)
+	{
+		for (int i = 0; i < OY_LEN + 1; i++)
+		{
+			printf("%lf ", density[OX_LEN_1 * i + j]);			
+		}
+		printf("%s\n", "");
+	}
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
-
+	printf("Computation Time %f\n", time);
 	cudaFree(result);
+	cudaFree(prev_result);
+	cudaFree(ox);
+	cudaFree(oy);
 	cudaDeviceReset();
-	delete PREV_DENSITY_HOST;
+	delete[] prev_result_h;
 	return time;
-#else
-	return 0;
-#endif
 }
 
+inline void print_matrix11(double* a, int n, int m, int precision = 8) {
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < m; ++j) {
+			int k = i * n + j;
+			switch (precision) {
+			case 1:
+				printf("%.1f ", a[k]);
+				break;
+			case 2:
+				printf("%.2f ", a[k]);
+				break;
+			case 3:
+				printf("%.3f ", a[k]);
+				break;
+			case 4:
+				printf("%.4f ", a[k]);
+				break;
+			case 5:
+				printf("%.5f ", a[k]);
+				break;
+			case 6:
+				printf("%.6f ", a[k]);
+				break;
+			case 7:
+				printf("%.7f ", a[k]);
+				break;
+			case 8:
+				printf("%.8f ", a[k]);
+				break;
+			}
+		}
+		printf("\n");
+	}
+}
 
 double* compute_density_cuda_internal(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length, double& norm, float& time)
 {
-#ifdef __NVCC__
-	printf("HELLO FROM CUDA\n");
-    	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
+#ifdef __NVCC__	
+    init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	time = solve_cuda(density);
+	//print_matrix11(density, 11, 11);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;

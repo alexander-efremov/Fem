@@ -2,7 +2,6 @@
 #include "common.h"
 #include "test_utils.h"
 #include "LowOrdOper.h"
-#include <timer.h>
 #define STRINGIZE(x) #x
 #define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
 
@@ -17,11 +16,11 @@ public:
 	}
 	
 protected:
-	double* solve_internal(ComputeParameters& p)
+	double* solve_internal(ComputeParameters& p, float& time)
 	{
 		return compute_density(p.b, p.lb, p.rb, p.bb,
 		                       p.ub, p.tau, p.t_count, p.x_size,
-		                       p.y_size, p.norm);
+		                       p.y_size, p.norm, time);
 	}
 	
 	double* solve_internal_cuda(ComputeParameters& p, float& time)
@@ -43,25 +42,22 @@ TEST_F(cpu, test_to_model)
 {
 	int first = 0, last = 3;
 	double norm_test, norm_model;
+	float time;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
 	{
 		p.recompute_params(lvl);
-		double* data = solve_internal(p);
+		double* data = solve_internal(p, time);
 		double norm_test = p.norm;
 		double* model = get_model_result(p, lvl);
 		double norm_model = p.norm;
-		StartTimer();
-
 		if (lvl < 2)
 			for (int i = 0; i < p.get_size(); i++)
 			{
 				ASSERT_NEAR(model[i], data[i], 1e-12);
 			}
-		//printf("!!!!!!!!!! ASSERT_NEAR IS DISABLED !!!!!!!!!\n", norm_model);
 		printf("model norm = %f\n", norm_model);
 		printf("test norm = %f\n", norm_test);
-		double time = GetTimer();
 		printf("Time: %lf\n", time);
 		ASSERT_NEAR(norm_model, norm_test, 1e-12);
 		delete[] data;
@@ -74,7 +70,7 @@ TEST_F(cpu, test_to_model)
 //TEST_F(cpu, DISABLED_test_to_model)
 TEST_F(cpu, test_to_model_cuda)
 {
-	int first = 0, last = 3;
+	int first = 0, last = 1;
 	double norm_test, norm_model;
 	float time = 0;
 	ComputeParameters p = ComputeParameters();
@@ -85,7 +81,6 @@ TEST_F(cpu, test_to_model_cuda)
 		double norm_test = p.norm;
 		double* model = get_model_result(p, lvl);
 		double norm_model = p.norm;
-
 		if (lvl < 2)
 			for (int i = 0; i < p.get_size(); i++)
 			{
