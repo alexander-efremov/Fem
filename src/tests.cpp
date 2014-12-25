@@ -99,10 +99,26 @@ TEST_F(cpu, test_to_model_cuda)
 	}
 }
 
-
-TEST_F(cpu, openmp_experiment)
+TEST_F(cpu, china2015_openmp_test)
 {
 //	int first = 4, last = 8;
+	int first = 3, last = 4;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		printf("Start level %d\n", lvl);
+		fflush(stdout);
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_internal(p, time);
+		delete[] data;
+	}
+}
+
+TEST_F(cpu, china2015_seq_test)
+{
+	//int first = 4, last = 8;
 	int first = 3, last = 4;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();

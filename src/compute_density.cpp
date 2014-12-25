@@ -1457,9 +1457,10 @@ static void solve(double* density, double& time)
 #ifdef _OPENMP
 	timeEnd = omp_get_wtime();
 	time = timeEnd-timeStart;
-	printf("time %f\n", time);
+	printf("time %f s.\n", time);
 #else
 	time = GetTimer();
+	printf("time %f s.\n", time/1000);
 #endif   	
 	delete [] PREV_DENSITY;
 }
