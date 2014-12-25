@@ -40,7 +40,7 @@ protected:
 //TEST_F(cpu, DISABLED_test_to_model)
 TEST_F(cpu, test_to_model)
 {
-	int first = 0, last = 1;
+	int first = 0, last = 3;
 	double norm_test, norm_model;
 	double time;
 	ComputeParameters p = ComputeParameters();
