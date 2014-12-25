@@ -12,6 +12,7 @@ make -C ~/fem/ -f ~/fem/build/makefile.icpc clean
 make -C ~/fem/ -f ~/fem/build/makefile.icpc build
 cp ~/fem/fem_icpc ./fem_icpc
 
+export OMP_NUM_THREADS=24; ./fem_openmp --gtest_filter=cpu.china2015_openmp_test | tee -a openmp_result.log
 export OMP_NUM_THREADS=20; ./fem_openmp --gtest_filter=cpu.china2015_openmp_test | tee -a openmp_result.log
 export OMP_NUM_THREADS=16; ./fem_openmp --gtest_filter=cpu.china2015_openmp_test | tee -a openmp_result.log
 export OMP_NUM_THREADS=12; ./fem_openmp --gtest_filter=cpu.china2015_openmp_test | tee -a openmp_result.log
