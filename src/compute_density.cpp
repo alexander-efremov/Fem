@@ -1407,10 +1407,17 @@ static void solve(double* density, double& time)
 	}
 	
 	int i = 0, j = 0, tl = 0;
-        float timeStart = 0;
+        double timeStart = 0, timeEnd=0;
 #ifdef _OPENMP
     printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
+    long count = 0;
+    // dummy parallel section to get all threads running
+    #pragma omp parallel private(i,j)
+    {
+      _InterlockedIncrement(&count);
+    }
 #endif
+ 
 #ifdef _OPENMP
     printf("OPENMP timer function is used!\n");
     timeStart = omp_get_wtime();
@@ -1418,7 +1425,7 @@ static void solve(double* density, double& time)
     printf("Standart timer function is used!\n");
     StartTimer();
 #endif        
- fflush(stdout);
+     fflush(stdout);
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
 	{	    	
 		PREV_TIME = TIME;
@@ -1448,9 +1455,9 @@ static void solve(double* density, double& time)
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
 	}
 #ifdef _OPENMP
-	double t = omp_get_wtime();
-	time = timeStart - t;
-	printf("time %f\n", fabs(time));
+	timeEnd = omp_get_wtime();
+	time = timeEnd-timeStart;
+	printf("time %f\n", time);
 #else
 	time = GetTimer();
 #endif   	

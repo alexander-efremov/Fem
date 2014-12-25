@@ -102,6 +102,7 @@ TEST_F(cpu, test_to_model_cuda)
 
 TEST_F(cpu, openmp_experiment)
 {
+//	int first = 4, last = 8;
 	int first = 3, last = 4;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
