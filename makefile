@@ -1,7 +1,10 @@
 BUILD := build
 
-all: icc openmp cuda
-    
+all: icc openmp cuda main
+
+main:
+	make -f $(BUILD)/makefile.main
+
 icc:
 	make -f $(BUILD)/makefile.icpc
 
@@ -15,5 +18,6 @@ clean:
 	make -f $(BUILD)/makefile.icpc clean
 	make -f $(BUILD)/makefile.openmp clean
 	make -f $(BUILD)/makefile.cuda clean
+	make -f $(BUILD)/makefile.main clean
 	
 clobber: clean

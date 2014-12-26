@@ -8,7 +8,7 @@
   #include <omp.h>
 #else
   #define omp_get_thread_num() 1
-  #define omp_get_num_threads() -10
+  #define omp_get_num_threads() 1
 #endif
 
 class cpu : public testing::Test
@@ -99,10 +99,10 @@ TEST_F(cpu, test_to_model_cuda)
 	}
 }
 
-TEST_F(cpu, china2015_openmp_test)
+TEST_F(cpu, china2015_test)
 {
-	int first = 4, last = 8;
-	//int first = 3, last = 4;
+//	int first = 4, last = 9;
+	int first = 6, last = 7;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
@@ -116,10 +116,10 @@ TEST_F(cpu, china2015_openmp_test)
 	}
 }
 
-TEST_F(cpu, china2015_seq_test)
+TEST_F(cpu, valgrind_test)
 {
-	int first = 4, last = 8;
-	//int first = 3, last = 4;
+//	int first = 4, last = 9;
+	int first = 1, last = 2;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)

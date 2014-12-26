@@ -1223,9 +1223,22 @@ static double integrate(int i, int j)
 	dp_t a1, b1, c1, a2, b2, c2;
 	dp4_t* p = new dp4_t[6];
 	quad_type type = get_quadrangle_type(i, j, a1, b1, c1, a2, b2, c2, p);
+	if (type == concave || type == convex || type == pseudo)
+		return -1;
+	
+	double result = 0;
+	double t = 0;
+	sort_by_y_asc(a1, b1, c1);
+	t = integrate_uniform_triangle(a1, b1, c1);
+	result += t;
+	sort_by_y_asc(a2, b2, c2);
+	t = integrate_uniform_triangle(a2, b2, c2);
+	result += t;
+	delete[] p;
+	return result;
+	
 
-
-	switch (type)
+/*	switch (type)
 	{
 	case wall_1_middle_in: // вообщем это один и тот же способ
 	case wall_1_middle_out:
@@ -1353,16 +1366,16 @@ static double integrate(int i, int j)
 	case wall_3_middle_out:
 	case wall_3_middle_at:
 		{
-			/*double result = 0;
-		double t = 0;
-		dp_t v1 = p[4];
-		dp_t v2 = p[5];
-		dp_t v3 = p[3];
-		sort_by_y_asc(v1, v2, v3);
-		t = integrate_uniform_triangle(a1, b1, c1);
-		result += t;
-		return result;*/
-		}
+//		double result = 0;
+//		double t = 0;
+//		dp_t v1 = p[4];
+//		dp_t v2 = p[5];
+//		dp_t v3 = p[3];
+//		sort_by_y_asc(v1, v2, v3);
+//		t = integrate_uniform_triangle(a1, b1, c1);
+//		result += t;
+//		return result;
+//		}
 	case wall_4:
 		//return 0;
 	case normal:
@@ -1381,7 +1394,8 @@ static double integrate(int i, int j)
 	case convex:
 	case pseudo:
 		return -1;
-	}
+	}*/
+	delete[] p;
 	return 0;
 }
 
@@ -1461,7 +1475,7 @@ static void solve(double* density, double& time)
 #else
 	time = GetTimer();
 	printf("time %f s.\n", time/1000);
-#endif   	
+#endif
 	delete [] PREV_DENSITY;
 }
 
