@@ -1,0 +1,1 @@
+nvcc -ptx -o kernel.ptx src/compute_density.cu -I./FemBase -I./inc

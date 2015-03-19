@@ -298,13 +298,30 @@ __pure inline static double func_f(double b, double time, double ub, double bb, 
 
 __pure inline static double integrate_rectangle(double py, double qy, double gx, double hx, double a, double b)
 {
-	return 0.25 * (sqr(hx - a) - sqr(gx - a)) * (sqr(qy - b) - sqr(py - b));
+	double t1 = __dmul_rn(hx-a, hx-a);
+	t1 = t1 - __dmul_rn(gx-a, gx-a);
+	double t3 = __dmul_rn(qy-b, qy-b);
+	t3 = t3 - __dmul_rn(py-b, py-b);
+	return __dmul_rn(__dmul_rn(0.25, t1), t3);
+	//return 0.25 * (sqr(hx - a) - sqr(gx - a)) * (sqr(qy - b) - sqr(py - b));
 }
 
 __pure inline static double integrate_triangle(double py, double qy, double alpha, double beta, double a, double b)
 {
-	return (((qy - alpha) * cub(a * qy + b - beta) - (py - alpha) * cub(a * py + b - beta)) / (6 * a))
-		- (quad(a * qy + b - beta) - quad(a * py + b - beta)) / (24 * sqr(a));
+	double x = __dadd_rn(__dadd_rn(__dmul_rn(a,qy), b), -beta);
+	double xx = __dadd_rn(__dadd_rn(__dmul_rn(a,py), b), -beta);
+	double x_cub = __dmul_rn(__dmul_rn(x,x),x);
+	double xx_cub = __dmul_rn(__dmul_rn(xx,xx),xx);
+	double x_quad = __dmul_rn(__dmul_rn(__dmul_rn(x,x),x),x);
+	double xx_quad = __dmul_rn(__dmul_rn(__dmul_rn(xx,xx),xx),xx);
+	double t1 = __dmul_rn(__dadd_rn(qy, -alpha), x_cub);
+	double t2 = __dmul_rn(__dadd_rn(py, -alpha), xx_cub);
+	double t3 = __dadd_rn(x_quad, -xx_quad);
+	double t4 = __dmul_rn(6.0f,a);
+	double t5 = __dmul_rn(24.0f,__dmul_rn(a,a));
+	return ( (t1 - t2) / t4 - t3 / t5);
+//	return (((qy - alpha) * cub(a * qy + b - beta) - (py - alpha) * cub(a * py + b - beta)) / (6 * a))
+//		- (quad(a * qy + b - beta) - quad(a * py + b - beta)) / (24 * sqr(a));
 }
 
 __pure static double integrate_rectangle_one_cell(double* prev_dens, double py, double qy, double gx, double hx, const c_ip_t& sx, const c_ip_t& sy)
@@ -899,10 +916,10 @@ __global__ void kernel(double* prev_result, double* result)
 
 float solve_cuda(double* density)
 {
-//	const int gridSize = 256;
-//	const int blockSize =  512; 
-	const int gridSize = 1;
-	const int blockSize =  1;
+	const int gridSize = 256;
+	const int blockSize =  512; 
+	//const int gridSize = 1;
+	//const int blockSize =  1;
 	double *result = NULL, *prev_result = NULL, *ox = NULL, *oy=NULL;
 	int size = sizeof(double)*XY_LEN;
 	double *prev_result_h = new double[XY_LEN];
