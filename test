@@ -1,24 +1,31 @@
-make -f build/makefile.cuda
-make[1]: Вход в каталог `/home/jane/fem'
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/comppute_density_cuda.o -c src/compute_density.cu
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/origin_print.o -c src/OriginPrint.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/one_cell_integ.o -c src/OneCellInteg.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/space_volume.o -c src/SpaceVolume.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/integ_und_rig_ang_tr.o -c src/integUndRigAngTr.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/integ_und_gor_chan.o -c src/IntegUndGorChan.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/compute_density_base.o -c src/LowOrdOper.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/init_and_boundary_data.o -c src/InitAndBoundaryData.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/compute_density.o -c src/compute_density.cpp
-mkdir -p obj/cuda
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++ -I./FemBase -I./inc  -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0  -gencode arch=compute_20,code=sm_20 -o obj/cuda/tests.o -c src/tests.cpp
-/usr/local/cuda-6.5/bin/nvcc -ccbin g++   -m64 -O2  --fmad=false -ftz=false -prec-div=true -prec-sqrt=true  -Xcompiler -O0   -Xlinker -L./lib -gencode arch=compute_20,code=sm_20 -o fem_cuda obj/cuda/comppute_density_cuda.o obj/cuda/origin_print.o obj/cuda/one_cell_integ.o obj/cuda/space_volume.o obj/cuda/integ_und_rig_ang_tr.o obj/cuda/integ_und_gor_chan.o obj/cuda/compute_density_base.o obj/cuda/init_and_boundary_data.o obj/cuda/compute_density.o obj/cuda/tests.o -lgtest -lgtest_main
-make[1]: Выход из каталога `/home/jane/fem'
+Running main() from gtest_main.cc
+Note: Google Test filter = cpu.test_fma
+[==========] Running 1 test from 1 test case.
+[----------] Global test environment set-up.
+[----------] 1 test from cpu
+[ RUN      ] cpu.test_fma
+b = 10.000000
+lbDom = 0.000000
+rbDom = 1.000000
+bbDom = 0.000000
+ubDom = 1.000000
+tau = 0.002500
+Time level count = 400
+ox length = 81
+oy length = 81
+Computation Time 2362.666260
+src/tests.cpp:122: Failure
+The difference between model[i] and data[i] is 1.1182166304024577e-12, which exceeds 1e-12, where
+model[i] evaluates to 1.3988158345024961,
+data[i] evaluates to 1.3988158345013779, and
+1e-12 evaluates to 9.9999999999999998e-13.
+[  FAILED  ] cpu.test_fma (12235 ms)
+[----------] 1 test from cpu (12235 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test case ran. (12235 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] cpu.test_fma
+
+ 1 FAILED TEST
