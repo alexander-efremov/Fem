@@ -218,7 +218,7 @@ __pure inline void sort_by_x_asc(c_dp4_t* a)
 	}
 }
 
-// РїРѕР»СѓС‡Р°РµС‚СЃСЏ РїРѕСЂСЏРґРѕРє
+// получается порядок
 /*
 
 a[1]    a[2]
@@ -252,7 +252,7 @@ __pure inline static bool try_get_slope_ratio(const c_dp_t& bv, const c_dp_t& uv
 	{
 		return false;
 	}
-	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // СѓРіР»РѕРІРѕР№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РїСЂСЏРјРѕР№
+	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // угловой коэффициент прямой
 	if (value < 1e-12)
 	{
 		return false;
@@ -353,7 +353,7 @@ __pure static double integrate_rectangle_one_cell(double* prev_dens, double py, 
 {
 	double result, a, b;
 	a = sx.y >= 0 && sy.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
-	b = sx.y >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y; // Р­РўРћ РџР›РћРўРќРћРЎРўР¬ РЎ РџР Р•Р”Р«Р”РЈР©Р•Р“Рћ РЎР›РћРЇ Р”Р›РЇ Р”РђРќРќРћР™ РЇР§Р•Р™РљР
+	b = sx.y >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y; // ЭТО ПЛОТНОСТЬ С ПРЕДЫДУЩЕГО СЛОЯ ДЛЯ ДАННОЙ ЯЧЕЙКИ
 	result = integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? prev_dens[C_OX_LEN_1 * sy.x + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.x * C_HY));
 	a = sx.x >= 0 && sy.y >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 	b = sx.x >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y;
@@ -436,7 +436,7 @@ __pure static double integrate_right_slant_chanel(double* prev_dens, const c_dp_
 	//   A. Under rectangle.
 	result += -1 * integrate_triangle_left_one_cell(prev_dens, bv, uv, x, sx, sy);
 
-	// case B: РЅРµРїРѕР»РЅС‹Р№ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє    
+	// case B: неполный прямоугольник    
 	if (is_rect_truncated)
 	{
 		if (sx.x == sb.x) gx = b;
@@ -447,7 +447,7 @@ __pure static double integrate_right_slant_chanel(double* prev_dens, const c_dp_
 		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, gx, x, sx, sy);
 	}
 
-	//   Рђ С‚РµРїРµСЂСЊ РїСЂРёР±Р°РІРёРј РІСЃРµ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅС‹Рµ РєСѓСЃРєРё, РєРѕС‚РѕСЂС‹Рµ РїРѕРјРµС‰Р°СЋС‚СЃСЏ РІ СЏС‡РµР№РєСѓ
+	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
 	c_ip_t ch_pos(sb.x, sb.x + 1);
 	for (int j = sb.x; j < sx.x; j++)
 	{
@@ -460,8 +460,8 @@ __pure static double integrate_right_slant_chanel(double* prev_dens, const c_dp_
 	return result;
 }
 
-// РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ upper left Рё РґР»СЏ bottom left С‚СЂРµСѓРіРѕР»СЊРЅРёРєР°
-// С‚.Рµ. СЃР»СѓС‡Р°Р№
+// используется для upper left и для bottom left треугольника
+// т.е. случай
 // UPPERLEFTTR
 //
 //                  CENTRE
@@ -479,15 +479,15 @@ __pure static double integrate_left_slant_chanel(double* prev_dens, const c_dp_t
 	// case A: triangle
 	result += integrate_triangle_left_one_cell(prev_dens, bv, uv, x, sx, sy);
 
-	// case B: РЅРµ РїРѕР»РЅС‹Р№ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє
+	// case B: не полный прямоугольник
 	if (is_rect_trunc)
-	{ // СЌС‚Рѕ Р·РЅР°С‡РёС‚, С‡С‚Рѕ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє Р·Р°РЅРёРјР°РµС‚ РЅРµ РІСЃСЋ СЏС‡РµР№РєСѓ  
+	{ // это значит, что прямоугольник занимает не всю ячейку  
 		hx = sx.x == sb.x ? b : (sx.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y);
 		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, x, hx, sx, sy);
 	}
 
-	//   Рђ С‚РµРїРµСЂСЊ РїСЂРёР±Р°РІРёРј РІСЃРµ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅС‹Рµ РєСѓСЃРєРё, РєРѕС‚РѕСЂС‹Рµ РїРѕРјРµС‰Р°СЋС‚СЃСЏ РІ СЏС‡РµР№РєСѓ
-	c_ip_t ch_pos(sx.x + 1, sx.x + 2); //   - РєРѕРѕСЂРґРёРЅР°С‚С‹ РєР°РЅР°Р»Р°
+	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
+	c_ip_t ch_pos(sx.x + 1, sx.x + 2); //   - координаты канала
 	for (int j = sx.x + 1; j < sb.x + 1; j++)
 	{
 		hx = ch_pos.y <= 0 ? C_HX * ch_pos.y : hx = OX_DEVICE[ch_pos.y];
@@ -499,10 +499,10 @@ __pure static double integrate_left_slant_chanel(double* prev_dens, const c_dp_t
 	return result;
 }
 
-// РѕРїСЂРµРґРµР»РёРј С†РµР»РѕС‡РёСЃР»РµРЅРЅС‹Рµ РёРЅРґРµРєСЃС‹ РєРІР°РґСЂР°С‚РѕРІ РІ РєРѕС‚РѕСЂС‹С… Р»РµР¶Р°С‚ РІРµСЂС…РЅСЏСЏ Рё РЅРёР¶РЅСЏСЏ С‚РѕС‡РєРё С‚СЂРµСѓРіРѕР»СЊРЅРёРєР°
-// sx = (x,y) РєРѕРѕСЂРґРёРЅР°С‚С‹ РєРІР°РґСЂР°С‚Р° РІ РєРѕС‚РѕСЂРѕР№ Р»РµР¶РёС‚ РЅРёР¶РЅСЏСЏ С‚РѕС‡РєР°
-// sy = (x,y) РєРѕРѕСЂРґРёРЅР°С‚С‹ РєРІР°РґСЂР°С‚Р° РІ РєРѕС‚РѕСЂРѕР№ Р»РµР¶РёС‚ РІРµСЂС…РЅСЏСЏ С‚РѕС‡РєР°
-// РІ СЃР»СѓС‡Р°Рµ СѓСЃРїРµС€РЅРѕР№ РїСЂРѕРІРµСЂРєРё, k = Р±СѓРґРµС‚  СѓРіР»РѕРІРѕР№ РєРѕСЌС„РёС†РёРµРЅС‚ РїСЂСЏРјРѕР№
+// определим целочисленные индексы квадратов в которых лежат верхняя и нижняя точки треугольника
+// sx = (x,y) координаты квадрата в которой лежит нижняя точка
+// sy = (x,y) координаты квадрата в которой лежит верхняя точка
+// в случае успешной проверки, k = будет  угловой коэфициент прямой
 
 __pure static double integrate_right_triangle_bottom_left(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv)
 {
@@ -524,7 +524,7 @@ __pure static double integrate_right_triangle_bottom_left(double* prev_dens, con
 	c_dp_t curr = bv, next;
 	while (true)
 	{
-		//TODO: sx.x Рё sx.y РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹РјРё РІСЃРµРіРґР°? РљР°Р¶РµС‚СЃСЏ РґР»СЏ sx.x СЌС‚Рѕ РІСЃРµРіРґР° РІРµСЂРЅРѕ...
+		//TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
 		double slope = sx.y >= 0 ? OY_DEVICE[sy.y] - curr.y : fabs(C_HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? curr.x - OX_DEVICE[sx.x] : fabs(curr.x - C_HX * sx.x);
 		if (slope <= k)
@@ -541,8 +541,8 @@ __pure static double integrate_right_triangle_bottom_left(double* prev_dens, con
 		}
 		if (next.x - uv.x < FLT_MIN)
 		{
-			// СЃСЋРґР° РїРѕРїР°РґР°РµРј Рё РІ СЃР»СѓС‡Р°Рµ РєРѕРіРґР° С‚СЂРµСѓРіРѕР»СЊРЅРёРє РїРѕР»РЅРѕСЃС‚СЊСЋ РІ РѕРґРЅРѕР№ СЏС‡РµР№РєРµ Р»РµР¶РёС‚
-			// Рё РІ СЃР»СѓС‡Р°Рµ РєРѕРіРґР° РїСЂРѕС€Р»РёСЃСЊ РїРѕ РІСЃРµРј С‚РѕС‡РєР°Рј...
+			// сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
+			// и в случае когда прошлись по всем точкам...
 			result += integrate_left_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, bv.x, ib);
 			break;
 		}
@@ -705,7 +705,7 @@ __pure static double integrate_right_triangle_upper_left(double* prev_dens, cons
 			next.x = sx.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
 		}
-		if (next.x - uv.x > FLT_MIN) // РµСЃР»Рё СЃР»РµРґСѓСЋС‰Р°СЏ С‚РѕС‡РєР° СѓР¶Рµ РїСЂР°РІРµРµ, С‡РµРј РЅР°С€Р° РіСЂР°РЅРёС‡РЅР°СЏ С‚РѕС‡РєР°, С‚Рѕ РјС‹ РѕР±СЂР°Р±РѕС‚Р°Р»Рё РєР°РЅР°Р»
+		if (next.x - uv.x > FLT_MIN) // если следующая точка уже правее, чем наша граничная точка, то мы обработали канал
 		{
 			result += integrate_left_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 			break;
@@ -818,7 +818,7 @@ __pure static double integrate_right_triangle_upper_right(double* prev_dens, con
 // 			next.x = sx.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
 // 			next.y = bv.y + k * (next.x - bv.x);
 // 		}
-// 		if (next.x - uv.x > FLT_MIN) // РµСЃР»Рё СЃР»РµРґСѓСЋС‰Р°СЏ С‚РѕС‡РєР° СѓР¶Рµ РїСЂР°РІРµРµ, С‡РµРј РЅР°С€Р° РіСЂР°РЅРёС‡РЅР°СЏ С‚РѕС‡РєР°, С‚Рѕ РјС‹ РѕР±СЂР°Р±РѕС‚Р°Р»Рё РєР°РЅР°Р»
+// 		if (next.x - uv.x > FLT_MIN) // если следующая точка уже правее, чем наша граничная точка, то мы обработали канал
 // 		{
 // 			result += integrate_left_slant_chanel(curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 // 			break;
@@ -951,7 +951,7 @@ __pure static double integrate_upper_triangle(double* prev_dens, const c_dp_t& l
 // x,y,z
 __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t& x, const c_dp_t& y, const c_dp_t& z)
 {
-	// С‚РѕС‡РєРё РґРѕР»Р¶РЅС‹ РёРґС‚Рё РІ РїРѕСЂСЏРґРєРµ РІРѕР·СЂР°СЃС‚Р°РЅРёСЏ y РєРѕРѕСЂРґРёРЅР°С‚С‹, С‡С‚РѕР±С‹ РїСЂР°РІРёР»СЊРЅРѕ РѕС‚СЂР°Р±РѕС‚Р°Р»Р° РїСЂРѕС†РµРґСѓСЂР° РёРЅС‚РµРіСЂРёСЂРѕРІР°РЅРёСЏ		
+	// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования		
 
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
@@ -960,10 +960,10 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 	double c = b * x.y + a * x.x;
 	c_dp_t ip((c - b * y.y) / a, y.y);
 
-	//   Р’РѕР·РјРѕР¶РЅС‹ 2 СЃР»СѓС‡Р°СЏ СЂР°СЃРїРѕР»РѕР¶РµРЅРёСЏ С‚РѕС‡РєРё РїРµСЂРµСЃРµС‡РµРЅРёСЏ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЃСЂРµРґРЅРµР№
-	//   СЃР»РµРІР° РёР»Рё СЃРїСЂР°РІР°.
-	//   РµСЃРґРё СЃСЂРµРґРЅСЏСЏ С‚РѕС‡РєР° СЃРїСЂР°РІР° РѕС‚ С‚РѕС‡РєРё РїРµСЂРµСЃРµС‡РµРЅРёСЏ
-	//   РѕР±РјРµРЅСЏРµРј РјРµСЃС‚Р°РјРё  X РєРѕРѕСЂРґРёРЅР°С‚С‹, С‡С‚РѕР±С‹ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РѕРґРёРЅ РєРѕРґ РґР»СЏ СЂР°СЃС‡РµС‚Р°
+	//   Возможны 2 случая расположения точки пересечения относительно средней
+	//   слева или справа.
+	//   есди средняя точка справа от точки пересечения
+	//   обменяем местами  X координаты, чтобы использовать один код для расчета
 	c_dp_t t = y;
 	if (t.x >= ip.x)
 	{
@@ -978,18 +978,18 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 // __pure static double integrate_uniform_triangle_wall(const c_dp_t& x, const c_dp_t& y,
 //                                               const c_dp_t& z, quad_type type)
 // {
-// 	// РґР»СЏ С‚РѕС‡РµРє YOt РѕСЃРё РєРѕРѕСЂРґРёРЅР°С‚ РѕР±РѕР·РЅР°С‡РµРЅС‹ РїРѕ РґСЂСѓРіРѕРјСѓ
-// 	// РїРѕ OX Р±СѓРґРµС‚ РѕС‚РєР»Р°РґС‹РІР°С‚СЊСЃСЏ Р·РЅР°С‡РµРЅРёРµ y
-// 	// РїРѕ OY Р±СѓРґРµС‚ РѕС‚РєР»Р°РґС‹РІР°С‚СЊСЃСЏ Р·РЅР°С‡РµРЅРёРµ t
-// 	// С‚.Рµ. Р±СѓРґРµС‚ РїР»РѕСЃРєРѕСЃС‚СЊ YOt
-// 	// Р·РґРµСЃСЊ y РєРѕРѕСЂРґРёРЅР°С‚Р° С‚РѕС‡РєРё РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РІСЂРµРјРµРЅРµРј	
+// 	// для точек YOt оси координат обозначены по другому
+// 	// по OX будет откладываться значение y
+// 	// по OY будет откладываться значение t
+// 	// т.е. будет плоскость YOt
+// 	// здесь y координата точки должна быть временем	
 // 	switch (type)
 // 	{
 // 	case wall_1_middle_at:
 // 	case wall_1_middle_in:
 // 	case wall_1_middle_out:		
 // 			// !phd\2014\fem\ggb\wa1\4.ggb
-// 			// СЃР»СѓС‡Р°Р№ Рђ
+// 			// случай А
 // 			if (x.x >= y.x)
 // 			{
 // 				double res = 0;
@@ -999,7 +999,7 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 // 				res += t;
 // 				return res;
 // 			}
-// 			if (x.x < y.x && x.x > z.x) // СЃР»СѓС‡Р°Р№ B
+// 			if (x.x < y.x && x.x > z.x) // случай B
 // 			{
 // 				double res = 0;
 // 				double t = integrate_right_triangle_upper_left_wall(z, x);
@@ -1008,7 +1008,7 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 // 				res += t;
 // 				return res;
 // 			}
-// 			if (x.x <= z.x) // СЃР»СѓС‡Р°Р№ C
+// 			if (x.x <= z.x) // случай C
 // 			{
 // 				double res = 0;
 // 				double t = integrate_right_triangle_upper_right_wall(y, x);
@@ -1067,7 +1067,7 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 // __pure inline static quad_type get_wall_intersection_type(c_dp4_t* a)
 // {
 // 	/*
-// 	 С„РѕСЂРјСѓР»С‹ СЂР°СЃС‡РµС‚РѕРІ Р·РґРµСЃСЊ http://www.pm298.ru/reshenie/fha0327.php
+// 	 формулы расчетов здесь http://www.pm298.ru/reshenie/fha0327.php
 // 	 a[0] - alpha
 // 	 a[1] - beta
 // 	 a[2] - gamma
@@ -1086,13 +1086,13 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 // 		{
 // 			sort_by_x_asc(a);
 // 			sort_by_y_desc_3(a);
-// 			// СЂР°СЃСЃС‡РёС‚Р°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅРёСЏ OY Рё РїСЂСЏРјРѕР№ a[0]:a[3]
-// 			// С‚СѓС‚ РЅРµ РЅР°РґРѕ fabs, РїРѕС‚РѕРјСѓ С‡С‚Рѕ a[3].x > a[0].x
+// 			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+// 			// тут не надо fabs, потому что a[3].x > a[0].x
 // 			double y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x));
 // 			a[4] = c_dp4_t(0, y); // mu
 
-// 			// СЂР°СЃСЃС‡РёС‚Р°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅРёСЏ OY Рё РїСЂСЏРјРѕР№ a[2]:a[3]
-// 			// С‚СѓС‚ РЅРµ РЅР°РґРѕ fabs, РїРѕС‚РѕРјСѓ С‡С‚Рѕ a[3].x > a[2].x
+// 			// рассчитаем точку пересечения OY и прямой a[2]:a[3]
+// 			// тут не надо fabs, потому что a[3].x > a[2].x
 // 			y = a[3].x - a[2].x < FLT_MIN ? 0.5 * (a[3].y + a[2].y) : a[2].y - a[2].x * ((a[3].y - a[2].y) / (a[3].x - a[2].x));
 // 			a[5] = c_dp4_t(0, y); // nu
 
@@ -1134,22 +1134,22 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 // 			sort_by_x_asc(a);
 // 			sort_by_y_desc_3(a);
 
-// 			// РґР»СЏ С‚РѕС‡РµРє РЅР° СЃС‚РµРЅРєРµ РѕСЃРё РєРѕРѕСЂРґРёРЅР°С‚ РѕР±РѕР·РЅР°С‡РµРЅС‹ РїРѕ РґСЂСѓРіРѕРјСѓ
-// 			// РїРѕ OX Р±СѓРґРµС‚ РѕС‚РєР»Р°РґС‹РІР°С‚СЊСЃСЏ Р·РЅР°С‡РµРЅРёРµ y
-// 			// РїРѕ OY Р±СѓРґРµС‚ РѕС‚РєР»Р°РґС‹РІР°С‚СЊСЃСЏ Р·РЅР°С‡РµРЅРёРµ t
-// 			// С‚РѕС‡РєР° a[0] - С‚РѕС‡РєР°, РєРѕС‚РѕСЂР°СЏ СѓРїР°Р»Р° РЅР° СЃС‚РµРЅРєСѓ
-// 			// СЃС‡РёС‚Р°РµРј y РєРѕРјРїРѕРЅРµРЅС‚Сѓ
+// 			// для точек на стенке оси координат обозначены по другому
+// 			// по OX будет откладываться значение y
+// 			// по OY будет откладываться значение t
+// 			// точка a[0] - точка, которая упала на стенку
+// 			// считаем y компоненту
 // 			a[0].x = a[0].y_initial - a[0].x_initial * func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, a[0].x_initial, a[0].y_initial) / func_u(C_B, a[0].x_initial, a[0].y_initial);
-// 			a[0].y = C_TIME - a[0].x_initial*(1 / func_u(C_B, a[0].x_initial, a[0].y_initial)); // Р·РґРµСЃСЊ Р±СѓРґРµС‚ Mt = tk - Ax*tg(alpha); tg(alpha) = 1 / U(A)
+// 			a[0].y = C_TIME - a[0].x_initial*(1 / func_u(C_B, a[0].x_initial, a[0].y_initial)); // здесь будет Mt = tk - Ax*tg(alpha); tg(alpha) = 1 / U(A)
 			
 
-// 			// СЂР°СЃСЃС‡РёС‚Р°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅРёСЏ OY Рё РїСЂСЏРјРѕР№ a[0]:a[1]
-// 			// С‚СѓС‚ РЅРµ РЅР°РґРѕ fabs, РїРѕС‚РѕРјСѓ С‡С‚Рѕ a[1].x > a[0].x
+// 			// рассчитаем точку пересечения OY и прямой a[0]:a[1]
+// 			// тут не надо fabs, потому что a[1].x > a[0].x
 // 			double y = a[1].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[1].y) : (a[0].y - a[0].x * ((a[1].y - a[0].y) / (a[1].x - a[0].x)));
 // 			a[4] = c_dp4_t(0, y); // mu
 
-// 			// СЂР°СЃСЃС‡РёС‚Р°РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅРёСЏ OY Рё РїСЂСЏРјРѕР№ a[0]:a[3]
-// 			// С‚СѓС‚ РЅРµ РЅР°РґРѕ fabs, РїРѕС‚РѕРјСѓ С‡С‚Рѕ a[3].x > a[0].x
+// 			// рассчитаем точку пересечения OY и прямой a[0]:a[3]
+// 			// тут не надо fabs, потому что a[3].x > a[0].x
 // 			y = a[3].x - a[0].x < FLT_MIN ? 0.5 * (a[0].y + a[3].y) : (a[0].y - a[0].x * ((a[3].y - a[0].y) / (a[3].x - a[0].x)));
 // 			a[5] = c_dp4_t(0, y); // nu
 
@@ -1170,7 +1170,7 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 __pure static quad_type get_quadrangle_type(int i, int j,
                                      c_dp_t& a, c_dp_t& b, c_dp_t& c, c_dp_t& k, c_dp_t& m, c_dp_t& n, c_dp4_t* p)
 {
-	// TODO РєР°РєРѕР№ РїРѕСЂСЏРґРѕРє С‚СѓС‚ РІСЃРµ С‚Р°РєРё РїСЂРµРґРїРѕР»Р°РіРµС‚СЃСЏ? РїСЂРѕС‚РёРІ С‡Р°СЃРѕРІРѕР№ РЅР°С‡РёРЅР°СЏ СЃ РІРµСЂС…РЅРµР№ Р»РµРІРѕР№?	
+	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
 	c_dp_t alpha((OX_DEVICE[i - 1] + OX_DEVICE[i]) * 0.5, (OY_DEVICE[j - 1] + OY_DEVICE[j]) * 0.5),
 		beta((OX_DEVICE[i + 1] + OX_DEVICE[i]) * 0.5, (OY_DEVICE[j - 1] + OY_DEVICE[j]) * 0.5),
 		gamma((OX_DEVICE[i + 1] + OX_DEVICE[i]) * 0.5, (OY_DEVICE[j + 1] + OY_DEVICE[j]) * 0.5),
@@ -1255,11 +1255,11 @@ __pure static double integrate(double* prev_dens, int i, int j)
 
 	switch (type)
 	{
-	case wall_1_middle_in: // РІРѕРѕР±С‰РµРј СЌС‚Рѕ РѕРґРёРЅ Рё С‚РѕС‚ Р¶Рµ СЃРїРѕСЃРѕР±
+	case wall_1_middle_in: // вообщем это один и тот же способ
 	case wall_1_middle_out:
 	case wall_1_middle_at:
 		{
-//			//С‚СѓС‚ РїРѕР»СѓС‡Р°РµС‚СЃСЏ РІСЃРµРіРґР° 3 С‚СЂРµСѓРіРѕР»СЊРЅРёРєР°
+//			//тут получается всегда 3 треугольника
 //			double result = 0;
 //			double t = 0;			
 //			c_dp_t v1 = c_dp_t(p[4].x, p[4].y);
@@ -1295,14 +1295,14 @@ __pure static double integrate(double* prev_dens, int i, int j)
 	{
 		//double t = 0;
 		//double result = 0;
-			//// РЅР°РґРѕ СЂР°СЃСЃРјРѕС‚СЂРµС‚СЊ С‚СЂРё СЃР»СѓС‡Р°СЏ
-			//// 1. p2 РІРЅСѓС‚СЂРё С‚СЂРµСѓРіРѕР»СЊРЅРёРєР° (p4,p5,p3) = РёС‚РµРіСЂРёСЂРѕРІР°РЅРёРµ РїРѕ 3 С‚СЂРµСѓРіРѕР»СЊРЅРёРєР°Рј
+			//// надо рассмотреть три случая
+			//// 1. p2 внутри треугольника (p4,p5,p3) = итегрирование по 3 треугольникам
 			//if (is_point_in_triangle(p[2], p[4], p[5], p[3]))
 			//{
 			//	c_dp_t v1 = p[5];
 			//	c_dp_t v2 = p[3];
 			//	c_dp_t v3 = p[4];
-			//	//СЃСЂР°Р·Сѓ РёС… СЂР°СЃРїРѕР»Р°РіР°РµРј РІ РїРѕСЂСЏРґРєРµ РІРѕР·СЂРѕСЃС‚Р°РЅРёСЏ y РєРѕРѕСЂРґРёРЅР°С‚С‹
+			//	//сразу их располагаем в порядке возростания y координаты
 			//	t = integrate_uniform_triangle(v1, v2, v3);
 			//	result += t;
 			//				
@@ -1320,10 +1320,10 @@ __pure static double integrate(double* prev_dens, int i, int j)
 			//	t = integrate_uniform_triangle(v1, v2, v3);
 			//	result += t;
 			//}
-			//// 2. p3 РІРЅСѓС‚СЂРё С‚СЂРµСѓРіРѕР»СЊРЅРёРєР° (p4,p5,p2) =  РёС‚РµРіСЂРёСЂРѕРІР°РЅРёРµ РїРѕ 3 С‚СЂРµСѓРіРѕР»СЊРЅРёРєР°Рј
+			//// 2. p3 внутри треугольника (p4,p5,p2) =  итегрирование по 3 треугольникам
 			//else if (is_point_in_triangle(p[3], p[4], p[5], p[2]))
 			//{
-			//	//СЃСЂР°Р·Сѓ РёС… СЂР°СЃРїРѕР»Р°РіР°РµРј РІ РїРѕСЂСЏРґРєРµ РІРѕР·СЂРѕСЃС‚Р°РЅРёСЏ y РєРѕРѕСЂРґРёРЅР°С‚С‹
+			//	//сразу их располагаем в порядке возростания y координаты
 			//	c_dp_t v1 = p[5];
 			//	c_dp_t v2 = p[2];
 			//	c_dp_t v3 = p[4];			
@@ -1344,7 +1344,7 @@ __pure static double integrate(double* prev_dens, int i, int j)
 			//	t = integrate_uniform_triangle(v1, v2, v3);
 			//	result += t;
 			//}
-			//// 3. РЅРё 1 РЅРё 2 СѓСЃР»РѕРІРёРµ - РЅРѕСЂРјР°Р»СЊРЅС‹Р№ СЃР»СѓС‡Р°Р№ 4 СѓРіРѕР»СЊРЅРёРє, РёРЅС‚РµРіСЂРёСЂСѓРµРј РєР°Рє РѕР±С‹С‡РЅРѕ
+			//// 3. ни 1 ни 2 условие - нормальный случай 4 угольник, интегрируем как обычно
 			//else
 			//{
 			//	c_dp_t v1 = p[4];
@@ -1525,7 +1525,7 @@ __global__ void kernel(double* prev_result, double* result)
 	 	int i = opt % (C_OX_LEN + 1);
 	 	int j = opt / (C_OY_LEN + 1);
 
-	 	// СЂР°СЃС‡РµС‚ РіСЂР°РЅРёС†С‹
+	 	// расчет границы
 	 	if (j == 0)  // bottom bound
 	 	{
 	 		result[ opt ]  = 1.1  +  sin( C_TIME * C_HX * j * C_BB );
@@ -1704,4 +1704,3 @@ double* compute_density_cuda_internal(double b, double lb, double rb, double bb,
         return NULL;
 #endif
 }
-

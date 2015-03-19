@@ -85,14 +85,13 @@ TEST_F(cpu, test_to_model_cuda)
 		double norm_test = p.norm;
 		double* model = get_model_result(p, lvl);
 		double norm_model = p.norm;
-		if (lvl < 2)
+//		if (lvl < 2)
 			for (int i = 0; i < p.get_size(); i++)
 			{
 				ASSERT_NEAR(model[i], data[i], 1e-12);
 			}
 		printf("model norm = %f\n", norm_model);
 		printf("test norm = %f\n", norm_test);
-		printf("Time: %lf\n", time);
 		ASSERT_NEAR(norm_model, norm_test, 1e-12);
 		delete[] data;
 		delete[] model;
@@ -101,8 +100,8 @@ TEST_F(cpu, test_to_model_cuda)
 
 TEST_F(cpu, china2015_test)
 {
-//	int first = 4, last = 9;
-	int first = 6, last = 7;
+	int first = 4, last = 9;
+//	int first = 6, last = 7;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
@@ -118,7 +117,7 @@ TEST_F(cpu, china2015_test)
 
 TEST_F(cpu, valgrind_test)
 {
-//	int first = 4, last = 9;
+//	int first = 4, last = 8;
 	int first = 1, last = 2;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
