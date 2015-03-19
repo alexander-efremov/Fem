@@ -103,6 +103,31 @@ TEST_F(cpu, test_to_model_cuda)
 	}
 }
 
+TEST_F(cpu, test_fma)
+{
+	int first = 1, last = 2;
+	double norm_test, norm_model;
+	float time = 0;
+	ComputeParameters p = ComputeParameters();
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		p.recompute_params(lvl);
+		double* data = solve_internal_cuda(p, time);
+		double norm_test = p.norm;
+		double* model = get_model_result(p, lvl);	
+		double norm_model = p.norm;
+		for (int i = 0; i < p.get_size(); i++)
+		{
+			ASSERT_NEAR(model[i], data[i], 1e-12);
+		}
+		printf("model norm = %f\n", norm_model);
+		printf("test norm = %f\n", norm_test);
+		ASSERT_NEAR(norm_model, norm_test, 1e-12);
+		delete[] data;
+		delete[] model;
+	}
+}
+
 TEST_F(cpu, china2015_test)
 {
 	int first = 4, last = 9;
