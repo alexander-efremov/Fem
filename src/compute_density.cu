@@ -11,8 +11,8 @@ __constant__ double C_RB;
 __constant__ double C_UB;
 __constant__ double C_BB;
 __constant__ double C_INVERTED_HX_HY;
-__constant__ int C_HX;
-__constant__ int C_HY;
+__constant__ double C_HX;
+__constant__ double C_HY;
 __constant__ int C_OY_LEN;
 __constant__ int C_OX_LEN;
 __constant__ int C_OX_LEN_1;
@@ -404,7 +404,7 @@ __pure static double integrate_triangle_left_one_cell(double* prev_dens, const c
 	tmp = sqr(uv.y - OY_DEVICE[sy.x]) - sqr(bv.y - OY_DEVICE[sy.x]);
 	tmp = -0.25 * tmp * sqr(hx - beta) + integrate_triangle(bv.y, uv.y, alpha, beta, a_sl, b_sl);
 	result += tmp * (sx.x >= 0 && sx.y <= C_OX_LEN && sy.x >= 0 && sy.y <= C_OY_LEN ? prev_dens[C_OX_LEN_1 * sy.y + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.y * C_HY));
-		if (flag == 1) 
+		/*if (flag == 1) 
 	{
 		printf("%s\n", "integrate_triangle_left_one_cell result 3");
 		printf("%lf\n", sy.y);
@@ -413,7 +413,7 @@ __pure static double integrate_triangle_left_one_cell(double* prev_dens, const c
 		printf("%lf\n", C_OX_LEN_1 * sy.y + sx.x);
 		printf("%lf\n", prev_dens[C_OX_LEN_1 * sy.y + sx.x]);
 		printf("%lf\n", result);
-	}
+	}*/
 	alpha = sx.x >= 0 && sy.x >= 0 ? OY_DEVICE[sy.x] : C_HY * sy.x;
 	beta = sx.x >= 0 && sy.x >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 	tmp = sqr(uv.y - OY_DEVICE[sy.x]) - sqr(bv.y - OY_DEVICE[sy.x]);
@@ -1482,7 +1482,7 @@ inline static void clean()
 
 __global__ void kernel(double* prev_result, double* result)
 {
-	if (blockIdx.x * blockDim.x + threadIdx.x == 0)
+	/*if (blockIdx.x * blockDim.x + threadIdx.x == 0)
 	{
 		printf("\nKERNEL PARAMS\n");
 		printf("b = %f\n", C_B);
@@ -1490,9 +1490,11 @@ __global__ void kernel(double* prev_result, double* result)
 	 	printf("rbDom = %f\n", C_RB);
 	 	printf("bbDom = %f\n", C_BB);
 		printf("ubDom = %f\n", C_UB);
+		printf("HX = %f\n", C_HX);
+		printf("HY = %f\n", C_HY);
 	 	printf("tau = %f\n", C_TAU);
 	 	printf("ox length = %d\n", C_OX_LEN + 1);
-	 	printf("oy length = %d\n", C_OX_LEN + 1);
+	 	printf("oy length = %d\n", C_OY_LEN + 1);
 	 	printf("PREV_TIME = %lf\n", C_PREV_TIME);
 	 	printf("TIME = %lf\n", C_TIME);
 	 	printf("C_XY_LEN = %d\n", C_XY_LEN);
@@ -1513,13 +1515,22 @@ __global__ void kernel(double* prev_result, double* result)
 	 	{
 	 		for(int j = 0; j < C_OY_LEN + 1; j++)
 		 	{
-		 		printf("%f ", prev_result[C_OX_LEN_1 * j + i]);
+		 		printf("%.8f ", prev_result[C_OX_LEN_1 * i + j]);
+		 	}
+		 	printf("%s\n", "");
+	 	}
+		printf("%s\n", "DENSITY");
+	 	for(int i = 0; i < C_OX_LEN + 1; i++)
+	 	{
+	 		for(int j = 0; j < C_OY_LEN + 1; j++)
+		 	{
+		 		printf("%.8f ", result[C_OX_LEN_1 * i + j]);
 		 	}
 		 	printf("%s\n", "");
 	 	}
 	 	
-	}
-	
+	}*/
+			
 	 for (int opt = blockIdx.x * blockDim.x + threadIdx.x; opt < C_XY_LEN; opt += blockDim.x * gridDim.x)
 	 {		
 	 	int i = opt % (C_OX_LEN + 1);
@@ -1528,11 +1539,11 @@ __global__ void kernel(double* prev_result, double* result)
 	 	// расчет границы
 	 	if (j == 0)  // bottom bound
 	 	{
-	 		result[ opt ]  = 1.1  +  sin( C_TIME * C_HX * j * C_BB );
+	 		result[ opt ] = 1.1  +  sin( C_TIME * C_HX * j * C_BB );
 	 	}
 		else if (i == 0) // left bound
 		{
-			result[ opt ] = 1.1  +  sin( C_TIME * C_HX* i * C_LB );
+			result[ opt ] = 1.1  +  sin( C_TIME * C_HX * i * C_LB );
 		}
 		else if (j == C_OY_LEN) // upper bound
 		{ 
@@ -1545,21 +1556,8 @@ __global__ void kernel(double* prev_result, double* result)
 		else if (i > 0 && j > 0 && j != C_OY_LEN && i != C_OX_LEN)
 		{                   
 			double t = integrate(prev_result, i, j);	
-			result[ opt ] =  t * C_INVERTED_HX_HY;
-			if (opt == 13) 
-			{
-				printf("%s\n", "result = 13");
-				printf("%lf\n", t);
-				printf("%lf\n", result[ opt ]);
-			}
-			result[ opt ] += C_TAU * func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]);
-			if (opt == 13) 
-			{
-				printf("%s\n", " F result = 13");
-				printf("%lf\n", C_TAU);
-				printf("%lf\n", result[ opt ] );
-				printf("%lf\n", func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]) );
-			}
+			result[ opt ] =  t * C_INVERTED_HX_HY;			
+			result[ opt ] += C_TAU * func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]);			
 		}
 	 }
 }
@@ -1585,15 +1583,15 @@ float solve_cuda(double* density)
 	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
-    checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
+        checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
 	checkCuda(cudaMemcpyToSymbol(C_B, &B, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_LB, &LB, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_RB, &RB, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_BB, &BB, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_UB, &UB, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_INVERTED_HX_HY, &INVERTED_HX_HY, sizeof(double)));	
-	checkCuda(cudaMemcpyToSymbol(C_HX, &HX, sizeof(int)));	
-	checkCuda(cudaMemcpyToSymbol(C_HY, &HY, sizeof(int)));	
+	checkCuda(cudaMemcpyToSymbol(C_HX, &HX, sizeof(double)));	
+	checkCuda(cudaMemcpyToSymbol(C_HY, &HY, sizeof(double)));	
 	checkCuda(cudaMemcpyToSymbol(C_OX_LEN_1, &OX_LEN_1, sizeof(int)));
 	checkCuda(cudaMemcpyToSymbol(C_XY_LEN, &XY_LEN, sizeof(int)));
 	checkCuda(cudaMemcpyToSymbol(C_OX_LEN, &OX_LEN, sizeof(int)));
@@ -1614,32 +1612,35 @@ float solve_cuda(double* density)
 
 	TIME = 0;
 	int tl = 0;
-	TIME_STEP_CNT = 2;
-	int tempTl  = TIME_STEP_CNT - 1;
-	while(tl < tempTl)
+	int tempTl  = TIME_STEP_CNT -1;
+        while(tl < tempTl)
 	{
-		checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
-     	TIME = TAU * (tl+1);
+	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
+            TIME = TAU * (tl+1);
 	    checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
 	    kernel<<<gridSize, blockSize>>>(prev_result, result);
-		// checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
-  		// TIME = TAU * (tl+2);
-		// checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
-		// kernel<<<gridSize, blockSize>>>(result, prev_result); 
-	    tl += 2;            
+
+	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
+            TIME = TAU * (tl+2);
+	    checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
+	    kernel<<<gridSize, blockSize>>>(result, prev_result);		 		 
+	    tl+=2;            
 	}
 
-	printf("%s\n", "");
-	//checkCuda(cudaMemcpy(density, prev_result, size, cudaMemcpyDeviceToHost));	
-	checkCuda(cudaMemcpy(density, result, size, cudaMemcpyDeviceToHost));	
-	for (int j = 0; j < OX_LEN_1; j++)
+	if (TIME_STEP_CNT%2==0)
+		checkCuda(cudaMemcpy(density, prev_result, size, cudaMemcpyDeviceToHost));
+	else
+		checkCuda(cudaMemcpy(density, result, size, cudaMemcpyDeviceToHost));
+
+	/*printf("%s\n", "RESULT");	
+	for (int i = 0; i < OX_LEN_1; i++)
 	{
-		for (int i = 0; i < OY_LEN + 1; i++)
+		for (int j = 0; j < OY_LEN + 1; j++)
 		{
-			printf("%lf ", density[OX_LEN_1 * i + j]);			
+			printf("%.8f ", density[OX_LEN_1 * i + j]);			
 		}
 		printf("%s\n", "");
-	}
+	}*/
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
@@ -1696,7 +1697,6 @@ double* compute_density_cuda_internal(double b, double lb, double rb, double bb,
 	double* density = new double[XY_LEN];
 	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	time = solve_cuda(density);
-	//print_matrix11(density, 11, 11);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;

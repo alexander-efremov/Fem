@@ -84,6 +84,11 @@ TEST_F(cpu, test_to_model_cuda)
 		double* data = solve_internal_cuda(p, time);
 		double norm_test = p.norm;
 		double* model = get_model_result(p, lvl);
+		printf("GPU\n");
+		_print_matrix(data, 11, 11);
+		printf("CPU\n");
+		_print_matrix(model, 11, 11);
+
 		double norm_model = p.norm;
 //		if (lvl < 2)
 			for (int i = 0; i < p.get_size(); i++)

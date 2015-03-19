@@ -140,6 +140,7 @@ bool solByEqualVolumes(
 			//   rhoInCurrTL[ iOfOXN ][ numOfOYSt ]  =   upperBound( par_a,   lbDom, rbDom,   bbDom, ubDom,   tau*iCurrTL, masOX[ iOfOXN ] );
 
 			rhoInCurrTL_asV[(numOfOXSt + 1) * numOfOYSt + iOfOXN] = upperBound(par_a, lbDom, rbDom, bbDom, ubDom, tau*iCurrTL, masOX[iOfOXN]);
+
 		}
 
 
@@ -184,7 +185,7 @@ bool solByEqualVolumes(
 					isSpVolComp, //   -  Is space volume computed?
 					rhoInPrevTL_asV);
 
-				/*  if ((numOfOXSt +1)*iOfOYN + iOfOXN == 12)
+				/* if ((numOfOXSt +1)*iOfOYN + iOfOXN == 12)
 				{
 				printf("\na = %f\n", par_a);
 				printf("b = %f\n", par_b);
@@ -241,21 +242,9 @@ bool solByEqualVolumes(
 
 				//   rhoInCurrTL[ iOfOXN ][ iOfOYN ]  =  spVolInPrevTL;
 
-				/*
-				if( (iOfOXSt == 0)  ||  (iOfOXSt == numOfOXSt) ){   rhoInCurrTSt[ iOfOXSt ][ iOfOYSt ] *= 2.;   }
-
-				//   and
-
-				if( (iOfOYSt == 0)  ||  (iOfOYSt == numOfOYSt) ){   rhoInCurrTSt[ iOfOXSt ][ iOfOYSt ] *= 2.;   }
-				*/
-
-				//   rhoInCurrTL[ iOfOXN ][ iOfOYN ] +=  tau * RPInCurrTL;
-
+				
 				rhoInCurrTL_asV[(numOfOXSt + 1) * iOfOYN + iOfOXN] += tau * RPInCurrTL;
-				//if ((numOfOXSt +1)*iOfOYN + iOfOXN == 12)
-				//    {
-				//      printf("spVolInPrevTL = %f\n", rhoInCurrTL_asV[ (numOfOXSt +1)*iOfOYN + iOfOXN ]);
-				//}
+				 
 			}
 		}
 
