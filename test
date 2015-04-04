@@ -13,19 +13,12 @@ tau = 0.002500
 Time level count = 400
 ox length = 81
 oy length = 81
-Computation Time 2362.666260
-src/tests.cpp:122: Failure
-The difference between model[i] and data[i] is 1.1182166304024577e-12, which exceeds 1e-12, where
-model[i] evaluates to 1.3988158345024961,
-data[i] evaluates to 1.3988158345013779, and
-1e-12 evaluates to 9.9999999999999998e-13.
-[  FAILED  ] cpu.test_fma (12235 ms)
-[----------] 1 test from cpu (12235 ms total)
+Computation Time 2355.024414
+model norm = 0.000763
+test norm = 0.000763
+[       OK ] cpu.test_fma (12239 ms)
+[----------] 1 test from cpu (12239 ms total)
 
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test case ran. (12235 ms total)
-[  PASSED  ] 0 tests.
-[  FAILED  ] 1 test, listed below:
-[  FAILED  ] cpu.test_fma
-
- 1 FAILED TEST
+[==========] 1 test from 1 test case ran. (12239 ms total)
+[  PASSED  ] 1 test.
