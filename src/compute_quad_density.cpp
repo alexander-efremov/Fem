@@ -9,10 +9,6 @@
   #define omp_get_num_threads() 1
 #endif
 
-#ifdef __NVCC__
-    #include "compute_density_cuda.cuh"
-#endif
-
 #define sqr(x) ((x)*(x))
 #define cub(x) ((x)*(x)*(x))
 #define quad(x) ((x)*(x)*(x)*(x))
@@ -114,22 +110,6 @@ __pure inline static void sort_by_x(dp_t& x, dp_t& y, dp_t& z)
 		//swap(y, z);
 	}
 }
-
-//__pure inline void sort_by_y(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
-//{
-//	if (w.y > x.y)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
-//	if (w.y > y.y)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
-//	if (w.y > z.y)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
-//	sort_by_y(x, y, z);
-//}
-//
-//__pure inline void sort_by_x_asc(dp_t& w, dp_t& x, dp_t& y, dp_t& z)
-//{
-//	if (w.x > x.x)  { double t = w.y; w.y = x.y; x.y = t; t = w.x; w.x = x.x; x.x = t; }
-//	if (w.x > y.x)  { double t = w.y; w.y = y.y; y.y = t; t = w.x; w.x = y.x; y.x = t; }
-//	if (w.x > z.x)  { double t = w.y; w.y = z.y; z.y = t; t = w.x; w.x = z.x; z.x = t; }
-//	sort_by_x_asc(x, y, z);
-//}
 
 inline void sort_by_y(dp_t* a)
 {
@@ -951,60 +931,7 @@ static double integrate_uniform_triangle(const dp_t& x, const dp_t& y, const dp_
 static double integrate_uniform_triangle_wall(const dp_t& x, const dp_t& y,
                                               const dp_t& z, quad_type type)
 {
-	// для точек YOt оси координат обозначены по другому
-	// по OX будет откладываться значение y
-	// по OY будет откладываться значение t
-	// т.е. будет плоскость YOt
-	// здесь y координата точки должна быть временем	
-	switch (type)
-	{
-	case wall_1_middle_at:
-	case wall_1_middle_in:
-	case wall_1_middle_out:		
-			// !phd\2014\fem\ggb\wa1\4.ggb
-			// случай А
-			if (x.x >= y.x)
-			{
-				double res = 0;
-				double t = integrate_right_triangle_upper_left_wall(z, x);
-				res += t;
-				t = integrate_right_triangle_upper_left_wall(y, x);
-				res += t;
-				return res;
-			}
-			if (x.x < y.x && x.x > z.x) // случай B
-			{
-				double res = 0;
-				double t = integrate_right_triangle_upper_left_wall(z, x);
-				res += t;
-				t = integrate_right_triangle_upper_right_wall(y, x);
-				res += t;
-				return res;
-			}
-			if (x.x <= z.x) // случай C
-			{
-				double res = 0;
-				double t = integrate_right_triangle_upper_right_wall(y, x);
-				res += t;
-				t = integrate_right_triangle_upper_left_wall(z, x);
-				res += t;
-				return res;
-			}
-	case wall_2:
-	{
-		double t = 0;
-		double res = 0;
-		t = integrate_right_triangle_upper_right_wall(x, y);
-		res += t;
-		t = integrate_right_triangle_bottom_right_wall(y, z);
-		res += t;
-		return res;
-	}
-		break;
-
-	default:
-		return 0;
-	}
+	return 0;	
 }
 
 __pure inline int get_wall_intersection_type_as_int(dp4_t* a)
@@ -1234,168 +1161,7 @@ static double integrate(int i, int j)
 	t = integrate_uniform_triangle(a2, b2, c2);
 	result += t;
 	delete[] p;
-	return result;
-	
-
-/*	switch (type)
-	{
-	case wall_1_middle_in: // вообщем это один и тот же способ
-	case wall_1_middle_out:
-	case wall_1_middle_at:
-		{
-//			//тут получается всегда 3 треугольника
-//			double result = 0;
-//			double t = 0;			
-//			dp_t v1 = dp_t(p[4].x, p[4].y);
-//			dp_t v2 = dp_t(p[2].x, p[2].y);
-//			dp_t v3 = dp_t(p[1].x, p[1].y);
-//			sort_by_y_asc(v1, v2, v3);
-//			t = integrate_uniform_triangle(v1, v2, v3);
-//			result += t;
-//										
-//			v1 = dp_t(p[4].x, p[4].y);
-//			v2 = dp_t(p[2].x, p[2].y);
-//			v3 = dp_t(p[5].x, p[5].y);
-//			sort_by_y_asc(v1, v2, v3);
-//			t = integrate_uniform_triangle(v1, v2, v3); 
-//			result += t;
-//										
-//			v1 = dp_t(p[3].x, p[3].y);
-//			v2 = dp_t(p[2].x, p[2].y);
-//			v3 = dp_t(p[5].x, p[5].y);
-//			sort_by_y_asc(v1, v2, v3);
-//			t = integrate_uniform_triangle(v1, v2, v3);
-//			result += t;
-//					
-//			v1 = dp_t(p[0].x, p[0].y);
-//			v2 = dp_t(p[4].x, p[4].y);
-//			v3 = dp_t(p[5].x, p[5].y);
-//			t = integrate_uniform_triangle_wall(v1, v2, v3, type);
-//			result += t;
-			//return result;
-			//break;
-		}
-	case wall_2:
-	{
-		double t = 0;
-		double result = 0;
-			//// надо рассмотреть три случая
-			//// 1. p2 внутри треугольника (p4,p5,p3) = итегрирование по 3 треугольникам
-			//if (is_point_in_triangle(p[2], p[4], p[5], p[3]))
-			//{
-			//	dp_t v1 = p[5];
-			//	dp_t v2 = p[3];
-			//	dp_t v3 = p[4];
-			//	//сразу их располагаем в порядке возростания y координаты
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-			//				
-			//	v1 = p[5];
-			//	v2 = p[3];
-			//	v3 = p[2];
-			//	sort_by_y_asc(v1, v2, v3);
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-			//				
-			//	v1 = p[3];
-			//	v2 = p[2];
-			//	v3 = p[4];
-			//	sort_by_y_asc(v1, v2, v3);
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-			//}
-			//// 2. p3 внутри треугольника (p4,p5,p2) =  итегрирование по 3 треугольникам
-			//else if (is_point_in_triangle(p[3], p[4], p[5], p[2]))
-			//{
-			//	//сразу их располагаем в порядке возростания y координаты
-			//	dp_t v1 = p[5];
-			//	dp_t v2 = p[2];
-			//	dp_t v3 = p[4];			
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-
-			//	v1 = p[5];
-			//	v2 = p[2];
-			//	v3 = p[3];
-			//	sort_by_y_asc(v1, v2, v3);
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-
-			//	v1 = p[4];
-			//	v2 = p[2];
-			//	v3 = p[3];
-			//	sort_by_y_asc(v1, v2, v3);
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-			//}
-			//// 3. ни 1 ни 2 условие - нормальный случай 4 угольник, интегрируем как обычно
-			//else
-			//{
-			//	dp_t v1 = p[4];
-			//	dp_t v2 = p[5];
-			//	dp_t v3 = p[3];
-			//	sort_by_y_asc(v1, v2, v3);
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-			//	v1 = p[4];
-			//	v2 = p[2];
-			//	v3 = p[3];
-			//	sort_by_y_asc(v1, v2, v3);
-			//	t = integrate_uniform_triangle(v1, v2, v3);
-			//	result += t;
-			//}
-//		if (type == wall_2){
-//			dp_t v1 = dp_t(p[0].x, p[0].y);
-//			dp_t v2 = dp_t(p[1].x, p[1].y);
-//			dp_t v3 = dp_t(p[5].x, p[5].y);
-//			sort_by_y_asc(v1, v2, v3);
-//			t = integrate_uniform_triangle_wall(v1, v2, v3, type);
-//			result += t;
-//			v1 = dp_t(p[4].x, p[4].y);
-//			v2 = dp_t(p[1].x, p[1].y);
-//			v3 = dp_t(p[5].x, p[5].y);
-//			sort_by_y_asc(v1, v2, v3);
-//			t = integrate_uniform_triangle_wall(v1, v2, v3, type);
-//			result += t;
-//		}
-			//return 0;
-			//return result;
-		}
-	case wall_3_middle_in:
-	case wall_3_middle_out:
-	case wall_3_middle_at:
-		{
-//		double result = 0;
-//		double t = 0;
-//		dp_t v1 = p[4];
-//		dp_t v2 = p[5];
-//		dp_t v3 = p[3];
-//		sort_by_y_asc(v1, v2, v3);
-//		t = integrate_uniform_triangle(a1, b1, c1);
-//		result += t;
-//		return result;
-//		}
-	case wall_4:
-		//return 0;
-	case normal:
-		{
-			double result = 0;
-			double t = 0;
-			sort_by_y_asc(a1, b1, c1);
-			t = integrate_uniform_triangle(a1, b1, c1);
-			result += t;
-			sort_by_y_asc(a2, b2, c2);
-			t = integrate_uniform_triangle(a2, b2, c2);
-			result += t;
-			return result;
-		}
-	case concave:
-	case convex:
-	case pseudo:
-		return -1;
-	}*/
-	delete[] p;
-	return 0;
+	return result;		
 }
 
 inline static double get_norm_of_error(double* density, double ts_count_mul_steps)
@@ -1478,7 +1244,6 @@ static void solve(double* density, double& time)
 	delete [] PREV_DENSITY;
 }
 
-
 inline static void init(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length)
 {
@@ -1523,7 +1288,7 @@ inline static void clean()
 	delete [] OY;
 }
 
-double* compute_density(double b, double lb, double rb, double bb, double ub,
+double* compute_quad_density(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
@@ -1533,14 +1298,4 @@ double* compute_density(double b, double lb, double rb, double bb, double ub,
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;
-}
-
-double* compute_density_cuda(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, float& time)
-{
-#ifdef __NVCC__
-	return compute_density_cuda_internal(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length, norm, time);                      
-#else
-        return NULL;
-#endif
 }

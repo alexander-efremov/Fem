@@ -22,12 +22,20 @@ public:
 	}
 	
 protected:
+	double* solve_quad_internal(ComputeParameters& p, double& time)
+	{
+		return compute_quad_density(p.b, p.lb, p.rb, p.bb,
+		                       p.ub, p.tau, p.t_count, p.x_size,
+		                       p.y_size, p.norm, time);
+	}
+
 	double* solve_internal(ComputeParameters& p, double& time)
 	{
 		return compute_density(p.b, p.lb, p.rb, p.bb,
 		                       p.ub, p.tau, p.t_count, p.x_size,
 		                       p.y_size, p.norm, time);
 	}
+
 	
 	double* solve_internal_cuda(ComputeParameters& p, float& time)
 	{
@@ -159,6 +167,23 @@ TEST_F(cpu, valgrind_test)
 		time = 0;
 		p.recompute_params(lvl);
 		double* data = solve_internal(p, time);
+		delete[] data;
+	}
+}
+
+// test new version with replace of variables of integral
+TEST_F(cpu, quad_test)
+{
+	int first = 0, last = 1;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		printf("Start level %d\n", lvl);
+		fflush(stdout);
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_quad_internal(p, time);
 		delete[] data;
 	}
 }

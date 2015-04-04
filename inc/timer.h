@@ -15,13 +15,12 @@
 
 #ifdef WIN32
 double PCFreq = 0.0;
-__int64 timerStart = 0;
+extern __int64 timerStart;
 #else
-struct timeval timerStart;
+extern struct timeval timerStart;
 #endif
 
-inline
-void StartTimer()
+inline void StartTimer()
 {
 #ifdef WIN32
 	LARGE_INTEGER li;
@@ -38,8 +37,7 @@ void StartTimer()
 }
 
 // time elapsed in ms
-inline
-double GetTimer()
+inline double GetTimer()
 {
 #ifdef WIN32
 	LARGE_INTEGER li;
