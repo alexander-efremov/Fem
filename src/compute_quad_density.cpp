@@ -43,6 +43,7 @@ static double* OY; //-V707
 static double* PREV_DENSITY;
 static double TIME;
 static double PREV_TIME; // tau * (tl - 1)
+static double INVERTED_HX_HY;
 
 __pure inline static double analytical_solution(double t, double x, double y)
 {
@@ -88,6 +89,16 @@ __pure inline static double func_f(double b, double time, double ub, double bb, 
 
 __pure static void get_coord_on_prev_tl(dp_t& left, dp_t& up, dp_t& right, dp_t& bottom, dp_t& center, int i, int j)
 {	
+
+	if(i==1&& j==1)
+	{
+		printf("new left x %f y = %f\n", left.x,left.y);
+		printf("new up x %f y = %f\n", up.x,up.y);
+		printf("new right x %f y = %f\n", right.x,right.y);
+		printf("new bottom x %f y = %f\n", bottom.x,bottom.y);
+		printf("new center x %f y = %f\n", center.x,center.y);		
+	}
+
 	double u = func_u(B, left);
 	double v = func_v(UB, BB, LB, RB, TIME, left);
 	left.x = left.x - TAU * u;
@@ -108,6 +119,16 @@ __pure static void get_coord_on_prev_tl(dp_t& left, dp_t& up, dp_t& right, dp_t&
 	v = func_v(UB, BB, LB, RB, TIME, center);
 	center.x = center.x - TAU * u;
 	center.y = center.y - TAU * v;	
+
+	if(i==1&& j==1)
+	{
+		printf("new left x %f y = %f\n", left.x,left.y);
+		printf("new up x %f y = %f\n", up.x,up.y);
+		printf("new right x %f y = %f\n", right.x,right.y);
+		printf("new bottom x %f y = %f\n", bottom.x,bottom.y);
+		printf("new center x %f y = %f\n", center.x,center.y);		
+	}
+
 }
 
 __pure static double get_det(dp_t& left, dp_t& up, dp_t& right, dp_t& bottom, dp_t& center, int i, int j)
@@ -117,9 +138,18 @@ __pure static double get_det(dp_t& left, dp_t& up, dp_t& right, dp_t& bottom, dp
     double w_y_ksi = 0.5*((right.y-center.y)/HY + (center.y - left.y)/HY);
     double w_y_the = 0.5*((up.y-center.y)/HY + (center.y - bottom.y)/HY);
 
+    if(i==1&& j==1)
+	{
+		printf("new w_x_ksi = %f\n", w_x_ksi);
+		printf("new w_x_the = %f\n", w_x_the);
+		printf("new w_y_ksi = %f\n", w_y_ksi);
+		printf("new w_y_the = %f\n", w_y_the);
+
+		
+	}
+
     double r = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
     return r;
-
 }
 
 static double integrate(double prev_density, int i, int j)
@@ -131,6 +161,12 @@ static double integrate(double prev_density, int i, int j)
 	dp_t center(OX[i], OY[j]);
 	get_coord_on_prev_tl(left, up, right, bottom, center, i, j);
 	double det = get_det(left, up, right, bottom, center, i, j);		
+	if(i==1&&j==1)
+	{
+		printf("new det %f\n",det );
+		printf("new prev_density %f\n",prev_density );
+		printf("new res %f\n",prev_density*det );
+	}
 	return prev_density * det;
 }
 
@@ -200,7 +236,13 @@ static void solve(double* density, double& time)
 			for (i = 1; i < OX_LEN; ++i)
 			{				
 				density[OX_LEN_1 * j + i] = integrate(PREV_DENSITY[OX_LEN_1 * j + i], i, j);
-				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
+				double f = func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
+				if(i==1&& j==1)
+				{
+					printf("new integ %f\n", density[OX_LEN_1 * j + i]);
+					printf("new f %f\n", f);
+				}
+				density[OX_LEN_1 * j + i] += TAU * f;
 			}
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
@@ -236,6 +278,7 @@ inline static void init(double b, double lb, double rb, double bb, double ub,
 	for (int i = 0; i <= OY_LEN; ++i) OY[i] = bb + i * (ub - bb) / OY_LEN;
 	HX = OX[1] - OX[0];
 	HY = OY[1] - OY[0];
+	INVERTED_HX_HY = 1 / HX / HY;
 }
 
 inline static void clean()
@@ -254,6 +297,7 @@ inline static void clean()
 	XY_LEN = 0;
 	HX = 0;
 	HY = 0;
+	INVERTED_HX_HY = 	0;
 	delete [] OX;
 	delete [] OY;
 }

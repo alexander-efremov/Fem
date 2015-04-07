@@ -1465,7 +1465,14 @@ static void solve(double* density, double& time)
 			for (i = 1; i < OX_LEN; ++i)
 			{
 				density[OX_LEN_1 * j + i] = integrate(i, j) * INVERTED_HX_HY;
-				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
+				double f = func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
+				if(i==1&& j==1)
+				{
+					printf("new integ %f\n", density[OX_LEN_1 * j + i]);
+					printf("new f %f\n", f);
+				}
+				density[OX_LEN_1 * j + i] += TAU * f;
+				//density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
 			}
 		}
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib

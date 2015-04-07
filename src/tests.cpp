@@ -159,6 +159,7 @@ TEST_F(cpu, valgrind_test)
 //	int first = 4, last = 8;
 	int first = 1, last = 2;
 	double time = 0;
+
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
 	{
@@ -183,7 +184,8 @@ TEST_F(cpu, quad_test)
 		fflush(stdout);
 		time = 0;
 		p.recompute_params(lvl);
-		//p.t_count = 1;
+		p.t_count = 1;
+		// не считает - норма решения возрастает!
 		double* data = solve_quad_internal(p, time);
 		delete[] data;		
 		data = solve_internal(p, time);
