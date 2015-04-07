@@ -183,7 +183,10 @@ TEST_F(cpu, quad_test)
 		fflush(stdout);
 		time = 0;
 		p.recompute_params(lvl);
+		//p.t_count = 1;
 		double* data = solve_quad_internal(p, time);
+		delete[] data;		
+		data = solve_internal(p, time);
 		delete[] data;
 	}
 }

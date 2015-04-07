@@ -123,7 +123,7 @@ __pure static double get_det(dp_t& left, dp_t& up, dp_t& right, dp_t& bottom, dp
 }
 
 static double integrate(double prev_density, int i, int j)
-{
+{	
 	dp_t left(OX[i-1], OY[j]);
 	dp_t right(OX[i+1], OY[j]);
 	dp_t up(OX[i], OY[j+1]);
@@ -146,6 +146,7 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 
 static void solve(double* density, double& time)
 {
+	printf("%s\n", "quad algo");
 	PREV_DENSITY = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
 	{
@@ -174,7 +175,7 @@ static void solve(double* density, double& time)
     printf("Standart timer function is used!\n");
     StartTimer();
 #endif        
-    fflush(stdout);
+    fflush(stdout);    
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
 	{	    	
 		PREV_TIME = TIME;
@@ -190,9 +191,10 @@ static void solve(double* density, double& time)
 			density[OX_LEN_1 * u] = analytical_solution(LB, OY[u], TIME);
 			density[OX_LEN_1 * u + OX_LEN] = analytical_solution(RB, OY[u], TIME);
 		}
+//		print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 #ifdef _OPENMP
    #pragma omp parallel for collapse(2) private(i, j)
-#endif
+#endif		
 		for (j = 1; j < OY_LEN; ++j)
 		{
 			for (i = 1; i < OX_LEN; ++i)
@@ -256,14 +258,52 @@ inline static void clean()
 	delete [] OY;
 }
 
+
+inline static void print_matrix11(double* a, int n, int m, int precision = 8) {
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < m; ++j) {
+			int k = i * n + j;
+			switch (precision) {
+			case 1:
+				printf("%.1f ", a[k]);
+				break;
+			case 2:
+				printf("%.2f ", a[k]);
+				break;
+			case 3:
+				printf("%.3f ", a[k]);
+				break;
+			case 4:
+				printf("%.4f ", a[k]);
+				break;
+			case 5:
+				printf("%.5f ", a[k]);
+				break;
+			case 6:
+				printf("%.6f ", a[k]);
+				break;
+			case 7:
+				printf("%.7f ", a[k]);
+				break;
+			case 8:
+				printf("%.8f ", a[k]);
+				break;
+			}
+		}
+		printf("\n");
+	}
+}
+
 double* compute_quad_density(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
-	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
+//	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	solve(density, time);
+	print_matrix11(density, ox_length+1, oy_length+1);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
+	printf("norm = %f\n", norm);
 	clean();
 	return density;
 }
