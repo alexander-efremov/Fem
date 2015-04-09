@@ -134,8 +134,8 @@ __pure static void get_coord_on_prev_tl(dp_t& left, dp_t& up, dp_t& right, dp_t&
 __pure static double get_det(dp_t& left, dp_t& up, dp_t& right, dp_t& bottom, dp_t& center, int i, int j)
 {	
     double w_x_ksi = 0.5*((right.x-center.x)/HX + (center.x - left.x)/HX);
-    double w_x_the = 0.5*((up.x-center.x)/HX + (center.x - bottom.x)/HX);
-    double w_y_ksi = 0.5*((right.y-center.y)/HY + (center.y - left.y)/HY);
+    double w_x_the = 0.5*((up.x-center.x)/HY + (center.x - bottom.x)/HY);
+    double w_y_ksi = 0.5*((right.y-center.y)/HX + (center.y - left.y)/HX);
     double w_y_the = 0.5*((up.y-center.y)/HY + (center.y - bottom.y)/HY);
 
     if(i==1&& j==1)

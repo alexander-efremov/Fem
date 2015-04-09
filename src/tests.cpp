@@ -175,7 +175,7 @@ TEST_F(cpu, valgrind_test)
 // test new version with replace of variables of integral
 TEST_F(cpu, quad_test)
 {
-	int first = 0, last = 1;
+	int first = 0, last = 3;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
@@ -184,7 +184,7 @@ TEST_F(cpu, quad_test)
 		fflush(stdout);
 		time = 0;
 		p.recompute_params(lvl);
-		p.t_count = 1;
+		//p.t_count = 1;
 		// не считает - норма решения возрастает!
 		double* data = solve_quad_internal(p, time);
 		delete[] data;		
