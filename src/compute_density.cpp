@@ -1466,11 +1466,13 @@ static void solve(double* density, double& time)
 			{
 				density[OX_LEN_1 * j + i] = integrate(i, j) * INVERTED_HX_HY;
 				double f = func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
+/*
 				if(i==1&& j==1)
 				{
 					printf("new integ %f\n", density[OX_LEN_1 * j + i]);
 					printf("new f %f\n", f);
 				}
+*/
 				density[OX_LEN_1 * j + i] += TAU * f;
 				//density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
 			}
@@ -1575,7 +1577,7 @@ double* compute_density(double b, double lb, double rb, double bb, double ub,
 	double* density = new double[XY_LEN];
 	//print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);	
 	solve(density, time);
-	print_matrix11(density, ox_length+1, oy_length+1);
+//	print_matrix11(density, ox_length+1, oy_length+1);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	printf("norm = %f\n", norm);
 	clean();

@@ -90,6 +90,7 @@ __pure inline static double func_f(double b, double time, double ub, double bb, 
 __pure static void get_coord_on_prev_tl(dp_t& left, dp_t& up, dp_t& right, dp_t& bottom, dp_t& center, int i, int j)
 {	
 
+	/*
 	if(i==1&& j==1)
 	{
 		printf("new left x %f y = %f\n", left.x,left.y);
@@ -98,6 +99,7 @@ __pure static void get_coord_on_prev_tl(dp_t& left, dp_t& up, dp_t& right, dp_t&
 		printf("new bottom x %f y = %f\n", bottom.x,bottom.y);
 		printf("new center x %f y = %f\n", center.x,center.y);		
 	}
+	*/
 
 	double u = func_u(B, left);
 	double v = func_v(UB, BB, LB, RB, TIME, left);
@@ -120,6 +122,7 @@ __pure static void get_coord_on_prev_tl(dp_t& left, dp_t& up, dp_t& right, dp_t&
 	center.x = center.x - TAU * u;
 	center.y = center.y - TAU * v;	
 
+/*
 	if(i==1&& j==1)
 	{
 		printf("new left x %f y = %f\n", left.x,left.y);
@@ -128,31 +131,88 @@ __pure static void get_coord_on_prev_tl(dp_t& left, dp_t& up, dp_t& right, dp_t&
 		printf("new bottom x %f y = %f\n", bottom.x,bottom.y);
 		printf("new center x %f y = %f\n", center.x,center.y);		
 	}
+*/
 
 }
 
 __pure static double get_det(dp_t& left, dp_t& up, dp_t& right, dp_t& bottom, dp_t& center, int i, int j)
 {	
+    
     double w_x_ksi = 0.5*((right.x-center.x)/HX + (center.x - left.x)/HX);
     double w_x_the = 0.5*((up.x-center.x)/HY + (center.x - bottom.x)/HY);
     double w_y_ksi = 0.5*((right.y-center.y)/HX + (center.y - left.y)/HX);
     double w_y_the = 0.5*((up.y-center.y)/HY + (center.y - bottom.y)/HY);
 
-    if(i==1&& j==1)
+/*
+    if(i==1 && j==1)
 	{
 		printf("new w_x_ksi = %f\n", w_x_ksi);
 		printf("new w_x_the = %f\n", w_x_the);
 		printf("new w_y_ksi = %f\n", w_y_ksi);
-		printf("new w_y_the = %f\n", w_y_the);
-
-		
+		printf("new w_y_the = %f\n", w_y_the);		
 	}
+*/
 
     double r = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
     return r;
 }
 
-static double integrate(double prev_density, int i, int j)
+static double get_density(dp_t center, int i, int j)
+{
+	ip_t quad;
+	quad.x = floor(center.x / HX);	
+	quad.y = floor(center.y / HY);
+	
+	double rho0 = PREV_DENSITY[quad.y * OX_LEN_1 + quad.x];
+	double rho1 = PREV_DENSITY[quad.y * OX_LEN_1 + quad.x + 1];
+	double rho2 = PREV_DENSITY[(quad.y + 1) * OX_LEN_1 + quad.x + 1];
+	double rho3 = PREV_DENSITY[(quad.y + 1) * OX_LEN_1 + quad.x];
+
+/* 
+    if (i==1&&j==1)
+	{
+		printf("quad x = %d\n", quad.x);
+		printf("quad y = %d\n", quad.y);
+		printf("rho0 ind = %d\n", quad.y * OX_LEN_1 + quad.x);
+		printf("rho1 ind = %d\n", quad.y * OX_LEN_1 + quad.x + 1);
+		printf("rho2 ind = %d\n", (quad.y + 1) * OX_LEN_1 + quad.x + 1);
+		printf("rho3 ind = %d\n", (quad.y + 1) * OX_LEN_1 + quad.x);		
+		printf("rho0 = %f\n", rho0);
+		printf("rho1 = %f\n", rho1);
+		printf("rho2 = %f\n", rho2);
+		printf("rho3 = %f\n", rho3);		
+		printf("rho0 = %f\n", rho0);
+		printf("first prod = %f\n", (center.x - OX[quad.x + 1]));
+		printf("second prod = %f\n", (center.y - OY[quad.y + 1]));
+		printf("first * second = %.8f\n", (center.y - OY[quad.y + 1])*(center.x - OX[quad.x + 1]));
+		printf("rho0 * first * second = %.8f\n", (center.y - OY[quad.y + 1])*(center.x - OX[quad.x + 1]));
+	}
+
+*/
+	    
+    //interpolation
+	rho0 = rho0 * (center.x - OX[quad.x + 1]) * (center.y - OY[quad.y + 1]);
+	rho1 *= (center.x - OX[quad.x]) * (center.y - OY[quad.y + 1]);
+	rho2 *= (center.x - OX[quad.x]) * (center.y - OY[quad.y]);
+	rho3 *= (center.x - OX[quad.x + 1]) * (center.y - OY[quad.y]);
+
+/*
+	if (i==1&&j==1)
+	{
+		printf("inter rho0 = %f\n", rho0);
+		printf("inter rho1 = %f\n", rho1);
+		printf("inter rho2 = %f\n", rho2);
+		printf("inter rho3 = %f\n", rho3);		
+		printf("inter total rho = %f\n", (rho0 - rho1 + rho2 - rho3));				
+		printf("inter INVERTED_HX_HY = %f\n", INVERTED_HX_HY);		
+		printf("inter total rho / hx*hy = %f\n", INVERTED_HX_HY * (rho0 - rho1 + rho2 - rho3));				
+	}
+*/
+
+	return INVERTED_HX_HY * (rho0 - rho1 + rho2 - rho3);
+}
+
+static double integrate(int i, int j)
 {	
 	dp_t left(OX[i-1], OY[j]);
 	dp_t right(OX[i+1], OY[j]);
@@ -160,14 +220,17 @@ static double integrate(double prev_density, int i, int j)
 	dp_t bottom(OX[i], OY[j-1]);
 	dp_t center(OX[i], OY[j]);
 	get_coord_on_prev_tl(left, up, right, bottom, center, i, j);
-	double det = get_det(left, up, right, bottom, center, i, j);		
-	if(i==1&&j==1)
+	double det = get_det(left, up, right, bottom, center, i, j);
+	double density = get_density(center, i, j);
+/*
+	if(i==1 && j==1)
 	{
-		printf("new det %f\n",det );
-		printf("new prev_density %f\n",prev_density );
-		printf("new res %f\n",prev_density*det );
+		printf("new det %f\n", det);
+		printf("new density %f\n", density);
+		printf("new res %f\n", density*det);
 	}
-	return prev_density * det;
+*/
+	return density * det;
 }
 
 inline static double get_norm_of_error(double* density, double ts_count_mul_steps)
@@ -235,13 +298,15 @@ static void solve(double* density, double& time)
 		{
 			for (i = 1; i < OX_LEN; ++i)
 			{				
-				density[OX_LEN_1 * j + i] = integrate(PREV_DENSITY[OX_LEN_1 * j + i], i, j);
+				density[OX_LEN_1 * j + i] = integrate(i, j);
 				double f = func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
+/*
 				if(i==1&& j==1)
 				{
 					printf("new integ %f\n", density[OX_LEN_1 * j + i]);
 					printf("new f %f\n", f);
 				}
+*/
 				density[OX_LEN_1 * j + i] += TAU * f;
 			}
 		}
@@ -345,7 +410,7 @@ double* compute_quad_density(double b, double lb, double rb, double bb, double u
 	double* density = new double[XY_LEN];
 //	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	solve(density, time);
-	print_matrix11(density, ox_length+1, oy_length+1);
+	//print_matrix11(density, ox_length+1, oy_length+1);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	printf("norm = %f\n", norm);
 	clean();

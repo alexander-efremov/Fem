@@ -187,8 +187,10 @@ TEST_F(cpu, quad_test)
 		//p.t_count = 1;
 		// не считает - норма решения возрастает!
 		double* data = solve_quad_internal(p, time);
+		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;		
 		data = solve_internal(p, time);
+		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
 	}
 }
