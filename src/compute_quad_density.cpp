@@ -55,19 +55,9 @@ __pure inline static double func_u(double b, double x, double y)
 	return b * y * (1 - y) * (M_PI_2 + atan(-x));
 }
 
-__pure inline static double func_u(double b, const dp_t& p)
-{
-	return func_u(b, p.x, p.y);
-}
-
 __pure inline static double func_v(double ub, double bb, double lb, double rb, double time, double x, double y)
 {
 	return atan(0.1 * (x - lb) * (x - rb) * (1 + time) * (y - ub) * (y - bb));
-}
-
-__pure inline static double func_v(double ub, double bb, double lb, double rb, double time, const dp_t& p)
-{
-	return func_v(ub, bb, lb, rb, time, p.x, p.y);
 }
 
 __pure inline static double func_f(double b, double time, double ub, double bb, double lb, double rb, double x, double y)
@@ -82,9 +72,7 @@ __pure inline static double func_f(double b, double time, double ub, double bb, 
 	double du_dx = -b * y * (1 - y) / (1 + sqr(x));
 	double dv_dx = 0.1 * (x - lb) * (x - rb) * (1 + time) * (y - bb + y - ub);
 	dv_dx /= (1 + arg_v * arg_v);
-	double res = drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
-	// print_f_params()...
-	return res;
+	return drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
 }
 
 static double integrate(int i, int j)
@@ -95,30 +83,30 @@ static double integrate(int i, int j)
 	dp_t bottom(OX[i], OY[j-1]);
 	dp_t center(OX[i], OY[j]);
 
-	double u = func_u(B, left);
-	double v = func_v(UB, BB, LB, RB, TIME, left);
+	double u = func_u(B, left.x, left.y);
+	double v = func_v(UB, BB, LB, RB, TIME, left.x, left.y);
 	left.x = left.x - TAU * u;
 	left.y = left.y - TAU * v;
-	u = func_u(B, right);
-	v = func_v(UB, BB, LB, RB, TIME, right);
+	u = func_u(B, right.x, right.y);
+	v = func_v(UB, BB, LB, RB, TIME, right.x, right.y);
 	right.x = right.x - TAU * u;
 	right.y = right.y - TAU * v;
-	u = func_u(B, up);
-	v = func_v(UB, BB, LB, RB, TIME, up);
+	u = func_u(B, up.x, up.y);
+	v = func_v(UB, BB, LB, RB, TIME, up.x, up.y);
 	up.x = up.x - TAU * u;
 	up.y = up.y - TAU * v;
-	u = func_u(B, bottom);
-	v = func_v(UB, BB, LB, RB, TIME, bottom);
+	u = func_u(B, bottom.x, bottom.y);
+	v = func_v(UB, BB, LB, RB, TIME, bottom.x, bottom.y);
 	bottom.x = bottom.x - TAU * u;
 	bottom.y = bottom.y - TAU * v;
-	u = func_u(B, center);
-	v = func_v(UB, BB, LB, RB, TIME, center);
+	u = func_u(B, center.x, center.y);
+	v = func_v(UB, BB, LB, RB, TIME, center.x, center.y);
 	center.x = center.x - TAU * u;
 	center.y = center.y - TAU * v;	
 	
 	double w_x_ksi = 0.5*((right.x-center.x)/HX + (center.x - left.x)/HX);
-    double w_x_the = 0.5*((up.x-center.x)/HY + (center.x - bottom.x)/HY);
     double w_y_ksi = 0.5*((right.y-center.y)/HX + (center.y - left.y)/HX);
+    double w_x_the = 0.5*((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
     double w_y_the = 0.5*((up.y-center.y)/HY + (center.y - bottom.y)/HY);
     double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
 
@@ -256,50 +244,12 @@ inline static void clean()
 	delete [] OY;
 }
 
-
-inline static void print_matrix11(double* a, int n, int m, int precision = 8) {
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < m; ++j) {
-			int k = i * n + j;
-			switch (precision) {
-			case 1:
-				printf("%.1f ", a[k]);
-				break;
-			case 2:
-				printf("%.2f ", a[k]);
-				break;
-			case 3:
-				printf("%.3f ", a[k]);
-				break;
-			case 4:
-				printf("%.4f ", a[k]);
-				break;
-			case 5:
-				printf("%.5f ", a[k]);
-				break;
-			case 6:
-				printf("%.6f ", a[k]);
-				break;
-			case 7:
-				printf("%.7f ", a[k]);
-				break;
-			case 8:
-				printf("%.8f ", a[k]);
-				break;
-			}
-		}
-		printf("\n");
-	}
-}
-
 double* compute_quad_density(double b, double lb, double rb, double bb, double ub,
                         double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
-//	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	solve(density, time);
-	//print_matrix11(density, ox_length+1, oy_length+1);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	printf("norm = %f\n", norm);
 	clean();
