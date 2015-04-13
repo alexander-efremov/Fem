@@ -112,11 +112,11 @@ static double integrate(int i, int j)
 
 	int x = floor(center.x / HX);	
 	int y = floor(center.y / HY);	
-	double rho0 = PREV_DENSITY[y * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y + 1]);
-	double rho1 = PREV_DENSITY[y * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y + 1]);
-	double rho2 = PREV_DENSITY[(y + 1) * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y]);
-	double rho3 = PREV_DENSITY[(y + 1) * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y]);    
-	return det * INVERTED_HX_HY * (rho0 - rho1 + rho2 - rho3);
+	double rho = PREV_DENSITY[y * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y + 1]);
+	rho -= PREV_DENSITY[y * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y + 1]);
+	rho += PREV_DENSITY[(y + 1) * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y]);
+	rho -= PREV_DENSITY[(y + 1) * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y]);    
+	return det * rho * INVERTED_HX_HY;
 }
 
 inline static double get_norm_of_error(double* density, double ts_count_mul_steps)
