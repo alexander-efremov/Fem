@@ -1155,7 +1155,7 @@ float solve_quad_cuda(double* density)
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
-	printf("Computation Time %f\n", time);
+	printf("Computation Time %f s\n", time/1000);
 	cudaFree(result);
 	cudaFree(prev_result);
 	cudaFree(ox);

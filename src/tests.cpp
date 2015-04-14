@@ -203,7 +203,7 @@ TEST_F(cpu, quad_test)
 // test new version with replace of variables of integral
 TEST_F(cpu, cuda_quad_test)
 {
-	int first = 0, last = 5;
+	int first = 0, last = 8;
 	float time_cuda = 0;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
@@ -214,14 +214,14 @@ TEST_F(cpu, cuda_quad_test)
 		time = 0;
 		p.recompute_params(lvl);
 		//p.t_count = 1;
-		
+		printf("%s\n", "CPU");
 		double* data = solve_quad_internal(p, time);
-		printf("CPU norm %f\n", p.norm);
+		printf("norm = %f\n", p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;		
-		
+		printf("%s\n", "GPU");
 		data = solve_internal_quad_cuda(p, time_cuda);
-		printf("GPU norm %f\n", p.norm);
+		printf("norm = %f\n", p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
 	}

@@ -131,7 +131,6 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 
 static void solve(double* density, double& time)
 {
-	printf("%s\n", "quad algo");
 	PREV_DENSITY = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
 	{
@@ -250,8 +249,7 @@ double* compute_quad_density(double b, double lb, double rb, double bb, double u
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	solve(density, time);
-	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
-	printf("norm = %f\n", norm);
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);	
 	clean();
 	return density;
 }
