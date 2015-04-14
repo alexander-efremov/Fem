@@ -41,6 +41,11 @@ protected:
 	{
 		return compute_density_cuda(p.b, p.lb, p.rb, p.bb, p.ub, p.tau, p.t_count, p.x_size, p.y_size, p.norm, time);
 	}
+
+	double* solve_internal_quad_cuda(ComputeParameters& p, float& time)
+	{
+		return compute_density_quad_cuda(p.b, p.lb, p.rb, p.bb, p.ub, p.tau, p.t_count, p.x_size, p.y_size, p.norm, time);
+	}
 	
 
 	double* get_model_result(ComputeParameters& p, int lvl)
@@ -190,6 +195,33 @@ TEST_F(cpu, quad_test)
 		 //_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;		
 		data = solve_internal(p, time);
+		//_print_matrix(data, p.x_size+1, p.y_size+1);
+		delete[] data;
+	}
+}
+
+// test new version with replace of variables of integral
+TEST_F(cpu, cuda_quad_test)
+{
+	int first = 0, last = 5;
+	float time_cuda = 0;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		printf("Start level %d\n", lvl);
+		fflush(stdout);
+		time = 0;
+		p.recompute_params(lvl);
+		//p.t_count = 1;
+		
+		double* data = solve_quad_internal(p, time);
+		printf("CPU norm %f\n", p.norm);
+		//_print_matrix(data, p.x_size+1, p.y_size+1);
+		delete[] data;		
+		
+		data = solve_internal_quad_cuda(p, time_cuda);
+		printf("GPU norm %f\n", p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
 	}

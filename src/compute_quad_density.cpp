@@ -183,7 +183,7 @@ static void solve(double* density, double& time)
 		{
 			for (i = 1; i < OX_LEN; ++i)
 			{				
-				density[OX_LEN_1 * j + i] = integrate(i, j);				
+				density[OX_LEN_1 * j + i] = integrate(i, j);						
 				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
 			}
 		}

@@ -1593,3 +1593,13 @@ double* compute_density_cuda(double b, double lb, double rb, double bb, double u
         return NULL;
 #endif
 }
+
+double* compute_density_quad_cuda(double b, double lb, double rb, double bb, double ub,
+                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, float& time)
+{
+#ifdef __NVCC__
+	return compute_density_quad_cuda_internal(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length, norm, time);                      
+#else
+        return NULL;
+#endif
+}

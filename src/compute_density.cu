@@ -888,7 +888,6 @@ __global__ void kernel(double* prev_result, double* result)
 	 	int i = opt % (C_OX_LEN + 1);
 	 	int j = opt / (C_OY_LEN + 1);
 
-	 	// расчет границы
 	 	if (j == 0)  // bottom bound
 	 	{
 	 		 result[ opt ] = 1.1  +  sin( C_TIME * C_HX * j * C_BB );
@@ -914,6 +913,81 @@ __global__ void kernel(double* prev_result, double* result)
 	 }
 }
 
+__pure static double integrate_quad(double *prev_density, int i, int j)
+{	
+	c_dp_t left(OX_DEVICE[i-1], OY_DEVICE[j]);
+	c_dp_t right(OX_DEVICE[i+1], OY_DEVICE[j]);
+	c_dp_t up(OX_DEVICE[i], OY_DEVICE[j+1]);
+	c_dp_t bottom(OX_DEVICE[i], OY_DEVICE[j-1]);
+	c_dp_t center(OX_DEVICE[i], OY_DEVICE[j]);
+
+	double u = func_u(C_B, left.x, left.y);
+	double v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, left.x, left.y);
+	left.x = left.x - C_TAU * u;
+	left.y = left.y - C_TAU * v;
+	u = func_u(C_B, right.x, right.y);
+	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, right.x, right.y);
+	right.x = right.x - C_TAU * u;
+	right.y = right.y - C_TAU * v;
+	u = func_u(C_B, up.x, up.y);
+	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, up.x, up.y);
+	up.x = up.x - C_TAU * u;
+	up.y = up.y - C_TAU * v;
+	u = func_u(C_B, bottom.x, bottom.y);
+	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, bottom.x, bottom.y);
+	bottom.x = bottom.x - C_TAU * u;
+	bottom.y = bottom.y - C_TAU * v;
+	u = func_u(C_B, center.x, center.y);
+	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, center.x, center.y);
+	center.x = center.x - C_TAU * u;
+	center.y = center.y - C_TAU * v;	
+	
+	double w_x_ksi = 0.5*((right.x-center.x)/C_HX + (center.x - left.x)/C_HX);
+    double w_y_ksi = 0.5*((right.y-center.y)/C_HX + (center.y - left.y)/C_HX);
+    double w_x_the = 0.5*((up.x-center.x)/C_HY + (center.x - bottom.x)/C_HY);    
+    double w_y_the = 0.5*((up.y-center.y)/C_HY + (center.y - bottom.y)/C_HY);
+    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
+
+	int x = floor(center.x / C_HX);	
+	int y = floor(center.y / C_HY);	
+	double rho = prev_density[y * C_OX_LEN_1 + x] * (center.x - OX_DEVICE[x + 1]) * (center.y - OY_DEVICE[y + 1]);
+	rho -= prev_density[y * C_OX_LEN_1 + x + 1] * (center.x - OX_DEVICE[x]) * (center.y - OY_DEVICE[y + 1]);
+	rho += prev_density[(y + 1) * C_OX_LEN_1 + x + 1] * (center.x - OX_DEVICE[x]) * (center.y - OY_DEVICE[y]);
+	rho -= prev_density[(y + 1) * C_OX_LEN_1 + x] * (center.x - OX_DEVICE[x + 1]) * (center.y - OY_DEVICE[y]);    
+	return det * rho * C_INVERTED_HX_HY;
+}
+
+__global__ void kernel_quad(double* prev_result, double* result)
+{	
+	 for (int opt = blockIdx.x * blockDim.x + threadIdx.x; opt < C_XY_LEN; opt += blockDim.x * gridDim.x)
+	 {		
+	 	int i = opt % (C_OX_LEN + 1);
+	 	int j = opt / (C_OY_LEN + 1);
+	 	
+	 	if (j == 0)  // bottom bound
+	 	{
+	 		 result[ opt ] = 1.1  +  sin( C_TIME * C_HX * j * C_BB );
+	 	}
+		else if (i == 0) // left bound
+		{
+			 result[ opt ] = 1.1  +  sin( C_TIME * C_HX * i * C_LB );
+		}
+		else if (j == C_OY_LEN) // upper bound
+		{ 
+			 result[ opt ] = 1.1  +  sin( C_TIME * C_HX * i * C_UB );
+		}
+		else if (i == C_OX_LEN) // right bound
+		{ 
+			 result[ opt ] = 1.1  +  sin(  C_TIME * C_HX * j * C_RB );
+		}
+		else if (i > 0 && j > 0 && j != C_OY_LEN && i != C_OX_LEN)
+		{                   			
+			result[ opt ] =  integrate_quad(prev_result, i, j);						
+			result[ opt ] += C_TAU * func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]);					
+		}
+	 }
+}
+
 float solve_cuda(double* density)
 {
 	const int gridSize = 256;
@@ -935,7 +1009,7 @@ float solve_cuda(double* density)
 	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
-        checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
+    checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
 	checkCuda(cudaMemcpyToSymbol(C_B, &B, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_LB, &LB, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_RB, &RB, sizeof(double)));
@@ -965,7 +1039,7 @@ float solve_cuda(double* density)
 	TIME = 0;
 	int tl = 0;
 	int tempTl  = TIME_STEP_CNT -1;
-        while(tl < tempTl)
+    while(tl < tempTl)
 	{
 	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
             TIME = TAU * (tl+1);
@@ -997,39 +1071,98 @@ float solve_cuda(double* density)
 	return time;
 }
 
-inline void print_matrix11(double* a, int n, int m, int precision = 8) {
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < m; ++j) {
-			int k = i * n + j;
-			switch (precision) {
-			case 1:
-				printf("%.1f ", a[k]);
-				break;
-			case 2:
-				printf("%.2f ", a[k]);
-				break;
-			case 3:
-				printf("%.3f ", a[k]);
-				break;
-			case 4:
-				printf("%.4f ", a[k]);
-				break;
-			case 5:
-				printf("%.5f ", a[k]);
-				break;
-			case 6:
-				printf("%.6f ", a[k]);
-				break;
-			case 7:
-				printf("%.7f ", a[k]);
-				break;
-			case 8:
-				printf("%.8f ", a[k]);
-				break;
-			}
+float solve_quad_cuda(double* density)
+{
+	const int gridSize = 256;
+	const int blockSize =  512; 
+	//const int gridSize = 1;
+	//const int blockSize =  1;
+	double *result = NULL, *prev_result = NULL, *ox = NULL, *oy=NULL;
+	int size = sizeof(double)*XY_LEN;
+	double *prev_result_h = new double[XY_LEN];
+	for (int j = 0; j < OY_LEN + 1; j++)
+	{
+		for (int i = 0; i < OX_LEN_1; i++)
+		{
+			prev_result_h[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
-		printf("\n");
 	}
+
+	cudaEvent_t start, stop;
+	float time;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+    checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
+	checkCuda(cudaMemcpyToSymbol(C_B, &B, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_LB, &LB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_RB, &RB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_BB, &BB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_UB, &UB, sizeof(double)));
+	checkCuda(cudaMemcpyToSymbol(C_INVERTED_HX_HY, &INVERTED_HX_HY, sizeof(double)));	
+	checkCuda(cudaMemcpyToSymbol(C_HX, &HX, sizeof(double)));	
+	checkCuda(cudaMemcpyToSymbol(C_HY, &HY, sizeof(double)));	
+	checkCuda(cudaMemcpyToSymbol(C_OX_LEN_1, &OX_LEN_1, sizeof(int)));
+	checkCuda(cudaMemcpyToSymbol(C_XY_LEN, &XY_LEN, sizeof(int)));
+	checkCuda(cudaMemcpyToSymbol(C_OX_LEN, &OX_LEN, sizeof(int)));
+	checkCuda(cudaMemcpyToSymbol(C_OY_LEN, &OY_LEN, sizeof(int)));
+	
+	checkCuda(cudaMalloc((void**)&(result), size) );
+	checkCuda(cudaMemset(result, 0, size) );
+	checkCuda(cudaMalloc((void**)&(prev_result), size) );
+	checkCuda(cudaMalloc((void**)&(ox), sizeof(ox)*(OX_LEN+1)));
+	checkCuda(cudaMalloc((void**)&(oy), sizeof(oy)*(OY_LEN+1)));
+	checkCuda(cudaMemcpy(ox, OX, sizeof(ox)*(OX_LEN + 1), cudaMemcpyHostToDevice));	
+	checkCuda(cudaMemcpy(oy, OY, sizeof(oy)*(OY_LEN + 1), cudaMemcpyHostToDevice));	
+	checkCuda(cudaMemcpy(prev_result, prev_result_h, size, cudaMemcpyHostToDevice));	
+	checkCuda(cudaMemcpyToSymbol(OX_DEVICE, &ox, sizeof(ox)));
+	checkCuda(cudaMemcpyToSymbol(OY_DEVICE, &oy, sizeof(oy)));	
+
+	cudaEventRecord(start, 0);   
+
+/*	TIME = 0;
+	int tl = 0;	
+    while(tl < TIME_STEP_CNT)
+	{
+	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
+            TIME = TAU * (tl+1);
+	    checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
+	    kernel_quad<<<gridSize, blockSize>>>(prev_result, result);
+	    tl++;	  
+	}*/
+
+	TIME = 0;
+	int tl = 0;
+	int tempTl  = TIME_STEP_CNT -1;
+    while(tl < tempTl)
+	{
+	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
+            TIME = TAU * (tl+1);
+	    checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
+	    kernel_quad<<<gridSize, blockSize>>>(prev_result, result);
+
+	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
+            TIME = TAU * (tl+2);
+	    checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
+	    kernel_quad<<<gridSize, blockSize>>>(result, prev_result);		 		 
+	    tl+=2;            
+	}
+	
+	if (TIME_STEP_CNT%2==0)
+		checkCuda(cudaMemcpy(density, prev_result, size, cudaMemcpyDeviceToHost));
+	else
+		checkCuda(cudaMemcpy(density, result, size, cudaMemcpyDeviceToHost));
+	
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&time, start, stop);
+	printf("Computation Time %f\n", time);
+	cudaFree(result);
+	cudaFree(prev_result);
+	cudaFree(ox);
+	cudaFree(oy);
+	cudaDeviceReset();
+	delete[] prev_result_h;
+	return time;
 }
 
 double* compute_density_cuda_internal(double b, double lb, double rb, double bb, double ub,
@@ -1038,8 +1171,24 @@ double* compute_density_cuda_internal(double b, double lb, double rb, double bb,
 #ifdef __NVCC__	
     init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
-	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
+//	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
 	time = solve_cuda(density);
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
+	clean();
+	return density;
+#else
+        return NULL;
+#endif
+}
+
+double* compute_density_quad_cuda_internal(double b, double lb, double rb, double bb, double ub,
+                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, float& time)
+{
+#ifdef __NVCC__	
+    init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
+	double* density = new double[XY_LEN];
+//	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
+	time = solve_quad_cuda(density);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;
