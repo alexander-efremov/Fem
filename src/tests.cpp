@@ -180,7 +180,7 @@ TEST_F(cpu, valgrind_test)
 // test new version with replace of variables of integral
 TEST_F(cpu, quad_test)
 {
-	int first = 0, last = 3;
+	int first = 0, last = 5;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
@@ -193,8 +193,10 @@ TEST_F(cpu, quad_test)
 		
 		double* data = solve_quad_internal(p, time);
 		 //_print_matrix(data, p.x_size+1, p.y_size+1);
+		 printf("norm = %le\n", p.norm);
 		delete[] data;		
 		data = solve_internal(p, time);
+		printf("norm = %le\n", p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
 	}
@@ -203,7 +205,7 @@ TEST_F(cpu, quad_test)
 // test new version with replace of variables of integral
 TEST_F(cpu, cuda_quad_test)
 {
-	int first = 0, last = 8;
+	int first = 0, last = 7;
 	float time_cuda = 0;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
@@ -216,12 +218,12 @@ TEST_F(cpu, cuda_quad_test)
 		//p.t_count = 1;
 		printf("%s\n", "CPU");
 		double* data = solve_quad_internal(p, time);
-		printf("norm = %f\n", p.norm);
+		printf("norm = %le\n", p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;		
 		printf("%s\n", "GPU");
 		data = solve_internal_quad_cuda(p, time_cuda);
-		printf("norm = %f\n", p.norm);
+		printf("norm = %le\n", p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
 	}
