@@ -191,7 +191,7 @@ __pure inline void sort_by_x_asc(c_dp4_t* a)
 	}
 }
 
-// получается порядок
+// ГЇГ®Г«ГіГ·Г ГҐГІГ±Гї ГЇГ®Г°ГїГ¤Г®ГЄ
 /*
 
 a[1]    a[2]
@@ -225,7 +225,7 @@ __pure inline static bool try_get_slope_ratio(const c_dp_t& bv, const c_dp_t& uv
 	{
 		return false;
 	}
-	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // угловой коэффициент прямой
+	value = fabs((uv.y - bv.y) / (uv.x - bv.x)); // ГіГЈГ«Г®ГўГ®Г© ГЄГ®ГЅГґГґГЁГ¶ГЁГҐГ­ГІ ГЇГ°ГїГ¬Г®Г©
 	if (value < 1e-12)
 	{
 		return false;
@@ -328,7 +328,7 @@ __pure static double integrate_rectangle_one_cell(double* prev_dens, double py, 
 {
 	double result, a, b;
 	a = sx.y >= 0 && sy.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
-	b = sx.y >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y; // ЭТО ПЛОТНОСТЬ С ПРЕДЫДУЩЕГО СЛОЯ ДЛЯ ДАННОЙ ЯЧЕЙКИ
+	b = sx.y >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y; // ГќГ’ГЋ ГЏГ‹ГЋГ’ГЌГЋГ‘Г’Гњ Г‘ ГЏГђГ…Г„Г›Г„Г“Г™Г…ГѓГЋ Г‘Г‹ГЋГџ Г„Г‹Гџ Г„ГЂГЌГЌГЋГ‰ ГџГ—Г…Г‰ГЉГ€
 	result = integrate_rectangle(py, qy, gx, hx, a, b) * (sx.x >= 0 && sy.x >= 0 ? prev_dens[C_OX_LEN_1 * sy.x + sx.x] : analytical_solution(C_PREV_TIME, sx.x * C_HX, sy.x * C_HY));
 	a = sx.x >= 0 && sy.y >= 0 ? OX_DEVICE[sx.x] : C_HX * sx.x;
 	b = sx.x >= 0 && sy.y >= 0 ? OY_DEVICE[sy.y] : C_HY * sy.y;
@@ -386,7 +386,7 @@ __pure static double integrate_right_slant_chanel(double* prev_dens, const c_dp_
 	//   A. Under rectangle.
 	result += -1 * integrate_triangle_left_one_cell(prev_dens, bv, uv, x, sx, sy);
 
-	// case B: неполный прямоугольник    
+	// case B: Г­ГҐГЇГ®Г«Г­Г»Г© ГЇГ°ГїГ¬Г®ГіГЈГ®Г«ГјГ­ГЁГЄ    
 	if (is_rect_truncated)
 	{
 		if (sx.x == sb.x) gx = b;
@@ -397,7 +397,7 @@ __pure static double integrate_right_slant_chanel(double* prev_dens, const c_dp_
 		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, gx, x, sx, sy);
 	}
 
-	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
+	//   ГЂ ГІГҐГЇГҐГ°Гј ГЇГ°ГЁГЎГ ГўГЁГ¬ ГўГ±ГҐ ГЇГ°ГїГ¬Г®ГіГЈГ®Г«ГјГ­Г»ГҐ ГЄГіГ±ГЄГЁ, ГЄГ®ГІГ®Г°Г»ГҐ ГЇГ®Г¬ГҐГ№Г ГѕГІГ±Гї Гў ГїГ·ГҐГ©ГЄГі
 	c_ip_t ch_pos(sb.x, sb.x + 1);
 	for (int j = sb.x; j < sx.x; j++)
 	{
@@ -410,8 +410,8 @@ __pure static double integrate_right_slant_chanel(double* prev_dens, const c_dp_
 	return result;
 }
 
-// используется для upper left и для bottom left треугольника
-// т.е. случай
+// ГЁГ±ГЇГ®Г«ГјГ§ГіГҐГІГ±Гї Г¤Г«Гї upper left ГЁ Г¤Г«Гї bottom left ГІГ°ГҐГіГЈГ®Г«ГјГ­ГЁГЄГ 
+// ГІ.ГҐ. Г±Г«ГіГ·Г Г©
 // UPPERLEFTTR
 //
 //                  CENTRE
@@ -429,15 +429,15 @@ __pure static double integrate_left_slant_chanel(double* prev_dens, const c_dp_t
 	// case A: triangle
 	result += integrate_triangle_left_one_cell(prev_dens, bv, uv, x, sx, sy);
 
-	// case B: не полный прямоугольник
+	// case B: Г­ГҐ ГЇГ®Г«Г­Г»Г© ГЇГ°ГїГ¬Г®ГіГЈГ®Г«ГјГ­ГЁГЄ
 	if (is_rect_trunc)
-	{ // это значит, что прямоугольник занимает не всю ячейку  
+	{ // ГЅГІГ® Г§Г­Г Г·ГЁГІ, Г·ГІГ® ГЇГ°ГїГ¬Г®ГіГЈГ®Г«ГјГ­ГЁГЄ Г§Г Г­ГЁГ¬Г ГҐГІ Г­ГҐ ГўГ±Гѕ ГїГ·ГҐГ©ГЄГі  
 		hx = sx.x == sb.x ? b : (sx.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y);
 		result += integrate_rectangle_one_cell(prev_dens, bv.y, uv.y, x, hx, sx, sy);
 	}
 
-	//   А теперь прибавим все прямоугольные куски, которые помещаются в ячейку
-	c_ip_t ch_pos(sx.x + 1, sx.x + 2); //   - координаты канала
+	//   ГЂ ГІГҐГЇГҐГ°Гј ГЇГ°ГЁГЎГ ГўГЁГ¬ ГўГ±ГҐ ГЇГ°ГїГ¬Г®ГіГЈГ®Г«ГјГ­Г»ГҐ ГЄГіГ±ГЄГЁ, ГЄГ®ГІГ®Г°Г»ГҐ ГЇГ®Г¬ГҐГ№Г ГѕГІГ±Гї Гў ГїГ·ГҐГ©ГЄГі
+	c_ip_t ch_pos(sx.x + 1, sx.x + 2); //   - ГЄГ®Г®Г°Г¤ГЁГ­Г ГІГ» ГЄГ Г­Г Г«Г 
 	for (int j = sx.x + 1; j < sb.x + 1; j++)
 	{
 		hx = ch_pos.y <= 0 ? C_HX * ch_pos.y : hx = OX_DEVICE[ch_pos.y];
@@ -449,10 +449,10 @@ __pure static double integrate_left_slant_chanel(double* prev_dens, const c_dp_t
 	return result;
 }
 
-// определим целочисленные индексы квадратов в которых лежат верхняя и нижняя точки треугольника
-// sx = (x,y) координаты квадрата в которой лежит нижняя точка
-// sy = (x,y) координаты квадрата в которой лежит верхняя точка
-// в случае успешной проверки, k = будет  угловой коэфициент прямой
+// Г®ГЇГ°ГҐГ¤ГҐГ«ГЁГ¬ Г¶ГҐГ«Г®Г·ГЁГ±Г«ГҐГ­Г­Г»ГҐ ГЁГ­Г¤ГҐГЄГ±Г» ГЄГўГ Г¤Г°Г ГІГ®Гў Гў ГЄГ®ГІГ®Г°Г»Гµ Г«ГҐГ¦Г ГІ ГўГҐГ°ГµГ­ГїГї ГЁ Г­ГЁГ¦Г­ГїГї ГІГ®Г·ГЄГЁ ГІГ°ГҐГіГЈГ®Г«ГјГ­ГЁГЄГ 
+// sx = (x,y) ГЄГ®Г®Г°Г¤ГЁГ­Г ГІГ» ГЄГўГ Г¤Г°Г ГІГ  Гў ГЄГ®ГІГ®Г°Г®Г© Г«ГҐГ¦ГЁГІ Г­ГЁГ¦Г­ГїГї ГІГ®Г·ГЄГ 
+// sy = (x,y) ГЄГ®Г®Г°Г¤ГЁГ­Г ГІГ» ГЄГўГ Г¤Г°Г ГІГ  Гў ГЄГ®ГІГ®Г°Г®Г© Г«ГҐГ¦ГЁГІ ГўГҐГ°ГµГ­ГїГї ГІГ®Г·ГЄГ 
+// Гў Г±Г«ГіГ·Г ГҐ ГіГ±ГЇГҐГёГ­Г®Г© ГЇГ°Г®ГўГҐГ°ГЄГЁ, k = ГЎГіГ¤ГҐГІ  ГіГЈГ«Г®ГўГ®Г© ГЄГ®ГЅГґГЁГ¶ГЁГҐГ­ГІ ГЇГ°ГїГ¬Г®Г©
 
 __pure static double integrate_right_triangle_bottom_left(double* prev_dens, const c_dp_t& bv, const c_dp_t& uv)
 {
@@ -474,7 +474,7 @@ __pure static double integrate_right_triangle_bottom_left(double* prev_dens, con
 	c_dp_t curr = bv, next;
 	while (true)
 	{
-		//TODO: sx.x и sx.y должны быть положительными всегда? Кажется для sx.x это всегда верно...
+		//TODO: sx.x ГЁ sx.y Г¤Г®Г«Г¦Г­Г» ГЎГ»ГІГј ГЇГ®Г«Г®Г¦ГЁГІГҐГ«ГјГ­Г»Г¬ГЁ ГўГ±ГҐГЈГ¤Г ? ГЉГ Г¦ГҐГІГ±Гї Г¤Г«Гї sx.x ГЅГІГ® ГўГ±ГҐГЈГ¤Г  ГўГҐГ°Г­Г®...
 		double slope = sx.y >= 0 ? OY_DEVICE[sy.y] - curr.y : fabs(C_HY * sy.y - curr.y);
 		slope /= sx.x >= 0 ? curr.x - OX_DEVICE[sx.x] : fabs(curr.x - C_HX * sx.x);
 		if (slope <= k)
@@ -491,8 +491,8 @@ __pure static double integrate_right_triangle_bottom_left(double* prev_dens, con
 		}
 		if (next.x - uv.x < FLT_MIN)
 		{
-			// сюда попадаем и в случае когда треугольник полностью в одной ячейке лежит
-			// и в случае когда прошлись по всем точкам...
+			// Г±ГѕГ¤Г  ГЇГ®ГЇГ Г¤Г ГҐГ¬ ГЁ Гў Г±Г«ГіГ·Г ГҐ ГЄГ®ГЈГ¤Г  ГІГ°ГҐГіГЈГ®Г«ГјГ­ГЁГЄ ГЇГ®Г«Г­Г®Г±ГІГјГѕ Гў Г®Г¤Г­Г®Г© ГїГ·ГҐГ©ГЄГҐ Г«ГҐГ¦ГЁГІ
+			// ГЁ Гў Г±Г«ГіГ·Г ГҐ ГЄГ®ГЈГ¤Г  ГЇГ°Г®ГёГ«ГЁГ±Гј ГЇГ® ГўГ±ГҐГ¬ ГІГ®Г·ГЄГ Г¬...
 			result += integrate_left_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, bv.x, ib);
 			break;
 		}
@@ -601,7 +601,7 @@ __pure static double integrate_right_triangle_upper_left(double* prev_dens, cons
 			next.x = sx.y >= 0 ? OX_DEVICE[sx.y] : C_HX * sx.y;
 			next.y = bv.y + k * (next.x - bv.x);
 		}
-		if (next.x - uv.x > FLT_MIN) // если следующая точка уже правее, чем наша граничная точка, то мы обработали канал
+		if (next.x - uv.x > FLT_MIN) // ГҐГ±Г«ГЁ Г±Г«ГҐГ¤ГіГѕГ№Г Гї ГІГ®Г·ГЄГ  ГіГ¦ГҐ ГЇГ°Г ГўГҐГҐ, Г·ГҐГ¬ Г­Г ГёГ  ГЈГ°Г Г­ГЁГ·Г­Г Гї ГІГ®Г·ГЄГ , ГІГ® Г¬Г» Г®ГЎГ°Г ГЎГ®ГІГ Г«ГЁ ГЄГ Г­Г Г«
 		{
 			result += integrate_left_slant_chanel(prev_dens, curr, uv, (uv.x <= curr.x ? curr_i : 0) == 1, sx, sy, uv.x, ib);
 			break;
@@ -734,7 +734,7 @@ __pure static double integrate_upper_triangle(double* prev_dens, const c_dp_t& l
 // x,y,z
 __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t& x, const c_dp_t& y, const c_dp_t& z)
 {
-	// точки должны идти в порядке возрастания y координаты, чтобы правильно отработала процедура интегрирования		
+	// ГІГ®Г·ГЄГЁ Г¤Г®Г«Г¦Г­Г» ГЁГ¤ГІГЁ Гў ГЇГ®Г°ГїГ¤ГЄГҐ ГўГ®Г§Г°Г Г±ГІГ Г­ГЁГї y ГЄГ®Г®Г°Г¤ГЁГ­Г ГІГ», Г·ГІГ®ГЎГ» ГЇГ°Г ГўГЁГ«ГјГ­Г® Г®ГІГ°Г ГЎГ®ГІГ Г«Г  ГЇГ°Г®Г¶ГҐГ¤ГіГ°Г  ГЁГ­ГІГҐГЈГ°ГЁГ°Г®ГўГ Г­ГЁГї		
 
 	//   a * x  +  b * y  = c.
 	double a = z.y - x.y;
@@ -743,10 +743,10 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 	double c = b * x.y + a * x.x;
 	c_dp_t ip((c - b * y.y) / a, y.y);
 
-	//   Возможны 2 случая расположения точки пересечения относительно средней
-	//   слева или справа.
-	//   есди средняя точка справа от точки пересечения
-	//   обменяем местами  X координаты, чтобы использовать один код для расчета
+	//   Г‚Г®Г§Г¬Г®Г¦Г­Г» 2 Г±Г«ГіГ·Г Гї Г°Г Г±ГЇГ®Г«Г®Г¦ГҐГ­ГЁГї ГІГ®Г·ГЄГЁ ГЇГҐГ°ГҐГ±ГҐГ·ГҐГ­ГЁГї Г®ГІГ­Г®Г±ГЁГІГҐГ«ГјГ­Г® Г±Г°ГҐГ¤Г­ГҐГ©
+	//   Г±Г«ГҐГўГ  ГЁГ«ГЁ Г±ГЇГ°Г ГўГ .
+	//   ГҐГ±Г¤ГЁ Г±Г°ГҐГ¤Г­ГїГї ГІГ®Г·ГЄГ  Г±ГЇГ°Г ГўГ  Г®ГІ ГІГ®Г·ГЄГЁ ГЇГҐГ°ГҐГ±ГҐГ·ГҐГ­ГЁГї
+	//   Г®ГЎГ¬ГҐГ­ГїГҐГ¬ Г¬ГҐГ±ГІГ Г¬ГЁ  X ГЄГ®Г®Г°Г¤ГЁГ­Г ГІГ», Г·ГІГ®ГЎГ» ГЁГ±ГЇГ®Г«ГјГ§Г®ГўГ ГІГј Г®Г¤ГЁГ­ ГЄГ®Г¤ Г¤Г«Гї Г°Г Г±Г·ГҐГІГ 
 	c_dp_t t = y;
 	if (t.x >= ip.x)
 	{
@@ -761,7 +761,7 @@ __pure static double integrate_uniform_triangle(double* prev_dens, const c_dp_t&
 __pure static quad_type get_quadrangle_type(int i, int j,
                                      c_dp_t& a, c_dp_t& b, c_dp_t& c, c_dp_t& k, c_dp_t& m, c_dp_t& n, c_dp4_t* p)
 {
-	// TODO какой порядок тут все таки предполагется? против часовой начиная с верхней левой?	
+	// TODO ГЄГ ГЄГ®Г© ГЇГ®Г°ГїГ¤Г®ГЄ ГІГіГІ ГўГ±ГҐ ГІГ ГЄГЁ ГЇГ°ГҐГ¤ГЇГ®Г«Г ГЈГҐГІГ±Гї? ГЇГ°Г®ГІГЁГў Г·Г Г±Г®ГўГ®Г© Г­Г Г·ГЁГ­Г Гї Г± ГўГҐГ°ГµГ­ГҐГ© Г«ГҐГўГ®Г©?	
 	c_dp_t alpha((OX_DEVICE[i - 1] + OX_DEVICE[i]) * 0.5, (OY_DEVICE[j - 1] + OY_DEVICE[j]) * 0.5),
 		beta((OX_DEVICE[i + 1] + OX_DEVICE[i]) * 0.5, (OY_DEVICE[j - 1] + OY_DEVICE[j]) * 0.5),
 		gamma((OX_DEVICE[i + 1] + OX_DEVICE[i]) * 0.5, (OY_DEVICE[j + 1] + OY_DEVICE[j]) * 0.5),
@@ -921,6 +921,73 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 	c_dp_t bottom(OX_DEVICE[i], OY_DEVICE[j-1]);
 	c_dp_t center(OX_DEVICE[i], OY_DEVICE[j]);
 
+	// РїСЂРѕРІРµСЂРёРј СЃР»СѓС‡Р°Р№ РІС‹Р»РµС‚Р° С‚РѕС‡РєРё Р·Р° Р»РµРІСѓСЋ РіСЂР°РЅРёС†Сѓ
+	if (center.x <= 0) // РІС‹Р»РµС‚ Р·Р° Р»РµРІСѓСЋ РіСЂР°РЅРёС†Сѓ
+	{
+		c_dp_t center_tk(OX_DEVICE[i], OY_DEVICE[j]);
+		// РЅР°Р№РґРµРј С‚РѕС‡РєСѓ (t, y) РїРµСЂРµСЃРµС‡РµРЅРёСЏ С‚СЂР°РµРєС‚РѕСЂРёРё Рё РѕСЃРё РѕСЂРґРёРЅР°С‚
+												
+		double y_ = 0;
+		double t_ = 0;
+		if ( center_tk.x - center.x < FLT_MIN )
+		{ 
+			y_ = 0.5 * (center_tk.y + center_tk.y); 
+		}
+		else 
+		{ 
+			y_ = center_tk.y - center.x 
+			* ((center_tk.y - center.y) / (center_tk.x - center.x)); 
+		}		
+
+		// РЅР°Р№РґРµРј РІСЂРµРјСЏ t* РІ С‚РѕС‡РєРµ РїРµСЂРµС‡РµСЃРµРЅРёСЏ 
+		// СѓСЂР°РІРЅРµРЅРёРµ РїСЂСЏРјРѕР№ РґР»СЏ С‚РѕС‡РєРё (y, t)
+		// t - t1 / t2-t1 = y-y1/y2-y1
+		// => t = t1 + (y-y1)*(t2-t1)/y2-y1
+		// Р·РґРµСЃСЊ center_tk = РїРµСЂРІР°СЏ С‚РѕС‡РєР° 
+		// center = РІС‚РѕСЂР°СЏ
+		// TAU = t2 - t1
+		// TIME = РІСЂРµРјСЏ РЅР° K СЃР»РѕРµ РїРѕ РІСЂРµРјРµРЅРё
+		t_ = C_TIME + C_TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
+
+		// РїРѕСЃС‡РёС‚Р°РµРј TAU* 
+		double tau_ = C_TIME - t_;
+
+		double u = func_u(C_B, left.x, left.y);
+		double v = func_v(C_UB, C_BB, C_LB, C_RB, t_, left.x, left.y);
+		left.x = left.x - tau_ * u;
+		left.y = left.y - tau_ * v;
+		u = func_u(C_B, right.x, right.y);
+		v = func_v(C_UB, C_BB, C_LB, C_RB, t_, right.x, right.y);
+		right.x = right.x - tau_ * u;
+		right.y = right.y - tau_ * v;
+		u = func_u(C_B, up.x, up.y);
+		v = func_v(C_UB, C_BB, C_LB, C_RB, t_, up.x, up.y);
+		up.x = up.x - tau_ * u;
+		up.y = up.y - tau_ * v;
+		u = func_u(C_B, bottom.x, bottom.y);
+		v = func_v(C_UB, C_BB, C_LB, C_RB, t_, bottom.x, bottom.y);
+		bottom.x = bottom.x - tau_ * u;
+		bottom.y = bottom.y - tau_ * v;	
+		u = func_u(C_B, center.x, center.y);
+		v = func_v(C_UB, C_BB, C_LB, C_RB, t_, center.x, center.y);
+		center.x = center.x - tau_ * u;
+		center.y = center.y - tau_ * v;
+		
+		double w_x_ksi = 0.5 * ((right.x-center.x)/C_HX + (center.x - left.x)/C_HX);
+	    double w_y_ksi = 0.5 * ((right.y-center.y)/C_HX + (center.y - left.y)/C_HX);
+	    double w_x_the = 0.5 * ((up.x-center.x)/C_HY + (center.x - bottom.x)/C_HY);    
+	    double w_y_the = 0.5 * ((up.y-center.y)/C_HY + (center.y - bottom.y)/C_HY);
+	    double det = w_x_ksi*w_y_the - w_x_the*w_y_ksi;
+
+		int x = floor(center.x / C_HX);	
+		int y = floor(center.y / C_HY);	
+		double rho = prev_density[y * C_OX_LEN_1 + x] * (center.x - OX_DEVICE[x + 1]) * (center.y - OY_DEVICE[y + 1]);
+		rho -= prev_density[y * C_OX_LEN_1 + x + 1] * (center.x - OX_DEVICE[x]) * (center.y - OY_DEVICE[y + 1]);
+		rho += prev_density[(y + 1) * C_OX_LEN_1 + x + 1] * (center.x - OX_DEVICE[x]) * (center.y - OY_DEVICE[y]);
+		rho -= prev_density[(y + 1) * C_OX_LEN_1 + x] * (center.x - OX_DEVICE[x + 1]) * (center.y - OY_DEVICE[y]);    
+		return det * rho * C_INVERTED_HX_HY;
+	}
+
 	double u = func_u(C_B, left.x, left.y);
 	double v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, left.x, left.y);
 	left.x = left.x - C_TAU * u;
@@ -1061,7 +1128,7 @@ float solve_cuda(double* density)
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
-	printf("Computation Time %f\n", time);
+	//printf("Computation Time %f\n", time);
 	cudaFree(result);
 	cudaFree(prev_result);
 	cudaFree(ox);
@@ -1071,7 +1138,7 @@ float solve_cuda(double* density)
 	return time;
 }
 
-float solve_quad_cuda(double* density)
+float solve_quad_cuda(double* density, float& time)
 {
 	const int gridSize = 256;
 	const int blockSize =  512; 
@@ -1089,7 +1156,6 @@ float solve_quad_cuda(double* density)
 	}
 
 	cudaEvent_t start, stop;
-	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
     checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
@@ -1155,7 +1221,8 @@ float solve_quad_cuda(double* density)
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
-	printf("Computation Time %f s\n", time/1000);
+	time /=  1000;
+//	printf("Computation Time %f s\n", time/1000);
 	cudaFree(result);
 	cudaFree(prev_result);
 	cudaFree(ox);
@@ -1188,7 +1255,7 @@ double* compute_density_quad_cuda_internal(double b, double lb, double rb, doubl
     init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 //	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
-	time = solve_quad_cuda(density);
+	time = solve_quad_cuda(density, time);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;

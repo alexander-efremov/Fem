@@ -81,10 +81,82 @@ static double integrate(int i, int j)
 	dp_t right(OX[i+1], OY[j]);
 	dp_t up(OX[i], OY[j+1]);
 	dp_t bottom(OX[i], OY[j-1]);
+	
 	dp_t center(OX[i], OY[j]);
+	double u = func_u(B, center.x, center.y);
+	double v = func_v(UB, BB, LB, RB, TIME, center.x, center.y);
+	center.x = center.x - TAU * u;
+	center.y = center.y - TAU * v;
 
-	double u = func_u(B, left.x, left.y);
-	double v = func_v(UB, BB, LB, RB, TIME, left.x, left.y);
+	// проверим случай вылета точки за левую границу
+	if (center.x <= 0) // вылет за левую границу
+	{
+		dp_t center_tk(OX[i], OY[j]);
+		// найдем точку (t, y) пересечения траектории и оси ординат
+												
+		double y_ = 0;
+		double t_ = 0;
+		if ( center_tk.x - center.x < FLT_MIN )
+		{ 
+			y_ = 0.5 * (center_tk.y + center_tk.y); 
+		}
+		else 
+		{ 
+			y_ = center_tk.y - center.x 
+			* ((center_tk.y - center.y) / (center_tk.x - center.x)); 
+		}		
+
+		// найдем время t* в точке перечесения 
+		// уравнение прямой для точки (y, t)
+		// t - t1 / t2-t1 = y-y1/y2-y1
+		// => t = t1 + (y-y1)*(t2-t1)/y2-y1
+		// здесь center_tk = первая точка 
+		// center = вторая
+		// TAU = t2 - t1
+		// TIME = время на K слое по времени
+		t_ = TIME + TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
+
+		// посчитаем TAU* 
+		double tau_ = TIME - t_;
+
+		double u = func_u(B, left.x, left.y);
+		double v = func_v(UB, BB, LB, RB, t_, left.x, left.y);
+		left.x = left.x - tau_ * u;
+		left.y = left.y - tau_ * v;
+		u = func_u(B, right.x, right.y);
+		v = func_v(UB, BB, LB, RB, t_, right.x, right.y);
+		right.x = right.x - tau_ * u;
+		right.y = right.y - tau_ * v;
+		u = func_u(B, up.x, up.y);
+		v = func_v(UB, BB, LB, RB, t_, up.x, up.y);
+		up.x = up.x - tau_ * u;
+		up.y = up.y - tau_ * v;
+		u = func_u(B, bottom.x, bottom.y);
+		v = func_v(UB, BB, LB, RB, t_, bottom.x, bottom.y);
+		bottom.x = bottom.x - tau_ * u;
+		bottom.y = bottom.y - tau_ * v;	
+		u = func_u(B, center.x, center.y);
+		v = func_v(UB, BB, LB, RB, t_, center.x, center.y);
+		center.x = center.x - tau_ * u;
+		center.y = center.y - tau_ * v;
+		
+		double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
+	    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
+	    double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
+	    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
+	    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
+
+		int x = floor(center.x / HX);	
+		int y = floor(center.y / HY);	
+		double rho = PREV_DENSITY[y * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y + 1]);
+		rho -= PREV_DENSITY[y * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y + 1]);
+		rho += PREV_DENSITY[(y + 1) * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y]);
+		rho -= PREV_DENSITY[(y + 1) * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y]);    
+		return det * rho * INVERTED_HX_HY;
+	}
+
+	u = func_u(B, left.x, left.y);
+	v = func_v(UB, BB, LB, RB, TIME, left.x, left.y);
 	left.x = left.x - TAU * u;
 	left.y = left.y - TAU * v;
 	u = func_u(B, right.x, right.y);
@@ -98,16 +170,12 @@ static double integrate(int i, int j)
 	u = func_u(B, bottom.x, bottom.y);
 	v = func_v(UB, BB, LB, RB, TIME, bottom.x, bottom.y);
 	bottom.x = bottom.x - TAU * u;
-	bottom.y = bottom.y - TAU * v;
-	u = func_u(B, center.x, center.y);
-	v = func_v(UB, BB, LB, RB, TIME, center.x, center.y);
-	center.x = center.x - TAU * u;
-	center.y = center.y - TAU * v;	
+	bottom.y = bottom.y - TAU * v;	
 	
-	double w_x_ksi = 0.5*((right.x-center.x)/HX + (center.x - left.x)/HX);
-    double w_y_ksi = 0.5*((right.y-center.y)/HX + (center.y - left.y)/HX);
-    double w_x_the = 0.5*((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
-    double w_y_the = 0.5*((up.y-center.y)/HY + (center.y - bottom.y)/HY);
+	double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
+    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
+    double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
+    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
     double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
 
 	int x = floor(center.x / HX);	
@@ -153,10 +221,10 @@ static void solve(double* density, double& time)
 #endif
  
 #ifdef _OPENMP
-    printf("OPENMP timer function is used!\n");
+//    printf("OPENMP timer function is used!\n");
     timeStart = omp_get_wtime();
 #else
-    printf("Standart timer function is used!\n");
+//    printf("Standart timer function is used!\n");
     StartTimer();
 #endif        
     fflush(stdout);    
@@ -190,11 +258,11 @@ static void solve(double* density, double& time)
 	}
 #ifdef _OPENMP
 	timeEnd = omp_get_wtime();
-	time = timeEnd-timeStart;
-	printf("time %f s.\n", time);
+	time = (timeEnd-timeStart)/1000;
+//	printf("time %f s.\n", time);
 #else
-	time = GetTimer();
-	printf("time %f s.\n", time/1000);
+	time = GetTimer()/1000;
+//	printf("time %f s.\n", time/1000);
 #endif
 	delete [] PREV_DENSITY;
 }

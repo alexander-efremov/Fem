@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <string>
 #include "common.h"
 #include "test_utils.h"
 #include "LowOrdOper.h"
@@ -35,7 +36,6 @@ protected:
 		                       p.ub, p.tau, p.t_count, p.x_size,
 		                       p.y_size, p.norm, time);
 	}
-
 	
 	double* solve_internal_cuda(ComputeParameters& p, float& time)
 	{
@@ -53,6 +53,21 @@ protected:
 		return solByEqualVolWithVarStepPlusPrint1(p.a, p.b, p.lb, p.rb, p.bb,
 		                                          p.ub, p.tau, p.t_count, p.x_size,
 		                                          p.y_size, lvl);
+	}
+
+	void print_result_table_header()
+	{
+		printf("ALGO\t\t\tSIZE\t\tTIME\t\t\tNORM\n");
+	}
+
+	void print_result_table_footer()
+	{
+		printf("==============================================================================\n");	
+	}
+
+	void print_result_table_row(std::string algo_name, int size, float time, double norm)
+	{
+		printf("%s\t\t%d\t\t%f\t\t%le\n", algo_name.c_str(), size, time, norm);
 	}
 };
 
@@ -183,48 +198,50 @@ TEST_F(cpu, quad_test)
 	int first = 0, last = 5;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
 	for (int lvl = first; lvl < last; ++lvl)
 	{
-		printf("Start level %d\n", lvl);
 		fflush(stdout);
 		time = 0;
 		p.recompute_params(lvl);
-		//p.t_count = 1;
-		
+		//p.t_count = 1;		
 		double* data = solve_quad_internal(p, time);
-		 //_print_matrix(data, p.x_size+1, p.y_size+1);
-		 printf("norm = %le\n", p.norm);
+		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);
+		 //_print_matrix(data, p.x_size+1, p.y_size+1);		
 		delete[] data;		
-		data = solve_internal(p, time);
-		printf("norm = %le\n", p.norm);
+		data = solve_internal(p, time);		
+		print_result_table_row("cpu_orig", p.x_length(), time, p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
+
 	}
+	print_result_table_footer();
 }
 
 // test new version with replace of variables of integral
 TEST_F(cpu, cuda_quad_test)
 {
-	int first = 0, last = 7;
+	int first = 0, last = 1;
 	float time_cuda = 0;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
 	for (int lvl = first; lvl < last; ++lvl)
-	{
-		printf("Start level %d\n", lvl);
+	{		
 		fflush(stdout);
 		time = 0;
 		p.recompute_params(lvl);
 		//p.t_count = 1;
-		printf("%s\n", "CPU");
+
 		double* data = solve_quad_internal(p, time);
-		printf("norm = %le\n", p.norm);
+		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;		
-		printf("%s\n", "GPU");
+
 		data = solve_internal_quad_cuda(p, time_cuda);
-		printf("norm = %le\n", p.norm);
+		print_result_table_row("gpu_quad", p.x_length(), time_cuda, p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
 	}
+	print_result_table_footer();
 }

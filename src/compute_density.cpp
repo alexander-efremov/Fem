@@ -1410,7 +1410,6 @@ inline static double get_norm_of_error(double* density, double ts_count_mul_step
 
 static void solve(double* density, double& time)
 {
-	printf("%s\n", "old algo");
 	PREV_DENSITY = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
 	{
@@ -1433,10 +1432,10 @@ static void solve(double* density, double& time)
 #endif
  
 #ifdef _OPENMP
-    printf("OPENMP timer function is used!\n");
+//    printf("OPENMP timer function is used!\n");
     timeStart = omp_get_wtime();
 #else
-    printf("Standart timer function is used!\n");
+//    printf("Standart timer function is used!\n");
     StartTimer();
 #endif        
      fflush(stdout);    
@@ -1474,11 +1473,11 @@ static void solve(double* density, double& time)
 	}
 #ifdef _OPENMP
 	timeEnd = omp_get_wtime();
-	time = timeEnd-timeStart;
-	printf("time %f s.\n", time);
+	time = (timeEnd-timeStart)/1000;
+//	printf("time %f s.\n", time);
 #else
-	time = GetTimer();
-	printf("time %f s.\n", time/1000);
+	time = GetTimer()/1000;
+//	printf("time %f s.\n", time/1000);
 #endif
 	delete [] PREV_DENSITY;
 }
@@ -1572,7 +1571,6 @@ double* compute_density(double b, double lb, double rb, double bb, double ub,
 	solve(density, time);
 //	print_matrix11(density, ox_length+1, oy_length+1);
 	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
-	printf("norm = %f\n", norm);
 	clean();
 	return density;
 }
