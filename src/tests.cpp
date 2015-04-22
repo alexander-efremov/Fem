@@ -21,7 +21,7 @@ public:
 	cpu()
 	{
 	    #ifdef VER
-		 printf("%s\n", STRINGIZE_VALUE_OF(VER));
+//		 printf("%s\n", STRINGIZE_VALUE_OF(VER));
 	    #endif
 	}
 	
@@ -60,6 +60,7 @@ protected:
 
 	void print_result_table_header()
 	{
+		fflush(stdout);
 		printf("ALGO\t\t\tSIZE\t\tTIME\t\t\tNORM\t\tOMP\n");
 	}
 
@@ -70,9 +71,11 @@ protected:
 
 	void print_result_table_row(std::string algo_name, int size, float time, double norm)
 	{
-		int omptthreads = omp_get_num_threads();
+		fflush(stdout);
+		int omptthreads = strTo<int>(GetEnv("OMP_NUM_THREADS"));
 		std::string ompth = omptthreads == 0 ? "NO OMP" : toStr<int>(omptthreads);
-		printf("%s\t\t%d\t\t%f\t\t%le\t%s\n", algo_name.c_str(), size, time, norm, ompth.c_str());
+		printf("%s\t\t%d\t\t%le\t\t%le\t%s\n", algo_name.c_str(), size, time, norm, ompth.c_str());
+		fflush(stdout);
 	}
 };
 
@@ -273,15 +276,80 @@ TEST_F(cpu, cuda_quad_test)
 
 // ДИАПОЗОН СЕТОК ОТ 11 ДО 2561 (УРОВНИ: 0 ДО 8 ВКЛЮЧИТЕЛЬНО)
 
-//    РЕЗУЛЬТАТ: ТАБЛИЦА НОРМ ДЛЯ СЕТОК ОТ 11 ДО 2561 ДЛЯ СТАРОГО И НОВОГО ПОСЛ. АЛГОРИТМОВ
-// TEST_F(cpu, cpu_2_norm_test) {}
+// РЕЗУЛЬТАТ: ТАБЛИЦА НОРМ ДЛЯ СЕТОК ОТ 11 ДО 2561 ДЛЯ СТАРОГО И НОВОГО ПОСЛ. АЛГОРИТМОВ
+TEST_F(cpu, cpu_2_norm_test) 
+{
+	int first = 0, last = 9;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
+	fflush(stdout);
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		time = 0;
+		p.recompute_params(lvl);		
+		double* data = solve_internal(p, time); delete[] data;
+		print_result_table_row("cpu_orig", p.x_length(), time, p.norm);		
+	}
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_quad_internal(p, time); delete[] data;
+		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);
+	}
+	print_result_table_footer();
+}
 
 // 2) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ CUDA НОВОГО И СТАРОГО АЛГОРИТМОВ
 //	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА СТАРЫМ И НОВЫМ CUDA АЛГОРИТМОМ
-// TEST_F(cpu, gpu_2_time_test) {}
+TEST_F(cpu, gpu_2_time_test)
+{
+	int first = 0, last = 9;
+	float time_cuda = 0;
+	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
+	for (int lvl = first; lvl < last; ++lvl) 
+	{	
+		time_cuda = 0;
+		p.recompute_params(lvl);
+		double* data = solve_internal_quad_cuda(p, time_cuda); delete[] data;
+		print_result_table_row("gpu_quad", p.x_length(), time_cuda, p.norm);
+	}
+	for (int lvl = first; lvl < last; ++lvl) 
+	{	
+		time_cuda = 0;
+		p.recompute_params(lvl);
+		double* data = solve_internal_cuda(p, time_cuda); delete[] data;
+		print_result_table_row("gpu__old", p.x_length(), time_cuda, p.norm);
+	}	
+	print_result_table_footer();
+}
 
 // 3) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ OPENMP НОВОГО И СТАРОГО АЛГОРИТМОВ
 //	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА СТАРЫМ И НОВЫМ OPENMP АЛГОРИТМОМ
-// TEST_F(cpu, omp_2_time_test) {}
+TEST_F(cpu, omp_2_time_test) 
+{
+	int first = 0, last = 1;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
+	fflush(stdout);
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		time = 0;
+		p.recompute_params(lvl);		
+		double* data = solve_internal(p, time); delete[] data;
+		print_result_table_row("omp_cpu_orig", p.x_length(), time, p.norm);		
+	}
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_quad_internal(p, time); delete[] data;
+		print_result_table_row("omp_cpu_quad", p.x_length(), time, p.norm);
+	}
+	print_result_table_footer();
+}
 
 /* ===================================================================================== */

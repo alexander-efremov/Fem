@@ -56,11 +56,29 @@ inline void _print_matrix(double* a, int n, int m, int precision = 8)
 	}
 }
 
+template <typename T> T strTo(std::string tmp)
+{
+	T output;
+	std::istringstream in(tmp);
+	in >> output;
+	return output;
+}
+
 template <typename T> std::string toStr(T tmp)
 {
 	std::ostringstream out;
 	out << tmp;
 	return out.str();
+}
+
+std::string GetEnv(const std::string &var)
+{
+	const char* val = ::getenv(var.c_str());
+	if (val == 0)
+	{
+		return "";
+	}
+	return val;
 }
 
 

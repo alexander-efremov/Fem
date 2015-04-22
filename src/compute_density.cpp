@@ -1422,7 +1422,7 @@ static void solve(double* density, double& time)
 	int i = 0, j = 0, tl = 0;
         double timeStart = 0, timeEnd=0;
 #ifdef _OPENMP
-    printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
+//    printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
     long count = 0;
     // dummy parallel section to get all threads running
     #pragma omp parallel private(i,j)
