@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+#include <iostream>
 #include <string>
+#include <stdlib.h>
 #include "common.h"
 #include "test_utils.h"
 #include "LowOrdOper.h"
@@ -9,7 +11,8 @@
   #include <omp.h>
 #else
   #define omp_get_thread_num() 1
-  #define omp_get_num_threads() 1
+  #define omp_get_num_threads() 0
+  #define OMP_NUM_THREADS -1
 #endif
 
 class cpu : public testing::Test
@@ -57,17 +60,19 @@ protected:
 
 	void print_result_table_header()
 	{
-		printf("ALGO\t\t\tSIZE\t\tTIME\t\t\tNORM\n");
+		printf("ALGO\t\t\tSIZE\t\tTIME\t\t\tNORM\t\tOMP\n");
 	}
 
 	void print_result_table_footer()
 	{
-		printf("==============================================================================\n");	
+		printf("=========================================================================================\n");	
 	}
 
 	void print_result_table_row(std::string algo_name, int size, float time, double norm)
 	{
-		printf("%s\t\t%d\t\t%f\t\t%le\n", algo_name.c_str(), size, time, norm);
+		int omptthreads = omp_get_num_threads();
+		std::string ompth = omptthreads == 0 ? "NO OMP" : toStr<int>(omptthreads);
+		printf("%s\t\t%d\t\t%f\t\t%le\t%s\n", algo_name.c_str(), size, time, norm, ompth.c_str());
 	}
 };
 
@@ -176,14 +181,12 @@ TEST_F(cpu, china2015_test)
 
 TEST_F(cpu, valgrind_test)
 {
-//	int first = 4, last = 8;
 	int first = 1, last = 2;
 	double time = 0;
 
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
 	{
-		printf("Start level %d\n", lvl);
 		fflush(stdout);
 		time = 0;
 		p.recompute_params(lvl);
@@ -218,6 +221,25 @@ TEST_F(cpu, quad_test)
 	print_result_table_footer();
 }
 
+TEST_F(cpu, cuda_quad_2561_test)
+{
+	int first = 8, last = 9;
+	float time_cuda = 0;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		fflush(stdout);
+		time = 0;
+		p.recompute_params(lvl);		
+		double* data = solve_internal_quad_cuda(p, time_cuda);
+		print_result_table_row("gpu_quad", p.x_length(), time_cuda, p.norm);		
+		delete[] data;
+	}
+	print_result_table_footer();
+}
+
 // test new version with replace of variables of integral
 TEST_F(cpu, cuda_quad_test)
 {
@@ -245,3 +267,21 @@ TEST_F(cpu, cuda_quad_test)
 	}
 	print_result_table_footer();
 }
+
+
+/* ГРУППА ТЕСТОВ ДЛЯ ОБЩЕГО ТЕСТИРОВАНИЯ  СТАРЫХ И НОВЫХ АЛГООИТМОВ ДЛЯ СТАТЬИ 2015 ГОДА */
+
+// ДИАПОЗОН СЕТОК ОТ 11 ДО 2561 (УРОВНИ: 0 ДО 8 ВКЛЮЧИТЕЛЬНО)
+
+//    РЕЗУЛЬТАТ: ТАБЛИЦА НОРМ ДЛЯ СЕТОК ОТ 11 ДО 2561 ДЛЯ СТАРОГО И НОВОГО ПОСЛ. АЛГОРИТМОВ
+// TEST_F(cpu, cpu_2_norm_test) {}
+
+// 2) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ CUDA НОВОГО И СТАРОГО АЛГОРИТМОВ
+//	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА СТАРЫМ И НОВЫМ CUDA АЛГОРИТМОМ
+// TEST_F(cpu, gpu_2_time_test) {}
+
+// 3) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ OPENMP НОВОГО И СТАРОГО АЛГОРИТМОВ
+//	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА СТАРЫМ И НОВЫМ OPENMP АЛГОРИТМОМ
+// TEST_F(cpu, omp_2_time_test) {}
+
+/* ===================================================================================== */

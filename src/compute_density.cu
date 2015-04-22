@@ -920,7 +920,7 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 	c_dp_t up(OX_DEVICE[i], OY_DEVICE[j+1]);
 	c_dp_t bottom(OX_DEVICE[i], OY_DEVICE[j-1]);
 	c_dp_t center(OX_DEVICE[i], OY_DEVICE[j]);
-
+	
 	// проверим случай вылета точки за левую границу
 	if (center.x <= 0) // вылет за левую границу
 	{
@@ -1049,6 +1049,7 @@ __global__ void kernel_quad(double* prev_result, double* result)
 		}
 		else if (i > 0 && j > 0 && j != C_OY_LEN && i != C_OX_LEN)
 		{                   			
+			//if (i == 1 && j == 1) printf("%le\n", C_TIME);
 			result[ opt ] =  integrate_quad(prev_result, i, j);						
 			result[ opt ] += C_TAU * func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]);					
 		}
@@ -1059,8 +1060,6 @@ float solve_cuda(double* density)
 {
 	const int gridSize = 256;
 	const int blockSize =  512; 
-	//const int gridSize = 1;
-	//const int blockSize =  1;
 	double *result = NULL, *prev_result = NULL, *ox = NULL, *oy=NULL;
 	int size = sizeof(double)*XY_LEN;
 	double *prev_result_h = new double[XY_LEN];
@@ -1185,20 +1184,10 @@ float solve_quad_cuda(double* density, float& time)
 
 	cudaEventRecord(start, 0);   
 
-/*	TIME = 0;
-	int tl = 0;	
-    while(tl < TIME_STEP_CNT)
-	{
-	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
-            TIME = TAU * (tl+1);
-	    checkCuda(cudaMemcpyToSymbol(C_TIME, &TIME, sizeof(double)));	
-	    kernel_quad<<<gridSize, blockSize>>>(prev_result, result);
-	    tl++;	  
-	}*/
-
 	TIME = 0;
 	int tl = 0;
 	int tempTl  = TIME_STEP_CNT -1;
+
     while(tl < tempTl)
 	{
 	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));

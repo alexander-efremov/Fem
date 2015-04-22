@@ -87,6 +87,7 @@ static double integrate(int i, int j)
 	double v = func_v(UB, BB, LB, RB, TIME, center.x, center.y);
 	center.x = center.x - TAU * u;
 	center.y = center.y - TAU * v;
+	
 
 	// проверим случай вылета точки за левую границу
 	if (center.x <= 0) // вылет за левую границу

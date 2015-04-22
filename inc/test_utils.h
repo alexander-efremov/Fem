@@ -56,6 +56,12 @@ inline void _print_matrix(double* a, int n, int m, int precision = 8)
 	}
 }
 
+template <typename T> std::string toStr(T tmp)
+{
+	std::ostringstream out;
+	out << tmp;
+	return out.str();
+}
 
 
 #endif /* TEST_UTILS_H */
