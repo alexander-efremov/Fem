@@ -21,7 +21,7 @@ const double C_par_b = 10.; //   -  Item of second parameter from "u_funcion" or
 
 double C_lbDom = 0., C_rbDom = 1.; //   -  Left and right boundaries of rectangular domain.
 
-const int C_numOfOXSt = 10; //   -  Number of OX steps (segments).
+
 
 double *masOX; //   -  Massive of OX points. Dimension = C_numOfOXSt +1.
 
@@ -29,7 +29,9 @@ double *masOX; //   -  Massive of OX points. Dimension = C_numOfOXSt +1.
 
 double C_bbDom = 0., C_ubDom = 1.; //   -  Botton and upper boundaries of rectangular domain.
 
+const int C_numOfOXSt = 10; //   -  Number of OX steps (segments).
 const int C_numOfOYSt = 10; //   -  Number of OY steps (segments).
+
 
 double *masOY; //   -  Massive of OY points. Dimension = C_numOfOYSt +1.
 

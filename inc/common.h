@@ -44,6 +44,7 @@ struct ComputeParameters
 	{
 		const int x_length_default = 10;
 		const int y_length_default = 10;
+
 		t_count = 50;
 		tau = 0.02;
 		a = 2.;
@@ -74,10 +75,11 @@ struct ComputeParameters
 		return y_size + 1;
 	}
 
-	void recompute_params(int step)
-	{
-		const int x_length_default = 10;
-		const int y_length_default = 10;
+	void recompute_params(int step, int step_multiplier = 1)
+    {
+		int x_length_default = 10*step_multiplier;
+		int y_length_default = 10*step_multiplier;		
+
 		t_count = 50;
 		tau = 0.02;
 		double value = pow(2., 0);

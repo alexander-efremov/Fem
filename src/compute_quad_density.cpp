@@ -138,8 +138,8 @@ static double integrate(int i, int j)
 		bottom.y = bottom.y - tau_ * v;	
 		u = func_u(B, center.x, center.y);
 		v = func_v(UB, BB, LB, RB, t_, center.x, center.y);
-		center.x = center.x - tau_ * u;
-		center.y = center.y - tau_ * v;
+		center.x = center_tk.x - tau_ * u;
+		center.y = center_tk.y - tau_ * v;
 		
 		double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
 	    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
@@ -147,7 +147,9 @@ static double integrate(int i, int j)
 	    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
 	    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;	
 		double rho =  analytical_solution(t_, 0, y_);
-		return det * rho * INVERTED_HX_HY;
+		//printf("%s\n", "WALL COLLISION");
+		//return det * rho * INVERTED_HX_HY;
+		return det * rho;
 	}
 
 	u = func_u(B, left.x, left.y);

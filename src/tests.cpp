@@ -226,6 +226,34 @@ TEST_F(cpu, quad_test)
 	print_result_table_footer();
 }
 
+// ТЕСТ С НАЛЕТОМ ТОЧЕК НА СТЕНКУ ДЛЯ АЛГОРИТМА QUAD
+TEST_F(cpu, quad_wall_collision_test)
+{
+	int first = 0, last = 4;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_quad_internal(p, time);
+		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);		 
+		delete[] data;		
+	}
+
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		time = 0;
+		p.recompute_params(lvl, 2); // ДЕЛЕАЕМ СЕТКУ В 2 РАЗА МЕЛЬЧЕ, ЧТОБЫ БЫЛИ СТОЛКНОВЕНИЯ СО СТЕНКОЙ
+		double* data = solve_quad_internal(p, time);
+		print_result_table_row("cpu_quad_wc", p.x_length(), time, p.norm);		 
+		delete[] data;		
+	}
+	
+	print_result_table_footer();
+}
+
 TEST_F(cpu, cuda_quad_2561_test)
 {
 	int first = 8, last = 9;

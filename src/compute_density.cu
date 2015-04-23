@@ -947,7 +947,7 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 		// center = вторая
 		// TAU = t2 - t1
 		// TIME = время на K слое по времени
-		t_ = C_TIME + C_TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
+		t_ = C_TIME - C_TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
 
 		// посчитаем TAU* 
 		double tau_ = C_TIME - t_;
@@ -970,8 +970,8 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 		bottom.y = bottom.y - tau_ * v;	
 		u = func_u(C_B, center.x, center.y);
 		v = func_v(C_UB, C_BB, C_LB, C_RB, t_, center.x, center.y);
-		center.x = center.x - tau_ * u;
-		center.y = center.y - tau_ * v;
+		center.x = center_tk.x - tau_ * u;
+		center.y = center_tk.y - tau_ * v;
 		
 		double w_x_ksi = 0.5 * ((right.x-center.x)/C_HX + (center.x - left.x)/C_HX);
 	    double w_y_ksi = 0.5 * ((right.y-center.y)/C_HX + (center.y - left.y)/C_HX);
@@ -979,12 +979,7 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 	    double w_y_the = 0.5 * ((up.y-center.y)/C_HY + (center.y - bottom.y)/C_HY);
 	    double det = w_x_ksi*w_y_the - w_x_the*w_y_ksi;
 
-		int x = floor(center.x / C_HX);	
-		int y = floor(center.y / C_HY);	
-		double rho = prev_density[y * C_OX_LEN_1 + x] * (center.x - OX_DEVICE[x + 1]) * (center.y - OY_DEVICE[y + 1]);
-		rho -= prev_density[y * C_OX_LEN_1 + x + 1] * (center.x - OX_DEVICE[x]) * (center.y - OY_DEVICE[y + 1]);
-		rho += prev_density[(y + 1) * C_OX_LEN_1 + x + 1] * (center.x - OX_DEVICE[x]) * (center.y - OY_DEVICE[y]);
-		rho -= prev_density[(y + 1) * C_OX_LEN_1 + x] * (center.x - OX_DEVICE[x + 1]) * (center.y - OY_DEVICE[y]);    
+		double rho =  analytical_solution(t_, 0, y_);
 		return det * rho * C_INVERTED_HX_HY;
 	}
 
