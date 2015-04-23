@@ -61,20 +61,23 @@ protected:
 	void print_result_table_header()
 	{
 		fflush(stdout);
-		printf("ALGO\t\t\tSIZE\t\tTIME\t\t\tNORM\t\tOMP\n");
+		printf("|===============================================================================================|\n");	
+		printf("|ALGO\t\t|\tSIZE\t|\tTIME\t\t|\tNORM\t\t|\tOMP\t|\n");
+		printf("|===============================================================================================|\n");	
 	}
 
 	void print_result_table_footer()
 	{
-		printf("=========================================================================================\n");	
+		printf("|===============================================================================================|\n");	
 	}
 
 	void print_result_table_row(std::string algo_name, int size, float time, double norm)
 	{
 		fflush(stdout);
 		int omptthreads = strTo<int>(GetEnv("OMP_NUM_THREADS"));
-		std::string ompth = omptthreads == 0 ? "NO OMP" : toStr<int>(omptthreads);
-		printf("%s\t\t%d\t\t%le\t\t%le\t%s\n", algo_name.c_str(), size, time, norm, ompth.c_str());
+		std::string ompth = omptthreads <= 0 ? "NO OMP" : toStr<int>(omptthreads);
+		ompth = omptthreads >= 64 ? "NO OMP" : toStr<int>(omptthreads);
+		printf("|%s\t|\t%d\t|\t%le\t|\t%le\t|\t%s\t|\n", algo_name.c_str(), size, time, norm, ompth.c_str());
 		fflush(stdout);
 	}
 };
@@ -168,7 +171,6 @@ TEST_F(cpu, test_fma)
 TEST_F(cpu, china2015_test)
 {
 	int first = 4, last = 9;
-//	int first = 6, last = 7;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	for (int lvl = first; lvl < last; ++lvl)
@@ -201,25 +203,25 @@ TEST_F(cpu, valgrind_test)
 // test new version with replace of variables of integral
 TEST_F(cpu, quad_test)
 {
-	int first = 0, last = 5;
+	int first = 0, last = 4;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	print_result_table_header();
 	for (int lvl = first; lvl < last; ++lvl)
-	{
-		fflush(stdout);
+	{		
 		time = 0;
 		p.recompute_params(lvl);
-		//p.t_count = 1;		
 		double* data = solve_quad_internal(p, time);
-		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);
-		 //_print_matrix(data, p.x_size+1, p.y_size+1);		
+		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);		 
 		delete[] data;		
-		data = solve_internal(p, time);		
+	}
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_internal(p, time);		
 		print_result_table_row("cpu_orig", p.x_length(), time, p.norm);
-		//_print_matrix(data, p.x_size+1, p.y_size+1);
 		delete[] data;
-
 	}
 	print_result_table_footer();
 }
@@ -276,7 +278,7 @@ TEST_F(cpu, cuda_quad_test)
 
 // ДИАПОЗОН СЕТОК ОТ 11 ДО 2561 (УРОВНИ: 0 ДО 8 ВКЛЮЧИТЕЛЬНО)
 
-// РЕЗУЛЬТАТ: ТАБЛИЦА НОРМ ДЛЯ СЕТОК ОТ 11 ДО 2561 ДЛЯ СТАРОГО И НОВОГО ПОСЛ. АЛГОРИТМОВ
+// 1) РЕЗУЛЬТАТ: ТАБЛИЦА НОРМ ДЛЯ СЕТОК ОТ 11 ДО 2561 ДЛЯ СТАРОГО И НОВОГО ПОСЛ. АЛГОРИТМОВ
 TEST_F(cpu, cpu_2_norm_test) 
 {
 	int first = 0, last = 9;
@@ -290,7 +292,7 @@ TEST_F(cpu, cpu_2_norm_test)
 		p.recompute_params(lvl);		
 		double* data = solve_internal(p, time); delete[] data;
 		print_result_table_row("cpu_orig", p.x_length(), time, p.norm);		
-	}
+ 	}
 	for (int lvl = first; lvl < last; ++lvl)
 	{		
 		time = 0;

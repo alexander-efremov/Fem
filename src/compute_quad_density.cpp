@@ -115,7 +115,7 @@ static double integrate(int i, int j)
 		// center = вторая
 		// TAU = t2 - t1
 		// TIME = время на K слое по времени
-		t_ = TIME + TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
+		t_ = TIME - TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
 
 		// посчитаем TAU* 
 		double tau_ = TIME - t_;
@@ -145,14 +145,8 @@ static double integrate(int i, int j)
 	    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
 	    double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
 	    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
-	    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
-
-		int x = floor(center.x / HX);	
-		int y = floor(center.y / HY);	
-		double rho = PREV_DENSITY[y * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y + 1]);
-		rho -= PREV_DENSITY[y * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y + 1]);
-		rho += PREV_DENSITY[(y + 1) * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y]);
-		rho -= PREV_DENSITY[(y + 1) * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y]);    
+	    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;	
+		double rho =  analytical_solution(t_, 0, y_);
 		return det * rho * INVERTED_HX_HY;
 	}
 
