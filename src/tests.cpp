@@ -360,7 +360,7 @@ TEST_F(cpu, gpu_2_time_test)
 //	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА СТАРЫМ И НОВЫМ OPENMP АЛГОРИТМОМ
 TEST_F(cpu, omp_2_time_test) 
 {
-	int first = 0, last = 1;
+	int first = 0, last = 9;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	print_result_table_header();
