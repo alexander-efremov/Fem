@@ -351,7 +351,7 @@ TEST_F(cpu, gpu_2_time_test)
 		time_cuda = 0;
 		p.recompute_params(lvl);
 		double* data = solve_internal_cuda(p, time_cuda); delete[] data;
-		print_result_table_row("gpu__old", p.x_length(), time_cuda, p.norm);
+		print_result_table_row("gpu_old", p.x_length(), time_cuda, p.norm);
 	}	
 	print_result_table_footer();
 }
