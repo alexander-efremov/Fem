@@ -1473,7 +1473,7 @@ static void solve(double* density, double& time)
 	}
 #ifdef _OPENMP
 	timeEnd = omp_get_wtime();
-	time = (timeEnd-timeStart)/1000;
+	time = (timeEnd-timeStart);
 //	printf("time %f s.\n", time);
 #else
 	time = GetTimer()/1000;
