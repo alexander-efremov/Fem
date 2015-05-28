@@ -1122,6 +1122,7 @@ float solve_cuda(double* density)
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
+	time /= 1000; // to seconds
 	//printf("Computation Time %f\n", time);
 	cudaFree(result);
 	cudaFree(prev_result);
