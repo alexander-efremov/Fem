@@ -382,28 +382,20 @@ TEST_F(cpu, omp_2_time_test)
 	print_result_table_footer();
 }
 
-// 3) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ OPENMP НОВОГО И СТАРОГО АЛГОРИТМОВ
-//	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА СТАРЫМ И НОВЫМ OPENMP АЛГОРИТМОМ
-TEST_F(cpu, omp_2_time_test_24) 
+// 3.1) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ OPENMP СТАРОГО АЛГОРИТМА ДЛЯ 641 РЕТЕСТ
+TEST_F(cpu, omp_2_time_test_16_641) 
 {
-	int first = 8, last = 9;
+	int first = 6, last = 7;
 	double time = 0;
 	ComputeParameters p = ComputeParameters();
 	print_result_table_header();
 	fflush(stdout);
 	for (int lvl = first; lvl < last; ++lvl)
-	{		
-		time = 0;
-		p.recompute_params(lvl);		
-		double* data = solve_internal(p, time); delete[] data;
-		print_result_table_row("omp_cpu_orig", p.x_length(), time, p.norm);		
-	}
-	for (int lvl = first; lvl < last; ++lvl)
-	{		
+	{
 		time = 0;
 		p.recompute_params(lvl);
-		double* data = solve_quad_internal(p, time); delete[] data;
-		print_result_table_row("omp_cpu_quad", p.x_length(), time, p.norm);
+		double* data = solve_internal(p, time); delete[] data;
+		print_result_table_row("omp_cpu_orig", p.x_length(), time, p.norm);
 	}
 	print_result_table_footer();
 }

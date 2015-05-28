@@ -920,6 +920,10 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 	c_dp_t up(OX_DEVICE[i], OY_DEVICE[j+1]);
 	c_dp_t bottom(OX_DEVICE[i], OY_DEVICE[j-1]);
 	c_dp_t center(OX_DEVICE[i], OY_DEVICE[j]);
+	double u = func_u(C_B, center.x, center.y);
+	double v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, center.x, center.y);
+	center.x = center.x - C_TAU * u;
+	center.y = center.y - C_TAU * v;	
 	
 	// проверим случай вылета точки за левую границу
 	if (center.x <= 0) // вылет за левую границу
@@ -936,7 +940,7 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 		else 
 		{ 
 			y_ = center_tk.y - center.x 
-			* ((center_tk.y - center.y) / (center_tk.x - center.x)); 
+				* ((center_tk.y - center.y) / (center_tk.x - center.x)); 
 		}		
 
 		// найдем время t* в точке перечесения 
@@ -974,17 +978,17 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 		center.y = center_tk.y - tau_ * v;
 		
 		double w_x_ksi = 0.5 * ((right.x-center.x)/C_HX + (center.x - left.x)/C_HX);
-	    double w_y_ksi = 0.5 * ((right.y-center.y)/C_HX + (center.y - left.y)/C_HX);
-	    double w_x_the = 0.5 * ((up.x-center.x)/C_HY + (center.x - bottom.x)/C_HY);    
-	    double w_y_the = 0.5 * ((up.y-center.y)/C_HY + (center.y - bottom.y)/C_HY);
-	    double det = w_x_ksi*w_y_the - w_x_the*w_y_ksi;
+                double w_y_ksi = 0.5 * ((right.y-center.y)/C_HX + (center.y - left.y)/C_HX);
+	        double w_x_the = 0.5 * ((up.x-center.x)/C_HY + (center.x - bottom.x)/C_HY);    
+                double w_y_the = 0.5 * ((up.y-center.y)/C_HY + (center.y - bottom.y)/C_HY);
+	        double det = w_x_ksi*w_y_the - w_x_the*w_y_ksi;
 
 		double rho =  analytical_solution(t_, 0, y_);
 		return det * rho * C_INVERTED_HX_HY;
 	}
 
-	double u = func_u(C_B, left.x, left.y);
-	double v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, left.x, left.y);
+	u = func_u(C_B, left.x, left.y);
+	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, left.x, left.y);
 	left.x = left.x - C_TAU * u;
 	left.y = left.y - C_TAU * v;
 	u = func_u(C_B, right.x, right.y);
@@ -999,16 +1003,12 @@ __pure static double integrate_quad(double *prev_density, int i, int j)
 	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, bottom.x, bottom.y);
 	bottom.x = bottom.x - C_TAU * u;
 	bottom.y = bottom.y - C_TAU * v;
-	u = func_u(C_B, center.x, center.y);
-	v = func_v(C_UB, C_BB, C_LB, C_RB, C_TIME, center.x, center.y);
-	center.x = center.x - C_TAU * u;
-	center.y = center.y - C_TAU * v;	
 	
 	double w_x_ksi = 0.5*((right.x-center.x)/C_HX + (center.x - left.x)/C_HX);
-    double w_y_ksi = 0.5*((right.y-center.y)/C_HX + (center.y - left.y)/C_HX);
-    double w_x_the = 0.5*((up.x-center.x)/C_HY + (center.x - bottom.x)/C_HY);    
-    double w_y_the = 0.5*((up.y-center.y)/C_HY + (center.y - bottom.y)/C_HY);
-    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
+        double w_y_ksi = 0.5*((right.y-center.y)/C_HX + (center.y - left.y)/C_HX);
+        double w_x_the = 0.5*((up.x-center.x)/C_HY + (center.x - bottom.x)/C_HY);    
+        double w_y_the = 0.5*((up.y-center.y)/C_HY + (center.y - bottom.y)/C_HY);
+        double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
 
 	int x = floor(center.x / C_HX);	
 	int y = floor(center.y / C_HY);	
@@ -1044,7 +1044,6 @@ __global__ void kernel_quad(double* prev_result, double* result)
 		}
 		else if (i > 0 && j > 0 && j != C_OY_LEN && i != C_OX_LEN)
 		{                   			
-			//if (i == 1 && j == 1) printf("%le\n", C_TIME);
 			result[ opt ] =  integrate_quad(prev_result, i, j);						
 			result[ opt ] += C_TAU * func_f(C_B, C_TIME, C_UB, C_BB, C_LB, C_RB, OX_DEVICE[i], OY_DEVICE[j]);					
 		}
@@ -1070,7 +1069,7 @@ float solve_cuda(double* density)
 	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
-    checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
+        checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
 	checkCuda(cudaMemcpyToSymbol(C_B, &B, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_LB, &LB, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_RB, &RB, sizeof(double)));
@@ -1100,7 +1099,7 @@ float solve_cuda(double* density)
 	TIME = 0;
 	int tl = 0;
 	int tempTl  = TIME_STEP_CNT -1;
-    while(tl < tempTl)
+        while(tl < tempTl)
 	{
 	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
             TIME = TAU * (tl+1);
@@ -1153,7 +1152,7 @@ float solve_quad_cuda(double* density, float& time)
 	cudaEvent_t start, stop;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
-    checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
+        checkCuda(cudaMemcpyToSymbol(C_TAU, &TAU, sizeof(double)));	
 	checkCuda(cudaMemcpyToSymbol(C_B, &B, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_LB, &LB, sizeof(double)));
 	checkCuda(cudaMemcpyToSymbol(C_RB, &RB, sizeof(double)));
@@ -1184,7 +1183,7 @@ float solve_quad_cuda(double* density, float& time)
 	int tl = 0;
 	int tempTl  = TIME_STEP_CNT -1;
 
-    while(tl < tempTl)
+        while(tl < tempTl)
 	{
 	    checkCuda(cudaMemcpyToSymbol(C_PREV_TIME, &TIME, sizeof(double)));
             TIME = TAU * (tl+1);
