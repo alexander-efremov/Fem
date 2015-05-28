@@ -88,7 +88,6 @@ static double integrate(int i, int j)
 	center.x = center.x - TAU * u;
 	center.y = center.y - TAU * v;
 
-
 	// проверим случай вылета точки за левую границу
 	if (center.x <= 0) // вылет за левую границу
 	{
@@ -142,10 +141,10 @@ static double integrate(int i, int j)
 		center.y = center_tk.y - tau_ * v;
 		
 		double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
-	    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
-	    double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
-	    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
-	    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;	
+	        double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
+                double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
+	        double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
+	        double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;	
 		double rho =  analytical_solution(t_, 0, y_);
 		//printf("%s\n", "WALL COLLISION");
 		//return det * rho * INVERTED_HX_HY;
@@ -170,10 +169,10 @@ static double integrate(int i, int j)
 	bottom.y = bottom.y - TAU * v;	
 	
 	double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
-    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
-    double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
-    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
-    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
+        double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
+        double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
+        double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
+        double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
 
 	int x = floor(center.x / HX);	
 	int y = floor(center.y / HY);	
@@ -224,7 +223,7 @@ static void solve(double* density, double& time)
 //    printf("Standart timer function is used!\n");
     StartTimer();
 #endif        
-    fflush(stdout);    
+        fflush(stdout);    
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
 	{	    	
 		PREV_TIME = TIME;

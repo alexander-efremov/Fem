@@ -282,7 +282,7 @@ TEST_F(cpu, cuda_quad_test)
 	ComputeParameters p = ComputeParameters();
 	print_result_table_header();
 	for (int lvl = first; lvl < last; ++lvl)
-	{		
+	{
 		fflush(stdout);
 		time = 0;
 		p.recompute_params(lvl);
@@ -291,7 +291,7 @@ TEST_F(cpu, cuda_quad_test)
 		double* data = solve_quad_internal(p, time);
 		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);
 		//_print_matrix(data, p.x_size+1, p.y_size+1);
-		delete[] data;		
+		delete[] data;
 
 		data = solve_internal_quad_cuda(p, time_cuda);
 		print_result_table_row("gpu_quad", p.x_length(), time_cuda, p.norm);
@@ -315,14 +315,14 @@ TEST_F(cpu, cpu_2_norm_test)
 	print_result_table_header();
 	fflush(stdout);
 	for (int lvl = first; lvl < last; ++lvl)
-	{		
+	{
 		time = 0;
-		p.recompute_params(lvl);		
+		p.recompute_params(lvl);
 		double* data = solve_internal(p, time); delete[] data;
-		print_result_table_row("cpu_orig", p.x_length(), time, p.norm);		
+		print_result_table_row("cpu_orig", p.x_length(), time, p.norm);
  	}
 	for (int lvl = first; lvl < last; ++lvl)
-	{		
+	{
 		time = 0;
 		p.recompute_params(lvl);
 		double* data = solve_quad_internal(p, time); delete[] data;
@@ -340,14 +340,14 @@ TEST_F(cpu, gpu_2_time_test)
 	ComputeParameters p = ComputeParameters();
 	print_result_table_header();
 	for (int lvl = first; lvl < last; ++lvl) 
-	{	
+	{
 		time_cuda = 0;
 		p.recompute_params(lvl);
 		double* data = solve_internal_quad_cuda(p, time_cuda); delete[] data;
 		print_result_table_row("gpu_quad", p.x_length(), time_cuda, p.norm);
 	}
 	for (int lvl = first; lvl < last; ++lvl) 
-	{	
+	{
 		time_cuda = 0;
 		p.recompute_params(lvl);
 		double* data = solve_internal_cuda(p, time_cuda); delete[] data;
