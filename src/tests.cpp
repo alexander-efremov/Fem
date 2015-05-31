@@ -356,6 +356,24 @@ TEST_F(cpu, gpu_2_time_test)
 	print_result_table_footer();
 }
 
+// 2.1) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ CUDA НОВОГО АЛГОРИТМОВ
+//	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА НОВЫМ CUDA АЛГОРИТМОМ
+TEST_F(cpu, gpu_2_time_test_1)
+{
+	int first = 0, last = 9;
+	float time_cuda = 0;
+	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
+	for (int lvl = first; lvl < last; ++lvl) 
+	{
+		time_cuda = 0;
+		p.recompute_params(lvl);
+		double* data = solve_internal_quad_cuda(p, time_cuda); delete[] data;
+		print_result_table_row("gpu_quad", p.x_length(), time_cuda, p.norm);
+	}
+	print_result_table_footer();
+}
+
 // 3) ЗАМЕРЫ ВРЕМЕНИ РАСЧЕТОВ OPENMP НОВОГО И СТАРОГО АЛГОРИТМОВ
 //	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА СТАРЫМ И НОВЫМ OPENMP АЛГОРИТМОМ
 TEST_F(cpu, omp_2_time_test) 

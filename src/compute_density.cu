@@ -1177,6 +1177,8 @@ float solve_quad_cuda(double* density, float& time)
 	checkCuda(cudaMemcpyToSymbol(OX_DEVICE, &ox, sizeof(ox)));
 	checkCuda(cudaMemcpyToSymbol(OY_DEVICE, &oy, sizeof(oy)));	
 
+	checkCuda(cudaFuncSetCacheConfig(kernel_quad, cudaFuncCachePreferL1));
+
 	cudaEventRecord(start, 0);   
 
 	TIME = 0;
