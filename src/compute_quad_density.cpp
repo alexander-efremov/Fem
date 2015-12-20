@@ -3,10 +3,10 @@
 #include "utils.h"
 #include <algorithm>
 #ifdef _OPENMP
-  #include <omp.h>
+	#include <omp.h>
 #else
-  #define omp_get_thread_num() 1
-  #define omp_get_num_threads() 1
+	#define omp_get_thread_num() 1
+	#define omp_get_num_threads() 1
 #endif
 
 #define sqr(x) ((x)*(x))
@@ -22,7 +22,7 @@
 #elif __NVCC__
 #define __pure
 #else
-#define __pure 
+#define __pure
 #endif
 
 static double B; //-V707
@@ -76,7 +76,7 @@ __pure inline static double func_f(double b, double time, double ub, double bb, 
 }
 
 static double integrate(int i, int j)
-{	
+{
 	dp_t left(OX[i-1], OY[j]);
 	dp_t right(OX[i+1], OY[j]);
 	dp_t up(OX[i], OY[j+1]);
@@ -93,20 +93,19 @@ static double integrate(int i, int j)
 	{
 		dp_t center_tk(OX[i], OY[j]);
 		// найдем точку (t, y) пересечения траектории и оси ординат
-												
 		double y_ = 0;
 		double t_ = 0;
 		if ( center_tk.x - center.x < FLT_MIN )
-		{ 
-			y_ = 0.5 * (center_tk.y + center_tk.y); 
+		{
+			y_ = 0.5 * (center_tk.y + center_tk.y);
 		}
-		else 
-		{ 
+		else
+		{
 			y_ = center_tk.y - center.x 
-			* ((center_tk.y - center.y) / (center_tk.x - center.x)); 
-		}		
+			* ((center_tk.y - center.y) / (center_tk.x - center.x));
+		}
 
-		// найдем время t* в точке перечесения 
+		// найдем время t* в точке перечесения
 		// уравнение прямой для точки (y, t)
 		// t - t1 / t2-t1 = y-y1/y2-y1
 		// => t = t1 + (y-y1)*(t2-t1)/y2-y1
@@ -116,7 +115,7 @@ static double integrate(int i, int j)
 		// TIME = время на K слое по времени
 		t_ = TIME - TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
 
-		// посчитаем TAU* 
+		// посчитаем TAU*
 		double tau_ = TIME - t_;
 
 		double u = func_u(B, left.x, left.y);
@@ -134,17 +133,17 @@ static double integrate(int i, int j)
 		u = func_u(B, bottom.x, bottom.y);
 		v = func_v(UB, BB, LB, RB, t_, bottom.x, bottom.y);
 		bottom.x = bottom.x - tau_ * u;
-		bottom.y = bottom.y - tau_ * v;	
+		bottom.y = bottom.y - tau_ * v;
 		u = func_u(B, center.x, center.y);
 		v = func_v(UB, BB, LB, RB, t_, center.x, center.y);
 		center.x = center_tk.x - tau_ * u;
 		center.y = center_tk.y - tau_ * v;
-		
+
 		double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
-	        double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
-                double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
-	        double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
-	        double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;	
+		double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
+		double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);
+		double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
+		double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
 		double rho =  analytical_solution(t_, 0, y_);
 		//printf("%s\n", "WALL COLLISION");
 		//return det * rho * INVERTED_HX_HY;
@@ -166,20 +165,20 @@ static double integrate(int i, int j)
 	u = func_u(B, bottom.x, bottom.y);
 	v = func_v(UB, BB, LB, RB, TIME, bottom.x, bottom.y);
 	bottom.x = bottom.x - TAU * u;
-	bottom.y = bottom.y - TAU * v;	
-	
-	double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
-        double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
-        double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
-        double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
-        double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
+	bottom.y = bottom.y - TAU * v;
 
-	int x = floor(center.x / HX);	
-	int y = floor(center.y / HY);	
+	double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
+	double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
+	double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);
+	double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
+	double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
+
+	int x = floor(center.x / HX);
+	int y = floor(center.y / HY);
 	double rho = PREV_DENSITY[y * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y + 1]);
 	rho -= PREV_DENSITY[y * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y + 1]);
 	rho += PREV_DENSITY[(y + 1) * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y]);
-	rho -= PREV_DENSITY[(y + 1) * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y]);    
+	rho -= PREV_DENSITY[(y + 1) * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y]);
 	return det * rho * INVERTED_HX_HY;
 }
 
@@ -203,29 +202,29 @@ static void solve(double* density, double& time)
 			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
-	
+
 	int i = 0, j = 0, tl = 0;
-    double timeStart = 0, timeEnd=0;
+	double timeStart = 0, timeEnd=0;
 #ifdef _OPENMP
-//    printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
-    long count = 0;
-    // dummy parallel section to get all threads running
-    #pragma omp parallel private(i,j)
-    {
-      _InterlockedIncrement(&count);
-    }
+	// printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
+	long count = 0;
+	// dummy parallel section to get all threads running
+	#pragma omp parallel private(i,j)
+	{
+		_InterlockedIncrement(&count);
+	}
 #endif
- 
+
 #ifdef _OPENMP
-//    printf("OPENMP timer function is used!\n");
-    timeStart = omp_get_wtime();
+//	printf("OPENMP timer function is used!\n");
+	timeStart = omp_get_wtime();
 #else
-//    printf("Standart timer function is used!\n");
-    StartTimer();
-#endif        
-        fflush(stdout);    
+//	printf("Standart timer function is used!\n");
+	StartTimer();
+#endif
+	fflush(stdout);
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
-	{	    	
+	{
 		PREV_TIME = TIME;
 		TIME = TAU * tl;
 		for (int k = 0; k <= OX_LEN; k++)
@@ -233,20 +232,19 @@ static void solve(double* density, double& time)
 			density[k] = analytical_solution(OX[k], BB, TIME);
 			density[OX_LEN_1 * OY_LEN + k] = analytical_solution(OX[k], UB, TIME);
 		}
-
 		for (int u = 0; u <= OY_LEN; u++)
 		{
 			density[OX_LEN_1 * u] = analytical_solution(LB, OY[u], TIME);
 			density[OX_LEN_1 * u + OX_LEN] = analytical_solution(RB, OY[u], TIME);
 		}
 #ifdef _OPENMP
-   #pragma omp parallel for collapse(2) private(i, j)
-#endif		
+	#pragma omp parallel for collapse(2) private(i, j)
+#endif
 		for (j = 1; j < OY_LEN; ++j)
 		{
 			for (i = 1; i < OX_LEN; ++i)
-			{				
-				density[OX_LEN_1 * j + i] = integrate(i, j);						
+			{
+				density[OX_LEN_1 * j + i] = integrate(i, j);
 				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
 			}
 		}
@@ -264,7 +262,7 @@ static void solve(double* density, double& time)
 }
 
 inline static void init(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length)
+						double tau, int time_step_count, int ox_length, int oy_length)
 {
 	B = b;
 	UB = ub;
@@ -302,18 +300,18 @@ inline static void clean()
 	XY_LEN = 0;
 	HX = 0;
 	HY = 0;
-	INVERTED_HX_HY = 	0;
+	INVERTED_HX_HY = 0;
 	delete [] OX;
 	delete [] OY;
 }
 
 double* compute_quad_density(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
+								double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	solve(density, time);
-	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);	
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;
 }

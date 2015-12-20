@@ -1249,3 +1249,21 @@ double* compute_density_quad_cuda_internal(double b, double lb, double rb, doubl
         return NULL;
 #endif
 }
+
+double* compute_density_quad2_cuda_internal(double b, double lb, double rb, double bb, double ub,
+                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, float& time)
+{
+#ifdef __NVCC__	
+    init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
+	double* density = new double[XY_LEN];
+//	print_params(B, LB, RB, BB, UB, TAU, TIME_STEP_CNT, OX_LEN, OY_LEN);
+	//time = solve_quad_cuda(density, time);
+	time =1;
+	printf("%s\n", "NOT IMPLEMENTED compute_density_quad2_cuda_internal");
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
+	clean();
+	return density;
+#else
+        return NULL;
+#endif
+}

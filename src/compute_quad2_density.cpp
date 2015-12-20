@@ -3,10 +3,10 @@
 #include "utils.h"
 #include <algorithm>
 #ifdef _OPENMP
-  #include <omp.h>
+	#include <omp.h>
 #else
-  #define omp_get_thread_num() 1
-  #define omp_get_num_threads() 1
+	#define omp_get_thread_num() 1
+	#define omp_get_num_threads() 1
 #endif
 
 #define sqr(x) ((x)*(x))
@@ -22,7 +22,7 @@
 #elif __NVCC__
 #define __pure
 #else
-#define __pure 
+#define __pure
 #endif
 
 static double B; //-V707
@@ -50,137 +50,216 @@ __pure inline static double analytical_solution(double t, double x, double y)
 	return 1.1 + sin(t * x * y);
 }
 
-__pure inline static double func_u(double b, double x, double y)
-{
-	return b * y * (1 - y) * (M_PI_2 + atan(-x));
+inline static void __print_matrix11(double* a, int n, int m, int precision = 8) {
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < m; ++j) {
+			int k = i * n + j;
+			switch (precision) {
+			case 1:
+				printf("%.1f ", a[k]);
+				break;
+			case 2:
+				printf("%.2f ", a[k]);
+				break;
+			case 3:
+				printf("%.3f ", a[k]);
+				break;
+			case 4:
+				printf("%.4f ", a[k]);
+				break;
+			case 5:
+				printf("%.5f ", a[k]);
+				break;
+			case 6:
+				printf("%.6f ", a[k]);
+				break;
+			case 7:
+				printf("%.7f ", a[k]);
+				break;
+			case 8:
+				printf("%.8f ", a[k]);
+				break;
+			}
+		}
+		printf("\n");
+	}
 }
 
-__pure inline static double func_v(double ub, double bb, double lb, double rb, double time, double x, double y)
-{
-	return atan(0.1 * (x - lb) * (x - rb) * (1 + time) * (y - ub) * (y - bb));
+inline static void __print_vector(double* a, int n, int precision = 8) {
+	for (int k = 0; k < n; ++k) 
+	{
+			switch (precision) 
+			{
+			case 1:
+				printf("%.1f ", a[k]);
+				break;
+			case 2:
+				printf("%.2f ", a[k]);
+				break;
+			case 3:
+				printf("%.3f ", a[k]);
+				break;
+			case 4:
+				printf("%.4f ", a[k]);
+				break;
+			case 5:
+				printf("%.5f ", a[k]);
+				break;
+			case 6:
+				printf("%.6f ", a[k]);
+				break;
+			case 7:
+				printf("%.7f ", a[k]);
+				break;
+			case 8:
+				printf("%.8f ", a[k]);
+				break;
+			}
+	}
 }
 
-__pure inline static double func_f(double b, double time, double ub, double bb, double lb, double rb, double x, double y)
+static int f = 0;
+
+static double func_u()
 {
-	double arg_v = 0.1 * (x - lb) * (x - rb) * (1 + time) * (y - ub) * (y - bb);
-	double rho = analytical_solution(time, x, y);
-	double drho_dt = x * y * cos(time * x * y);
-	double drho_dx = time * y * cos(time * x * y);
-	double dtho_dy = time * x * cos(time * x * y);
-	double u = func_u(b, x, y);
-	double v = func_v(ub, bb, lb, rb, time, x, y);
-	double du_dx = -b * y * (1 - y) / (1 + sqr(x));
-	double dv_dx = 0.1 * (x - lb) * (x - rb) * (1 + time) * (y - bb + y - ub);
-	dv_dx /= (1 + arg_v * arg_v);
-	return drho_dt + rho * du_dx + u * drho_dx + rho * dv_dx + v * dtho_dy;
+	return 0;
+}
+static double func_v()
+{
+	return 0;
 }
 
-static double integrate(int i, int j)
-{	
-	dp_t left(OX[i-1], OY[j]);
-	dp_t right(OX[i+1], OY[j]);
-	dp_t up(OX[i], OY[j+1]);
-	dp_t bottom(OX[i], OY[j-1]);
-	
+// Calculate coordintes in tk-1 square by coordintes from 
+// ideal square and 4 points of tk-1 square
+static dp_t get_point_real_pt_by_ideal_pt(dp_t p1, dp_t p2, dp_t p3, dp_t p4,
+	dp_t ideal)
+{
+	dp_t r;
+	double x = p1.x + (p2.x - p1.x)*ideal.x + (p4.x - p1.x)*ideal.y 
+			+ (p1.x + p3.x - p2.x - p4.x)*ideal.x*ideal.y;
+	double y = p1.y + (p2.y - p1.y)*ideal.x + (p4.y - p1.y)*ideal.y
+			+ (p1.y + p3.y - p2.y - p4.y)*ideal.x*ideal.y;
+	r.x = x;
+	r.y = y;
+	return r;
+}
+// Calculate density in real point by 4 points of tk-1 square
+static double get_density_in_real_pt(dp_t p1, dp_t p2, dp_t p3, dp_t p4,
+	dp_t real)
+{
+	// find out in which square real point was placed
+	int i = static_cast<int>((real.x - FLT_MIN) / HX);
+	if (real.x - FLT_MIN <= 0) i -= 1;
+	int j = static_cast<int>((real.y - FLT_MIN) / HY);
+	if (real.y - FLT_MIN <= 0) j -= 1;
+	// if i,j = square index
+	// compute 4 points of this square
+	dp_t b_left;
+	b_left.x = i*HX;
+	b_left.y = j*HY;
+	dp_t b_right;
+	b_right.x = b_left.x + HX;
+	b_right.y = b_left.y;
+	dp_t u_left;
+	u_left.x = b_left.x;
+	u_left.y = b_left.y + HY;
+	dp_t u_right;
+	u_right.x = u_left.x + HX;
+	u_right.y = u_left.y;
+
+	double r = 0.;
+
+	// formula 4
+	r = PREV_DENSITY[j * OX_LEN_1 + i]*(1-(real.x - b_left.x)/HX)*(1 - (real.y - b_left.y)/HY)
+	+ PREV_DENSITY[(j+1) * OX_LEN_1 + i]*((real.x - b_left.x)/HX)*(1 - (real.y - b_left.y)/HY)
+	+ PREV_DENSITY[(j+1) * OX_LEN_1 + i + 1]*((real.x - b_left.x)/HX)*((real.y - b_left.y)/HY)
+	+ PREV_DENSITY[j * OX_LEN_1 + i + 1]*(1 - (real.x - b_left.x)/HX)*((real.y - b_left.y)/HY);
+
+	return r;
+}
+static double jakobian(dp_t p1, dp_t p2, dp_t p3, dp_t p4, dp_t ideal)
+{
+	double a11 = (p2.x - p1.x) + (p1.x + p3.x - p2.x - p4.x)*ideal.x;
+	double a12 = (p4.x - p1.x) + (p1.x + p3.x - p2.x - p4.x)*ideal.y;
+	double a21 = (p2.y - p1.y) + (p1.y + p3.y - p2.y - p4.y)*ideal.x;
+	double a22 = (p4.y - p1.y) + (p1.y + p3.y - p2.y - p4.y)*ideal.y;
+	double r = a11*a22 - a21*a12;
+	return r;
+}
+
+static double* create_mesh_vector(int n)
+{
+	double* a = new double[n];
+	double h = 1.0/n;
+	for(int i = 0; i < n; ++i)
+		a[i] = i*h;
+	return a;
+}
+
+static double get_phi(int i, int j)
+{
+	dp_t u_left(OX[i-1], OY[j+1]); // left upper
+	dp_t u_right(OX[i+1], OY[j+1]); // right upper
+	dp_t b_left(OX[i-1], OY[j-1]); // left bottom
+	dp_t b_right(OX[i+1], OY[j-1]); // right bottom
 	dp_t center(OX[i], OY[j]);
-	double u = func_u(B, center.x, center.y);
-	double v = func_v(UB, BB, LB, RB, TIME, center.x, center.y);
+
+	double u = func_u();
+	double v = func_v();
 	center.x = center.x - TAU * u;
 	center.y = center.y - TAU * v;
+	u = func_u();
+	v = func_v();
+	u_left.x = u_left.x - TAU * u;
+	u_left.y = u_left.y - TAU * v;
+	u = func_u();
+	v = func_v();
+	u_right.x = u_right.x - TAU * u;
+	u_right.y = u_right.y - TAU * v;
+	u = func_u();
+	v = func_v();
+	b_left.x = b_left.x - TAU * u;
+	b_left.y = b_left.y - TAU * v;
+	u = func_u();
+	v = func_v();
+	b_right.x = b_right.x - TAU * u;
+	b_right.y = b_right.y - TAU * v;
 
-	// проверим случай вылета точки за левую границу
-	if (center.x <= 0) // вылет за левую границу
+	int nx = 10;
+	int ny = 10;
+	double x_step = 1.0/nx;
+	double y_step = 1.0/ny;
+	double* x_mesh = create_mesh_vector(nx);
+	double* y_mesh = create_mesh_vector(ny);
+
+	if (i == 1 && j == 1 && f == 0)
 	{
-		dp_t center_tk(OX[i], OY[j]);
-		// найдем точку (t, y) пересечения траектории и оси ординат
-												
-		double y_ = 0;
-		double t_ = 0;
-		if ( center_tk.x - center.x < FLT_MIN )
-		{ 
-			y_ = 0.5 * (center_tk.y + center_tk.y); 
-		}
-		else 
-		{ 
-			y_ = center_tk.y - center.x 
-			* ((center_tk.y - center.y) / (center_tk.x - center.x)); 
-		}		
-
-		// найдем время t* в точке перечесения 
-		// уравнение прямой для точки (y, t)
-		// t - t1 / t2-t1 = y-y1/y2-y1
-		// => t = t1 + (y-y1)*(t2-t1)/y2-y1
-		// здесь center_tk = первая точка 
-		// center = вторая
-		// TAU = t2 - t1
-		// TIME = время на K слое по времени
-		t_ = TIME - TAU * ((y_-center_tk.y)/(center.y - center_tk.y));
-
-		// посчитаем TAU* 
-		double tau_ = TIME - t_;
-
-		double u = func_u(B, left.x, left.y);
-		double v = func_v(UB, BB, LB, RB, t_, left.x, left.y);
-		left.x = left.x - tau_ * u;
-		left.y = left.y - tau_ * v;
-		u = func_u(B, right.x, right.y);
-		v = func_v(UB, BB, LB, RB, t_, right.x, right.y);
-		right.x = right.x - tau_ * u;
-		right.y = right.y - tau_ * v;
-		u = func_u(B, up.x, up.y);
-		v = func_v(UB, BB, LB, RB, t_, up.x, up.y);
-		up.x = up.x - tau_ * u;
-		up.y = up.y - tau_ * v;
-		u = func_u(B, bottom.x, bottom.y);
-		v = func_v(UB, BB, LB, RB, t_, bottom.x, bottom.y);
-		bottom.x = bottom.x - tau_ * u;
-		bottom.y = bottom.y - tau_ * v;	
-		u = func_u(B, center.x, center.y);
-		v = func_v(UB, BB, LB, RB, t_, center.x, center.y);
-		center.x = center_tk.x - tau_ * u;
-		center.y = center_tk.y - tau_ * v;
-		
-		double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
-	    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
-        double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
-	    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
-	    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;	
-		double rho =  analytical_solution(t_, 0, y_);
-		//printf("%s\n", "WALL COLLISION");
-		//return det * rho * INVERTED_HX_HY;
-		return det * rho;
+		__print_vector(x_mesh, nx);
+		__print_vector(y_mesh, ny);
+		f = 1;
 	}
 
-	u = func_u(B, left.x, left.y);
-	v = func_v(UB, BB, LB, RB, TIME, left.x, left.y);
-	left.x = left.x - TAU * u;
-	left.y = left.y - TAU * v;
-	u = func_u(B, right.x, right.y);
-	v = func_v(UB, BB, LB, RB, TIME, right.x, right.y);
-	right.x = right.x - TAU * u;
-	right.y = right.y - TAU * v;
-	u = func_u(B, up.x, up.y);
-	v = func_v(UB, BB, LB, RB, TIME, up.x, up.y);
-	up.x = up.x - TAU * u;
-	up.y = up.y - TAU * v;
-	u = func_u(B, bottom.x, bottom.y);
-	v = func_v(UB, BB, LB, RB, TIME, bottom.x, bottom.y);
-	bottom.x = bottom.x - TAU * u;
-	bottom.y = bottom.y - TAU * v;	
-	
-	double w_x_ksi = 0.5 * ((right.x-center.x)/HX + (center.x - left.x)/HX);
-    double w_y_ksi = 0.5 * ((right.y-center.y)/HX + (center.y - left.y)/HX);
-    double w_x_the = 0.5 * ((up.x-center.x)/HY + (center.x - bottom.x)/HY);    
-    double w_y_the = 0.5 * ((up.y-center.y)/HY + (center.y - bottom.y)/HY);
-    double det = w_x_ksi*w_y_the - w_x_the *w_y_ksi;
-
-	int x = floor(center.x / HX);	
-	int y = floor(center.y / HY);	
-	double rho = PREV_DENSITY[y * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y + 1]);
-	rho -= PREV_DENSITY[y * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y + 1]);
-	rho += PREV_DENSITY[(y + 1) * OX_LEN_1 + x + 1] * (center.x - OX[x]) * (center.y - OY[y]);
-	rho -= PREV_DENSITY[(y + 1) * OX_LEN_1 + x] * (center.x - OX[x + 1]) * (center.y - OY[y]);    
-	return det * rho * INVERTED_HX_HY;
+	// get right part for jakoby
+	double phi = 0;
+	for(int i = 0; i < nx; ++i)
+	{
+		for(int j = 0; j < ny; ++j)
+		{
+			dp_t ideal;
+			ideal.x = x_mesh[i] + x_step/2.;
+			ideal.y = y_mesh[j] + y_step/2.;
+			dp_t real = get_point_real_pt_by_ideal_pt(b_left, b_right, u_right, u_left, 
+				ideal);
+			double dens = get_density_in_real_pt(b_left, b_right, u_right, u_left, 
+				real);
+			double jakob = jakobian(b_left, b_right, u_right, u_left, ideal);
+			phi += dens * jakob;
+		}
+	}
+	phi = (16*phi/9*x_step*y_step);
+	delete[] x_mesh;
+	delete[] y_mesh;
+	return phi;
 }
 
 inline static double get_norm_of_error(double* density, double ts_count_mul_steps)
@@ -203,53 +282,72 @@ static void solve(double* density, double& time)
 			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
 		}
 	}
-	
+
 	int i = 0, j = 0, tl = 0;
-    double timeStart = 0, timeEnd=0;
+	double timeStart = 0, timeEnd=0;
 #ifdef _OPENMP
-//    printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
-    long count = 0;
-    // dummy parallel section to get all threads running
-    #pragma omp parallel private(i,j)
-    {
-      _InterlockedIncrement(&count);
-    }
+	// printf("OPENMP THREADS COUNT = %d\n", omp_get_max_threads());
+	long count = 0;
+	// dummy parallel section to get all threads running
+	#pragma omp parallel private(i,j)
+	{
+		_InterlockedIncrement(&count);
+	}
 #endif
- 
+
 #ifdef _OPENMP
-//    printf("OPENMP timer function is used!\n");
-    timeStart = omp_get_wtime();
+//	printf("OPENMP timer function is used!\n");
+	timeStart = omp_get_wtime();
 #else
-//    printf("Standart timer function is used!\n");
-    StartTimer();
-#endif        
-        fflush(stdout);    
+//	printf("Standart timer function is used!\n");
+	StartTimer();
+#endif
+	fflush(stdout);
+	double* phi = new double[XY_LEN];
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
-	{	    	
-		PREV_TIME = TIME;
-		TIME = TAU * tl;
+	{
 		for (int k = 0; k <= OX_LEN; k++)
 		{
 			density[k] = analytical_solution(OX[k], BB, TIME);
 			density[OX_LEN_1 * OY_LEN + k] = analytical_solution(OX[k], UB, TIME);
 		}
-
 		for (int u = 0; u <= OY_LEN; u++)
 		{
 			density[OX_LEN_1 * u] = analytical_solution(LB, OY[u], TIME);
 			density[OX_LEN_1 * u + OX_LEN] = analytical_solution(RB, OY[u], TIME);
 		}
 #ifdef _OPENMP
-   #pragma omp parallel for collapse(2) private(i, j)
-#endif		
+	#pragma omp parallel for collapse(2) private(i, j)
+#endif
 		for (j = 1; j < OY_LEN; ++j)
-		{
 			for (i = 1; i < OX_LEN; ++i)
-			{				
-				density[OX_LEN_1 * j + i] = integrate(i, j);						
-				density[OX_LEN_1 * j + i] += TAU * func_f(B, TIME, UB, BB, LB, RB, OX[i], OY[j]);
+				phi[OX_LEN_1 * j + i] = get_phi(i, j);
+		// jakoby
+		int iter_count = 20;
+		int i = 0;
+		while(i < iter_count)
+		{
+			for (j = 1; j < OY_LEN; ++j)
+			{
+				for (i = 1; i < OX_LEN; ++i)
+				{
+					density[OX_LEN_1 * j + i] = -1/9*(
+						1.5*(
+							PREV_DENSITY[OX_LEN_1 * j + i+1] +
+							PREV_DENSITY[OX_LEN_1 *(j+1) + i] +
+							PREV_DENSITY[OX_LEN_1 * j + i - 1] +
+							PREV_DENSITY[OX_LEN_1 * (j-1) + i]) + 
+						0.25*(
+						PREV_DENSITY[OX_LEN_1 * (j+1) + i+1] + 
+						PREV_DENSITY[OX_LEN_1 * (j+1) + i-1] + 
+						PREV_DENSITY[OX_LEN_1 * (j-1) + i-1] + 
+						PREV_DENSITY[OX_LEN_1 * (j-1) + i+1])) + 
+						phi[OX_LEN_1 * j + i];
+				}
 			}
+			i++;
 		}
+
 		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
 	}
 #ifdef _OPENMP
@@ -260,11 +358,12 @@ static void solve(double* density, double& time)
 	time = GetTimer()/1000;
 //	printf("time %f s.\n", time/1000);
 #endif
-	delete [] PREV_DENSITY;
+	delete[] PREV_DENSITY;
+	delete[] phi;
 }
 
 inline static void init(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length)
+						double tau, int time_step_count, int ox_length, int oy_length)
 {
 	B = b;
 	UB = ub;
@@ -302,18 +401,18 @@ inline static void clean()
 	XY_LEN = 0;
 	HX = 0;
 	HY = 0;
-	INVERTED_HX_HY = 	0;
-	delete [] OX;
-	delete [] OY;
+	INVERTED_HX_HY = 0;
+	delete[] OX;
+	delete[] OY;
 }
 
 double* compute_quad2_density(double b, double lb, double rb, double bb, double ub,
-                        double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
+								double tau, int time_step_count, int ox_length, int oy_length, double& norm, double& time)
 {
 	init(b, lb, rb, bb, ub, tau, time_step_count, ox_length, oy_length);
 	double* density = new double[XY_LEN];
 	solve(density, time);
-	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);	
+	norm = get_norm_of_error(density, TIME_STEP_CNT * TAU);
 	clean();
 	return density;
 }

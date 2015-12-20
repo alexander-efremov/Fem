@@ -1,11 +1,11 @@
 BUILD := build
 
-all: icc openmp cuda main
+all: icpc openmp cuda main
 
 main:
 	make -f $(BUILD)/makefile.main
 
-icc:
+icpc:
 	make -f $(BUILD)/makefile.icpc
 
 openmp:

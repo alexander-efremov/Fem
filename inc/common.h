@@ -102,6 +102,17 @@ struct ComputeParameters
 	}
 };
 
+extern double* compute_density(
+	double b,
+	double lb,
+	double rb,
+	double bb,
+	double ub,
+	double time_step,
+	int time_step_count,
+	int ox_length,
+	int oy_length, double &norm, double& time);
+
 extern double* compute_quad_density(
 	double b,
 	double lb,
@@ -113,7 +124,7 @@ extern double* compute_quad_density(
 	int ox_length,
 	int oy_length, double &norm, double& time);
 
-extern double* compute_density(
+extern double* compute_quad2_density(
 	double b,
 	double lb,
 	double rb,
@@ -136,6 +147,17 @@ extern double* compute_density_cuda(
 	int oy_length, double &norm, float& time);
 
 extern double* compute_density_quad_cuda(
+	double b,
+	double lb,
+	double rb,
+	double bb,
+	double ub,
+	double time_step,
+	int time_step_count,
+	int ox_length,
+	int oy_length, double &norm, float& time);
+
+extern double* compute_density_quad2_cuda(
 	double b,
 	double lb,
 	double rb,

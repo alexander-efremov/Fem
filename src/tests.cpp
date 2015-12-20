@@ -33,6 +33,13 @@ protected:
 		                       p.y_size, p.norm, time);
 	}
 
+	double* solve_quad2_internal(ComputeParameters& p, double& time)
+	{
+		return compute_quad2_density(p.b, p.lb, p.rb, p.bb,
+		                       p.ub, p.tau, p.t_count, p.x_size,
+		                       p.y_size, p.norm, time);
+	}
+
 	double* solve_internal(ComputeParameters& p, double& time)
 	{
 		return compute_density(p.b, p.lb, p.rb, p.bb,
@@ -226,6 +233,34 @@ TEST_F(cpu, quad_test)
 	print_result_table_footer();
 }
 
+// test new version with replace of variables of integral
+// with bilinear isoparameter transformation
+// compare with previous quad
+TEST_F(cpu, quad2_test)
+{
+	int first = 0, last = 1;
+	double time = 0;
+	ComputeParameters p = ComputeParameters();
+	print_result_table_header();
+	for (int lvl = first; lvl < last; ++lvl)
+	{
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_quad2_internal(p, time);		
+		print_result_table_row("cpu_quad2", p.x_length(), time, p.norm);
+		delete[] data;
+	}
+	for (int lvl = first; lvl < last; ++lvl)
+	{		
+		time = 0;
+		p.recompute_params(lvl);
+		double* data = solve_quad_internal(p, time);
+		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);		 
+		delete[] data;		
+	}	
+	print_result_table_footer();
+}
+
 // ТЕСТ С НАЛЕТОМ ТОЧЕК НА СТЕНКУ ДЛЯ АЛГОРИТМА QUAD
 TEST_F(cpu, quad_wall_collision_test)
 {
@@ -360,7 +395,7 @@ TEST_F(cpu, gpu_2_time_test)
 //	  РЕЗУЛЬТАТ: ТАБЛИЦА С ВРЕМЕНЕМ СЧЕТА НОВЫМ CUDA АЛГОРИТМОМ
 TEST_F(cpu, gpu_2_time_test_1)
 {
-	int first = 0, last = 9;
+	int first = 6, last = 8;
 	float time_cuda = 0;
 	ComputeParameters p = ComputeParameters();
 	print_result_table_header();
