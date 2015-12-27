@@ -234,8 +234,8 @@ static double get_phi(int i, int j)
 
 	if (i == 1 && j == 1 && f == 0)
 	{
-		__print_vector(x_mesh, nx);
-		__print_vector(y_mesh, ny);
+		// __print_vector(x_mesh, nx);
+		// __print_vector(y_mesh, ny);
 		f = 1;
 	}
 
@@ -277,9 +277,17 @@ static void solve(double* density, double& time)
 	PREV_DENSITY = new double[XY_LEN];
 	for (int j = 0; j < OY_LEN + 1; j++)
 	{
-		for (int i = 0; i < OX_LEN_1; i++)
+		for (int i = 0; i < OX_LEN + 1; i++)
 		{
 			PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
+		}
+	}
+// for jakoby convergence test 
+	for (int j = 1; j < OY_LEN; j++)
+	{
+		for (int i = 0; i < OX_LEN; i++)
+		{
+			PREV_DENSITY[OX_LEN_1 * j + i] = 0;
 		}
 	}
 
@@ -304,6 +312,8 @@ static void solve(double* density, double& time)
 #endif
 	fflush(stdout);
 	double* phi = new double[XY_LEN];
+	printf("%d\n", TIME_STEP_CNT);
+	int iter_count = 3;
 	for (tl = 1; tl <= TIME_STEP_CNT; tl++)
 	{
 		for (int k = 0; k <= OX_LEN; k++)
@@ -322,33 +332,46 @@ static void solve(double* density, double& time)
 		for (j = 1; j < OY_LEN; ++j)
 			for (i = 1; i < OX_LEN; ++i)
 				phi[OX_LEN_1 * j + i] = get_phi(i, j);
-		// jakoby
-		int iter_count = 20;
-		int i = 0;
-		while(i < iter_count)
+
+		int iter = 0;
+		
+		//printf("%s\n", "Jakoby start");
+		while(iter < iter_count)
 		{
+			//if(iter == 1)
+			{
+				printf("%s %d\n", "PREV_DENSITY", iter);
+				__print_matrix11(PREV_DENSITY, OX_LEN+1, OY_LEN+1);
+				printf("%s %d\n", "density", iter);
+				__print_matrix11(density, OX_LEN+1, OY_LEN+1);
+			}
+			//printf("%s = %d\n", "Iter", iter);
 			for (j = 1; j < OY_LEN; ++j)
 			{
 				for (i = 1; i < OX_LEN; ++i)
 				{
 					density[OX_LEN_1 * j + i] = -1/9*(
 						1.5*(
-							PREV_DENSITY[OX_LEN_1 * j + i+1] +
-							PREV_DENSITY[OX_LEN_1 *(j+1) + i] +
-							PREV_DENSITY[OX_LEN_1 * j + i - 1] +
-							PREV_DENSITY[OX_LEN_1 * (j-1) + i]) + 
+							PREV_DENSITY[OX_LEN_1 * j + i - 1] + // left
+							PREV_DENSITY[OX_LEN_1 * (j - 1) + i] + // upper
+							PREV_DENSITY[OX_LEN_1 * j + i + 1] + // right
+							PREV_DENSITY[OX_LEN_1 * (j + 1) + i] // bottom
+							) + 
 						0.25*(
-						PREV_DENSITY[OX_LEN_1 * (j+1) + i+1] + 
-						PREV_DENSITY[OX_LEN_1 * (j+1) + i-1] + 
-						PREV_DENSITY[OX_LEN_1 * (j-1) + i-1] + 
-						PREV_DENSITY[OX_LEN_1 * (j-1) + i+1])) + 
+						PREV_DENSITY[OX_LEN_1 * (j + 1) + i + 1] + // bottom right
+						PREV_DENSITY[OX_LEN_1 * (j + 1) + i - 1] + // bottom left
+						PREV_DENSITY[OX_LEN_1 * (j - 1) + i - 1] + // upper right
+						PREV_DENSITY[OX_LEN_1 * (j - 1) + i + 1] // upper left
+						)) + 
 						phi[OX_LEN_1 * j + i];
 				}
 			}
-			i++;
+			// double* t = PREV_DENSITY;
+			// PREV_DENSITY = density;
+			// density = t;
+			memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));
+			iter++;
 		}
-
-		memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));// заменить на быструю версию из agnerasmlib
 	}
 #ifdef _OPENMP
 	timeEnd = omp_get_wtime();
