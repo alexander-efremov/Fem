@@ -326,12 +326,29 @@ static void solve(double* density, double& time)
 			density[OX_LEN_1 * u] = analytical_solution(LB, OY[u], TIME);
 			density[OX_LEN_1 * u + OX_LEN] = analytical_solution(RB, OY[u], TIME);
 		}
+
+		for (int j = 0; j < OY_LEN + 1; j++)
+		{
+			for (int i = 0; i < OX_LEN_1; i++)
+			{
+				PREV_DENSITY[OX_LEN_1 * j + i] = analytical_solution(0, OX[i], OY[j]);
+			}
+		}
+
 #ifdef _OPENMP
 	#pragma omp parallel for collapse(2) private(i, j)
 #endif
-		for (j = 1; j < OY_LEN; ++j)
-			for (i = 1; i < OX_LEN; ++i)
+		for (int j = 1; j < OY_LEN; ++j)
+			for (int i = 1; i < OX_LEN; ++i)
 				phi[OX_LEN_1 * j + i] = get_phi(i, j);
+
+		for (int j = 1; j < OY_LEN; ++j)
+		{
+			for (int i = 1; i < OX_LEN; ++i)
+			{
+				PREV_DENSITY[OX_LEN_1 * j + i] = 0.;
+			}
+		}
 
 		int iter = 0;
 		
@@ -346,9 +363,9 @@ static void solve(double* density, double& time)
 				__print_matrix11(density, OX_LEN+1, OY_LEN+1);
 			}
 			//printf("%s = %d\n", "Iter", iter);
-			for (j = 1; j < OY_LEN; ++j)
+			for (int j = 1; j < OY_LEN; ++j)
 			{
-				for (i = 1; i < OX_LEN; ++i)
+				for (int i = 1; i < OX_LEN; ++i)
 				{
 					density[OX_LEN_1 * j + i] = -1/9*(
 						1.5*(
@@ -366,9 +383,6 @@ static void solve(double* density, double& time)
 						phi[OX_LEN_1 * j + i];
 				}
 			}
-			// double* t = PREV_DENSITY;
-			// PREV_DENSITY = density;
-			// density = t;
 			memcpy(PREV_DENSITY, density, XY_LEN * sizeof(double));
 			iter++;
 		}

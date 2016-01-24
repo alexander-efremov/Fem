@@ -251,15 +251,6 @@ TEST_F(cpu, quad2_test)
 		print_result_table_row("cpu_quad2", p.x_length(), time, p.norm);
 		delete[] data;
 	}
-	for (int lvl = first; lvl < last; ++lvl)
-	{		
-		time = 0;
-		p.recompute_params(lvl);
-		p.t_count = 1;
-		double* data = solve_quad_internal(p, time);
-		print_result_table_row("cpu_quad", p.x_length(), time, p.norm);		 
-		delete[] data;		
-	}	
 	print_result_table_footer();
 }
 
